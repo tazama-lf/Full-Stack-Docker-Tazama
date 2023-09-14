@@ -1,0 +1,120 @@
+services:
+  # Cache
+  redis:
+    image: "redis:latest"
+    hostname: redis
+    ports:
+      - 16379:6379
+
+  # Database
+  arango:
+    image: "arangodb/arangodb:latest"
+    environment:
+      - ARANGO_NO_AUTH=1
+    command:
+      - arangod
+      - --server.endpoint=tcp://0.0.0.0:8529
+    volumes:
+      - ./arango/init:/docker-entrypoint-initdb.d:consistent
+    ports:
+      - "18529:8529"
+
+  # NATS
+  nats:
+    image: docker.io/bitnami/nats:2
+    restart: always
+    ports:
+      - '14222:4222'
+      - '16222:6222'
+      - '18222:8222'
+
+  # Rule 901
+  rule-901:
+    build:
+      context: https://github.com/frmscoe/rule-executer.git#${RULE_901_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # TMS
+  tms:
+    build:
+      context: https://github.com/frmscoe/tms-service.git#${TMS_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/tms.env
+      - .env
+    restart: always
+    ports:
+      - 5000:3000
+    depends_on:
+      - redis
+      - arango
+      - nats
+
+  # CRSP
+  crsp:
+    build:
+      context: https://github.com/frmscoe/channel-router-setup-processor.git#${CRSP_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/crsp.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+      - nats
+
+  # Typology Processor
+  tp:
+    build:
+      context: https://github.com/frmscoe/typology-processor.git#${TP_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/tp.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+      - nats
+
+  # CADP
+  cadp:
+    build:
+      context: https://github.com/frmscoe/channel-aggregation-decisioning-processor.git#${CADP_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+     - env/cadp.env
+     - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+      - nats
+
+  # TADP
+  tadp:
+    build:
+      context: https://github.com/frmscoe/transaction-aggregation-decisioning-processor.git#${TADP_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/tadp.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+      - nats
