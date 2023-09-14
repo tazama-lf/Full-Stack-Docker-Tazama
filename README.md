@@ -12,13 +12,13 @@ then run
 `docker compose up -d tms cadp crsp tadp tp rule-901`  
 
 # TROUBLESHOOTING TIPS
-Start/Restart individual services with
+Start/Restart individual services with  
 `docker compose up -d --force-recreate <service>`    
 Try running following if changes are not reflecting  
 `docker compose up -d --build --force-recreate`  
-You can trash your container followed by deleting the image in docker if none of the above works.  
+You can trash your container followed by deleting the image in docker if none of the above works.    
 
-List of \<services\>
+List of \<services\>  
 - arango  
 - redis  
 - nats  
