@@ -5,10 +5,10 @@
 Populate `.env` GH_TOKEN variable with github token that has read access to public packages
 
 # RECOMMENDED USAGE
-Start the following services first from the directory where docker-compose.yaml is located 
+Start the following services first from the directory where docker-compose.yaml is located  
 `docker compose up -d arango redis nats`  
-Wait till all running and arango migration scripts are done before going to the next command  
-then run  
+Wait till all running and arango migration scripts are done then run  
+(Arango will output 'it's ready for business' in docker logs when you can proceed)  
 `docker compose up -d tms cadp crsp tadp tp rule-901`  
 
 # TROUBLESHOOTING TIPS
