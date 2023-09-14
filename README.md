@@ -10,6 +10,11 @@ Start the following services first from the directory where docker-compose.yaml 
 Wait till all running and arango migration scripts are done then run  
 (Arango will output 'it's ready for business' in docker logs when you can proceed)  
 `docker compose up -d tms cadp crsp tadp tp rule-901`  
+That's it. You can now submit to TMS running on default port 5000
+
+# ONE LINER STARTUP
+`docker compose up -d`  
+Note that it will log errors and stabilize eventually due to the arango migration scripts.  Unless something goes wrong during the build.
 
 # TROUBLESHOOTING TIPS
 Start/Restart individual services with  
