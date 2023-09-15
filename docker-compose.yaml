@@ -53,7 +53,7 @@ services:
       - .env
     restart: always
     ports:
-      - 5000:3000
+      - ${TMS_PORT}:3000
     depends_on:
       - redis
       - arango
