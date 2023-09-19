@@ -89,21 +89,6 @@ services:
       - arango
       - nats
 
-  # CADP
-  cadp:
-    build:
-      context: https://github.com/frmscoe/channel-aggregation-decisioning-processor.git#${CADP_BRANCH}
-      args:
-        - GH_TOKEN
-    env_file:
-     - env/cadp.env
-     - .env
-    restart: always
-    depends_on:
-      - redis
-      - arango
-      - nats
-
   # TADP
   tadp:
     build:
