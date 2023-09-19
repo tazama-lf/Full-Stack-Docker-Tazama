@@ -23,7 +23,7 @@ Try running following if changes are not reflecting
 `docker compose up -d --build --force-recreate`  
 You can trash your container followed by deleting the image in docker if none of the above works.  
 
-Stopping individual (or multiple) services
+Stopping individual (or multiple) services  
 `docker compose down <service> <service2> <service3>`
 
 List of \<services\>  
