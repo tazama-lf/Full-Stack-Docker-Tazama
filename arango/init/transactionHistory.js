@@ -63,7 +63,7 @@ db._collection(transactionHistoryPacs008ColName).ensureIndex({
 
 db._collection(transactionHistoryPacs008ColName).ensureIndex({
   type: "persistent",
-  fields: ["FIToFICstmrCdt.GrpHdr.CreDtTm)"],
+  fields: ["FIToFICstmrCdt.GrpHdr.CreDtTm"],
   name: "pi_CreDtTm",
   unique: false,
   sparse: false,
