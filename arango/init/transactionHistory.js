@@ -26,7 +26,7 @@ db._create(transactionHistoryPain013ColName);
 // Pacs002
 db._collection(transactionHistoryPacs002ColName).ensureIndex({
   type: "persistent",
-  fields: ["EndToEndId"],
+  fields: ["FIToFIPmtSts.TxInfAndSts.OrgnlEndToEndId"],
   name: "pi_EndToEndId",
   unique: true,
   sparse: false,
@@ -39,19 +39,7 @@ db._collection(transactionHistoryPacs002ColName).ensureIndex({
 // Pacs008
 db._collection(transactionHistoryPacs008ColName).ensureIndex({
   type: "persistent",
-  fields: ["EndToEndId"],
-  name: "pi_EndToEndId",
-  unique: true,
-  sparse: false,
-  deduplicate: false,
-  estimates: true,
-  cacheEnabled: true,
-  inBackground: false,
-});
-
-db._collection(transactionHistoryPacs008ColName).ensureIndex({
-  type: "persistent",
-  fields: ["DebtorAcctId"],
+  fields: ["FIToFICstmrCdt.CdtTrfTxInf.Dbtr.Id.PrvtId.Othr.Id"],
   name: "pi_DebtorAcctId",
   unique: true,
   sparse: false,
@@ -63,7 +51,7 @@ db._collection(transactionHistoryPacs008ColName).ensureIndex({
 
 db._collection(transactionHistoryPacs008ColName).ensureIndex({
   type: "persistent",
-  fields: ["CreditorAcctId"],
+  fields: ["FIToFICstmrCdt.CdtTrfTxInf.Cdtr.Id.PrvtId.Othr.Id"],
   name: "pi_CreditorAcctId",
   unique: true,
   sparse: false,
@@ -75,9 +63,9 @@ db._collection(transactionHistoryPacs008ColName).ensureIndex({
 
 db._collection(transactionHistoryPacs008ColName).ensureIndex({
   type: "persistent",
-  fields: ["CreDtTm"],
+  fields: ["FIToFICstmrCdt.GrpHdr.CreDtTm)"],
   name: "pi_CreDtTm",
-  unique: true,
+  unique: false,
   sparse: false,
   deduplicate: false,
   estimates: true,
@@ -88,7 +76,7 @@ db._collection(transactionHistoryPacs008ColName).ensureIndex({
 db._collection(transactionHistoryPacs008ColName).ensureIndex({
   type: "persistent",
   fields: ["FIToFICstmrCdt.CdtTrfTxInf.PmtId.EndToEndId"],
-  name: "pi_PmtId-EndToEndId",
+  name: "pi_EndToEndId",
   unique: true,
   sparse: false,
   deduplicate: false,
@@ -112,7 +100,7 @@ db._collection(transactionHistoryPacs008ColName).ensureIndex({
 // Pain001
 db._collection(transactionHistoryPain001ColName).ensureIndex({
   type: "persistent",
-  fields: ["EndToEndId"],
+  fields: ["CstmrCdtTrfInitn.PmtInf.CdtTrfTxInf.PmtId.EndToEndId"],
   name: "pi_EndToEndId",
   unique: true,
   sparse: false,
@@ -124,7 +112,7 @@ db._collection(transactionHistoryPain001ColName).ensureIndex({
 
 db._collection(transactionHistoryPain001ColName).ensureIndex({
   type: "persistent",
-  fields: ["DebtorAcctId"],
+  fields: ["CstmrCdtTrfInitn.PmtInf.DbtrAcct.Id.Othr.Id"],
   name: "pi_DebtorAcctId",
   unique: true,
   sparse: false,
@@ -136,7 +124,7 @@ db._collection(transactionHistoryPain001ColName).ensureIndex({
 
 db._collection(transactionHistoryPain001ColName).ensureIndex({
   type: "persistent",
-  fields: ["CreditorAcctId"],
+  fields: ["CstmrCdtTrfInitn.PmtInf.CdtTrfTxInf.CdtrAcct.Id.Othr.Id"],
   name: "pi_CreditorAcctId",
   unique: true,
   sparse: false,
@@ -148,9 +136,9 @@ db._collection(transactionHistoryPain001ColName).ensureIndex({
 
 db._collection(transactionHistoryPain001ColName).ensureIndex({
   type: "persistent",
-  fields: ["CreDtTm"],
+  fields: ["CstmrCdtTrfInitn.GrpHdr.CreDtTm"],
   name: "pi_CreDtTm",
-  unique: true,
+  unique: false,
   sparse: false,
   deduplicate: false,
   estimates: true,
@@ -184,13 +172,13 @@ db._collection(transactionHistoryPain001ColName).ensureIndex({
 
 // Pain013
 db._collection(transactionHistoryPain013ColName).ensureIndex({
-    type: "persistent",
-    fields: ["EndToEndId"],
-    name: "pi_EndToEndId",
-    unique: true,
-    sparse: false,
-    deduplicate: false,
-    estimates: true,
-    cacheEnabled: true,
-    inBackground: false,
-  });
+  type: "persistent",
+  fields: ["CdtrPmtActvtnReq.PmtInf.CdtTrfTxInf.PmtId.EndToEndId"],
+  name: "pi_EndToEndId",
+  unique: true,
+  sparse: false,
+  deduplicate: false,
+  estimates: true,
+  cacheEnabled: true,
+  inBackground: false,
+});
