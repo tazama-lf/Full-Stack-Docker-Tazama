@@ -54,6 +54,9 @@ let typologyExpData = [
     typology_name: "test typology for rule 901",
     id: "001@1.0.0",
     cfg: "1.0.0",
+    workflow: {
+      alertThreshold: 50,
+    },
     rules: [
       {
         id: "901@1.0.0",
@@ -88,7 +91,6 @@ let transactionData = [
           {
             id: "001@1.0.0",
             cfg: "1.0.0",
-            threshold: 50,
           },
         ],
       },
