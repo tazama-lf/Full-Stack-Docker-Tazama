@@ -41,7 +41,7 @@ db._collection(transactionHistoryPacs008ColName).ensureIndex({
   type: "persistent",
   fields: ["FIToFICstmrCdt.CdtTrfTxInf.Dbtr.Id.PrvtId.Othr.Id"],
   name: "pi_DebtorAcctId",
-  unique: true,
+  unique: false,
   sparse: false,
   deduplicate: false,
   estimates: true,
@@ -53,7 +53,7 @@ db._collection(transactionHistoryPacs008ColName).ensureIndex({
   type: "persistent",
   fields: ["FIToFICstmrCdt.CdtTrfTxInf.Cdtr.Id.PrvtId.Othr.Id"],
   name: "pi_CreditorAcctId",
-  unique: true,
+  unique: false,
   sparse: false,
   deduplicate: false,
   estimates: true,
@@ -85,18 +85,6 @@ db._collection(transactionHistoryPacs008ColName).ensureIndex({
   inBackground: false,
 });
 
-db._collection(transactionHistoryPacs008ColName).ensureIndex({
-  type: "persistent",
-  fields: ["FIToFICstmrCdt.CdtTrfTxInf.DbtrAcct.Id.Othr.Id", "TxTp"],
-  name: "pi_DbtrAcct_ID-TxTp",
-  unique: true,
-  sparse: false,
-  deduplicate: false,
-  estimates: true,
-  cacheEnabled: true,
-  inBackground: false,
-});
-
 // Pain001
 db._collection(transactionHistoryPain001ColName).ensureIndex({
   type: "persistent",
@@ -114,7 +102,7 @@ db._collection(transactionHistoryPain001ColName).ensureIndex({
   type: "persistent",
   fields: ["CstmrCdtTrfInitn.PmtInf.DbtrAcct.Id.Othr.Id"],
   name: "pi_DebtorAcctId",
-  unique: true,
+  unique: false,
   sparse: false,
   deduplicate: false,
   estimates: true,
@@ -126,7 +114,7 @@ db._collection(transactionHistoryPain001ColName).ensureIndex({
   type: "persistent",
   fields: ["CstmrCdtTrfInitn.PmtInf.CdtTrfTxInf.CdtrAcct.Id.Othr.Id"],
   name: "pi_CreditorAcctId",
-  unique: true,
+  unique: false,
   sparse: false,
   deduplicate: false,
   estimates: true,
@@ -139,18 +127,6 @@ db._collection(transactionHistoryPain001ColName).ensureIndex({
   fields: ["CstmrCdtTrfInitn.GrpHdr.CreDtTm"],
   name: "pi_CreDtTm",
   unique: false,
-  sparse: false,
-  deduplicate: false,
-  estimates: true,
-  cacheEnabled: true,
-  inBackground: false,
-});
-
-db._collection(transactionHistoryPain001ColName).ensureIndex({
-  type: "persistent",
-  fields: ["CstmrCdtTrfInitn.PmtInf.DbtrAcct.Id.Othr.Id", "TxTp"],
-  name: "pi__DbtrAcct_Id_Othr_Id-TxTp",
-  unique: true,
   sparse: false,
   deduplicate: false,
   estimates: true,
