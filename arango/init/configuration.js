@@ -50,8 +50,8 @@ let typologyExpData = [
     _key: "999@1.0.0",
     _id: "typologyExpression/999",
     typology_name: "Rule-901 Typology",
-    id: "999@1.0.0",
-    cfg: "1.0.0",
+    id: "typology-processor@1.0.0",
+    cfg: "999@1.0.0",
     workflow: {
       alertThreshold: 200,
       interdictionThreshold: 400,

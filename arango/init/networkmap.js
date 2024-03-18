@@ -3,6 +3,7 @@ const db = require("@arangodb").db;
 const networkMapData = [{
   active: true,
   name: "FullNatsNoTP000",
+  cfg: "1.0.0",
   messages: [
     {
       id: "004@1.0.0",
