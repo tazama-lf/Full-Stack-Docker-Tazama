@@ -6,23 +6,19 @@ const networkMapData = [{
   messages: [
     {
       id: "004@1.0.0",
-      host: "NATS Server",
       cfg: "1.0.0",
       txTp: "pacs.002.001.12",
       channels: [
         {
           id: "001@1.0.0",
-          host: "NATS Server",
           cfg: "1.0.0",
           typologies: [
             {
-              id: "001@1.0.0",
-              host: "NATS Server",
-              cfg: "1.0.0",
+              id: "typology-processor@1.0.0",
+              cfg: "999@1.0.0",
               rules: [
                 {
                   id: "901@1.0.0",
-                  host: "RuleRequest901",
                   cfg: "1.0.0",
                 }
               ],
