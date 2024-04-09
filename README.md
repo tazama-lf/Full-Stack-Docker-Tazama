@@ -36,7 +36,7 @@ git clone https://github.com/frmscoe/Full-Stack-Docker-Tazama
 
 **Output:**
 
-![clone-the-repo](/images/full-stack-docker-tazama-clone-repo.png)
+![clone-the-repo](/images/full-stack-docker-tazama-clone-the-repo.png)
 
 ## 2. Update the Full-Stack-Docker-Tazama Configuration Files
 
@@ -89,7 +89,7 @@ docker compose up -d arango redis nats
 
 **Output:**
 
-![compose-core-services](/images/full-stack-docker-tazama-compose-core-services.png)
+![compose-core-services](/images/full-stack-docker-tazama-compose-the-core-services.png)
 
 You'll be able to access the web interfaces for the deployed components through their respective TCP/IP ports on your local machine as defined in the `docker-compose.yaml` file.
 
@@ -97,7 +97,6 @@ You'll be able to access the web interfaces for the deployed components through 
  - NATS: <http://localhost:18222>
 
 If your machine is open to your local area network, you will also be able to access these services from other computers on your network via your local machine's IP address.
-
 
 ## 4. Configure Tazama
 
@@ -110,7 +109,7 @@ git clone https://github.com/frmscoe/postman
 
 **Output:**
 
-![clone-config](/images/full-stack-docker-tazama-clone-config.png)
+![clone-config](/images/full-stack-docker-tazama-clone-postman.png)
 
 Perform the following Newman command to load the configuration into the ArangoDB databases and collections:
 
@@ -124,7 +123,7 @@ newman run collection-file -e environment-file --timeout-request 10200
 
 **Output:**
 
-![execute-config](/images/full-stack-docker-tazama-execute-config.png) 
+![execute-config](/images/full-stack-docker-tazama-load-config.png) 
 
 ## 5. Deploy core processors
 
@@ -141,12 +140,18 @@ Execute the following command to deploy the core processors:
 docker compose up -d tms crsp tp tadp
 ```
 
+
 This command will install:
 
  - The Transaction Monitoring Service API at `<https://localhost:5000>`, where messages will be sent for evaluation. 
  - The Channel Router and Setup Processor that will handle message routing based on the network map
  - The Typology Processor that will summarise rule results into scenarios according to invidual typology configurations
  - The Transaction Aggregation and Decisioning Processor that will wrap up the evaluation of a transaction and publish any alerts for breached typologies
+
+**Output:**
+
+![execute-config](./images/full-stack-docker-tazama-compose-the-core-processors.png)
+
 
 You can test that the TMS API was successfully deployed with the following command from the Command Prompt:
 
@@ -156,26 +161,9 @@ curl localhost:5000
 
 **Output:**
 
-![execute-config](./images/full-stack-docker-tazama-compose-core-processors.png)
+![execute-config](./images/full-stack-docker-tazama-curl.png)
 
-## 6.  Rule Processors
-
-Individual rule processors are wrapped in a rule executer shell that handles common functions for all rule processors in a common way. The rule executer source code is centralised in the public `rule-executer` repository
-
-### Clone the Rule Executer Repository
-
-First, we have to clone the rule-executer. From your source code folder run the command:
-
-```
-git clone https://github.com/frmscoe/rule-executer
-```
-![clone-rule-executroer](./images/full-stack-docker-tazama-clone-rule-processor.png)
-
-
-By default, the rule executer is configured to build rule 901. 
-
-
-### Deploy the processor
+## 6.  Compose the rule processor
 
 Navigate back to the `Full-Stack-Docker-Tazama` folder, and run the command:
 
@@ -185,7 +173,7 @@ docker compose up -d rule-901
 
 **Output:**
 
-![compose-rule-001](./images/full-stack-docker-tazama-compose-rule-001.png)
+![compose-rule-901](./images/full-stack-docker-tazama-compose-rule-901.png)
 
 ## TESTING THE END-TO-END DEPLOYMENT
 
@@ -202,8 +190,7 @@ newman run collection-file -e environment-file --timeout-request 10200 --delay-r
 
 **Output:**
 
-![great-success](./images/full-stack-docker-tazama-great-success.png)
-
+![success](./images/full-stack-docker-tazama-success.png)
 
 # TROUBLESHOOTING TIPS
 
