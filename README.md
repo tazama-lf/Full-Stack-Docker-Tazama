@@ -31,7 +31,7 @@ The pre-requisites that are essential to be able to follow this guide to the let
 In a Windows Command Prompt, navigate to the folder where you want to store a copy of the source code. For example, the source code root folder path I have been using to compile this guide is C:\Tazama\GitHub. Once in your source code root folder, clone the repository with the following command:
 
 ```
-git clone https://github.com/frmscoe/Full-Stack-Docker-Tazama
+git clone https://github.com/frmscoe/Full-Stack-Docker-Tazama -b main
 ```
 
 **Output:**
@@ -104,7 +104,7 @@ Tazama is configured by loading the network map, rules and typology configuratio
 
 In a Windows Command Prompt, navigate to the source code root folder. Then clone the following repository with the following command:
 ```
-git clone https://github.com/frmscoe/postman
+git clone https://github.com/frmscoe/postman -b main
 ```
 
 **Output:**
