@@ -16,7 +16,6 @@ let configData = [
       exitConditions: [
         {
           subRuleRef: ".x00",
-          outcome: false,
           reason: "Incoming transaction is unsuccessful",
         },
       ],
@@ -24,20 +23,17 @@ let configData = [
         {
           subRuleRef: ".01",
           upperLimit: 2,
-          outcome: true,
           reason: "The debtor has performed one transaction to date",
         },
         {
           subRuleRef: ".02",
           lowerLimit: 2,
           upperLimit: 4,
-          outcome: true,
           reason: "The debtor has performed two or three transactions to date",
         },
         {
           subRuleRef: ".03",
           lowerLimit: 4,
-          outcome: true,
           reason: "The debtor has performed 4 or more transactions to date",
         },
       ],
