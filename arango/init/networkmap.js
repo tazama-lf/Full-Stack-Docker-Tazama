@@ -9,23 +9,17 @@ const networkMapData = [{
       id: "004@1.0.0",
       cfg: "1.0.0",
       txTp: "pacs.002.001.12",
-      channels: [
+      typologies: [
         {
-          id: "001@1.0.0",
-          cfg: "1.0.0",
-          typologies: [
+          id: "typology-processor@1.0.0",
+          cfg: "999@1.0.0",
+          rules: [
             {
-              id: "typology-processor@1.0.0",
-              cfg: "999@1.0.0",
-              rules: [
-                {
-                  id: "901@1.0.0",
-                  cfg: "1.0.0",
-                }
-              ],
+              id: "901@1.0.0",
+              cfg: "1.0.0",
             }
           ],
-        },
+        }
       ],
     },
   ],
