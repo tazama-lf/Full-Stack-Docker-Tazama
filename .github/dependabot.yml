@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Set update schedule for GitHub Actions
+
+version: 2
+updates:
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
