@@ -7,7 +7,7 @@ const systemDb = "_system";
 const pseudonymsDbName = "pseudonyms";
 // Pseudonyms Collections
 const pseudonymsColName = "pseudonyms";
-const acountHolderColName = "account_holder";
+const accountHolderColName = "account_holder";
 const accountsColName = "accounts";
 const entitiesColName = "entities";
 const transRelationshipColName = "transactionRelationship";
@@ -19,7 +19,7 @@ db._createDatabase(pseudonymsDbName);
 db._useDatabase(pseudonymsDbName);
 
 db._create(pseudonymsColName);
-db._createEdgeCollection(acountHolderColName);
+db._createEdgeCollection(accountHolderColName);
 db._create(accountsColName);
 db._create(entitiesColName);
 db._createEdgeCollection(transRelationshipColName);

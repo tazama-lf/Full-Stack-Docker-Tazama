@@ -10,7 +10,6 @@ const transactionHistoryPacs002ColName = "transactionHistoryPacs002";
 const transactionHistoryPacs008ColName = "transactionHistoryPacs008";
 const transactionHistoryPain001ColName = "transactionHistoryPain001";
 const transactionHistoryPain013ColName = "transactionHistoryPain013";
-// const transactionsColName = "transactions";
 
 // TransactionHistory Setup
 db._useDatabase(systemDb);
@@ -22,7 +21,6 @@ db._create(transactionHistoryPacs002ColName);
 db._create(transactionHistoryPacs008ColName);
 db._create(transactionHistoryPain001ColName);
 db._create(transactionHistoryPain013ColName);
-// db._create(transactionsColName);
 
 // Indexes
 // Pacs002

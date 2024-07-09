@@ -4,7 +4,7 @@ const db = require("@arangodb").db;
 
 const systemDb = "_system";
 
-let configData = [
+const configData = [
   {
     _key: "901@1.0.0@1.0.0",
     _id: "configuration/901",
@@ -43,7 +43,7 @@ let configData = [
   },
 ];
 
-let typologyExpData = [
+const typologyExpData = [
   {
     _key: "999@1.0.0",
     _id: "typologyExpression/999",
@@ -98,11 +98,38 @@ let typologyExpData = [
   },
 ];
 
+
+const networkMapData = [{
+  active: true,
+  name: "FullNatsNoTP000",
+  cfg: "1.0.0",
+  messages: [
+    {
+      id: "004@1.0.0",
+      cfg: "1.0.0",
+      txTp: "pacs.002.001.12",
+      typologies: [
+        {
+          id: "typology-processor@1.0.0",
+          cfg: "999@1.0.0",
+          rules: [
+            {
+              id: "901@1.0.0",
+              cfg: "1.0.0",
+            }
+          ],
+        }
+      ],
+    },
+  ],
+}];
+
 // Config DB
-const configDbName = "Configuration";
+const configDbName = "configuration";
 // Config Collections
-const configColName = "configuration";
-const typologyColName = "typologyExpression";
+const configColName = "ruleConfiguration";
+const typologyColName = "typologyConfiguration";
+const networkColName = "networkConfiguration";
 
 // Config Setup
 db._useDatabase(systemDb);
@@ -112,6 +139,7 @@ db._useDatabase(configDbName);
 
 db._create(configColName);
 db._create(typologyColName);
+db._create(networkColName);
 
 // Indexes
 // None
@@ -119,3 +147,4 @@ db._create(typologyColName);
 // Populate
 db._collection(configColName).save(configData);
 db._collection(typologyColName).save(typologyExpData);
+db._collection(networkColName).save(networkMapData);
