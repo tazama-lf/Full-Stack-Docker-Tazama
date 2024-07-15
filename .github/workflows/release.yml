@@ -37,19 +37,6 @@ jobs:
         if: ${{ steps.release-label.outputs.level != null }}
         with:
           semver_only: true
-
-      - name: Setup Node.js (.npmrc)
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16.x
-          registry-url: https://npm.pkg.github.com/
-          # Defaults to the user or organization that owns the workflow file
-          scope: '@frmscoe'
-          
-      - name: Install dependencies
-        run: npm ci
-        env:
-          GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         
       # Determine the release type (major, minor, patch) based on commit messages  
       - name: Determine Release Type
