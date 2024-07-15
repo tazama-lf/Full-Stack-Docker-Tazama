@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# This GitHub Actions workflow checks that all commits in a pull request (PR) have been verified with GPG signatures.
+
+name: GPG Verify
+
+on: [pull_request]  # Trigger this workflow on pull request events
+
+jobs:
+  gpg-verify:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner for the job
+    steps:
+    - uses: actions/checkout@v4  # Checkout the repository code using the actions/checkout action
+      with:
+        fetch-depth: 0  # Fetch all history for all branches to ensure we have the full commit history
+
+    - name: Check GPG verification status  # Step to check each commit for GPG signature verification
+      run: |
+        # Get the list of commits in the pull request
+        commits=$(git log --pretty=format:%H origin/${{ github.event.pull_request.head.ref }}..origin/${{ github.event.pull_request.base.ref }})
+        
+        # Check the GPG verification status of each commit
+        for commit in $commits; do
+          status=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/commits/$commit/check-runs \
+            | jq -r '.check_runs[] | select(.name == "GPG verify") | .conclusion')
+          
+          # If the GPG verification status is not successful, list the commit and exit with a non-zero status
+          if [[ "$status" != "success" ]]; then
+            echo "GPG signature verification failed for commit $commit."
+            exit 1
+          fi
+        done
