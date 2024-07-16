@@ -63,7 +63,7 @@ GH_TOKEN=${GH_TOKEN}
 
 # Branches
 TMS_BRANCH=main
-CRSP_BRANCH=main
+ED_BRANCH=main
 TP_BRANCH=main
 TADP_BRANCH=main
 RULE_901_BRANCH=main
@@ -139,14 +139,14 @@ cd Full-Stack-Docker-Tazama
 Execute the following command to deploy the core processors:
 
 ```
-docker compose up -d tms crsp tp tadp
+docker compose up -d tms ed tp tadp
 ```
 
 
 This command will install:
 
  - The Transaction Monitoring Service API at `<https://localhost:5000>`, where messages will be sent for evaluation. 
- - The Channel Router and Setup Processor that will handle message routing based on the network map
+ - The Event Director that will handle message routing based on the network map
  - The Typology Processor that will summarise rule results into scenarios according to invidual typology configurations
  - The Transaction Aggregation and Decisioning Processor that will wrap up the evaluation of a transaction and publish any alerts for breached typologies
 
@@ -212,7 +212,7 @@ List of \<services\>
 - redis  
 - nats  
 - tms   
-- crsp  
+- ed  
 - tadp  
 - tp  
 - rule-901  
