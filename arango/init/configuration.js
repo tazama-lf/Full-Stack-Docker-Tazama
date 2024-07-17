@@ -4,10 +4,10 @@ const db = require("@arangodb").db;
 
 const systemDb = "_system";
 
-const configData = [
+const ruleConfigData = [
   {
     _key: "901@1.0.0@1.0.0",
-    _id: "configuration/901",
+    _id: "901@1.0.0@1.0.0",
     id: "901@1.0.0",
     cfg: "1.0.0",
     desc: "Number of outgoing transactions - debtor",
@@ -43,11 +43,11 @@ const configData = [
   },
 ];
 
-const typologyExpData = [
+const typologyConfigData = [
   {
-    _key: "999@1.0.0",
-    _id: "typologyExpression/999",
-    typology_name: "Rule-901 Typology",
+    _key: "typology-999@1.0.0@999@1.0.0",
+    _id: "typology-999@1.0.0@999@1.0.0",
+    typology_name: "Rule-901-Typology-999",
     id: "typology-processor@1.0.0",
     cfg: "999@1.0.0",
     workflow: {
@@ -58,50 +58,39 @@ const typologyExpData = [
       {
         id: "901@1.0.0",
         cfg: "1.0.0",
-        ref: ".err",
-        wght: "100",
-      },
-      {
-        id: "901@1.0.0",
-        cfg: "1.0.0",
-        ref: ".x00",
-        wght: "100",
-      },
-      {
-        id: "901@1.0.0",
-        cfg: "1.0.0",
-        ref: ".01",
-        wght: "100",
-      },
-      {
-        id: "901@1.0.0",
-        cfg: "1.0.0",
-        ref: ".02",
-        wght: "200",
-      },
-      {
-        id: "901@1.0.0",
-        cfg: "1.0.0",
-        ref: ".03",
-        wght: "400",
-      },
-    ],
-    expression: {
-      operator: "+",
-      terms: [
-        {
-          id: "901@1.0.0",
-          cfg: "1.0.0",
+        termId: "v901at100at100",
+        wghtList: [{
+          ref: ".err",
+          wght: "100",
         },
-      ],
-    },
+        {
+          ref: ".x00",
+          wght: "100",
+        },
+        {
+          ref: ".01",
+          wght: "100",
+        },
+        {
+          ref: ".02",
+          wght: "200",
+        },
+        {
+          ref: ".03",
+          wght: "400",
+        }],
+      }],
+    expression: [
+      "Add",
+      "v901at100at100"
+    ],
   },
 ];
 
 
-const networkMapData = [{
+const networkConfigData = [{
   active: true,
-  name: "FullNatsNoTP000",
+  name: "Public Network Map",
   cfg: "1.0.0",
   messages: [
     {
@@ -127,9 +116,9 @@ const networkMapData = [{
 // Config DB
 const configDbName = "configuration";
 // Config Collections
-const configColName = "ruleConfiguration";
-const typologyColName = "typologyConfiguration";
-const networkColName = "networkConfiguration";
+const ruleConfigColName = "ruleConfiguration";
+const typologyConfigColName = "typologyConfiguration";
+const networkConfigColName = "networkConfiguration";
 
 // Config Setup
 db._useDatabase(systemDb);
@@ -137,14 +126,14 @@ db._useDatabase(systemDb);
 db._createDatabase(configDbName);
 db._useDatabase(configDbName);
 
-db._create(configColName);
-db._create(typologyColName);
-db._create(networkColName);
+db._create(ruleConfigColName);
+db._create(typologyConfigColName);
+db._create(networkConfigColName);
 
 // Indexes
 // None
 
 // Populate
-db._collection(configColName).save(configData);
-db._collection(typologyColName).save(typologyExpData);
-db._collection(networkColName).save(networkMapData);
+db._collection(ruleConfigColName).save(ruleConfigData);
+db._collection(typologyConfigColName).save(typologyConfigData);
+db._collection(networkConfigColName).save(networkConfigData);
