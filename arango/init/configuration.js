@@ -58,71 +58,61 @@ const typologyExpData = [
       {
         id: "901@1.0.0",
         cfg: "1.0.0",
-        ref: ".err",
-        wght: "100",
-      },
-      {
-        id: "901@1.0.0",
-        cfg: "1.0.0",
-        ref: ".x00",
-        wght: "100",
-      },
-      {
-        id: "901@1.0.0",
-        cfg: "1.0.0",
-        ref: ".01",
-        wght: "100",
-      },
-      {
-        id: "901@1.0.0",
-        cfg: "1.0.0",
-        ref: ".02",
-        wght: "200",
-      },
-      {
-        id: "901@1.0.0",
-        cfg: "1.0.0",
-        ref: ".03",
-        wght: "400",
+        termId: "v901at100at100",
+        wghts: [
+          {
+            ref: ".err",
+            wght: 1,
+          },
+          {
+            ref: ".x00",
+            wght: 5,
+          },
+          {
+            ref: ".01",
+            wght: 100,
+          },
+          {
+            ref: ".02",
+            wght: 200,
+          },
+          {
+            ref: ".03",
+            wght: 400,
+          },
+        ],
       },
     ],
-    expression: {
-      operator: "+",
-      terms: [
-        {
-          id: "901@1.0.0",
-          cfg: "1.0.0",
-        },
-      ],
-    },
+    expression: ["Add", "v901at100at100", "v901at100at100"],
   },
 ];
 
-
-const networkMapData = [{
-  active: true,
-  name: "FullNatsNoTP000",
-  cfg: "1.0.0",
-  messages: [
-    {
-      id: "004@1.0.0",
-      cfg: "1.0.0",
-      txTp: "pacs.002.001.12",
-      typologies: [
-        {
-          id: "typology-processor@1.0.0",
-          cfg: "999@1.0.0",
-          rules: [
-            {
-              id: "901@1.0.0",
-              cfg: "1.0.0",
-            }
-          ],
-        }
-      ],
-    },
-  ],
-}];
+const networkMapData = [
+  {
+    active: true,
+    name: "FullNatsNoTP000",
+    cfg: "1.0.0",
+    messages: [
+      {
+        id: "004@1.0.0",
+        cfg: "1.0.0",
+        txTp: "pacs.002.001.12",
+        typologies: [
+          {
+            id: "typology-processor@1.0.0",
+            cfg: "999@1.0.0",
+            rules: [
+              {
+                id: "901@1.0.0",
+                cfg: "1.0.0",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
 
 // Config DB
 const configDbName = "configuration";
