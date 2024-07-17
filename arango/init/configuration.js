@@ -59,7 +59,7 @@ const typologyConfigData = [
         id: "901@1.0.0",
         cfg: "1.0.0",
         termId: "v901at100at100",
-        wghtList: [{
+        wghts: [{
           ref: ".err",
           wght: "100",
         },
