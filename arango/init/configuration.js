@@ -1,11 +1,13 @@
+// SPDX-License-Identifier: Apache-2.0
+
 const db = require("@arangodb").db;
 
 const systemDb = "_system";
 
-let configData = [
+const ruleConfigData = [
   {
     _key: "901@1.0.0@1.0.0",
-    _id: "configuration/901",
+    _id: "901@1.0.0@1.0.0",
     id: "901@1.0.0",
     cfg: "1.0.0",
     desc: "Number of outgoing transactions - debtor",
@@ -16,7 +18,6 @@ let configData = [
       exitConditions: [
         {
           subRuleRef: ".x00",
-          outcome: false,
           reason: "Incoming transaction is unsuccessful",
         },
       ],
@@ -24,20 +25,17 @@ let configData = [
         {
           subRuleRef: ".01",
           upperLimit: 2,
-          outcome: true,
           reason: "The debtor has performed one transaction to date",
         },
         {
           subRuleRef: ".02",
           lowerLimit: 2,
           upperLimit: 4,
-          outcome: true,
           reason: "The debtor has performed two or three transactions to date",
         },
         {
           subRuleRef: ".03",
           lowerLimit: 4,
-          outcome: true,
           reason: "The debtor has performed 4 or more transactions to date",
         },
       ],
@@ -45,11 +43,11 @@ let configData = [
   },
 ];
 
-let typologyExpData = [
+const typologyConfigData = [
   {
-    _key: "999@1.0.0",
-    _id: "typologyExpression/999",
-    typology_name: "Rule-901 Typology",
+    _key: "typology-999@1.0.0@999@1.0.0",
+    _id: "typology-999@1.0.0@999@1.0.0",
+    typology_name: "Rule-901-Typology-999",
     id: "typology-processor@1.0.0",
     cfg: "999@1.0.0",
     workflow: {
@@ -60,56 +58,67 @@ let typologyExpData = [
       {
         id: "901@1.0.0",
         cfg: "1.0.0",
-        ref: ".err",
-        true: "100",
-        false: "0",
-      },
-      {
-        id: "901@1.0.0",
-        cfg: "1.0.0",
-        ref: ".x00",
-        true: "100",
-        false: "0",
-      },
-      {
-        id: "901@1.0.0",
-        cfg: "1.0.0",
-        ref: ".01",
-        true: "100",
-        false: "0",
-      },
-      {
-        id: "901@1.0.0",
-        cfg: "1.0.0",
-        ref: ".02",
-        true: "200",
-        false: "0",
-      },
-      {
-        id: "901@1.0.0",
-        cfg: "1.0.0",
-        ref: ".03",
-        true: "400",
-        false: "0",
-      },
-    ],
-    expression: {
-      operator: "+",
-      terms: [
-        {
-          id: "901@1.0.0",
-          cfg: "1.0.0",
+        termId: "v901at100at100",
+        wghts: [{
+          ref: ".err",
+          wght: "100",
         },
-      ],
-    },
+        {
+          ref: ".x00",
+          wght: "100",
+        },
+        {
+          ref: ".01",
+          wght: "100",
+        },
+        {
+          ref: ".02",
+          wght: "200",
+        },
+        {
+          ref: ".03",
+          wght: "400",
+        }],
+      }],
+    expression: [
+      "Add",
+      "v901at100at100"
+    ],
   },
 ];
 
+
+const networkConfigData = [{
+  active: true,
+  name: "Public Network Map",
+  cfg: "1.0.0",
+  messages: [
+    {
+      id: "004@1.0.0",
+      cfg: "1.0.0",
+      txTp: "pacs.002.001.12",
+      typologies: [
+        {
+          id: "typology-processor@1.0.0",
+          cfg: "999@1.0.0",
+          rules: [
+            {
+              id: "901@1.0.0",
+              cfg: "1.0.0",
+            }
+          ],
+        }
+      ],
+    },
+  ],
+}];
+
 // Config DB
-const configDbName = "Configuration";
+const configDbName = "configuration";
 // Config Collections
-const configColName = "configuration";
-const typologyColName = "typologyExpression";
+const ruleConfigColName = "ruleConfiguration";
+const typologyConfigColName = "typologyConfiguration";
+const networkConfigColName = "networkConfiguration";
 
 // Config Setup
 db._useDatabase(systemDb);
@@ -117,12 +126,14 @@ db._useDatabase(systemDb);
 db._createDatabase(configDbName);
 db._useDatabase(configDbName);
 
-db._create(configColName);
-db._create(typologyColName);
+db._create(ruleConfigColName);
+db._create(typologyConfigColName);
+db._create(networkConfigColName);
 
 // Indexes
 // None
 
 // Populate
-db._collection(configColName).save(configData);
-db._collection(typologyColName).save(typologyExpData);
+db._collection(ruleConfigColName).save(ruleConfigData);
+db._collection(typologyConfigColName).save(typologyConfigData);
+db._collection(networkConfigColName).save(networkConfigData);
