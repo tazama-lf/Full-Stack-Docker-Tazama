@@ -77,7 +77,7 @@ services:
   # EVENT DIRECTOR
   ed:
     build:
-      context: https://github.com/frmscoe/channel-router-setup-processor.git#${ED_BRANCH}
+      context: https://github.com/frmscoe/event-director.git#${ED_BRANCH}
       args:
         - GH_TOKEN
     env_file:
