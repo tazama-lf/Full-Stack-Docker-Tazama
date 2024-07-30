@@ -102,30 +102,9 @@ If your machine is open to your local area network, you will also be able to acc
 
 ## 4. Configure Tazama
 
-Tazama is configured by loading the network map, rules and typology configurations required to evaluate a transaction via the ArangoDB API. We need to clone the Tazama Postman repository so that we can utilize the Postman environment file that is hosted there. 
+Tazama is configured by loading the network map, rules and typology configurations required to evaluate a transaction via the ArangoDB API. The steps above have already loaded the default configuration into the database.
 
-In a Windows Command Prompt, navigate to the source code root folder. Then clone the following repository with the following command:
-```
-git clone https://github.com/frmscoe/postman -b main
-```
-
-**Output:**
-
-![clone-config](/images/full-stack-docker-tazama-clone-postman.png)
-
-Perform the following Newman command to load the configuration into the ArangoDB databases and collections:
-
-```
-newman run collection-file -e environment-file --timeout-request 10200
-```
-
- - The `collection-file` is the full path to the location on your local machine where the `postman\Configuration - Rule 901.postman_collection.json` file is located.
- - The `environment-file` is the full path to the location on your local machine where the `postman\environments\Tazama-Docker-Compose-LOCAL.postman_environment.json` file is located.
- - If the path contains spaces, wrap the string in double-quotes.
-
-**Output:**
-
-![execute-config](/images/full-stack-docker-tazama-load-config.png) 
+For an optional step to load the Tazama configuration manually, follow the instructions in the [postman-appendix](/postman-appendix.md)
 
 ## 5. Deploy core processors
 
@@ -179,7 +158,19 @@ docker compose up -d rule-901
 
 ## TESTING THE END-TO-END DEPLOYMENT
 
-Now, if everything went according to plan, you'll be able to submit a test transaction to the Transaction Monitoring Service API and then be able to see the result of a complete end-to-end evaluation in the database. We can run the following Postman test via Newman to see if our deployment was successful:
+Now, if everything went according to plan, you'll be able to submit a test transaction to the Transaction Monitoring Service API and then be able to see the result of a complete end-to-end evaluation in the database. 
+
+If you have not already done so, clone the postman repository. In a Windows Command Prompt, navigate to the source code root folder. Then clone the postman repository with the following command:
+```
+git clone https://github.com/frmscoe/postman -b main
+```
+
+**Output:**
+
+![clone-config](/images/full-stack-docker-tazama-clone-postman.png)
+
+
+We can run the following Postman test via Newman to see if our deployment was successful:
 
 ```
 newman run collection-file -e environment-file --timeout-request 10200 --delay-request 500
