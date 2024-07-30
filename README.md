@@ -1,5 +1,23 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+
+
+
+  - [INTRODUCTION](#introduction)
+  - [Pre-requisites:](#pre-requisites)
+  - [INSTALLATION STEPS](#installation-steps)
+  - [1. Clone the Full-Stack-Docker-Tazama Repository to Your Local Machine](#1-clone-the-full-stack-docker-tazama-repository-to-your-local-machine)
+  - [2. Update the Full-Stack-Docker-Tazama Configuration Files](#2-update-the-full-stack-docker-tazama-configuration-files)
+  - [3. Deploy the Core Services](#3-deploy-the-core-services)
+  - [4. Configure Tazama](#4-configure-tazama)
+  - [5. Deploy core processors](#5-deploy-core-processors)
+  - [6.  Compose the rule processor](#6--compose-the-rule-processor)
+  - [TESTING THE END-TO-END DEPLOYMENT](#testing-the-end-to-end-deployment)
+- [TROUBLESHOOTING TIPS](#troubleshooting-tips)
+  - [Appendix](#appendix)
+  - [Configure Tazama](#configure-tazama)
+
+
 ## INTRODUCTION
 
 This guide will show you how to install the platform using only the publicly available open source software components, in a Docker container on a single local Windows machine via Docker Compose.
@@ -104,7 +122,7 @@ If your machine is open to your local area network, you will also be able to acc
 
 Tazama is configured by loading the network map, rules and typology configurations required to evaluate a transaction via the ArangoDB API. The steps above have already loaded the default configuration into the database.
 
-For an optional step to load the Tazama configuration manually, follow the instructions in the [postman-appendix](/postman-appendix.md)
+For an optional step to load the Tazama configuration manually, follow the instructions in the  [Appendix](#appendix)
 
 ## 5. Deploy core processors
 
@@ -207,3 +225,31 @@ List of \<services\>
 - tadp  
 - tp  
 - rule-901  
+
+## Appendix
+
+This appendix will show you how to optionally load the configuration and environment files in the Tazama full stack docker deployment.
+
+In a Windows Command Prompt, navigate to the source code root folder. Then clone the following repository with the following command:
+```
+git clone https://github.com/frmscoe/postman -b main
+```
+
+**Output:**
+
+![clone-config](/images/full-stack-docker-tazama-clone-postman.png)
+
+Perform the following Newman command to load the configuration into the ArangoDB databases and collections:
+
+```
+newman run collection-file -e environment-file --timeout-request 10200
+```
+
+ - The `collection-file` is the full path to the location on your local machine where the `postman\Configuration - Rule 901.postman_collection.json` file is located.
+ - The `environment-file` is the full path to the location on your local machine where the `postman\environments\Tazama-Docker-Compose-LOCAL.postman_environment.json` file is located.
+ - If the path contains spaces, wrap the string in double-quotes.
+
+**Output:**
+
+![execute-config](/images/full-stack-docker-tazama-load-config.png) 
+
