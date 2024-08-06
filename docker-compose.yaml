@@ -74,6 +74,468 @@ services:
       - redis
       - arango
 
+  # Rule 001
+  rule-001:
+    build:
+      context: ..\rule-executer-001
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule001.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 002
+  rule-002:
+    build:
+      context: ..\rule-executer-002
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule002.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 003
+  rule-003:
+    build:
+      context: ..\rule-executer-003
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule003.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 004
+  rule-004:
+    build:
+      context: ..\rule-executer-004
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule004.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 006
+  rule-006:
+    build:
+      context: ..\rule-executer-006
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule006.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 007
+  rule-007:
+    build:
+      context: ..\rule-executer-007
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule007.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 008
+  rule-008:
+    build:
+      context: ..\rule-executer-008
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule008.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 010
+  rule-010:
+    build:
+      context: ..\rule-executer-010
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule010.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 011
+  rule-011:
+    build:
+      context: ..\rule-executer-011
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule011.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 016
+  rule-016:
+    build:
+      context: ..\rule-executer-016
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule016.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 017
+  rule-017:
+    build:
+      context: ..\rule-executer-017
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule017.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 018
+  rule-018:
+    build:
+      context: ..\rule-executer-018
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule018.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 020
+  rule-020:
+    build:
+      context: ..\rule-executer-020
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule020.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 021
+  rule-021:
+    build:
+      context: ..\rule-executer-021
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule021.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 024
+  rule-024:
+    build:
+      context: ..\rule-executer-024
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule024.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 025
+  rule-025:
+    build:
+      context: ..\rule-executer-025
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule025.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 026
+  rule-026:
+    build:
+      context: ..\rule-executer-026
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule026.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 027
+  rule-027:
+    build:
+      context: ..\rule-executer-027
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule027.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 028
+  rule-028:
+    build:
+      context: ..\rule-executer-028
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule028.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 030
+  rule-030:
+    build:
+      context: ..\rule-executer-030
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule030.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 044
+  rule-044:
+    build:
+      context: ..\rule-executer-044
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule044.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 045
+  rule-045:
+    build:
+      context: ..\rule-executer-045
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule045.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 048
+  rule-048:
+    build:
+      context: ..\rule-executer-048
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule048.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 054
+  rule-054:
+    build:
+      context: ..\rule-executer-054
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule054.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 063
+  rule-063:
+    build:
+      context: ..\rule-executer-063
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule063.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 074
+  rule-074:
+    build:
+      context: ..\rule-executer-074
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule074.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 075
+  rule-075:
+    build:
+      context: ..\rule-executer-075
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule075.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 076
+  rule-076:
+    build:
+      context: ..\rule-executer-076
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule076.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 078
+  rule-078:
+    build:
+      context: ..\rule-executer-078
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule078.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 083
+  rule-083:
+    build:
+      context: ..\rule-executer-083
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule083.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 084
+  rule-084:
+    build:
+      context: ..\rule-executer-084
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule084.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 090
+  rule-090:
+    build:
+      context: ..\rule-executer-090
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule090.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
+  # Rule 091
+  rule-091:
+    build:
+      context: ..\rule-executer-091
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule091.env
+      - .env
+    restart: always
+    depends_on:
+      - redis
+      - arango
+
   # EVENT DIRECTOR
   ed:
     build:
