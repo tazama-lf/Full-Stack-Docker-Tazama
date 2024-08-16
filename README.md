@@ -15,8 +15,7 @@
   - [TESTING THE END-TO-END DEPLOYMENT](#testing-the-end-to-end-deployment)
 - [TROUBLESHOOTING TIPS](#troubleshooting-tips)
   - [Appendix](#appendix)
-  - [Configure Tazama](#configure-tazama)
-
+ 
 
 ## INTRODUCTION
 
@@ -26,7 +25,7 @@ This guide is specific to the Windows 10 or 11 operating system.
 
 ## Pre-requisites:
 
-Set up your development environment as recommended in the [Tazama Contribution Guide](../Community/Tazama-Contribution-Guide.md#32-setting-up-the-development-environment).
+Set up your development environment as recommended in the [Tazama Contribution Guide](https://github.com/tazama-lf/docs/blob/main/Community/Tazama-Contribution-Guide.md#32-setting-up-the-development-environment).
 
 The pre-requisites that are essential to be able to follow this guide to the letter are:
 
@@ -36,7 +35,7 @@ The pre-requisites that are essential to be able to follow this guide to the let
  - A code editor (this guide will assume you are using VS Code)
   - A GitHub personal access token with `packages:read` permissions
    - Ensure that your GitHub Personal Access Token is added as a Windows Environment Variable called "`GH_TOKEN`".
-   - Instructions for creating the GH_TOKEN environment variable can be found in the [Tazama Contribution Guide (A. Preparation)](https://github.com/frmscoe/docs/blob/main/Community/Tazama-Contribution-Guide.md#a-preparation)
+   - Instructions for creating the GH_TOKEN environment variable can be found in the [Tazama Contribution Guide (A. Preparation)](https://github.com/tazama-lf/docs/blob/main/Community/Tazama-Contribution-Guide.md#a-preparation)
 
      - We will be referencing your GitHub Personal Access Token throughout the installation process as your `GH_TOKEN`. It is not possible to retrieve the token from GitHub after you initially created it, but if the token had been set in Windows as an environment variable, you can retrieve it with the following command from a Windows Command Prompt:
 
@@ -51,7 +50,7 @@ The pre-requisites that are essential to be able to follow this guide to the let
 In a Windows Command Prompt, navigate to the folder where you want to store a copy of the source code. For example, the source code root folder path I have been using to compile this guide is C:\Tazama\GitHub. Once in your source code root folder, clone the repository with the following command:
 
 ```
-git clone https://github.com/frmscoe/Full-Stack-Docker-Tazama -b main
+git clone https://github.com/tazama-lf/Full-Stack-Docker-Tazama -b main
 ```
 
 **Output:**
@@ -180,7 +179,7 @@ Now, if everything went according to plan, you'll be able to submit a test trans
 
 If you have not already done so, clone the postman repository. In a Windows Command Prompt, navigate to the source code root folder. Then clone the postman repository with the following command:
 ```
-git clone https://github.com/frmscoe/postman -b main
+git clone https://github.com/tazama-lf/postman -b main
 ```
 
 **Output:**
@@ -232,7 +231,7 @@ This appendix will show you how to optionally load the configuration and environ
 
 In a Windows Command Prompt, navigate to the source code root folder. Then clone the following repository with the following command:
 ```
-git clone https://github.com/frmscoe/postman -b main
+git clone https://github.com/tazama-lf/postman -b main
 ```
 
 **Output:**
