@@ -3,8 +3,28 @@ services:
   redis:
     image: "redis:latest"
     hostname: redis
-    ports:
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -p 6381 ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+  ports:
       - 16379:6379
+
+  valkey:
+    hostname: valkey
+    image: valkey/valkey:7.2.5
+    volumes:
+      - ./conf/valkey.conf:/etc/valkey/valkey.conf
+      - ./data:/data
+    command: valkey-server /etc/valkey/valkey.conf
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli -p 6380 ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+    ports:
+      - 16380:6380
 
   # DATABASE
   arango:
@@ -31,7 +51,7 @@ services:
   # NATS-UTILITIES
   nats-utilities:
     build:
-      context: https://github.com/frmscoe/nats-utilities.git#${NATS_UTILITIES_BRANCH}
+      context: https://github.com/tazama-lf/nats-utilities.git#${NATS_UTILITIES_BRANCH}
       args:
         - GH_TOKEN
     env_file:
@@ -46,7 +66,7 @@ services:
   # TMS
   tms:
     build:
-      context: https://github.com/frmscoe/tms-service.git#${TMS_BRANCH}
+      context: https://github.com/tazama-lf/tms-service.git#${TMS_BRANCH}
       args:
         - GH_TOKEN
     env_file:
@@ -60,10 +80,26 @@ services:
       - arango
       - nats
 
+  # ADMIN
+  admin:
+    build:
+      context: https://github.com/frmscoe/admin-service.git#${ADMIN_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/admin.env
+      - .env
+    restart: always
+    ports:
+      - ${ADMIN_PORT}:3100
+    depends_on:
+      - arango
+      - valkey
+
   # RULE 901
   rule-901:
     build:
-      context: https://github.com/frmscoe/rule-executer.git#${RULE_EXECUTER_BRANCH}
+      context: https://github.com/tazama-lf/rule-executer.git#${RULE_EXECUTER_BRANCH}
       args:
         - GH_TOKEN
     env_file:
@@ -77,7 +113,7 @@ services:
   # EVENT DIRECTOR
   ed:
     build:
-      context: https://github.com/frmscoe/event-director.git#${ED_BRANCH}
+      context: https://github.com/tazama-lf/event-director.git#${ED_BRANCH}
       args:
         - GH_TOKEN
     env_file:
@@ -92,7 +128,7 @@ services:
   # TYPOLOGY PROCESSOR
   tp:
     build:
-      context: https://github.com/frmscoe/typology-processor.git#${TP_BRANCH}
+      context: https://github.com/tazama-lf/typology-processor.git#${TP_BRANCH}
       args:
         - GH_TOKEN
     env_file:
@@ -107,7 +143,7 @@ services:
   # TADP
   tadp:
     build:
-      context: https://github.com/frmscoe/transaction-aggregation-decisioning-processor.git#${TADP_BRANCH}
+      context: https://github.com/tazama-lf/transaction-aggregation-decisioning-processor.git#${TADP_BRANCH}
       args:
         - GH_TOKEN
     env_file:

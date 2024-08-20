@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
 
-const db = require("@arangodb").db;
-
 const systemDb = "_system";
 // Pseudonyms DB
 const pseudonymsDbName = "pseudonyms";
@@ -11,6 +9,12 @@ const accountHolderColName = "account_holder";
 const accountsColName = "accounts";
 const entitiesColName = "entities";
 const transRelationshipColName = "transactionRelationship";
+// Conditions Collections
+const conditionsColName = "conditions";
+const conditionsDebtorColName = "governed_as_debtor_by";
+const conditionsDebtorAccountColName = "governed_as_debtor_account_by";
+const conditionsCreditorName = "governed_as_creditor_by";
+const conditionsCreditorAccountName = "governed_as_creditor_account_by";
 
 // Pseudonyms Setup
 db._useDatabase(systemDb);
@@ -23,6 +27,13 @@ db._createEdgeCollection(accountHolderColName);
 db._create(accountsColName);
 db._create(entitiesColName);
 db._createEdgeCollection(transRelationshipColName);
+
+// Conditions Setup
+db._create(conditionsColName);
+db._createEdgeCollection(conditionsDebtorColName);
+db._createEdgeCollection(conditionsDebtorAccountColName);
+db._createEdgeCollection(conditionsCreditorName);
+db._createEdgeCollection(conditionsCreditorAccountName);
 
 // Indexes
 db._collection(entitiesColName).ensureIndex({
