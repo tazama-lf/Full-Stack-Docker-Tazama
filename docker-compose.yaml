@@ -4,7 +4,7 @@ services:
     image: "redis:latest"
     hostname: redis
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli -p 6381 ping | grep PONG"]
+      test: ["CMD-SHELL", "redis-cli -p 6379 ping | grep PONG"]
       interval: 1s
       timeout: 3s
       retries: 5
@@ -16,7 +16,6 @@ services:
     image: valkey/valkey:7.2.5
     volumes:
       - ./conf/valkey.conf:/etc/valkey/valkey.conf
-      - ./data:/data
     command: valkey-server /etc/valkey/valkey.conf
     healthcheck:
       test: ["CMD-SHELL", "valkey-cli -p 6380 ping | grep PONG"]
