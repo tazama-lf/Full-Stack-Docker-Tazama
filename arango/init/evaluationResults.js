@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
 
-const db = require("@arangodb").db;
-
 const systemDb = "_system";
 // Evaluations Results DB
 const evaluationsDbName = "evaluationResults";
