@@ -1,0 +1,14 @@
+services:
+  nats-utilities:
+    build:
+      context: https://github.com/tazama-lf/nats-utilities.git#${NATS_UTILITIES_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/nats-utilities.env
+      - .env
+    restart: always
+    depends_on:
+      - nats
+    ports:
+      - 4000:4000
