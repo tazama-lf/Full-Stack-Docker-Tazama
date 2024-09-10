@@ -12,7 +12,7 @@ services:
   # EVENT FLOW
   ef:
     build:
-      context: https://github.com/tazama-lf/event-flow#${EVENT_FLOW_BRANCH}
+      context: https://github.com/tazama-lf/event-flow.git#${EVENT_FLOW_BRANCH}
       args:
         - GH_TOKEN
     env_file:
