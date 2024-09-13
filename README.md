@@ -161,15 +161,6 @@ Tazama is configured by loading the network map, rules and typology configuratio
 
 For an optional step to load the Tazama configuration manually, follow the instructions in the  [Appendix](#appendix)
 
-
-## 6.  Compose the rule processor
-
-Navigate back to the `Full-Stack-Docker-Tazama` folder, and run the command:
-
-```
-docker compose up -d rule-901
-```
-
 **Output:**
 
 ![compose-rule-901](./images/full-stack-docker-tazama-compose-rule-901.png)
@@ -205,6 +196,19 @@ newman run collection-file -e environment-file --timeout-request 10200 --delay-r
 
 # TROUBLESHOOTING TIPS
 
+The services are split up in multiple yamls, 
+
+| Docker-Compose File | Services |
+| -------- | ------- |
+| docker-compose | tms, ed, tp, tadp, admin |
+| docker-compose.override | rule-901, set up all services |
+| docker-compose.infrastructure | arango, redis, nats, valkey |
+| docker-compose.dev.nats-utils | Nats-Utilities |
+| docker-compose.dev.auth | keycloak, auth-service, tms changes |
+| docker-compose.event-flow | FRuP |
+
+If you want to restart or alter certain processors - 
+
 Start/Restart individual services with
 `docker compose up -d --force-recreate <service>`    
 
@@ -225,6 +229,10 @@ List of \<services\>
 - tadp  
 - tp  
 - rule-901  
+- ef
+- valkey
+- auth
+- keycloak
 
 ## Appendix
 
