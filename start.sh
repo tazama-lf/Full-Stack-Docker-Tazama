@@ -3,11 +3,17 @@
 declare -A addons=(
     [1]="Event-flow"
     [2]="Authentication"
+    [3]="Basic (stdout) Logging"
+    [4]="[Elastic] Logging"
+    [5]="[Elastic] APM"
 )
 
 declare -A addon_files=(
     [1]="docker-compose.dev.event-flow.yaml"
     [2]="docker-compose.dev.auth.yaml"
+    [3]="docker-compose.dev.logs-base.yaml"
+    [4]="docker-compose.dev.logs-elastic.yaml"
+    [5]="docker-compose.dev.apm-elastic.yaml"
 )
 
 declare -A selected
@@ -85,7 +91,7 @@ while true; do
     read -p "Enter your choice: " choice
 
     case "$choice" in
-    [1-2])
+    [1-5])
         if [[ ${selected[$choice]} == 1 ]]; then
             selected[$choice]=0
         else

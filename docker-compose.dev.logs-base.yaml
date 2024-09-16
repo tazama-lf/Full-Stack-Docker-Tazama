@@ -1,4 +1,35 @@
 services:
+  tms:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+  
+  ed:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+  
+  rule-901:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+  
+  tp:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+    
+  tadp:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+    
   # event-sidecar
   event-sidecar:
     build:
@@ -6,8 +37,11 @@ services:
       args:
         - GH_TOKEN
     env_file:
-      - env/sidecar.env
       - .env
+    environment:
+      NATS_SERVER: nats:4222
+      NATS_SUBJECT: Lumberjack
+      PORT: ${EVENT_SIDECAR_PORT}
     restart: always
     depends_on:
       - nats

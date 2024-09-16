@@ -17,7 +17,6 @@ services:
     ports:
       - ${TMS_PORT}:3000
     depends_on:
-      - event-sidecar
       - redis
       - arango
       - nats
@@ -34,7 +33,6 @@ services:
     restart: always
     depends_on:
       - redis
-      - event-sidecar
       - arango
       - nats
 
@@ -50,7 +48,6 @@ services:
     restart: always
     depends_on:
       - redis
-      - event-sidecar
       - arango
       - nats
 
@@ -66,7 +63,6 @@ services:
     restart: always
     depends_on:
       - redis
-      - event-sidecar
       - arango
       - nats
   
