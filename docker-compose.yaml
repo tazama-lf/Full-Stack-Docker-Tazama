@@ -1,68 +1,10 @@
+# base
+
+include:
+  - path:
+    - docker-compose.infrastructure.yaml
 services:
-  # CACHE
-  redis:
-    image: "redis:latest"
-    hostname: redis
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli -p 6379 ping | grep PONG"]
-      interval: 1s
-      timeout: 3s
-      retries: 5
-    ports:
-      - 16379:6379
-
-  valkey:
-    hostname: valkey
-    image: valkey/valkey:7.2.5
-    volumes:
-      - ./conf/valkey.conf:/etc/valkey/valkey.conf
-    command: valkey-server /etc/valkey/valkey.conf
-    healthcheck:
-      test: ["CMD-SHELL", "valkey-cli -p 6380 ping | grep PONG"]
-      interval: 1s
-      timeout: 3s
-      retries: 5
-    ports:
-      - 16380:6380
-
-  # DATABASE
-  arango:
-    image: "arangodb/arangodb:3.11.10.1"
-    environment:
-      - ARANGO_NO_AUTH=1
-    command:
-      - arangod
-      - --server.endpoint=tcp://0.0.0.0:8529
-    volumes:
-      - ./arango/init:/docker-entrypoint-initdb.d:consistent
-    ports:
-      - "18529:8529"
-
-  # NATS
-  nats:
-    image: docker.io/bitnami/nats:2
-    restart: always
-    ports:
-      - '14222:4222'
-      - '16222:6222'
-      - '18222:8222'
-
-  # NATS-UTILITIES
-  nats-utilities:
-    build:
-      context: https://github.com/tazama-lf/nats-utilities.git#${NATS_UTILITIES_BRANCH}
-      args:
-        - GH_TOKEN
-    env_file:
-      - env/nats-utilities.env
-      - .env
-    restart: always
-    depends_on:
-      - nats
-    ports:
-      - '4000:4000'
-
-  # TMS
+  # TRANSACTION MONITORING SERVICE
   tms:
     build:
       context: https://github.com/tazama-lf/tms-service.git#${TMS_BRANCH}
@@ -79,37 +21,6 @@ services:
       - redis
       - arango
       - nats
-
-  # ADMIN
-  admin:
-    build:
-      context: https://github.com/frmscoe/admin-service.git#${ADMIN_BRANCH}
-      args:
-        - GH_TOKEN
-    env_file:
-      - env/admin.env
-      - .env
-    restart: always
-    ports:
-      - ${ADMIN_PORT}:3100
-    depends_on:
-      - arango
-      - valkey
-
-  # RULE 901
-  rule-901:
-    build:
-      context: https://github.com/tazama-lf/rule-executer.git#${RULE_EXECUTER_BRANCH}
-      args:
-        - GH_TOKEN
-    env_file:
-      - env/rule-executer.env
-      - .env
-    restart: always
-    depends_on:
-      - event-sidecar
-      - redis
-      - arango
 
   # EVENT DIRECTOR
   ed:
@@ -143,7 +54,7 @@ services:
       - arango
       - nats
 
-  # TADP
+  # TRANSACTION AGGREGATION AND DECISIONING PROCESSOR
   tadp:
     build:
       context: https://github.com/tazama-lf/transaction-aggregation-decisioning-processor.git#${TADP_BRANCH}
@@ -158,119 +69,18 @@ services:
       - event-sidecar
       - arango
       - nats
-
-  # event-sidecar
-  event-sidecar:
+  
+  admin-service:
     build:
-      context: https://github.com/tazama-lf/event-sidecar.git#${SIDECAR_BRANCH}
+      context: https://github.com/frmscoe/admin-service.git#${ADMIN_BRANCH}
       args:
         - GH_TOKEN
     env_file:
-      - env/sidecar.env
+      - env/admin.env
       - .env
     restart: always
-    depends_on:
-      - nats
-
-  lumberjack:
-    build:
-      context: https://github.com/tazama-lf/lumberjack.git#${LUMBERJACK_BRANCH}
-      args:
-        - GH_TOKEN
-    env_file:
-      - env/lumberjack.env
-      - .env
-    restart: always
-    depends_on:
-      - event-sidecar
-      - nats
-
-
-  elasticsearch:
-    image: elasticsearch:${STACK_VERSION}
-    volumes:
-      - esdata01:/usr/share/elasticsearch/data
     ports:
-      - ${ES_PORT}:9200
-    environment:
-      - node.name=elasticsearch
-      - discovery.type=single-node
-      - bootstrap.memory_lock=true
-      - xpack.security.enabled=false
-    mem_limit: ${ES_MEM_LIMIT}
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl http://elasticsearch:9200",
-        ]
-      interval: 10s
-      timeout: 10s
-      retries: 120
-
-  kibana:
+      - ${ADMIN_PORT}:3100
     depends_on:
-      elasticsearch:
-        condition: service_healthy
-    image: kibana:${STACK_VERSION}
-    volumes:
-      - kibanadata:/usr/share/kibana/data
-    ports:
-      - ${KIBANA_PORT}:5601
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    mem_limit: ${KB_MEM_LIMIT}
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl http://localhost:5601",
-        ]
-      interval: 10s
-      timeout: 10s
-      retries: 120
-
-  logstash:
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-      kibana:
-        condition: service_healthy
-    image: logstash:${STACK_VERSION}
-    mem_limit: ${LS_MEM_LIMIT}
-    volumes:
-      - logstashdata:/usr/share/logstash/data
-    environment:
-      - xpack.monitoring.enabled=true
-      - ELASTIC_HOSTS=http://elasticsearch:9200
-      - ELASTIC_USER=elastic
-      - ELASTIC_PASSWORD=""
-
-  apm-server:
-    image: elastic/apm-server:${STACK_VERSION}
-    container_name: apm-server
-    command: > # -e because logs
-       apm-server -e
-         -E apm-server.rum.enabled=true
-         -E setup.kibana.host=http://kibana:5601
-         -E setup.template.settings.index.number_of_replicas=0
-         -E apm-server.kibana.enabled=true
-         -E apm-server.kibana.host=http://kibana:5601
-         -E output.elasticsearch.host=http://elasticsearch:9200
-    ports:
-      - ${APMSERVER_PORT}:8200
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-
-volumes:
- esdata01:
-   driver: local
- kibanadata:
-   driver: local
- logstashdata:
-   driver: local
+      - arango
+      - valkey

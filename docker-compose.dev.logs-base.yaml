@@ -1,0 +1,26 @@
+services:
+  # event-sidecar
+  event-sidecar:
+    build:
+      context: https://github.com/tazama-lf/event-sidecar.git#${SIDECAR_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/sidecar.env
+      - .env
+    restart: always
+    depends_on:
+      - nats
+
+  lumberjack:
+    build:
+      context: https://github.com/tazama-lf/lumberjack.git#${LUMBERJACK_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/lumberjack.env
+      - .env
+    restart: always
+    depends_on:
+      - event-sidecar
+      - nats

@@ -1,8 +1,5 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
-
-
-
   - [INTRODUCTION](#introduction)
   - [Pre-requisites:](#pre-requisites)
   - [INSTALLATION STEPS](#installation-steps)
@@ -13,7 +10,7 @@
   - [5. Deploy core processors](#5-deploy-core-processors)
   - [6.  Compose the rule processor](#6--compose-the-rule-processor)
   - [TESTING THE END-TO-END DEPLOYMENT](#testing-the-end-to-end-deployment)
-- [TROUBLESHOOTING TIPS](#troubleshooting-tips)
+  - [TROUBLESHOOTING TIPS](#troubleshooting-tips)
   - [Appendix](#appendix)
  
 
@@ -81,34 +78,48 @@ GH_TOKEN=${GH_TOKEN}
 # Branches
 TMS_BRANCH=main
 ED_BRANCH=main
+RULE_EXECUTER_BRANCH=main
 TP_BRANCH=main
 TADP_BRANCH=main
-RULE_901_BRANCH=main
+NATS_UTILITIES_BRANCH=main
+CMS_BRANCH=main
+BATCH_PPA_BRANCH=main
+ADMIN_BRANCH=main
+AUTH_SERVICE_BRANCH=main
+EVENT_FLOW_BRANCH=main
 
 # Ports
-TMS_PORT=5000
+TMS_PORT=3000
+ADMIN_PORT=5100
 
 # TLS
 NODE_TLS_REJECT_UNAUTHORIZED='0'
 ```
 
-## 3. Deploy the Core Services
-
-Tazama core services provides the foundational infrastructure components for the platform and includes the ArangoDB, NATS and redis services: ArangoDB provides the database infrastructure, NATS provides the pub/sub functionality and redis provides for fast in-memory processor data caching.
-
-We deploy these services first and separately so that we can access the database to configure Tazama before continuing with the rest of the installation tasks.
+## 3. Deploy the services via script
 
 First, start the Docker Desktop for Windows application.
 
-With Docker Desktop running: from your Windows Command Prompt and from inside the `Full-Stack-Docker-Tazama` folder, execute the following command:
+With Docker Desktop running: from your Windows Command Prompt and from inside the `Full-Stack-Docker-Tazama` folder, execute the following command and follow the prompts:
 
-```
-docker compose up -d arango redis nats
-```
+#### Windows
+Command Prompt: `start.bat` 
+Powershell: `.\start.bat`
+
+#### Unix (Linux/MacOS)
+Any terminal: `./start.sh`
 
 **Output:**
 
-![compose-core-services](/images/full-stack-docker-tazama-compose-the-core-services.png)
+![start-services-1](/images/full-stack-docker-tazama-start-bat-1.png)
+
+Toggle any or no addons
+
+![start-services-2](/images/full-stack-docker-tazama-start-bat-2.png)
+
+Apply configuration
+
+![start-services-3](/images/full-stack-docker-tazama-start-bat-3.png)
 
 You'll be able to access the web interfaces for the deployed components through their respective TCP/IP ports on your local machine as defined in the `docker-compose.yaml` file.
 
@@ -117,39 +128,22 @@ You'll be able to access the web interfaces for the deployed components through 
 
 If your machine is open to your local area network, you will also be able to access these services from other computers on your network via your local machine's IP address.
 
-## 4. Configure Tazama
+## 4. Overview of services
+
+Tazama core services provides the foundational infrastructure components for the platform and includes the ArangoDB, NATS and redis services: ArangoDB provides the database infrastructure, NATS provides the pub/sub functionality and redis/valkey provides for fast in-memory processor data caching.
 
 Tazama is configured by loading the network map, rules and typology configurations required to evaluate a transaction via the ArangoDB API. The steps above have already loaded the default configuration into the database.
 
 For an optional step to load the Tazama configuration manually, follow the instructions in the  [Appendix](#appendix)
 
-## 5. Deploy core processors
+Now that the platform is configured, core processors should be running without problems. The main reason the configuration is required is that the processors read the network map at startup to set up the NATS pub/sub routes for the evaluation flow. If some services are still in a restart loop it means that the network map is either not configured correctly, they cannot communicate with the infrastructure or a required piece of infrastructure is not running.
 
-Now that the platform is configured, we can deploy our core processors. The main reason the configuration needs to preceed the deployment of the processors is that the processors read the network map at startup to set up the NATS pub/sub routes for the evaluation flow. If the core processors were deployed first, they would have to be restarted once the configuration was eventually uploaded.
+The core processors include:
 
-Navigate back to the `full-stack-docker-tazama` folder:
-```
-cd Full-Stack-Docker-Tazama
-```
-
-Execute the following command to deploy the core processors:
-
-```
-docker compose up -d tms ed tp tadp
-```
-
-
-This command will install:
-
- - The Transaction Monitoring Service API at `<https://localhost:5000>`, where messages will be sent for evaluation. 
+ - The Transaction Monitoring Service API at `<https://localhost:5000>`, where messages will be sent for evaluation. (Port configured in .env file under `TMS_PORT`)
  - The Event Director that will handle message routing based on the network map
- - The Typology Processor that will summarise rule results into scenarios according to invidual typology configurations
+ - The Typology Processor that will summarise rule results into scenarios according to individual typology configurations
  - The Transaction Aggregation and Decisioning Processor that will wrap up the evaluation of a transaction and publish any alerts for breached typologies
-
-**Output:**
-
-![execute-config](./images/full-stack-docker-tazama-compose-the-core-processors.png)
-
 
 You can test that the TMS API was successfully deployed with the following command from the Command Prompt:
 
@@ -160,6 +154,13 @@ curl localhost:5000
 **Output:**
 
 ![execute-config](./images/full-stack-docker-tazama-curl.png)
+
+## 5. Configure Tazama
+
+Tazama is configured by loading the network map, rules and typology configurations required to evaluate a transaction via the ArangoDB API. The steps above have already loaded the default configuration into the database.
+
+For an optional step to load the Tazama configuration manually, follow the instructions in the  [Appendix](#appendix)
+
 
 ## 6.  Compose the rule processor
 
