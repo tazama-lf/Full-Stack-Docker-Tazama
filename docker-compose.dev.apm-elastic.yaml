@@ -21,7 +21,7 @@ services:
         condition: service_healthy
       kibana:
         condition: service_healthy
-        
+
   tms:
     depends_on:
       elasticsearch:
@@ -30,7 +30,7 @@ services:
       APM_ACTIVE: true
       APM_URL: http://apm-server:8200
       APM_SECRET_TOKEN: ""
-  
+
   ed:
     depends_on:
       elasticsearch:
@@ -48,7 +48,7 @@ services:
       APM_ACTIVE: true
       APM_URL: http://apm-server:8200
       APM_SECRET_TOKEN: ""
-  
+
   tp:
     depends_on:
       elasticsearch:
@@ -57,7 +57,7 @@ services:
       APM_ACTIVE: true
       APM_URL: http://apm-server:8200
       APM_SECRET_TOKEN: ""
-    
+
   tadp:
     depends_on:
       elasticsearch:

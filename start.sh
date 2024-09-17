@@ -87,7 +87,7 @@ print_menu
 handle_menu
 
 while true; do  
-    echo "Apply current selection (a), Toggle addon (1-2) or quit (q)"
+    echo "Apply current selection (a), Toggle addon (1-5) or quit (q)"
     read -p "Enter your choice: " choice
 
     case "$choice" in
