@@ -90,10 +90,21 @@ BATCH_PPA_BRANCH=main
 ADMIN_BRANCH=main
 AUTH_SERVICE_BRANCH=main
 EVENT_FLOW_BRANCH=main
+SIDECAR_BRANCH=main
+LUMBERJACK_BRANCH=main
 
 # Ports
 TMS_PORT=5000
 ADMIN_PORT=5100
+EVENT_SIDECAR_PORT=15000
+ES_PORT=9200
+KIBANA_PORT=5601
+APMSERVER_PORT=8200
+
+# Memory Limits
+ES_MEM_LIMIT=1073741824
+KB_MEM_LIMIT=1073741824
+LS_MEM_LIMIT=1073741824
 
 # TLS
 NODE_TLS_REJECT_UNAUTHORIZED='0'
@@ -111,6 +122,9 @@ Powershell: `.\start.bat`
 
 #### Unix (Linux/MacOS)
 Any terminal: `./start.sh`
+
+> [!IMPORTANT]  
+> Ensure the script has the correct permissions to run. You may need to run `chmod +x start.sh` beforehand.
 
 **Output:**
 
@@ -137,7 +151,7 @@ Tazama core services provides the foundational infrastructure components for the
 
 Tazama is configured by loading the network map, rules and typology configurations required to evaluate a transaction via the ArangoDB API. The steps above have already loaded the default configuration into the database.
 
-For an optional step to load the Tazama configuration manually, follow the instructions in the  [Appendix](#appendix)
+For an optional step to load the Tazama configuration manually, follow the instructions in the [Appendix](#appendix)
 
 Now that the platform is configured, core processors should be running without problems. The main reason the configuration is required is that the processors read the network map at startup to set up the NATS pub/sub routes for the evaluation flow. If some services are still in a restart loop it means that the network map is either not configured correctly, they cannot communicate with the infrastructure or a required piece of infrastructure is not running.
 
@@ -162,7 +176,7 @@ curl localhost:5000
 
 Tazama is configured by loading the network map, rules and typology configurations required to evaluate a transaction via the ArangoDB API. The steps above have already loaded the default configuration into the database.
 
-For an optional step to load the Tazama configuration manually, follow the instructions in the  [Appendix](#appendix)
+For an optional step to load the Tazama configuration manually, follow the instructions in the [Appendix](#appendix)
 
 **Output:**
 
@@ -208,6 +222,9 @@ The services are split up in multiple yamls,
 | docker-compose.infrastructure | arango, redis, nats, valkey |
 | docker-compose.dev.nats-utils | Nats-Utilities |
 | docker-compose.dev.auth | keycloak, auth-service, tms changes |
+| docker-compose.dev.logs-base | event-sidecar, lumberjack, all service changes |
+| docker-compose.dev.logs-elastic | event-sidecar, lumberjack, elasticsearch, kibana |
+| docker-compose.dev.apm-elastic | event-sidecar, lumberjack, elasticsearch, kibana, apmserver |
 | docker-compose.event-flow | FRuP |
 
 If you want to restart or alter certain processors - 
@@ -236,6 +253,11 @@ List of \<services\>
 - valkey
 - auth
 - keycloak
+- event-sidecar
+- lumberjack
+- elasticsearch
+- kibana
+- apm-server
 
 ## Appendix
 

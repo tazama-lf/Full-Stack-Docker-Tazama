@@ -1,0 +1,62 @@
+services:
+  tms:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+  
+  ed:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+  
+  rule-901:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+  
+  tp:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+    
+  tadp:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+    
+  # event-sidecar
+  event-sidecar:
+    build:
+      context: https://github.com/tazama-lf/event-sidecar.git#${SIDECAR_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - .env
+    environment:
+      NATS_SERVER: nats:4222
+      NATS_SUBJECT: Lumberjack
+      PORT: ${EVENT_SIDECAR_PORT}
+    restart: always
+    depends_on:
+      - nats
+
+  lumberjack:
+    build:
+      context: https://github.com/tazama-lf/lumberjack.git#${LUMBERJACK_BRANCH}
+      args:
+        - GH_TOKEN
+    environment:
+      - STDOUT=true
+    env_file:
+      - env/lumberjack.env
+      - .env
+    restart: always
+    depends_on:
+      - event-sidecar
+      - nats
