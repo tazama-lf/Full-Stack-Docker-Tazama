@@ -1,5 +1,8 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## Table of Contents
+
+
   - [INTRODUCTION](#introduction)
   - [Pre-requisites:](#pre-requisites)
   - [INSTALLATION STEPS](#installation-steps)
@@ -22,7 +25,7 @@ This guide is specific to the Windows 10 or 11 operating system.
 
 ## Pre-requisites:
 
-Set up your development environment as recommended in the [Tazama Contribution Guide](https://github.com/tazama-lf/docs/blob/main/Community/Tazama-Contribution-Guide.md#32-setting-up-the-development-environment).
+Set up your development environment as recommended in the [Tazama Contribution Guide](https://github.com/tazama-lf/.github/blob/main/CONTRIBUTING.md#32-setting-up-the-development-environment) section 3.2.1.
 
 The pre-requisites that are essential to be able to follow this guide to the letter are:
 
@@ -30,9 +33,9 @@ The pre-requisites that are essential to be able to follow this guide to the let
  - Git
  - Newman
  - A code editor (this guide will assume you are using VS Code)
-  - A GitHub personal access token with `packages:read` permissions
+  - A GitHub personal access token with `packages:write` and `read:org` permissions
    - Ensure that your GitHub Personal Access Token is added as a Windows Environment Variable called "`GH_TOKEN`".
-   - Instructions for creating the GH_TOKEN environment variable can be found in the [Tazama Contribution Guide (A. Preparation)](https://github.com/tazama-lf/docs/blob/main/Community/Tazama-Contribution-Guide.md#a-preparation)
+   - Instructions for creating the GH_TOKEN environment variable can be found in the [Tazama Contribution Guide (A. Preparation)](https://github.com/tazama-lf/.github/blob/main/CONTRIBUTING.md#a-preparation-)
 
      - We will be referencing your GitHub Personal Access Token throughout the installation process as your `GH_TOKEN`. It is not possible to retrieve the token from GitHub after you initially created it, but if the token had been set in Windows as an environment variable, you can retrieve it with the following command from a Windows Command Prompt:
 
@@ -78,7 +81,7 @@ GH_TOKEN=${GH_TOKEN}
 # Branches
 TMS_BRANCH=main
 ED_BRANCH=main
-RULE_EXECUTER_BRANCH=main
+RULE_901_BRANCH=main
 TP_BRANCH=main
 TADP_BRANCH=main
 NATS_UTILITIES_BRANCH=main
@@ -89,7 +92,7 @@ AUTH_SERVICE_BRANCH=main
 EVENT_FLOW_BRANCH=main
 
 # Ports
-TMS_PORT=3000
+TMS_PORT=5000
 ADMIN_PORT=5100
 
 # TLS
@@ -161,15 +164,6 @@ Tazama is configured by loading the network map, rules and typology configuratio
 
 For an optional step to load the Tazama configuration manually, follow the instructions in the  [Appendix](#appendix)
 
-
-## 6.  Compose the rule processor
-
-Navigate back to the `Full-Stack-Docker-Tazama` folder, and run the command:
-
-```
-docker compose up -d rule-901
-```
-
 **Output:**
 
 ![compose-rule-901](./images/full-stack-docker-tazama-compose-rule-901.png)
@@ -205,6 +199,19 @@ newman run collection-file -e environment-file --timeout-request 10200 --delay-r
 
 # TROUBLESHOOTING TIPS
 
+The services are split up in multiple yamls, 
+
+| Docker-Compose File | Services |
+| -------- | ------- |
+| docker-compose | tms, ed, tp, tadp, admin |
+| docker-compose.override | rule-901, set up all services |
+| docker-compose.infrastructure | arango, redis, nats, valkey |
+| docker-compose.dev.nats-utils | Nats-Utilities |
+| docker-compose.dev.auth | keycloak, auth-service, tms changes |
+| docker-compose.event-flow | FRuP |
+
+If you want to restart or alter certain processors - 
+
 Start/Restart individual services with
 `docker compose up -d --force-recreate <service>`    
 
@@ -225,6 +232,10 @@ List of \<services\>
 - tadp  
 - tp  
 - rule-901  
+- ef
+- valkey
+- auth
+- keycloak
 
 ## Appendix
 
