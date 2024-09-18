@@ -51,6 +51,8 @@ services:
       context: https://github.com/tazama-lf/lumberjack.git#${LUMBERJACK_BRANCH}
       args:
         - GH_TOKEN
+    environment:
+      - STDOUT=true
     env_file:
       - env/lumberjack.env
       - .env

@@ -44,3 +44,4 @@ services:
     environment:
       ELASTIC_SEARCH_VERSION: ${ELASTIC_STACK_VERSION}
       ELASTIC_HOST: http://elasticsearch:9200
+      ELASTIC: true
