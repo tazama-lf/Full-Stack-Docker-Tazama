@@ -42,3 +42,10 @@ services:
       - CERT_PATH_PUBLIC=test-public-key.pem
     volumes:
       - ./auth/test-public-key.pem:/home/app/test-public-key.pem
+      
+  admin-service:
+    environment:
+      - AUTHENTICATED=true
+      - CERT_PATH_PUBLIC=test-public-key.pem
+    volumes:
+      - ./auth/test-public-key.pem:/home/app/test-public-key.pem
