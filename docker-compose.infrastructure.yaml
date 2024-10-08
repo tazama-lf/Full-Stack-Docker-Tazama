@@ -14,6 +14,8 @@ services:
     hostname: valkey
     image: valkey/valkey:7.2.5
     command: "valkey-server --port 6380"
+    ports:
+      - 16380:6380
     healthcheck:
       test: ["CMD-SHELL", "valkey-cli -p 6380 ping | grep PONG"]
       interval: 1s
@@ -29,6 +31,7 @@ services:
       - --server.endpoint=tcp://0.0.0.0:8529
     volumes:
       - ./arango/migration/base/00-CREATE.js:/docker-entrypoint-initdb.d/00-CREATE.js
+      - ./arango/migration/local/01-EVENT-FLOW.js:/docker-entrypoint-initdb.d/01-DATA.js
 
   nats:
     image: docker.io/bitnami/nats:2

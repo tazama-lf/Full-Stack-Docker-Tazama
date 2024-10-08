@@ -80,3 +80,16 @@ services:
     depends_on:
       - arango
       - valkey
+
+  ef:
+    build:
+      context: https://github.com/tazama-lf/event-flow.git#${EVENT_FLOW_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/event-flow.env
+      - .env
+    restart: always
+    depends_on:
+      - arango
+      - valkey
