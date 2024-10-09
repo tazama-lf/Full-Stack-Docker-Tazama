@@ -4,7 +4,6 @@ setlocal enabledelayedexpansion
 :menu
 set "type="
 
-set "eventflow=[ ]"
 set "auth=[ ]"
 set "basiclogs=[ ]"
 set "elasticlogs=[ ]"
@@ -29,24 +28,22 @@ if /i "%type%"=="1" goto :addons
 set "choice="
 cls
 echo Enable optional docker configuration addons:
-echo 1. %eventflow% Event-flow
-echo 2. %auth% Authentication
-echo 3. %basiclogs% Basic Logs
-echo 4. %elasticlogs% [Elastic] Logging
-echo 5. %elasticapm% [Elastic] APM
+echo 1. %auth% Authentication
+echo 2. %basiclogs% Basic Logs
+echo 3. %elasticlogs% [Elastic] Logging
+echo 4. %elasticapm% [Elastic] APM
 echo.
-echo Apply current selection (a), Toggle addon (1-2) or quit (q)
+echo Apply current selection (a), Toggle addon (1-4) or quit (q)
 set /p "choice=Enter your choice: "
 
 if /i "%choice%"=="q" goto :end
 if /i "%choice%"=="" goto :apply
 if /i "%choice%"=="a" goto :apply
 
-if "%choice%"=="1" if "%eventflow%" == "[ ]" (set "eventflow=[X]") else (set "eventflow=[ ]")
-if "%choice%"=="2" if "%auth%" == "[ ]" (set "auth=[X]") else (set "auth=[ ]")
-if "%choice%"=="3" if "%basiclogs%" == "[ ]" (set "basiclogs=[X]") else (set "basiclogs=[ ]")
-if "%choice%"=="4" if "%elasticlogs%" == "[ ]" (set "elasticlogs=[X]") else (set "elasticlogs=[ ]")
-if "%choice%"=="5" if "%elasticapm%" == "[ ]" (set "elasticapm=[X]") else (set "elasticapm=[ ]")
+if "%choice%"=="1" if "%auth%" == "[ ]" (set "auth=[X]") else (set "auth=[ ]")
+if "%choice%"=="2" if "%basiclogs%" == "[ ]" (set "basiclogs=[X]") else (set "basiclogs=[ ]")
+if "%choice%"=="3" if "%elasticlogs%" == "[ ]" (set "elasticlogs=[X]") else (set "elasticlogs=[ ]")
+if "%choice%"=="4" if "%elasticapm%" == "[ ]" (set "elasticapm=[X]") else (set "elasticapm=[ ]")
 
 @REM Nats utils not part of standard deployment
 if "%choice%"=="99" if "%natsutils%" == "[ ]" (set "natsutils=[X]") else (set "natsutils=[ ]")
@@ -55,7 +52,6 @@ goto :addons
 
 :apply
 set "cmd=docker compose -f docker-compose.yaml -f docker-compose.override.yaml"
-if "%eventflow%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.event-flow.yaml"
 if "%auth%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.auth.yaml"
 if "%basiclogs%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.logs-base.yaml"
 if "%elasticlogs%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.logs-elastic.yaml"

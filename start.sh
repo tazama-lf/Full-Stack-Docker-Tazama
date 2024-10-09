@@ -1,19 +1,17 @@
 #!/bin/bash
 
 declare -A addons=(
-    [1]="Event-flow"
-    [2]="Authentication"
-    [3]="Basic (stdout) Logging"
-    [4]="[Elastic] Logging"
-    [5]="[Elastic] APM"
+    [1]="Authentication"
+    [2]="Basic (stdout) Logging"
+    [3]="[Elastic] Logging"
+    [4]="[Elastic] APM"
 )
 
 declare -A addon_files=(
-    [1]="docker-compose.dev.event-flow.yaml"
-    [2]="docker-compose.dev.auth.yaml"
-    [3]="docker-compose.dev.logs-base.yaml"
-    [4]="docker-compose.dev.logs-elastic.yaml"
-    [5]="docker-compose.dev.apm-elastic.yaml"
+    [1]="docker-compose.dev.auth.yaml"
+    [2]="docker-compose.dev.logs-base.yaml"
+    [3]="docker-compose.dev.logs-elastic.yaml"
+    [4]="docker-compose.dev.apm-elastic.yaml"
 )
 
 declare -A selected
