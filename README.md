@@ -230,10 +230,10 @@ The services are split up in multiple yamls,
 If you want to restart or alter certain processors - 
 
 Start/Restart individual services with
-`docker compose up -d --force-recreate <service>`    
+`docker compose up -p tazama -d --force-recreate <service>`    
 
 Try running following if changes are not reflecting  
-`docker compose up -d --build --force-recreate`  
+`docker compose up -p tazama -d --build --force-recreate`  
 
 You can trash your container followed by deleting the image in docker if none of the above works.  
 
