@@ -31,7 +31,6 @@ services:
       - --server.endpoint=tcp://0.0.0.0:8529
     volumes:
       - ./arango/migration/base/00-CREATE.js:/docker-entrypoint-initdb.d/00-CREATE.js
-      - ./arango/migration/local/01-EVENT-FLOW.js:/docker-entrypoint-initdb.d/01-DATA.js
 
   nats:
     image: docker.io/bitnami/nats:2

@@ -47,6 +47,7 @@ const typologyConfigData = [
     workflow: {
       alertThreshold: 200,
       interdictionThreshold: 400,
+      flowProcessor: "EFRuP@1.0.0",
     },
     rules: [
       {
@@ -96,6 +97,10 @@ const networkConfigData = [
             id: "typology-processor@1.0.0",
             cfg: "999@1.0.0",
             rules: [
+              {
+                id: "EFRuP@1.0.0",
+                cfg: "none",
+              },
               {
                 id: "901@1.0.0",
                 cfg: "1.0.0",
