@@ -202,7 +202,7 @@ We can run the following Postman test via Newman to see if our deployment was su
 newman run collection-file -e environment-file --timeout-request 10200 --delay-request 500
 ```
 
- - The `collection-file` is the full path to the location on your local machine where the `postman\1.1. Rule-901 End-to-End test - pain001-013 disabled.postman_collection.json` file is located.
+ - If the authentication option has not been selected, then the `collection-file` is the full path to the location on your local machine where the `postman\1.1. (NO-AUTH) Rule-901 End-to-End test - pain001-013 disabled.postman_collection.json` file is located. If authentication is deployed, use `postman\1.2. (AUTH) Rule-901 End-to-End test - pain001-013 disabled.postman_collection.json`.
  - The `environment-file` is the full path to the location on your local machine where the `postman\environments\Tazama-Docker-Compose-LOCAL.postman_environment.json` file is located.
  - If the path contains spaces, wrap the string in double-quotes.
  - We add the `--delay-request` option to delay each individual test by 500 milliseconds to give them evaluation time to complete before we look for the result in the database.
