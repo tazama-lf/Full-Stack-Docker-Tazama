@@ -148,4 +148,4 @@ const networkConfigColName = "networkConfiguration";
 db._useDatabase(configDbName);
 db._collection(ruleConfigColName).save(ruleConfigData);
 db._collection(typologyConfigColName).save(typologyConfigData);
-db._collection(networkConfigColName).save(networkConfigData)
+db._collection(networkConfigColName).save(networkConfigData);
