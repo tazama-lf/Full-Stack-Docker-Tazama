@@ -9,7 +9,7 @@ services:
     environment:
       - ARANGO_NO_AUTH=1
     volumes:
-      - ./arango/migration/local/01-SIMPLE.js:/docker-entrypoint-initdb.d/01-DATA.js
+      - ./arango/migration/local/01-STANDARD.js:/docker-entrypoint-initdb.d/01-DATA.js
     ports:
       - 18529:8529
 
