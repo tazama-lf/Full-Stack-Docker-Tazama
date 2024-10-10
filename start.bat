@@ -59,7 +59,7 @@ if "%basiclogs%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.logs-base.yaml"
 if "%elasticlogs%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.logs-elastic.yaml"
 if "%elasticapm%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.apm-elastic.yaml"
 if "%natsutils%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.nats-utils.yaml"
-if "%ui%" == "[X]" set "cmd=%cmd% -f docker-compose.ui.yaml"
+if "%ui%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.ui.yaml"
 
 echo.
 echo Command to run: %cmd% -p tazama up -d

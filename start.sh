@@ -13,7 +13,7 @@ declare -A addon_files=(
     [2]="docker-compose.dev.logs-base.yaml"
     [3]="docker-compose.dev.logs-elastic.yaml"
     [4]="docker-compose.dev.apm-elastic.yaml"
-    [5]="docker-compose.ui.yaml"
+    [5]="docker-compose.dev.ui.yaml"
 )
 
 declare -A selected

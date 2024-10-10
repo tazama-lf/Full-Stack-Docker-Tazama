@@ -4,9 +4,9 @@ services:
     environment:
       - NEXT_TELEMETRY_DISABLED=1
       - NEXT_PUBLIC_URL=http://localhost:3001
-      - NEXT_PUBLIC_TMS_SERVER_URL=http://tms:3000
-      - NEXT_PUBLIC_CMS_NATS_HOSTING=nats://nats:4222
-      - NEXT_PUBLIC_ARANGO_DB_HOSTING=http://arango:8529
+      - NEXT_PUBLIC_TMS_SERVER_URL=http://localhost:${TMS_PORT}
+      - NEXT_PUBLIC_CMS_NATS_HOSTING=nats://localhost:14222
+      - NEXT_PUBLIC_ARANGO_DB_HOSTING=http://localhost:18529
       - NEXT_PUBLIC_DB_USER="root"
       - NEXT_PUBLIC_WS_URL=localhost:3001
       - NEXT_PUBLIC_NATS_SUBSCRIPTIONS="['connection', '>']
@@ -17,3 +17,11 @@ services:
       - nats
     ports:
       - "3001:3001"
+
+  arango:
+    environment:
+      - ARANGO_NO_AUTH=1
+    volumes:
+      - ./arango/migration/local/02-NO_EVENT_FLOW.js:/docker-entrypoint-initdb.d/01-DATA.js
+    ports:
+      - 18529:8529
