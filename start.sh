@@ -5,6 +5,7 @@ declare -A addons=(
     [2]="Basic (stdout) Logging"
     [3]="[Elastic] Logging"
     [4]="[Elastic] APM"
+    [5]="UI"
 )
 
 declare -A addon_files=(
@@ -12,6 +13,7 @@ declare -A addon_files=(
     [2]="docker-compose.dev.logs-base.yaml"
     [3]="docker-compose.dev.logs-elastic.yaml"
     [4]="docker-compose.dev.apm-elastic.yaml"
+    [5]="docker-compose.ui.yaml"
 )
 
 declare -A selected

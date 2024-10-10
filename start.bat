@@ -32,8 +32,9 @@ echo 1. %auth% Authentication
 echo 2. %basiclogs% Basic Logs
 echo 3. %elasticlogs% [Elastic] Logging
 echo 4. %elasticapm% [Elastic] APM
+echo 5. %ui% UI
 echo.
-echo Apply current selection (a), Toggle addon (1-4) or quit (q)
+echo Apply current selection (a), Toggle addon (1-5) or quit (q)
 set /p "choice=Enter your choice: "
 
 if /i "%choice%"=="q" goto :end
@@ -44,6 +45,7 @@ if "%choice%"=="1" if "%auth%" == "[ ]" (set "auth=[X]") else (set "auth=[ ]")
 if "%choice%"=="2" if "%basiclogs%" == "[ ]" (set "basiclogs=[X]") else (set "basiclogs=[ ]")
 if "%choice%"=="3" if "%elasticlogs%" == "[ ]" (set "elasticlogs=[X]") else (set "elasticlogs=[ ]")
 if "%choice%"=="4" if "%elasticapm%" == "[ ]" (set "elasticapm=[X]") else (set "elasticapm=[ ]")
+if "%choice%"=="5" if "%ui%" == "[ ]" (set "ui=[X]") else (set "ui=[ ]")
 
 @REM Nats utils not part of standard deployment
 if "%choice%"=="99" if "%natsutils%" == "[ ]" (set "natsutils=[X]") else (set "natsutils=[ ]")
@@ -57,6 +59,7 @@ if "%basiclogs%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.logs-base.yaml"
 if "%elasticlogs%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.logs-elastic.yaml"
 if "%elasticapm%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.apm-elastic.yaml"
 if "%natsutils%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.nats-utils.yaml"
+if "%ui%" == "[X]" set "cmd=%cmd% -f docker-compose.ui.yaml"
 
 echo.
 echo Command to run: %cmd% -p tazama up -d
