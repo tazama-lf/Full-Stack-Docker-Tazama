@@ -57,7 +57,7 @@ const typologyConfigData = [
         wghts: [
           {
             ref: ".err",
-            wght: "100",
+            wght: "0",
           },
           {
             ref: ".x00",
@@ -74,6 +74,33 @@ const typologyConfigData = [
           {
             ref: ".03",
             wght: "400",
+          },
+        ],
+      },
+      {
+        id: "EFRuP@1.0.0",
+        cfg: "none",
+        termId: "vEFRuPat100atnone",
+        wghts: [
+          {
+            ref: ".err",
+            wght: "0",
+          },
+          {
+            ref: "override",
+            wght: "0",
+          },
+          {
+            ref: "non-overridable-block",
+            wght: "0",
+          },
+          {
+            ref: "overridable-block",
+            wght: "0",
+          },
+          {
+            ref: "none",
+            wght: "0",
           },
         ],
       },
