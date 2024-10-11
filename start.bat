@@ -9,6 +9,7 @@ set "basiclogs=[ ]"
 set "elasticlogs=[ ]"
 set "elasticapm=[ ]"
 set "natsutils=[ ]"
+set "ui=[ ]"
 
 cls
 echo Select docker deployment type:
