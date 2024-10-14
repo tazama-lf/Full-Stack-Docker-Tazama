@@ -5,7 +5,7 @@ declare -A addons=(
     [2]="Basic (stdout) Logging"
     [3]="[Elastic] Logging"
     [4]="[Elastic] APM"
-    [5]="UI"
+    [5]="Demo UI"
 )
 
 declare -A addon_files=(

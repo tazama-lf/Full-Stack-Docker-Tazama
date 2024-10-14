@@ -9,6 +9,7 @@ set "basiclogs=[ ]"
 set "elasticlogs=[ ]"
 set "elasticapm=[ ]"
 set "natsutils=[ ]"
+set "ui=[ ]"
 
 cls
 echo Select docker deployment type:
@@ -32,7 +33,7 @@ echo 1. %auth% Authentication
 echo 2. %basiclogs% Basic Logs
 echo 3. %elasticlogs% [Elastic] Logging
 echo 4. %elasticapm% [Elastic] APM
-echo 5. %ui% UI
+echo 5. %ui% Demo UI
 echo.
 echo Apply current selection (a), Toggle addon (1-5) or quit (q)
 set /p "choice=Enter your choice: "
