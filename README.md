@@ -217,7 +217,7 @@ The services are split up in multiple yamls,
 
 | Docker-Compose File | Services |
 | -------- | ------- |
-| docker-compose | tms, ed, tp, tadp, admin |
+| docker-compose | tms, ed, tp, tadp, admin, ef |
 | docker-compose.override | rule-901, set up all services |
 | docker-compose.infrastructure | arango, redis, nats, valkey |
 | docker-compose.dev.nats-utils | Nats-Utilities |
@@ -225,7 +225,9 @@ The services are split up in multiple yamls,
 | docker-compose.dev.logs-base | event-sidecar, lumberjack, all service changes |
 | docker-compose.dev.logs-elastic | event-sidecar, lumberjack, elasticsearch, kibana |
 | docker-compose.dev.apm-elastic | event-sidecar, lumberjack, elasticsearch, kibana, apmserver |
-| docker-compose.event-flow | FRuP |
+
+> [!IMPORTANT]  
+> Turn off `tms` API authentication for the `Demo UI` to work.
 
 If you want to restart or alter certain processors - 
 
