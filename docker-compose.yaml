@@ -1,52 +1,13 @@
+# base
+
+include:
+  - path:
+    - docker-compose.infrastructure.yaml
 services:
-  # CACHE
-  redis:
-    image: "redis:latest"
-    hostname: redis
-    ports:
-      - 16379:6379
-
-  # DATABASE
-  arango:
-    image: "arangodb/arangodb:3.11.10.1"
-    environment:
-      - ARANGO_NO_AUTH=1
-    command:
-      - arangod
-      - --server.endpoint=tcp://0.0.0.0:8529
-    volumes:
-      - ./arango/init:/docker-entrypoint-initdb.d:consistent
-    ports:
-      - "18529:8529"
-
-  # NATS
-  nats:
-    image: docker.io/bitnami/nats:2
-    restart: always
-    ports:
-      - '14222:4222'
-      - '16222:6222'
-      - '18222:8222'
-
-  # NATS-UTILITIES
-  nats-utilities:
-    build:
-      context: https://github.com/frmscoe/nats-utilities.git#${NATS_UTILITIES_BRANCH}
-      args:
-        - GH_TOKEN
-    env_file:
-      - env/nats-utilities.env
-      - .env
-    restart: always
-    depends_on:
-      - nats
-    ports:
-      - '4000:4000'
-
-  # TMS
+  # TRANSACTION MONITORING SERVICE
   tms:
     build:
-      context: https://github.com/frmscoe/tms-service.git#${TMS_BRANCH}
+      context: https://github.com/tazama-lf/tms-service.git#${TMS_BRANCH}
       args:
         - GH_TOKEN
     env_file:
@@ -60,24 +21,10 @@ services:
       - arango
       - nats
 
-  # RULE 901
-  rule-901:
-    build:
-      context: https://github.com/frmscoe/rule-executer.git#${RULE_EXECUTER_BRANCH}
-      args:
-        - GH_TOKEN
-    env_file:
-      - env/rule-executer.env
-      - .env
-    restart: always
-    depends_on:
-      - redis
-      - arango
-
   # EVENT DIRECTOR
   ed:
     build:
-      context: https://github.com/frmscoe/event-director.git#${ED_BRANCH}
+      context: https://github.com/tazama-lf/event-director.git#${ED_BRANCH}
       args:
         - GH_TOKEN
     env_file:
@@ -92,7 +39,7 @@ services:
   # TYPOLOGY PROCESSOR
   tp:
     build:
-      context: https://github.com/frmscoe/typology-processor.git#${TP_BRANCH}
+      context: https://github.com/tazama-lf/typology-processor.git#${TP_BRANCH}
       args:
         - GH_TOKEN
     env_file:
@@ -104,10 +51,10 @@ services:
       - arango
       - nats
 
-  # TADP
+  # TRANSACTION AGGREGATION AND DECISIONING PROCESSOR
   tadp:
     build:
-      context: https://github.com/frmscoe/transaction-aggregation-decisioning-processor.git#${TADP_BRANCH}
+      context: https://github.com/tazama-lf/transaction-aggregation-decisioning-processor.git#${TADP_BRANCH}
       args:
         - GH_TOKEN
     env_file:
@@ -118,3 +65,31 @@ services:
       - redis
       - arango
       - nats
+  
+  admin-service:
+    build:
+      context: https://github.com/frmscoe/admin-service.git#${ADMIN_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/admin.env
+      - .env
+    restart: always
+    ports:
+      - ${ADMIN_PORT}:3100
+    depends_on:
+      - arango
+      - valkey
+
+  ef:
+    build:
+      context: https://github.com/tazama-lf/event-flow.git#${EVENT_FLOW_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/event-flow.env
+      - .env
+    restart: always
+    depends_on:
+      - arango
+      - valkey
