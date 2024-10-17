@@ -38,6 +38,8 @@ services:
         - GH_TOKEN
     env_file:
       - .env
+    ports:
+      - 15000:${EVENT_SIDECAR_PORT}
     environment:
       NATS_SERVER: nats:4222
       NATS_SUBJECT: Lumberjack
