@@ -1,0 +1,68 @@
+include:
+  - path:
+    - docker-compose.dev.elastic.yaml
+
+services:
+  apm-server:
+    image: elastic/apm-server:${ELASTIC_STACK_VERSION}
+    container_name: apm-server
+    command: > # -e because logs
+       apm-server -e
+         -E apm-server.rum.enabled=true
+         -E setup.kibana.host=http://kibana:5601
+         -E setup.template.settings.index.number_of_replicas=0
+         -E apm-server.kibana.enabled=true
+         -E apm-server.kibana.host=http://kibana:5601
+         -E output.elasticsearch.host=http://elasticsearch:9200
+    ports:
+      - ${APMSERVER_PORT}:8200
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      kibana:
+        condition: service_healthy
+
+  tms:
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      APM_ACTIVE: true
+      APM_URL: http://apm-server:8200
+      APM_SECRET_TOKEN: ""
+
+  ed:
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      APM_ACTIVE: true
+      APM_URL: http://apm-server:8200
+      APM_SECRET_TOKEN: ""
+  
+  rule-901:
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      APM_ACTIVE: true
+      APM_URL: http://apm-server:8200
+      APM_SECRET_TOKEN: ""
+
+  tp:
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      APM_ACTIVE: true
+      APM_URL: http://apm-server:8200
+      APM_SECRET_TOKEN: ""
+
+  tadp:
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      APM_ACTIVE: true
+      APM_URL: http://apm-server:8200
+      APM_SECRET_TOKEN: ""
