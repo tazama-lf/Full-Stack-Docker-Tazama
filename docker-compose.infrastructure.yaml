@@ -1,14 +1,14 @@
 # base infrastructure
 
 services:
-  redis:
-    image: redis:latest
-    hostname: redis
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli -p 6379 ping | grep PONG"]
-      interval: 1s
-      timeout: 3s
-      retries: 5
+  # redis:
+  #   image: redis:latest
+  #   hostname: redis
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "redis-cli -p 6379 ping | grep PONG"]
+  #     interval: 1s
+  #     timeout: 3s
+  #     retries: 5
 
   valkey:
     hostname: valkey

@@ -17,7 +17,7 @@ services:
     ports:
       - ${TMS_PORT}:3000
     depends_on:
-      - redis
+      - valkey
       - arango
       - nats
 
@@ -32,7 +32,7 @@ services:
       - .env
     restart: always
     depends_on:
-      - redis
+      - valkey
       - arango
       - nats
 
@@ -47,7 +47,7 @@ services:
       - .env
     restart: always
     depends_on:
-      - redis
+      - valkey
       - arango
       - nats
 
@@ -62,7 +62,7 @@ services:
       - .env
     restart: always
     depends_on:
-      - redis
+      - valkey
       - arango
       - nats
   

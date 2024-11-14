@@ -1,9 +1,9 @@
 # For local testing
 
 services:
-  redis:
-    ports:
-      - 16379:6379
+  # redis:
+  #   ports:
+  #     - 16379:6379
 
   arango:
     environment:
@@ -30,6 +30,6 @@ services:
       - .env
     restart: always
     depends_on:
-      - redis
+      - valkey
       - arango
 
