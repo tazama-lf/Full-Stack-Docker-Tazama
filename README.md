@@ -147,7 +147,7 @@ If your machine is open to your local area network, you will also be able to acc
 
 ## 4. Overview of services
 
-Tazama core services provides the foundational infrastructure components for the platform and includes the ArangoDB, NATS and redis services: ArangoDB provides the database infrastructure, NATS provides the pub/sub functionality and redis/valkey provides for fast in-memory processor data caching.
+Tazama core services provides the foundational infrastructure components for the platform and includes the ArangoDB, NATS and valkey services: ArangoDB provides the database infrastructure, NATS provides the pub/sub functionality and valkey provides for fast in-memory processor data caching.
 
 Tazama is configured by loading the network map, rules and typology configurations required to evaluate a transaction via the ArangoDB API. The steps above have already loaded the default configuration into the database.
 
@@ -219,7 +219,7 @@ The services are split up in multiple yamls,
 | -------- | ------- |
 | docker-compose | tms, ed, tp, tadp, admin, ef |
 | docker-compose.override | rule-901, set up all services |
-| docker-compose.infrastructure | arango, redis, nats, valkey |
+| docker-compose.infrastructure | arango, nats, valkey |
 | docker-compose.dev.nats-utils | Nats-Utilities |
 | docker-compose.dev.auth | keycloak, auth-service, tms changes |
 | docker-compose.dev.logs-base | event-sidecar, lumberjack, all service changes |
@@ -244,7 +244,6 @@ Stopping individual (or multiple) services
 
 List of \<services\>  
 - arango  
-- redis  
 - nats  
 - tms   
 - ed  
