@@ -1,23 +1,14 @@
 # base infrastructure
 
 services:
-  redis:
-    image: redis:latest
-    hostname: redis
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli -p 6379 ping | grep PONG"]
-      interval: 1s
-      timeout: 3s
-      retries: 5
-
   valkey:
     hostname: valkey
     image: valkey/valkey:7.2.5
-    command: "valkey-server --port 6380"
+    command: "valkey-server --port 6379"
     ports:
-      - 16380:6380
+      - 16379:6379
     healthcheck:
-      test: ["CMD-SHELL", "valkey-cli -p 6380 ping | grep PONG"]
+      test: ["CMD-SHELL", "valkey-cli -p 6379 ping | grep PONG"]
       interval: 1s
       timeout: 3s
       retries: 5
