@@ -6,6 +6,7 @@ declare -A addons=(
     [3]="[Elastic] Logging"
     [4]="[Elastic] APM"
     [5]="Demo UI"
+    [6]="Relay"
 )
 
 declare -A addon_files=(
@@ -14,6 +15,7 @@ declare -A addon_files=(
     [3]="docker-compose.dev.logs-elastic.yaml"
     [4]="docker-compose.dev.apm-elastic.yaml"
     [5]="docker-compose.dev.ui.yaml"
+    [6]="docker-compose.dev.relay.yaml"
 )
 
 declare -A selected
@@ -87,11 +89,11 @@ print_menu
 handle_menu
 
 while true; do  
-    echo "Apply current selection (a), Toggle addon (1-5) or quit (q)"
+    echo "Apply current selection (a), Toggle addon (1-6) or quit (q)"
     read -p "Enter your choice: " choice
 
     case "$choice" in
-    [1-5])
+    [1-6])
         if [[ ${selected[$choice]} == 1 ]]; then
             selected[$choice]=0
         else
