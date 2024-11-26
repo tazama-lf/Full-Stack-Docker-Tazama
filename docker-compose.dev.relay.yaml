@@ -5,7 +5,7 @@ services:
   tadp:
     environment:
       SUPPRESS_ALERTS: false
-  rs:
+  rs1:
     build:
       context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
       args:
@@ -13,6 +13,22 @@ services:
     env_file:
       - env/rs.env
       - .env
+    environment:
+      FUNCTION_NAME: tp-relay
+      CONSUMER_STREAM: interdiction-service
     depends_on:
       - tp
+
+  rs2:
+    build:
+      context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rs.env
+      - .env
+    environment:
+      FUNCTION_NAME: tadp-relay
+      CONSUMER_STREAM: cms
+    depends_on:
       - tadp
