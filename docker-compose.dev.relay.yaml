@@ -1,0 +1,18 @@
+services:
+  tp:
+    environment:
+      SUPPRESS_ALERTS: false
+  tadp:
+    environment:
+      SUPPRESS_ALERTS: false
+  rs:
+    build:
+      context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rs.env
+      - .env
+    depends_on:
+      - tp
+      - tadp

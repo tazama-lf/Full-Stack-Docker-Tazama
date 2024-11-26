@@ -92,6 +92,7 @@ AUTH_SERVICE_BRANCH=main
 EVENT_FLOW_BRANCH=main
 SIDECAR_BRANCH=main
 LUMBERJACK_BRANCH=main
+RELAY_BRANCH=main
 
 # Ports
 TMS_PORT=5000
@@ -225,6 +226,7 @@ The services are split up in multiple yamls,
 | docker-compose.dev.logs-base | event-sidecar, lumberjack, all service changes |
 | docker-compose.dev.logs-elastic | event-sidecar, lumberjack, elasticsearch, kibana |
 | docker-compose.dev.apm-elastic | event-sidecar, lumberjack, elasticsearch, kibana, apmserver |
+| docker-compose.dev.relay | relay-service |
 
 > [!IMPORTANT]  
 > Turn off `tms` API authentication for the `Demo UI` to work.
@@ -249,6 +251,7 @@ List of \<services\>
 - ed  
 - tadp  
 - tp  
+- relay-service
 - rule-901  
 - ef
 - valkey
