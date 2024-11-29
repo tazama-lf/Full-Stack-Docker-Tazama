@@ -1,4 +1,7 @@
 services:
+  ef:
+    environment:
+      SUPPRESS_ALERTS: false
   tp:
     environment:
       SUPPRESS_ALERTS: false
