@@ -24,13 +24,13 @@ const ruleConfigData = [
         {
           subRuleRef: ".02",
           lowerLimit: 2,
-          upperLimit: 4,
-          reason: "The debtor has performed two or three transactions to date",
+          upperLimit: 3,
+          reason: "The debtor has performed two transactions to date",
         },
         {
           subRuleRef: ".03",
-          lowerLimit: 4,
-          reason: "The debtor has performed 4 or more transactions to date",
+          lowerLimit: 3,
+          reason: "The debtor has performed three or more transactions to date",
         },
       ],
     },
