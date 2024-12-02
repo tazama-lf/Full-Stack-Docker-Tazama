@@ -71,7 +71,7 @@ jobs:
         with:
           subject-name: docker.io/tazamaorg/${{ env.REPO_NAME }}
           subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
+          push-to-registry: false
 
       - name: Send Slack Notification
         env:
