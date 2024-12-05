@@ -14,19 +14,28 @@ declare -A addon_files=(
     [2]="docker-compose.dev.logs-base.yaml"
     [3]="docker-compose.dev.logs-elastic.yaml"
     [4]="docker-compose.dev.apm-elastic.yaml"
-    [5]="docker-compose.dev.ui.yaml"
+    [5]="docker-compose.dev.ui.yaml -f docker-compose.dev.ui.override.yaml"
     [6]="docker-compose.dev.relay.yaml"
 )
 
 declare -A selected
 
+deploy_full_service() {
+    echo "stopping existing tazama containers..."
+    docker compose -p tazama down > /dev/null 2>&1
+    echo "deploying Tazama from docker hub..."
+    docker compose -p tazama -f docker-compose.full.yaml -f docker-compose.full.override.yaml -f docker-compose.dev.ui.yaml up -d
+    exit 0
+}
+
 print_menu() {
     clear
     echo "Select docker deployment type:"
     echo "1. Standard (Public)"
+    echo "2. Full-service (DockerHub)"
     # echo "2. Advanced"
     echo
-    echo "Choose (1) or quit (q):"
+    echo "Choose (1-2) or quit (q):"
 }
 
 handle_menu() {
@@ -37,8 +46,9 @@ handle_menu() {
         print_addon_menu
         ;;
         2)
+        deploy_full_service
         # Advanced: Not Yet Implemented
-        print_menu
+#        print_menu
         ;;
         Q | q) 
         exit 0

@@ -15,15 +15,17 @@ set "relay=[ ]"
 cls
 echo Select docker deployment type:
 echo 1. Standard (Public)
+echo 2. Full-service (DockerHub)
 @REM echo 2. Advanced
 echo.
-echo Choose (1) or quit (q):
+echo Choose (1-2) or quit (q):
 set /p "type=Enter your choice: "
 
 if /i "%type%"=="q" goto :end
 if /i "%type%"=="" goto :menu
 
 if /i "%type%"=="1" goto :addons
+if /i "%type%"=="2" goto :deploy_full
 @REM if /i "%type%"=="2" goto :advanced
 
 :addons
@@ -63,7 +65,7 @@ if "%basiclogs%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.logs-base.yaml"
 if "%elasticlogs%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.logs-elastic.yaml"
 if "%elasticapm%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.apm-elastic.yaml"
 if "%natsutils%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.nats-utils.yaml"
-if "%ui%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.ui.yaml"
+if "%ui%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.ui.yaml -f docker-compose.dev.ui.override.yaml"
 if "%relay%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.relay.yaml"
 
 echo.
@@ -78,6 +80,14 @@ if "%confirm%"=="e" (
     )
 ) 
 goto :addons
+
+:deploy_full
+cls
+echo stopping existing tazama containers...
+docker compose -p tazama down > nul 2>&1
+echo deploying tazama from docker hub...
+docker compose -p tazama -f docker-compose.full.yaml -f docker-compose.full.override.yaml -f docker-compose.dev.ui.yaml up -d
+goto :end
 
 :end
 exit /b 0

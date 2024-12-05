@@ -1,0 +1,106 @@
+# base
+
+include:
+  - path:
+    - docker-compose.infrastructure.yaml
+
+services:
+  # TRANSACTION MONITORING SERVICE
+  tms:
+    image: tazamaorg/tms-service:${TAZAMA_VERSION}
+    env_file:
+      - env/tms.env
+      - .env
+    restart: always
+    ports:
+      - ${TMS_PORT}:3000
+    depends_on:
+      - valkey
+      - arango
+      - nats
+
+  # EVENT DIRECTOR
+  ed:
+    image: tazamaorg/event-director:${TAZAMA_VERSION}
+    env_file:
+      - env/ed.env
+      - .env
+    restart: always
+    depends_on:
+      - valkey
+      - arango
+      - nats
+
+  # TYPOLOGY PROCESSOR
+  tp:
+    image: tazamaorg/typology-processor:${TAZAMA_VERSION}
+    env_file:
+      - env/tp.env
+      - .env
+    environment:
+      SUPPRESS_ALERTS: false
+    restart: always
+    depends_on:
+      - valkey
+      - arango
+      - nats
+
+  # TRANSACTION AGGREGATION AND DECISIONING PROCESSOR
+  tadp:
+    image: tazamaorg/transaction-aggregation-decisioning-processor:${TAZAMA_VERSION}
+    env_file:
+      - env/tadp.env
+      - .env
+    environment:
+      SUPPRESS_ALERTS: false
+    restart: always
+    depends_on:
+      - valkey
+      - arango
+      - nats
+  
+  admin-service:
+    image: tazamaorg/admin-service:${TAZAMA_VERSION}
+    env_file:
+      - env/admin.env
+      - .env
+    restart: always
+    ports:
+      - ${ADMIN_PORT}:3100
+    depends_on:
+      - arango
+      - valkey
+
+  ef:
+    image: tazamaorg/event-flow:${TAZAMA_VERSION}
+    env_file:
+      - env/event-flow.env
+      - .env
+    environment:
+      SUPPRESS_ALERTS: false
+    restart: always
+    depends_on:
+      - arango
+      - valkey
+
+  rs1:
+    image: tazamaorg/relay-service:${TAZAMA_VERSION}
+    env_file:
+      - env/rs.env
+      - .env
+    environment:
+      FUNCTION_NAME: tp-relay
+      CONSUMER_STREAM: interdiction-service
+    depends_on:
+      - tp
+
+  rs2:
+    image: tazamaorg/relay-service:${TAZAMA_VERSION}
+    env_file:
+      - env/rs.env
+      - .env
+    environment:
+      FUNCTION_NAME: tadp-relay
+      CONSUMER_STREAM: cms
+    depends_on:
+      - tadp
