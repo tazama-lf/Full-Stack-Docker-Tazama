@@ -12,7 +12,7 @@ services:
 
   # RULE 001
   rule-001:
-    image: tazamaorg/rule001:${TAZAMA_VERSION}
+    image: tazamaorg/rule-001:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -27,7 +27,7 @@ services:
 
   # RULE 002
   rule-002:
-    image: tazamaorg/rule002:${TAZAMA_VERSION}
+    image: tazamaorg/rule-002:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -42,7 +42,7 @@ services:
 
   # RULE 003
   rule-003:
-    image: tazamaorg/rule003:${TAZAMA_VERSION}
+    image: tazamaorg/rule-003:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -57,7 +57,7 @@ services:
 
   # RULE 004
   rule-004:
-    image: tazamaorg/rule004:${TAZAMA_VERSION}
+    image: tazamaorg/rule-004:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -72,7 +72,7 @@ services:
 
   # RULE 006
   rule-006:
-    image: tazamaorg/rule006:${TAZAMA_VERSION}
+    image: tazamaorg/rule-006:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -87,7 +87,7 @@ services:
 
   # RULE 007
   rule-007:
-    image: tazamaorg/rule007:${TAZAMA_VERSION}
+    image: tazamaorg/rule-007:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -102,7 +102,7 @@ services:
 
   # RULE 008
   rule-008:
-    image: tazamaorg/rule008:${TAZAMA_VERSION}
+    image: tazamaorg/rule-008:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -117,7 +117,7 @@ services:
 
   # RULE 010
   rule-010:
-    image: tazamaorg/rule010:${TAZAMA_VERSION}
+    image: tazamaorg/rule-010:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -132,7 +132,7 @@ services:
 
   # RULE 011
   rule-011:
-    image: tazamaorg/rule011:${TAZAMA_VERSION}
+    image: tazamaorg/rule-011:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -147,7 +147,7 @@ services:
 
   # RULE 016
   rule-016:
-    image: tazamaorg/rule016:${TAZAMA_VERSION}
+    image: tazamaorg/rule-016:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -162,7 +162,7 @@ services:
 
   # RULE 017
   rule-017:
-    image: tazamaorg/rule017:${TAZAMA_VERSION}
+    image: tazamaorg/rule-017:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -177,7 +177,7 @@ services:
 
   # RULE 018
   rule-018:
-    image: tazamaorg/rule018:${TAZAMA_VERSION}
+    image: tazamaorg/rule-018:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -192,7 +192,7 @@ services:
 
   # RULE 020
   rule-020:
-    image: tazamaorg/rule020:${TAZAMA_VERSION}
+    image: tazamaorg/rule-020:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -207,7 +207,7 @@ services:
 
   # RULE 021
   rule-021:
-    image: tazamaorg/rule021:${TAZAMA_VERSION}
+    image: tazamaorg/rule-021:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -222,7 +222,7 @@ services:
 
   # RULE 024
   rule-024:
-    image: tazamaorg/rule024:${TAZAMA_VERSION}
+    image: tazamaorg/rule-024:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -237,7 +237,7 @@ services:
 
   # RULE 025
   rule-025:
-    image: tazamaorg/rule025:${TAZAMA_VERSION}
+    image: tazamaorg/rule-025:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -252,7 +252,7 @@ services:
 
   # RULE 026
   rule-026:
-    image: tazamaorg/rule026:${TAZAMA_VERSION}
+    image: tazamaorg/rule-026:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -267,7 +267,7 @@ services:
 
   # RULE 027
   rule-027:
-    image: tazamaorg/rule027:${TAZAMA_VERSION}
+    image: tazamaorg/rule-027:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -282,7 +282,7 @@ services:
 
   # RULE 028
   rule-028:
-    image: tazamaorg/rule028:${TAZAMA_VERSION}
+    image: tazamaorg/rule-028:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -297,7 +297,7 @@ services:
 
   # RULE 030
   rule-030:
-    image: tazamaorg/rule030:${TAZAMA_VERSION}
+    image: tazamaorg/rule-030:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -312,7 +312,7 @@ services:
 
   # RULE 044
   rule-044:
-    image: tazamaorg/rule044:${TAZAMA_VERSION}
+    image: tazamaorg/rule-044:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -327,7 +327,7 @@ services:
 
   # RULE 045
   rule-045:
-    image: tazamaorg/rule045:${TAZAMA_VERSION}
+    image: tazamaorg/rule-045:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -342,7 +342,7 @@ services:
 
   # RULE 048
   rule-048:
-    image: tazamaorg/rule048:${TAZAMA_VERSION}
+    image: tazamaorg/rule-048:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -357,7 +357,7 @@ services:
 
   # RULE 054
   rule-054:
-    image: tazamaorg/rule054:${TAZAMA_VERSION}
+    image: tazamaorg/rule-054:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -372,7 +372,7 @@ services:
 
   # RULE 063
   rule-063:
-    image: tazamaorg/rule063:${TAZAMA_VERSION}
+    image: tazamaorg/rule-063:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -387,7 +387,7 @@ services:
 
   # RULE 074
   rule-074:
-    image: tazamaorg/rule074:${TAZAMA_VERSION}
+    image: tazamaorg/rule-074:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -402,7 +402,7 @@ services:
 
   # RULE 075
   rule-075:
-    image: tazamaorg/rule075:${TAZAMA_VERSION}
+    image: tazamaorg/rule-075:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -417,7 +417,7 @@ services:
 
   # RULE 076
   rule-076:
-    image: tazamaorg/rule076:${TAZAMA_VERSION}
+    image: tazamaorg/rule-076:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -432,7 +432,7 @@ services:
 
   # RULE 078
   rule-078:
-    image: tazamaorg/rule078:${TAZAMA_VERSION}
+    image: tazamaorg/rule-078:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -447,7 +447,7 @@ services:
 
   # RULE 083
   rule-083:
-    image: tazamaorg/rule083:${TAZAMA_VERSION}
+    image: tazamaorg/rule-083:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -462,7 +462,7 @@ services:
 
   # RULE 084
   rule-084:
-    image: tazamaorg/rule084:${TAZAMA_VERSION}
+    image: tazamaorg/rule-084:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -477,7 +477,7 @@ services:
 
   # RULE 090
   rule-090:
-    image: tazamaorg/rule090:${TAZAMA_VERSION}
+    image: tazamaorg/rule-090:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
@@ -492,7 +492,7 @@ services:
 
   # RULE 091
   rule-091:
-    image: tazamaorg/rule091:${TAZAMA_VERSION}
+    image: tazamaorg/rule-091:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
       - .env
