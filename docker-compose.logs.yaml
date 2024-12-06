@@ -1,0 +1,30 @@
+services:
+  tms:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+  
+  ed:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+  
+  rule-901:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+  
+  tp:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+    
+  tadp:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}

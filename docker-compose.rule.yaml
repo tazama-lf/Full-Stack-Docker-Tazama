@@ -1,0 +1,11 @@
+# For local testing
+services:
+  rule-901:
+    image: tazamaorg/rule-901:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    restart: always
+    depends_on:
+      - valkey
+      - arango

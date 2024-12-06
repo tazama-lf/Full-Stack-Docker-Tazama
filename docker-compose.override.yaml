@@ -1,5 +1,3 @@
-# For local testing
-
 services:
   valkey:
     ports:
@@ -18,18 +16,3 @@ services:
       - 14222:4222
       - 16222:6222
       - 18222:8222
-
-  # RULE 901 (SAMPLE E2E RULE)
-  rule-901:
-    build:
-      context: https://github.com/tazama-lf/rule-executer.git#${RULE_901_BRANCH}
-      args:
-        - GH_TOKEN
-    env_file:
-      - env/rule-executer.env
-      - .env
-    restart: always
-    depends_on:
-      - valkey
-      - arango
-
