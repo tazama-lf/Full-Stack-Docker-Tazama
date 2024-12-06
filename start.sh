@@ -1,5 +1,7 @@
 #!/bin/bash
 
+is_github_deployment=0
+
 declare -A addons=(
     [1]="Authentication"
     [2]="Basic (stdout) Logging"
@@ -9,13 +11,22 @@ declare -A addons=(
     [6]="Relay"
 )
 
-declare -A addon_files=(
-    [1]="docker-compose.dev.auth.yaml"
-    [2]="docker-compose.dev.logs-base.yaml"
-    [3]="docker-compose.dev.logs-elastic.yaml"
+declare -A addon_files_dev=(
+    [1]="docker-compose.dev.auth.yaml -f docker-compose.auth.base.yaml"
+    [2]="docker-compose.dev.logs-base.yaml -f docker-compose.logs.yaml"
+    [3]="docker-compose.dev.logs-elastic.yaml -f docker-compose.logs-elastic.base.yaml"
     [4]="docker-compose.dev.apm-elastic.yaml"
     [5]="docker-compose.dev.ui.yaml -f docker-compose.dev.ui.override.yaml"
     [6]="docker-compose.dev.relay.yaml"
+)
+
+declare -A addon_files=(
+    [1]="docker-compose.auth.yaml -f docker-compose.auth.base.yaml"
+    [2]="docker-compose.logs-base.yaml -f docker-compose.logs.yaml"
+    [3]="docker-compose.logs-elastic.yaml -f docker-compose.logs-elastic.base.yaml"
+    [4]="docker-compose.dev.apm-elastic.yaml"
+    [5]="docker-compose.dev.ui.yaml -f docker-compose.dev.ui.override.yaml"
+    [6]="docker-compose.relay.yaml"
 )
 
 declare -A selected
@@ -24,18 +35,19 @@ deploy_full_service() {
     echo "stopping existing tazama containers..."
     docker compose -p tazama down > /dev/null 2>&1
     echo "deploying Tazama from docker hub..."
-    docker compose -p tazama -f docker-compose.full.yaml -f docker-compose.full.override.yaml -f docker-compose.dev.ui.yaml up -d
+    docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.full.yaml -f docker-compose.relay.yaml -f docker-compose.dev.ui.yaml up -d
     exit 0
 }
 
 print_menu() {
     clear
     echo "Select docker deployment type:"
-    echo "1. Standard (Public)"
+    echo "1. Public - (GitHub)"
     echo "2. Full-service (DockerHub)"
+    echo "3. Public (DockerHub)"
     # echo "2. Advanced"
     echo
-    echo "Choose (1-2) or quit (q):"
+    echo "Choose (1-3) or quit (q):"
 }
 
 handle_menu() {
@@ -44,11 +56,17 @@ handle_menu() {
     case $type in
         1) 
         print_addon_menu
+        is_github_deployment=1
         ;;
         2)
         deploy_full_service
+        is_github_deployment=2
         # Advanced: Not Yet Implemented
 #        print_menu
+        ;;
+        3)
+        print_addon_menu
+        is_github_deployment=3
         ;;
         Q | q) 
         exit 0
@@ -73,10 +91,18 @@ print_addon_menu() {
 }
 
 build_command() {
-    local cmd=" -f docker-compose.yaml -f docker-compose.override.yaml"
-    for key in "${!addon_files[@]}"; do
-        [[ ${selected[$key]} == 1 ]] && cmd+=" -f ${addon_files[$key]}"
-    done
+    local cmd=" -f docker-compose.override.yaml"
+    if [[ $is_github_deployment == 1 ]]; then
+        cmd+=" -f docker-compose.dev.rule.yaml -f docker-compose.dev.yaml"
+        for key in "${!addon_files_dev[@]}"; do
+            [[ ${selected[$key]} == 1 ]] && cmd+=" -f ${addon_files_dev[$key]}"
+        done
+    else
+        cmd+=" -f docker-compose.rule.yaml -f docker-compose.yaml"
+        for key in "${!addon_files[@]}"; do
+            [[ ${selected[$key]} == 1 ]] && cmd+=" -f ${addon_files[$key]}"
+        done
+    fi
     echo "$cmd"
 }
 
