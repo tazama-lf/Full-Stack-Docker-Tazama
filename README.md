@@ -216,15 +216,18 @@ The services are split up in multiple yamls,
 | docker-compose | tms, ed, tp, tadp, admin, ef |
 | docker-compose.override | rule-901, set up all services |
 | docker-compose.infrastructure | arango, nats, valkey |
-| docker-compose.dev.nats-utils | nats-utilities |
-| docker-compose.dev.auth | keycloak, auth-service, tms changes |
-| docker-compose.dev.logs-base | event-sidecar, lumberjack, all service changes |
-| docker-compose.dev.logs-elastic | event-sidecar, lumberjack, elasticsearch, kibana |
-| docker-compose.dev.apm-elastic | event-sidecar, lumberjack, elasticsearch, kibana, apmserver |
-| docker-compose.dev.relay | relay-service |
+| docker-compose.(dev.)nats-utils | nats-utilities |
+| docker-compose.(dev.)auth | keycloak, auth-service, tms changes |
+| docker-compose.(dev.)logs-base | event-sidecar, lumberjack, all service changes |
+| docker-compose.(dev.)logs-elastic | event-sidecar, lumberjack, elasticsearch, kibana |
+| docker-compose.(dev.)apm-elastic | event-sidecar, lumberjack, elasticsearch, kibana, apmserver |
+| docker-compose.(dev.)relay | relay-service |
 
 > [!IMPORTANT]  
 > Turn off `tms` API authentication for the `Demo UI` to work.
+
+> [!NOTE]
+> Compose files without (.dev.) will pull pre-built images from DockerHub
 
 If you want to restart or alter certain processors - 
 
