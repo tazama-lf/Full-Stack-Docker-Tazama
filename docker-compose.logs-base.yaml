@@ -1,10 +1,7 @@
 services:
   # event-sidecar
   event-sidecar:
-    build:
-      context: https://github.com/tazama-lf/event-sidecar.git#${SIDECAR_BRANCH}
-      args:
-        - GH_TOKEN
+    image: tazamaorg/event-sidecar:${TAZAMA_VERSION}
     env_file:
       - .env
     ports:
@@ -18,10 +15,7 @@ services:
       - nats
 
   lumberjack:
-    build:
-      context: https://github.com/tazama-lf/lumberjack.git#${LUMBERJACK_BRANCH}
-      args:
-        - GH_TOKEN
+    image: tazamaorg/lumberjack:${TAZAMA_VERSION}
     env_file:
       - env/lumberjack.env
       - .env

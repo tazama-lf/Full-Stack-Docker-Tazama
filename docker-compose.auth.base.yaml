@@ -1,0 +1,33 @@
+# For local testing
+
+services:
+  # AUTH PROVIDER
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.6
+    command: "start-dev --import-realm"
+    env_file:
+      - env/keycloak.env
+    environment:
+      - KC_HOSTNAME=localhost
+      - KC_HOSTNAME_STRICT_BACKCHANNEL=false
+      - KC_HTTP_ENABLED=true
+      - KC_HOSTNAME_STRICT_HTTPS=false
+    volumes:
+      - ./auth/keycloak/realms/tazama-test-realm.json:/opt/keycloak/data/import/tazama-test-realm.json
+    ports:
+      - 8080:8080
+    restart: always
+
+  tms:
+    environment:
+      - AUTHENTICATED=true
+      - CERT_PATH_PUBLIC=test-public-key.pem
+    volumes:
+      - ./auth/test-public-key.pem:/home/app/test-public-key.pem
+      
+  admin-service:
+    environment:
+      - AUTHENTICATED=true
+      - CERT_PATH_PUBLIC=test-public-key.pem
+    volumes:
+      - ./auth/test-public-key.pem:/home/app/test-public-key.pem

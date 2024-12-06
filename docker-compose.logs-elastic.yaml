@@ -1,13 +1,14 @@
+include:
+  - path:
+    - docker-compose.dev.elastic.yaml
+
 services:
   event-sidecar:
     extends:
-      file: docker-compose.dev.logs-base.yaml
+      file: docker-compose.logs-base.yaml
       service: event-sidecar
   lumberjack:
-    build:
-      context: https://github.com/tazama-lf/lumberjack.git#${LUMBERJACK_BRANCH}
-      args:
-        - GH_TOKEN
+    build: tazamaorg/lumberjack:${TAZAMA_VERSION}
     env_file:
       - env/lumberjack.env
       - .env
