@@ -1,0 +1,9 @@
+services:
+  # disable event flow for 901 deployment
+  arango:
+    environment:
+      - ARANGO_NO_AUTH=1
+    volumes:
+      - ./arango/migration/local/02-NO_EVENT_FLOW.js:/docker-entrypoint-initdb.d/01-DATA.js
+    ports:
+      - 18529:8529

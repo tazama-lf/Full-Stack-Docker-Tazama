@@ -1,0 +1,14 @@
+# For local testing
+services:
+  rule-901:
+    build:
+      context: https://github.com/tazama-lf/rule-executer.git#${RULE_901_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule-executer.env
+      - .env
+    restart: always
+    depends_on:
+      - valkey
+      - arango

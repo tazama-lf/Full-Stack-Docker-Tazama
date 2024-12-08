@@ -1,9 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
-
-const db = require("@arangodb").db;
-
-const systemDb = "_system";
-
 const ruleConfigData = [
   {
     _key: "901@1.0.0@1.0.0",
@@ -53,87 +47,105 @@ const typologyConfigData = [
     workflow: {
       alertThreshold: 200,
       interdictionThreshold: 400,
+      flowProcessor: "EFRuP@1.0.0",
     },
     rules: [
       {
         id: "901@1.0.0",
         cfg: "1.0.0",
         termId: "v901at100at100",
-        wghts: [{
-          ref: ".err",
-          wght: "100",
-        },
-        {
-          ref: ".x00",
-          wght: "100",
-        },
-        {
-          ref: ".01",
-          wght: "100",
-        },
-        {
-          ref: ".02",
-          wght: "200",
-        },
-        {
-          ref: ".03",
-          wght: "400",
-        }],
-      }],
-    expression: [
-      "Add",
-      "v901at100at100"
+        wghts: [
+          {
+            ref: ".err",
+            wght: "0",
+          },
+          {
+            ref: ".x00",
+            wght: "100",
+          },
+          {
+            ref: ".01",
+            wght: "100",
+          },
+          {
+            ref: ".02",
+            wght: "200",
+          },
+          {
+            ref: ".03",
+            wght: "400",
+          },
+        ],
+      },
+      {
+        id: "EFRuP@1.0.0",
+        cfg: "none",
+        termId: "vEFRuPat100atnone",
+        wghts: [
+          {
+            ref: ".err",
+            wght: "0",
+          },
+          {
+            ref: "override",
+            wght: "0",
+          },
+          {
+            ref: "non-overridable-block",
+            wght: "0",
+          },
+          {
+            ref: "overridable-block",
+            wght: "0",
+          },
+          {
+            ref: "none",
+            wght: "0",
+          },
+        ],
+      },
+    ],
+    expression: ["Add", "v901at100at100"],
+  },
+];
+
+const networkConfigData = [
+  {
+    active: true,
+    name: "Public Network Map",
+    cfg: "1.0.0",
+    messages: [
+      {
+        id: "004@1.0.0",
+        cfg: "1.0.0",
+        txTp: "pacs.002.001.12",
+        typologies: [
+          {
+            id: "typology-processor@1.0.0",
+            cfg: "999@1.0.0",
+            rules: [
+              {
+                id: "EFRuP@1.0.0",
+                cfg: "none",
+              },
+              {
+                id: "901@1.0.0",
+                cfg: "1.0.0",
+              },
+            ],
+          },
+        ],
+      },
     ],
   },
 ];
 
-
-const networkConfigData = [{
-  active: true,
-  name: "Public Network Map",
-  cfg: "1.0.0",
-  messages: [
-    {
-      id: "004@1.0.0",
-      cfg: "1.0.0",
-      txTp: "pacs.002.001.12",
-      typologies: [
-        {
-          id: "typology-processor@1.0.0",
-          cfg: "999@1.0.0",
-          rules: [
-            {
-              id: "901@1.0.0",
-              cfg: "1.0.0",
-            }
-          ],
-        }
-      ],
-    },
-  ],
-}];
-
-// Config DB
 const configDbName = "configuration";
-// Config Collections
 const ruleConfigColName = "ruleConfiguration";
 const typologyConfigColName = "typologyConfiguration";
 const networkConfigColName = "networkConfiguration";
 
-// Config Setup
-db._useDatabase(systemDb);
-
-db._createDatabase(configDbName);
 db._useDatabase(configDbName);
-
-db._create(ruleConfigColName);
-db._create(typologyConfigColName);
-db._create(networkConfigColName);
-
-// Indexes
-// None
-
-// Populate
 db._collection(ruleConfigColName).save(ruleConfigData);
 db._collection(typologyConfigColName).save(typologyConfigData);
 db._collection(networkConfigColName).save(networkConfigData);

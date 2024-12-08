@@ -1,0 +1,33 @@
+services:
+  # event-sidecar
+  event-sidecar:
+    build:
+      context: https://github.com/tazama-lf/event-sidecar.git#${SIDECAR_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - .env
+    ports:
+      - 15000:${EVENT_SIDECAR_PORT}
+    environment:
+      NATS_SERVER: nats:4222
+      NATS_SUBJECT: Lumberjack
+      PORT: ${EVENT_SIDECAR_PORT}
+    restart: always
+    depends_on:
+      - nats
+
+  lumberjack:
+    build:
+      context: https://github.com/tazama-lf/lumberjack.git#${LUMBERJACK_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/lumberjack.env
+      - .env
+    environment:
+      STDOUT: true
+    restart: always
+    depends_on:
+      - event-sidecar
+      - nats

@@ -1,0 +1,22 @@
+include:
+  - path:
+    - docker-compose.dev.elastic.yaml
+
+services:
+  event-sidecar:
+    extends:
+      file: docker-compose.logs-base.yaml
+      service: event-sidecar
+  lumberjack:
+    image: tazamaorg/lumberjack:${TAZAMA_VERSION}
+    env_file:
+      - env/lumberjack.env
+      - .env
+    restart: always
+    depends_on:
+      - event-sidecar
+      - nats
+    environment:
+      ELASTIC_SEARCH_VERSION: ${ELASTIC_STACK_VERSION}
+      ELASTIC_HOST: http://elasticsearch:9200
+      ELASTIC: true

@@ -1,8 +1,102 @@
 // SPDX-License-Identifier: Apache-2.0
 
-const db = require("@arangodb").db;
-
 const systemDb = "_system";
+
+/*** CONFIGURATION ***/
+// Config DB
+const configDbName = "configuration";
+// Config Collections
+const ruleConfigColName = "ruleConfiguration";
+const typologyConfigColName = "typologyConfiguration";
+const networkConfigColName = "networkConfiguration";
+
+// Config Setup
+db._useDatabase(systemDb);
+db._createDatabase(configDbName);
+db._useDatabase(configDbName);
+db._create(ruleConfigColName);
+db._create(typologyConfigColName);
+db._create(networkConfigColName);
+
+/*** EVALUATION RESULTS ***/
+// Evaluation Results DB
+const evaluationsDbName = "evaluationResults";
+// Transactions Collections
+const transactionsColName = "transactions";
+// Transactions Setup
+db._useDatabase(systemDb);
+db._createDatabase(evaluationsDbName);
+db._useDatabase(evaluationsDbName);
+db._create(transactionsColName);
+
+/*** PSEUDONYMS ***/
+// Pseudonyms DB
+const pseudonymsDbName = "pseudonyms";
+// Pseudonyms Collections
+const pseudonymsColName = "pseudonyms";
+const accountHolderColName = "account_holder";
+const accountsColName = "accounts";
+const entitiesColName = "entities";
+const transRelationshipColName = "transactionRelationship";
+// Conditions Collections
+const conditionsColName = "conditions";
+const conditionsDebtorColName = "governed_as_debtor_by";
+const conditionsDebtorAccountColName = "governed_as_debtor_account_by";
+const conditionsCreditorName = "governed_as_creditor_by";
+const conditionsCreditorAccountName = "governed_as_creditor_account_by";
+
+db._useDatabase(systemDb);
+db._createDatabase(pseudonymsDbName);
+db._useDatabase(pseudonymsDbName);
+db._create(pseudonymsColName);
+db._createEdgeCollection(accountHolderColName);
+db._create(accountsColName);
+db._create(entitiesColName);
+db._createEdgeCollection(transRelationshipColName);
+db._create(conditionsColName);
+db._createEdgeCollection(conditionsDebtorColName);
+db._createEdgeCollection(conditionsDebtorAccountColName);
+db._createEdgeCollection(conditionsCreditorName);
+db._createEdgeCollection(conditionsCreditorAccountName);
+
+// Pseudonyms Indices
+db._collection(entitiesColName).ensureIndex({
+  type: "persistent",
+  fields: ["Id"],
+  name: "pi_Id",
+  unique: false,
+  sparse: false,
+  deduplicate: false,
+  estimates: true,
+  cacheEnabled: false,
+  inBackground: false,
+});
+
+db._collection(pseudonymsColName).ensureIndex({
+  type: "persistent",
+  fields: ["pseudonym"],
+  name: "pi_pseudonym",
+  unique: true,
+  sparse: false,
+  deduplicate: false,
+  estimates: true,
+  cacheEnabled: true,
+  inBackground: false,
+});
+
+db._collection(transRelationshipColName).ensureIndex({
+  type: "persistent",
+  fields: ["EndToEndId"],
+  name: "pi_EndToEndId",
+  unique: false, //for pacs002/pacs008 separate records
+  sparse: false,
+  deduplicate: false,
+  estimates: true,
+  cacheEnabled: true,
+  inBackground: false,
+});
+
+/*** TRANSACTION HISTORY ***/
 // TransactionHistory DB
 const transactionHistoryDbName = "transactionHistory";
 // TransactionHistory Collections
@@ -13,16 +107,14 @@ const transactionHistoryPain013ColName = "transactionHistoryPain013";
 
 // TransactionHistory Setup
 db._useDatabase(systemDb);
-
 db._createDatabase(transactionHistoryDbName);
 db._useDatabase(transactionHistoryDbName);
-
 db._create(transactionHistoryPacs002ColName);
 db._create(transactionHistoryPacs008ColName);
 db._create(transactionHistoryPain001ColName);
 db._create(transactionHistoryPain013ColName);
 
-// Indexes
+// TransactionHistory Indices
 // Pacs002
 db._collection(transactionHistoryPacs002ColName).ensureIndex({
   type: "persistent",

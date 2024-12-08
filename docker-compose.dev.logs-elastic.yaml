@@ -1,0 +1,21 @@
+services:
+  event-sidecar:
+    extends:
+      file: docker-compose.dev.logs-base.yaml
+      service: event-sidecar
+  lumberjack:
+    build:
+      context: https://github.com/tazama-lf/lumberjack.git#${LUMBERJACK_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/lumberjack.env
+      - .env
+    restart: always
+    depends_on:
+      - event-sidecar
+      - nats
+    environment:
+      ELASTIC_SEARCH_VERSION: ${ELASTIC_STACK_VERSION}
+      ELASTIC_HOST: http://elasticsearch:9200
+      ELASTIC: true

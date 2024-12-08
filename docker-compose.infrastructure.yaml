@@ -1,0 +1,28 @@
+# base infrastructure
+
+services:
+  valkey:
+    hostname: valkey
+    image: valkey/valkey:7.2.5
+    command: "valkey-server --port 6379"
+    ports:
+      - 16379:6379
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli -p 6379 ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+
+  arango:
+    image: arangodb/arangodb:3.11.10.1
+    env_file:
+      - env/arango.env 
+    command:
+      - arangod
+      - --server.endpoint=tcp://0.0.0.0:8529
+    volumes:
+      - ./arango/migration/base/00-CREATE.js:/docker-entrypoint-initdb.d/00-CREATE.js
+
+  nats:
+    image: docker.io/bitnami/nats:2
+    restart: always
