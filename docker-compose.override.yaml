@@ -3,14 +3,6 @@ services:
     ports:
       - 16379:6379
 
-  arango:
-    environment:
-      - ARANGO_NO_AUTH=1
-    volumes:
-      - ./arango/migration/local/01-STANDARD.js:/docker-entrypoint-initdb.d/01-DATA.js
-    ports:
-      - 18529:8529
-
   nats:
     ports:
       - 14222:4222
