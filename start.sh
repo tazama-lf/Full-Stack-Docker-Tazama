@@ -35,7 +35,7 @@ deploy_full_service() {
     echo "stopping existing tazama containers..."
     docker compose -p tazama down > /dev/null 2>&1
     echo "deploying Tazama from docker hub..."
-    docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.full.yaml -f docker-compose.relay.yaml -f docker-compose.dev.ui.yaml up -d
+    docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.full.yaml -f docker-compose.relay.yaml -f docker-compose.dev.ui.yaml up -d
     exit 0
 }
 
@@ -91,7 +91,7 @@ print_addon_menu() {
 }
 
 build_command() {
-    local cmd=" -f docker-compose.override.yaml"
+    local cmd=" -f docker-compose.override.yaml -f docker-compose.dev.db.yaml"
     if [[ $is_github_deployment == 1 ]]; then
         cmd+=" -f docker-compose.dev.rule.yaml -f docker-compose.dev.yaml"
         for key in "${!addon_files_dev[@]}"; do
