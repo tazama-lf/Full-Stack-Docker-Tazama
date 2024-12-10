@@ -1,28 +1,16 @@
+- [INTRODUCTION](#introduction)
+- [PRE-REQUISITES](#pre-requisites)
+- [INSTALLATION STEPS](#installation-steps)
+- [TESTING THE END-TO-END DEPLOYMENT](#testing-the-end-to-end-deployment)
+- [TROUBLESHOOTING TIPS](#troubleshooting-tips)
+- [APPENDIX](#appendix)
 <!-- SPDX-License-Identifier: Apache-2.0 -->
-
-## Table of Contents
-
-  - [INTRODUCTION](#introduction)
-  - [Pre-requisites:](#pre-requisites)
-  - [INSTALLATION STEPS](#installation-steps)
-  - [1. Clone the Full-Stack-Docker-Tazama Repository to Your Local Machine](#1-clone-the-full-stack-docker-tazama-repository-to-your-local-machine)
-  - [2. Update the Full-Stack-Docker-Tazama Configuration Files](#2-update-the-full-stack-docker-tazama-configuration-files)
-  - [3. Deploy the Core Services](#3-deploy-the-core-services)
-  - [4. Configure Tazama](#4-configure-tazama)
-  - [5. Deploy core processors](#5-deploy-core-processors)
-  - [6.  Compose the rule processor](#6--compose-the-rule-processor)
-  - [TESTING THE END-TO-END DEPLOYMENT](#testing-the-end-to-end-deployment)
-  - [TROUBLESHOOTING TIPS](#troubleshooting-tips)
-  - [Appendix](#appendix)
- 
 
 ## INTRODUCTION
 
-This guide will show you how to install the platform using only the publicly available open source software components, in a Docker container on a single local Windows machine via Docker Compose.
+This guide will show you how to install the Tazama system, using only the publicly available open source software components, in a Docker container on a single local Windows machine. This is a multi-layered docker compose stack which spins up Tazama components. A Windows [batch script](start.bat) and a Unix [shell script](start.sh) have been provided which may be used to start containers that are usually used together in Tazama.
 
-This guide is specific to the Windows 10 or 11 operating system.
-
-## Pre-requisites:
+## PRE-REQUISITES
 
 Set up your development environment as recommended in the [Tazama Contribution Guide](https://github.com/tazama-lf/.github/blob/main/CONTRIBUTING.md#32-setting-up-the-development-environment) section 3.2.1.
 
@@ -30,7 +18,6 @@ The pre-requisites that are essential to be able to follow this guide to the let
 
  - Docker Desktop for Windows (and WSL)
  - Git
- - Newman
  - A code editor (this guide will assume you are using VS Code)
   - A GitHub personal access token with `packages:write` and `read:org` permissions
    - Ensure that your GitHub Personal Access Token is added as a Windows Environment Variable called "`GH_TOKEN`".
@@ -44,21 +31,23 @@ The pre-requisites that are essential to be able to follow this guide to the let
 
 ## INSTALLATION STEPS
 
-## 1. Clone the Full-Stack-Docker-Tazama Repository to Your Local Machine
+**1. Clone the Full-Stack-Docker-Tazama Repository to Your Local Machine**
 
-In a Windows Command Prompt, navigate to the folder where you want to store a copy of the source code. For example, the source code root folder path I have been using to compile this guide is C:\Tazama\GitHub. Once in your source code root folder, clone the repository with the following command:
+In a Windows Command Prompt, navigate to the folder where you want to store a copy of the source code. For example, the source code root folder path I have been using to compile this guide is C:\Tazama\GitHub. Once in your source code root folder, clone (copy) the repository with the following command:
 
 ```
 git clone https://github.com/tazama-lf/Full-Stack-Docker-Tazama -b main
 ```
 
+If you would like to deploy the system from the `dev` branch, replace `main` above with `dev`. The `main` branch is the most recent official release of the system, while `dev` will be new features not yet released to the main branch
+
 **Output:**
 
 ![clone-the-repo](/images/full-stack-docker-tazama-clone-the-repo.png)
 
-## 2. Update the Full-Stack-Docker-Tazama Configuration Files
+**2. Update the Full-Stack-Docker-Tazama Configuration Files**
 
-First, we want to create the basic environment variables to guide the Docker Compose installation.
+This optional step is only applicable to Option 1 (Deployment from GitHub) and allows editing of the basic environment variables to guide the Docker Compose installation.
 
 Navigate to the Full-Stack-Docker-Tazama folder and launch VS Code:
 
@@ -70,10 +59,14 @@ In VS Code, open the .env file in the Full-Stack-Docker-Tazama folder and update
 
  - (Optional) If your GitHub Personal Access Token had not been added as a Windows Environment Variable, you would need to specify the token at the top of the file next to the GH_TOKEN key. If you had specified the GH_TOKEN as an environment variable, you can leave the `${GH_TOKEN}` shell variable in place to retrieve it automatically.
  - (Optional) If you prefer an alternative port for the Transaction Monitoring Service API, you can update the `TMS_PORT` environment variable.
+ - (Optional) If you would like to deploy from the `dev` branch, replace `main` with `dev` in the `#Branches` section
 
 The current unaltered `.env` file will look as follows:
 
 ```javascript
+# SPDX-License-Identifier: Apache-2.0
+TAZAMA_VERSION=2.1.0
+
 # Authentication
 GH_TOKEN=${GH_TOKEN}
 
@@ -86,41 +79,44 @@ TADP_BRANCH=main
 NATS_UTILITIES_BRANCH=main
 CMS_BRANCH=main
 BATCH_PPA_BRANCH=main
+RELAY_BRANCH=main
+
+SIDECAR_BRANCH=main
+LUMBERJACK_BRANCH=main
+
 ADMIN_BRANCH=main
 AUTH_SERVICE_BRANCH=main
 EVENT_FLOW_BRANCH=main
-SIDECAR_BRANCH=main
-LUMBERJACK_BRANCH=main
-RELAY_BRANCH=main
 
 # Ports
 TMS_PORT=5000
 ADMIN_PORT=5100
-EVENT_SIDECAR_PORT=15000
-ES_PORT=9200
-KIBANA_PORT=5601
-APMSERVER_PORT=8200
-
-# Memory Limits
-ES_MEM_LIMIT=1073741824
-KB_MEM_LIMIT=1073741824
-LS_MEM_LIMIT=1073741824
 
 # TLS
 NODE_TLS_REJECT_UNAUTHORIZED='0'
-```
 
-## 3. Deploy the services via script
+EVENT_SIDECAR_PORT=15000
+ELASTIC_STACK_VERSION=8.15.1
+ES_PORT=9200
+KIBANA_PORT=5601
+APMSERVER_PORT=8200
+ES_MEM_LIMIT=1073741824
+KB_MEM_LIMIT=1073741824
+LS_MEM_LIMIT=1073741824
+```
+[Top](#introduction)
+
+**3. Deploy the services via script**
 
 First, start the Docker Desktop for Windows application.
 
 With Docker Desktop running: from your Windows Command Prompt and from inside the `Full-Stack-Docker-Tazama` folder, execute the following command and follow the prompts:
 
-#### Windows
+**Windows**  
 Command Prompt: `start.bat` 
 Powershell: `.\start.bat`
 
-#### Unix (Linux/MacOS)
+**Unix (Linux/MacOS)**
 Any terminal: `./start.sh`
 
 > [!IMPORTANT]  
@@ -130,15 +126,38 @@ Any terminal: `./start.sh`
 
 ![start-services-1](/images/full-stack-docker-tazama-start-bat-1.png)
 
-Toggle any or no addons
+The installation script provides 3 docker deployment options
+1. Public deployment is a basic rule sample where the system is built from the source code in GitHub (this option is most useful for developers to explore the system)
+2. Full service deployment using pre-built images published on DockerHub.  Full service includes deploying all the current Tazama rules
+3. Public deployment using pre-built images published on DockerHub. This option is similar to option 1 but instead of building the images from source code, the deployment is from pre-built images on DockerHub
+
+![select-option](/images/full-stack-docker-tazama-select-option.png)
+
+Enter your choice, type `1`, `2` or `3` and press enter.
+
+**PUBLIC DEPLOYMENT**
+
+For options 1 and 3 (Public deployment), the following optional addons will appear as per the screen below
 
 > NOTE: It is currently not possible to select `Authentication` and `Demo UI` at the same time.
 
 ![start-services-2](/images/full-stack-docker-tazama-start-bat-2.png)
 
-Apply configuration
+Once you have selected optional configuration add-ons (by toggling options on/off by selecting 1 through 6), apply the configuration by entering your choice: type `a` and press enter
 
 ![start-services-3](/images/full-stack-docker-tazama-start-bat-3.png)
+
+**FULL SERVICE DEPLOYMENT**
+
+For option 2 (Full service deployment) select `2` from the start.bat docker deployment menu option
+
+![start-services-4](/images/full-stack-docker-tazama-start-bat-4.png)
+
+For option 2 (Full service deployment) the output will be as follows:
+
+![full-service-deployed](/images/full-stack-docker-tazama-full-service-option.png)
+
+**4. Access deployed components**
 
 You'll be able to access the web interfaces for the deployed components through their respective TCP/IP ports on your local machine as defined in the `docker-compose.yaml` file.
 
@@ -147,9 +166,11 @@ You'll be able to access the web interfaces for the deployed components through 
 
 If your machine is open to your local area network, you will also be able to access these services from other computers on your network via your local machine's IP address.
 
-## 4. Overview of services
+[Top](#introduction)
 
-Tazama core services provides the foundational infrastructure components for the platform and includes the ArangoDB, NATS and valkey services: ArangoDB provides the database infrastructure, NATS provides the pub/sub functionality and valkey provides for fast in-memory processor data caching.
+**5. Overview of services**
+
+Tazama core services provides the foundational infrastructure components for the system and includes the ArangoDB, NATS and valkey services: ArangoDB provides the database infrastructure, NATS provides the pub/sub functionality and valkey provides for fast in-memory processor data caching.
 
 Tazama is configured by loading the network map, rules and typology configurations required to evaluate a transaction via the ArangoDB API. The steps above have already loaded the default configuration into the database.
 
@@ -174,6 +195,7 @@ curl localhost:5000
 
 ![execute-config](./images/full-stack-docker-tazama-curl.png)
 
+[Top](#introduction)
 
 ## TESTING THE END-TO-END DEPLOYMENT
 
@@ -196,32 +218,38 @@ newman run collection-file -e environment-file --timeout-request 10200 --delay-r
 ```
 
 - Select one of the following `collection file` options:
-   - If the authentication option has not been selected, then the `collection-file` is the full path to the location on your local machine where the `postman\1.1. (NO-AUTH) Rule-901 End-to-End test - pain001-013 disabled.postman_collection.json` file is located. 
-   - If authentication is deployed, use `postman\1.2. (AUTH) Rule-901 End-to-End test - pain001-013 disabled.postman_collection.json`.
-   - If the demo UI is selected (which must be without Authentication) use `postman\1.3. (NO-AUTH-DEMO) Rule-901 End-to-End test - pain001-013 disabled.postman_collection.json` 
+   - For options 1 & 3, If the authentication option has not been selected, then the `collection-file` is the full path to the location on your local machine where the `postman\1.1. (NO-AUTH) Rule-901 End-to-End test - pain001-013 disabled.postman_collection.json` file is located.  
+   - For options 1 & 3, If authentication is deployed, use `postman\1.2. (AUTH) Rule-901 End-to-End test - pain001-013 disabled.postman_collection.json`.
+   - For options 1 & 3, If the demo UI is selected (which must be without Authentication) use `postman\1.3. (NO-AUTH-DEMO) Rule-901 End-to-End test - pain001-013 disabled.postman_collection.json` 
+   - For options 1 & 3, If the relay service is selected (which must be without Authentication) use `postman\1.4. (NO-AUTH-RELAY) Rule-901 End-to-End test - pain001/013 disabled.postman_collection.json` 
+   - For option 2 (Full Service deployment), use `postman\2. Full-service-test.postman_collection.json`
  - The `environment-file` is the full path to the location on your local machine where the `postman\environments\Tazama-Docker-Compose-LOCAL.postman_environment.json` file is located.
  - If the path contains spaces, wrap the string in double-quotes.
  - We add the `--delay-request` option to delay each individual test by 500 milliseconds to give them evaluation time to complete before we look for the result in the database.
+
+For this example, where the source code and test scripts are located in the C:\Tazama\GitHub folder, the newman command will look like this `newman run "C:\Tazama\GitHub\postman\1.1. (NO-AUTH) Rule-901 End-to-End test - pain001-013 disabled.postman_collection.json" -e "C:\Tazama\GitHub\postman\environments\Tazama-Docker-Compose-LOCAL.postman_environment.json" --timeout-request 10200 --delay-request 500`
 
 **Output:**
 
 ![success](./images/full-stack-docker-tazama-success.png)
 
-# TROUBLESHOOTING TIPS
+[Top](#introduction)
+
+## TROUBLESHOOTING TIPS
 
 The services are split up in multiple yamls, 
 
-| Docker-Compose File | Services |
-| -------- | ------- |
-| docker-compose | tms, ed, tp, tadp, admin, ef |
-| docker-compose.override | rule-901, set up all services |
-| docker-compose.infrastructure | arango, nats, valkey |
-| docker-compose.(dev.)nats-utils | nats-utilities |
-| docker-compose.(dev.)auth | keycloak, auth-service, tms changes |
-| docker-compose.(dev.)logs-base | event-sidecar, lumberjack, all service changes |
-| docker-compose.(dev.)logs-elastic | event-sidecar, lumberjack, elasticsearch, kibana |
-| docker-compose.(dev.)apm-elastic | event-sidecar, lumberjack, elasticsearch, kibana, apmserver |
-| docker-compose.(dev.)relay | relay-service |
+| Docker-Compose File               | Services                                                    |
+| --------------------------------- | ----------------------------------------------------------- |
+| docker-compose                    | tms, ed, tp, tadp, admin, ef                                |
+| docker-compose.override           | rule-901, set up all services                               |
+| docker-compose.infrastructure     | arango, nats, valkey                                        |
+| docker-compose.(dev.)nats-utils   | nats-utilities                                              |
+| docker-compose.(dev.)auth         | keycloak, auth-service, tms changes                         |
+| docker-compose.(dev.)logs-base    | event-sidecar, lumberjack, all service changes              |
+| docker-compose.(dev.)logs-elastic | event-sidecar, lumberjack, elasticsearch, kibana            |
+| docker-compose.(dev.)apm-elastic  | event-sidecar, lumberjack, elasticsearch, kibana, apmserver |
+| docker-compose.(dev.)relay        | relay-service                                               |
 
 > [!IMPORTANT]  
 > Turn off `tms` API authentication for the `Demo UI` to work.
@@ -261,9 +289,9 @@ List of \<services\>
 - kibana
 - apm-server
 
-## Appendix
+## APPENDIX 
 
-This appendix will show you how to manually load the configuration and environment files in the Tazama full stack docker deployment.
+This appendix will show you how to manually load the configuration and environment files in the Tazama full stack docker deployment for the public deployment option.
 
 In a Windows Command Prompt, navigate to the source code root folder. Then clone the following repository with the following command:
 ```
