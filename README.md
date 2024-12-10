@@ -104,6 +104,7 @@ ES_MEM_LIMIT=1073741824
 KB_MEM_LIMIT=1073741824
 LS_MEM_LIMIT=1073741824
 ```
+[Top](#introduction)
 
 **3. Deploy the services via script**
 
@@ -115,7 +116,7 @@ With Docker Desktop running: from your Windows Command Prompt and from inside th
 Command Prompt: `start.bat` 
 Powershell: `.\start.bat`
 
-**Unix (Linux/MacOS)** <!-- omit in toc -->
+**Unix (Linux/MacOS)**
 Any terminal: `./start.sh`
 
 > [!IMPORTANT]  
@@ -165,6 +166,8 @@ You'll be able to access the web interfaces for the deployed components through 
 
 If your machine is open to your local area network, you will also be able to access these services from other computers on your network via your local machine's IP address.
 
+[Top](#introduction)
+
 **5. Overview of services**
 
 Tazama core services provides the foundational infrastructure components for the system and includes the ArangoDB, NATS and valkey services: ArangoDB provides the database infrastructure, NATS provides the pub/sub functionality and valkey provides for fast in-memory processor data caching.
@@ -192,6 +195,7 @@ curl localhost:5000
 
 ![execute-config](./images/full-stack-docker-tazama-curl.png)
 
+[Top](#introduction)
 
 ## TESTING THE END-TO-END DEPLOYMENT
 
@@ -228,6 +232,8 @@ For this example, where the source code and test scripts are located in the C:\T
 **Output:**
 
 ![success](./images/full-stack-docker-tazama-success.png)
+
+[Top](#introduction)
 
 ## TROUBLESHOOTING TIPS
 
