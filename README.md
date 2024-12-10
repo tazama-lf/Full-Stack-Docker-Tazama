@@ -8,12 +8,7 @@
 
 ## INTRODUCTION
 
-This guide will show you how to install the Tazama system, using only the publicly available open source software components, in a Docker container on a single local Windows machine. This is a multi-layered docker compose stack which spins up Tazama components. A Windows [batch script](start.bat) and a Unix [shell script](start.sh) has been provided which may be used to start containers that are usually used together in Tazama.
-
-The installation scripts provide 3 options
-1. Public deployment is a basic rule sample where the system is built from the source code in GitHub (this option is most useful for developers to explore the system)
-2. Full service deployment using pre-built images published on DockerHub.  Full service includes deploying all the current Tazama rules
-3. Public deployment using pre-built images published on DockerHub. This option is similar to option 1 but instead of building the images from source code, the deployment is from pre-built images on DockerHub
+This guide will show you how to install the Tazama system, using only the publicly available open source software components, in a Docker container on a single local Windows machine. This is a multi-layered docker compose stack which spins up Tazama components. A Windows [batch script](start.bat) and a Unix [shell script](start.sh) have been provided which may be used to start containers that are usually used together in Tazama.
 
 ## PRE-REQUISITES
 
@@ -38,13 +33,13 @@ The pre-requisites that are essential to be able to follow this guide to the let
 
 **1. Clone the Full-Stack-Docker-Tazama Repository to Your Local Machine**
 
-In a Windows Command Prompt, navigate to the folder where you want to store a copy of the source code. For example, the source code root folder path I have been using to compile this guide is C:\Tazama\GitHub. Once in your source code root folder, clone the repository with the following command:
+In a Windows Command Prompt, navigate to the folder where you want to store a copy of the source code. For example, the source code root folder path I have been using to compile this guide is C:\Tazama\GitHub. Once in your source code root folder, clone (copy) the repository with the following command:
 
 ```
 git clone https://github.com/tazama-lf/Full-Stack-Docker-Tazama -b main
 ```
 
-If you would like to deploy the system from the `dev` branch, replace `main` above with `dev`
+If you would like to deploy the system from the `dev` branch, replace `main` above with `dev`. The `main` branch is the most recent official release of the system, while `dev` will be new features not yet released to the main branch
 
 **Output:**
 
@@ -130,15 +125,38 @@ Any terminal: `./start.sh`
 
 ![start-services-1](/images/full-stack-docker-tazama-start-bat-1.png)
 
-For options 1 and 3 (Public deployment) Toggle any or no addons
+The installation script provides 3 docker deployment options
+1. Public deployment is a basic rule sample where the system is built from the source code in GitHub (this option is most useful for developers to explore the system)
+2. Full service deployment using pre-built images published on DockerHub.  Full service includes deploying all the current Tazama rules
+3. Public deployment using pre-built images published on DockerHub. This option is similar to option 1 but instead of building the images from source code, the deployment is from pre-built images on DockerHub
+
+![select-option](/images/full-stack-docker-tazama-select-option.png)
+
+Enter your choice, type `1`, `2` or `3` and press enter.
+
+**PUBLIC DEPLOYMENT**
+
+For options 1 and 3 (Public deployment), the following optional addons will appear as per the screen below
 
 > NOTE: It is currently not possible to select `Authentication` and `Demo UI` at the same time.
 
 ![start-services-2](/images/full-stack-docker-tazama-start-bat-2.png)
 
-Once you have selected optional configuration add-ons, apply the configuration by entering your choice: `a`
+Once you have selected optional configuration add-ons (by toggling options on/off by selecting 1 through 6), apply the configuration by entering your choice: type `a` and press enter
 
 ![start-services-3](/images/full-stack-docker-tazama-start-bat-3.png)
+
+**FULL SERVICE DEPLOYMENT**
+
+For option 2 (Full service deployment) select `2` from the start.bat docker deployment menu option
+
+![start-services-4](/images/full-stack-docker-tazama-start-bat-4.png)
+
+For option 2 (Full service deployment) the output will be as follows:
+
+![full-service-deployed](/images/full-stack-docker-tazama-full-service-option.png)
+
+**4. Access deployed components**
 
 You'll be able to access the web interfaces for the deployed components through their respective TCP/IP ports on your local machine as defined in the `docker-compose.yaml` file.
 
@@ -147,7 +165,7 @@ You'll be able to access the web interfaces for the deployed components through 
 
 If your machine is open to your local area network, you will also be able to access these services from other computers on your network via your local machine's IP address.
 
-**4. Overview of services**
+**5. Overview of services**
 
 Tazama core services provides the foundational infrastructure components for the system and includes the ArangoDB, NATS and valkey services: ArangoDB provides the database infrastructure, NATS provides the pub/sub functionality and valkey provides for fast in-memory processor data caching.
 
