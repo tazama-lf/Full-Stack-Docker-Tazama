@@ -1,9 +1,10 @@
+- [INTRODUCTION](#introduction)
+- [PRE-REQUISITES](#pre-requisites)
+- [INSTALLATION STEPS](#installation-steps)
+- [TESTING THE END-TO-END DEPLOYMENT](#testing-the-end-to-end-deployment)
+- [TROUBLESHOOTING TIPS](#troubleshooting-tips)
+- [APPENDIX](#appendix)
 <!-- SPDX-License-Identifier: Apache-2.0 -->
-
-## Table of Contents
-
-
- 
 
 ## INTRODUCTION
 
@@ -14,7 +15,7 @@ The installation scripts provide 3 options
 2. Full service deployment using pre-built images published on DockerHub.  Full service includes deploying all the current Tazama rules
 3. Public deployment using pre-built images published on DockerHub. This option is similar to option 1 but instead of building the images from source code, the deployment is from pre-built images on DockerHub
 
-## Pre-requisites
+## PRE-REQUISITES
 
 Set up your development environment as recommended in the [Tazama Contribution Guide](https://github.com/tazama-lf/.github/blob/main/CONTRIBUTING.md#32-setting-up-the-development-environment) section 3.2.1.
 
@@ -22,7 +23,6 @@ The pre-requisites that are essential to be able to follow this guide to the let
 
  - Docker Desktop for Windows (and WSL)
  - Git
- - Newman
  - A code editor (this guide will assume you are using VS Code)
   - A GitHub personal access token with `packages:write` and `read:org` permissions
    - Ensure that your GitHub Personal Access Token is added as a Windows Environment Variable called "`GH_TOKEN`".
@@ -36,7 +36,7 @@ The pre-requisites that are essential to be able to follow this guide to the let
 
 ## INSTALLATION STEPS
 
-## 1. Clone the Full-Stack-Docker-Tazama Repository to Your Local Machine
+**1. Clone the Full-Stack-Docker-Tazama Repository to Your Local Machine**
 
 In a Windows Command Prompt, navigate to the folder where you want to store a copy of the source code. For example, the source code root folder path I have been using to compile this guide is C:\Tazama\GitHub. Once in your source code root folder, clone the repository with the following command:
 
@@ -50,7 +50,7 @@ If you would like to deploy the system from the `dev` branch, replace `main` abo
 
 ![clone-the-repo](/images/full-stack-docker-tazama-clone-the-repo.png)
 
-## 2. Update the Full-Stack-Docker-Tazama Configuration Files
+**2. Update the Full-Stack-Docker-Tazama Configuration Files**
 
 This optional step is only applicable to Option 1 (Deployment from GitHub) and allows editing of the basic environment variables to guide the Docker Compose installation.
 
@@ -110,17 +110,17 @@ KB_MEM_LIMIT=1073741824
 LS_MEM_LIMIT=1073741824
 ```
 
-## 3. Deploy the services via script
+**3. Deploy the services via script**
 
 First, start the Docker Desktop for Windows application.
 
 With Docker Desktop running: from your Windows Command Prompt and from inside the `Full-Stack-Docker-Tazama` folder, execute the following command and follow the prompts:
 
-#### Windows
+**Windows**  
 Command Prompt: `start.bat` 
 Powershell: `.\start.bat`
 
-#### Unix (Linux/MacOS)
+**Unix (Linux/MacOS)** <!-- omit in toc -->
 Any terminal: `./start.sh`
 
 > [!IMPORTANT]  
@@ -147,7 +147,7 @@ You'll be able to access the web interfaces for the deployed components through 
 
 If your machine is open to your local area network, you will also be able to access these services from other computers on your network via your local machine's IP address.
 
-## 4. Overview of services
+**4. Overview of services**
 
 Tazama core services provides the foundational infrastructure components for the system and includes the ArangoDB, NATS and valkey services: ArangoDB provides the database infrastructure, NATS provides the pub/sub functionality and valkey provides for fast in-memory processor data caching.
 
@@ -211,21 +211,21 @@ For this example, where the source code and test scripts are located in the C:\T
 
 ![success](./images/full-stack-docker-tazama-success.png)
 
-# TROUBLESHOOTING TIPS
+## TROUBLESHOOTING TIPS
 
 The services are split up in multiple yamls, 
 
-| Docker-Compose File | Services |
-| -------- | ------- |
-| docker-compose | tms, ed, tp, tadp, admin, ef |
-| docker-compose.override | rule-901, set up all services |
-| docker-compose.infrastructure | arango, nats, valkey |
-| docker-compose.(dev.)nats-utils | nats-utilities |
-| docker-compose.(dev.)auth | keycloak, auth-service, tms changes |
-| docker-compose.(dev.)logs-base | event-sidecar, lumberjack, all service changes |
-| docker-compose.(dev.)logs-elastic | event-sidecar, lumberjack, elasticsearch, kibana |
-| docker-compose.(dev.)apm-elastic | event-sidecar, lumberjack, elasticsearch, kibana, apmserver |
-| docker-compose.(dev.)relay | relay-service |
+| Docker-Compose File               | Services                                                    |
+| --------------------------------- | ----------------------------------------------------------- |
+| docker-compose                    | tms, ed, tp, tadp, admin, ef                                |
+| docker-compose.override           | rule-901, set up all services                               |
+| docker-compose.infrastructure     | arango, nats, valkey                                        |
+| docker-compose.(dev.)nats-utils   | nats-utilities                                              |
+| docker-compose.(dev.)auth         | keycloak, auth-service, tms changes                         |
+| docker-compose.(dev.)logs-base    | event-sidecar, lumberjack, all service changes              |
+| docker-compose.(dev.)logs-elastic | event-sidecar, lumberjack, elasticsearch, kibana            |
+| docker-compose.(dev.)apm-elastic  | event-sidecar, lumberjack, elasticsearch, kibana, apmserver |
+| docker-compose.(dev.)relay        | relay-service                                               |
 
 > [!IMPORTANT]  
 > Turn off `tms` API authentication for the `Demo UI` to work.
@@ -265,7 +265,7 @@ List of \<services\>
 - kibana
 - apm-server
 
-## Appendix
+## APPENDIX 
 
 This appendix will show you how to manually load the configuration and environment files in the Tazama full stack docker deployment for the public deployment option.
 
