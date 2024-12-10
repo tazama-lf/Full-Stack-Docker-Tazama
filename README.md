@@ -196,10 +196,11 @@ newman run collection-file -e environment-file --timeout-request 10200 --delay-r
 ```
 
 - Select one of the following `collection file` options:
-   - If the authentication option has not been selected, then the `collection-file` is the full path to the location on your local machine where the `postman\1.1. (NO-AUTH) Rule-901 End-to-End test - pain001-013 disabled.postman_collection.json` file is located.  
-   - If authentication is deployed, use `postman\1.2. (AUTH) Rule-901 End-to-End test - pain001-013 disabled.postman_collection.json`.
-   - If the demo UI is selected (which must be without Authentication) use `postman\1.3. (NO-AUTH-DEMO) Rule-901 End-to-End test - pain001-013 disabled.postman_collection.json` 
-   - If the relay service is selected (which must be without Authentication) use `postman\1.4. (NO-AUTH-RELAY) Rule-901 End-to-End test - pain001/013 disabled.postman_collection.json` 
+   - For options 1 & 3, If the authentication option has not been selected, then the `collection-file` is the full path to the location on your local machine where the `postman\1.1. (NO-AUTH) Rule-901 End-to-End test - pain001-013 disabled.postman_collection.json` file is located.  
+   - For options 1 & 3, If authentication is deployed, use `postman\1.2. (AUTH) Rule-901 End-to-End test - pain001-013 disabled.postman_collection.json`.
+   - For options 1 & 3, If the demo UI is selected (which must be without Authentication) use `postman\1.3. (NO-AUTH-DEMO) Rule-901 End-to-End test - pain001-013 disabled.postman_collection.json` 
+   - For options 1 & 3, If the relay service is selected (which must be without Authentication) use `postman\1.4. (NO-AUTH-RELAY) Rule-901 End-to-End test - pain001/013 disabled.postman_collection.json` 
+   - For option 2 (Full Service deployment), use `postman\2. Full-service-test.postman_collection.json`
  - The `environment-file` is the full path to the location on your local machine where the `postman\environments\Tazama-Docker-Compose-LOCAL.postman_environment.json` file is located.
  - If the path contains spaces, wrap the string in double-quotes.
  - We add the `--delay-request` option to delay each individual test by 500 milliseconds to give them evaluation time to complete before we look for the result in the database.
