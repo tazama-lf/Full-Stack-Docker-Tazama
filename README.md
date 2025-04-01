@@ -1,10 +1,14 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<a id="top"></a>
+
 - [INTRODUCTION](#introduction)
 - [PRE-REQUISITES](#pre-requisites)
 - [INSTALLATION STEPS](#installation-steps)
 - [TESTING THE END-TO-END DEPLOYMENT](#testing-the-end-to-end-deployment)
 - [TROUBLESHOOTING TIPS](#troubleshooting-tips)
 - [APPENDIX](#appendix)
-<!-- SPDX-License-Identifier: Apache-2.0 -->
+
 
 ## INTRODUCTION
 
@@ -12,7 +16,7 @@ This guide will show you how to install the Tazama system, using only the public
 
 ## PRE-REQUISITES
 
-Set up your development environment as recommended in the [Tazama Contribution Guide](https://github.com/tazama-lf/.github/blob/main/CONTRIBUTING.md#32-setting-up-the-development-environment) section 3.2.1.
+Set up your development environment as recommended in the [Tazama Contribution Guide](../Guides/dev-set-up-environment.md)
 
 The pre-requisites that are essential to be able to follow this guide to the letter are:
 
@@ -21,7 +25,7 @@ The pre-requisites that are essential to be able to follow this guide to the let
  - A code editor (this guide will assume you are using VS Code)
   - A GitHub personal access token with `packages:write` and `read:org` permissions
    - Ensure that your GitHub Personal Access Token is added as a Windows Environment Variable called "`GH_TOKEN`".
-   - Instructions for creating the GH_TOKEN environment variable can be found in the [Tazama Contribution Guide (A. Preparation)](https://github.com/tazama-lf/.github/blob/main/CONTRIBUTING.md#a-preparation-)
+  - Instructions for creating the GH_TOKEN environment variable can be found in the [Setting up GitHub Token Locally](https://github.com/tazama-lf/docs/blob/dev/Guides/dev-set-up-environment.md)
 
      - We will be referencing your GitHub Personal Access Token throughout the installation process as your `GH_TOKEN`. It is not possible to retrieve the token from GitHub after you initially created it, but if the token had been set in Windows as an environment variable, you can retrieve it with the following command from a Windows Command Prompt:
 
@@ -104,7 +108,7 @@ ES_MEM_LIMIT=1073741824
 KB_MEM_LIMIT=1073741824
 LS_MEM_LIMIT=1073741824
 ```
-[Top](#introduction)
+<div style="text-align: right"><a href="#top">Top</a></div>
 
 **3. Deploy the services via script**
 
@@ -166,7 +170,7 @@ You'll be able to access the web interfaces for the deployed components through 
 
 If your machine is open to your local area network, you will also be able to access these services from other computers on your network via your local machine's IP address.
 
-[Top](#introduction)
+<div style="text-align: right"><a href="#top">Top</a></div>
 
 **5. Overview of services**
 
@@ -233,7 +237,7 @@ For this example, where the source code and test scripts are located in the C:\T
 
 ![success](./images/full-stack-docker-tazama-success.png)
 
-[Top](#introduction)
+<div style="text-align: right"><a href="#top">Top</a></div>
 
 ## TROUBLESHOOTING TIPS
 
@@ -289,6 +293,8 @@ List of \<services\>
 - kibana
 - apm-server
 
+<div style="text-align: right"><a href="#top">Top</a></div>
+
 ## APPENDIX 
 
 This appendix will show you how to manually load the configuration and environment files in the Tazama full stack docker deployment for the public deployment option.
@@ -316,3 +322,4 @@ newman run collection-file -e environment-file --timeout-request 10200
 
 ![execute-config](/images/full-stack-docker-tazama-load-config.png) 
 
+<div style="text-align: right"><a href="#top">Top</a></div>
