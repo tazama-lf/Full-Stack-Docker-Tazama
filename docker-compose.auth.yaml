@@ -30,5 +30,4 @@ services:
       - 3020:3020
     restart: always
     depends_on:
-      - arango
       - keycloak

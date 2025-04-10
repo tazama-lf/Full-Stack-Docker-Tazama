@@ -20,6 +20,8 @@ services:
     command:
       - arangod
       - --server.endpoint=tcp://0.0.0.0:8529
+    ports:
+      - 18529:8529
     volumes:
       - ./arango/migration/base/00-CREATE.js:/docker-entrypoint-initdb.d/00-CREATE.js
 
