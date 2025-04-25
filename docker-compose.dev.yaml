@@ -68,7 +68,7 @@ services:
   
   admin-service:
     build:
-      context: https://github.com/frmscoe/admin-service.git#${ADMIN_BRANCH}
+      context: https://github.com/tazama-lf/admin-service.git#${ADMIN_BRANCH}
       args:
         - GH_TOKEN
     env_file:
