@@ -6,6 +6,7 @@ include:
 services:
   # TRANSACTION MONITORING SERVICE
   tms:
+    image: ! reset null
     build:
       context: https://github.com/tazama-lf/tms-service.git#${TMS_BRANCH}
       args:
@@ -23,6 +24,7 @@ services:
 
   # EVENT DIRECTOR
   ed:
+    image: ! reset null
     build:
       context: https://github.com/tazama-lf/event-director.git#${ED_BRANCH}
       args:
@@ -38,6 +40,7 @@ services:
 
   # TYPOLOGY PROCESSOR
   tp:
+    image: ! reset null
     build:
       context: https://github.com/tazama-lf/typology-processor.git#${TP_BRANCH}
       args:
@@ -53,6 +56,7 @@ services:
 
   # TRANSACTION AGGREGATION AND DECISIONING PROCESSOR
   tadp:
+    image: ! reset null
     build:
       context: https://github.com/tazama-lf/transaction-aggregation-decisioning-processor.git#${TADP_BRANCH}
       args:
@@ -67,6 +71,7 @@ services:
       - nats
   
   admin-service:
+    image: ! reset null
     build:
       context: https://github.com/tazama-lf/admin-service.git#${ADMIN_BRANCH}
       args:
@@ -82,6 +87,7 @@ services:
       - valkey
 
   ef:
+    image: ! reset null
     build:
       context: https://github.com/tazama-lf/event-flow.git#${EVENT_FLOW_BRANCH}
       args:
