@@ -9,7 +9,7 @@ services:
     environment:
       SUPPRESS_ALERTS: false
   rs1:
-    image: ! reset null
+    image: !reset null
     build:
       context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
       args:
@@ -25,7 +25,7 @@ services:
       - tp
 
   rs2:
-    image: ! reset null
+    image: !reset null
     build:
       context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
       args:

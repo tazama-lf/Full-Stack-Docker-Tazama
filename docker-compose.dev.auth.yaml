@@ -3,7 +3,7 @@
 services:
   # AUTH SERVICE
   auth:
-    image: ! reset null
+    image: !reset null
     build:
       context: https://github.com/tazama-lf/auth-service.git#${AUTH_SERVICE_BRANCH}
       args:

@@ -1,7 +1,7 @@
 services:
   # event-sidecar
   event-sidecar:
-    image: ! reset null
+    image: !reset null
     build:
       context: https://github.com/tazama-lf/event-sidecar.git#${SIDECAR_BRANCH}
       args:
@@ -19,7 +19,7 @@ services:
       - nats
 
   lumberjack:
-    image: ! reset null
+    image: !reset null
     build:
       context: https://github.com/tazama-lf/lumberjack.git#${LUMBERJACK_BRANCH}
       args:
