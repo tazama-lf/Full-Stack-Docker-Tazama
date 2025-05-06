@@ -13,6 +13,7 @@ services:
     env_file:
       - env/rs.env
       - .env
+    restart: always
     environment:
       FUNCTION_NAME: tp-relay
       CONSUMER_STREAM: interdiction-service
@@ -24,6 +25,7 @@ services:
     env_file:
       - env/rs.env
       - .env
+    restart: always
     environment:
       FUNCTION_NAME: tadp-relay
       CONSUMER_STREAM: cms

@@ -9,6 +9,7 @@ services:
     environment:
       SUPPRESS_ALERTS: false
   rs1:
+    image: !reset null
     build:
       context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
       args:
@@ -16,6 +17,7 @@ services:
     env_file:
       - env/rs.env
       - .env
+    restart: always
     environment:
       FUNCTION_NAME: tp-relay
       CONSUMER_STREAM: interdiction-service
@@ -23,6 +25,7 @@ services:
       - tp
 
   rs2:
+    image: !reset null
     build:
       context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
       args:
@@ -30,6 +33,7 @@ services:
     env_file:
       - env/rs.env
       - .env
+    restart: always
     environment:
       FUNCTION_NAME: tadp-relay
       CONSUMER_STREAM: cms

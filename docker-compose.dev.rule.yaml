@@ -1,6 +1,7 @@
 # For local testing
 services:
   rule-901:
+    image: !reset null
     build:
       context: https://github.com/tazama-lf/rule-executer.git#${RULE_901_BRANCH}
       args:

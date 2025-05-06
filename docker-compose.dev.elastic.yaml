@@ -10,6 +10,7 @@ services:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
       - xpack.security.enabled=false
+    restart: always
     mem_limit: ${ES_MEM_LIMIT}
     ulimits:
       memlock:
@@ -36,6 +37,7 @@ services:
       - ${KIBANA_PORT}:5601
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    restart: always
     mem_limit: ${KB_MEM_LIMIT}
     healthcheck:
       test:

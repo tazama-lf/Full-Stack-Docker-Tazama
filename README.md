@@ -295,6 +295,12 @@ List of \<services\>
 
 <div style="text-align: right"><a href="#top">Top</a></div>
 
+## Docker Compose YAML structure
+
+View this file for additional detail about the various Docker Compose YAML files and how they are structured and related:
+
+[Docker Compose YAML Structure Overview](./docker-yaml-structure.md)
+
 ## APPENDIX 
 
 This appendix will show you how to manually load the configuration and environment files in the Tazama full stack docker deployment for the public deployment option.
