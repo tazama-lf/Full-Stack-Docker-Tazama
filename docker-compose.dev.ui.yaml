@@ -17,3 +17,9 @@ services:
       - nats
     ports:
       - "3001:3001"
+  tms:
+    environment:
+      - CORS_POLICY=demo
+  admin-service:
+    environment:
+      - CORS_POLICY=demo
