@@ -1,6 +1,6 @@
 services:
   ui:
-    image: tazamaorg/demo-ui:v1.0.16
+    image: tazamaorg/demo-ui:v2.0.11-uat
     environment:
       - NEXT_TELEMETRY_DISABLED=1
       - NEXT_PUBLIC_URL=http://localhost:3001
@@ -11,6 +11,8 @@ services:
       - NEXT_PUBLIC_WS_URL=localhost:3001
       - NEXT_PUBLIC_NATS_SUBSCRIPTIONS="['connection', '>']
     restart: always
+    env_file:
+      - env/ui.env
     depends_on:
       - tms
       - arango
