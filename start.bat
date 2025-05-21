@@ -92,7 +92,7 @@ if "%elasticlogs%" == "[X]" (
 )
 if "%elasticapm%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.apm-elastic.yaml"
 if "%natsutils%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.nats-utils.yaml"
-if "%ui%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.ui.yaml -f docker-compose.dev.ui.override.yaml"
+if "%ui%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.ui.yaml"
 if "%relay%" == "[X]" if "%IS_GITHUB_DEPLOYMENT%" == "1" (
     set "cmd=%cmd% -f docker-compose.dev.relay.yaml"
 ) else (

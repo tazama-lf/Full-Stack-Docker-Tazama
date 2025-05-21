@@ -3,4 +3,4 @@ services:
     environment:
       - ARANGO_NO_AUTH=1
     volumes:
-      - ./arango/migration/local/03-FULL.js:/docker-entrypoint-initdb.d/01-DATA.js
+      - ./arango/migration/local/02-FULL.js:/docker-entrypoint-initdb.d/01-DATA.js
