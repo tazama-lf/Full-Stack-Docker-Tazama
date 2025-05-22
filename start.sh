@@ -16,7 +16,7 @@ declare -A addon_files_dev=(
     [2]="docker-compose.dev.logs-base.yaml -f docker-compose.logs.yaml"
     [3]="docker-compose.dev.logs-elastic.yaml -f docker-compose.logs-elastic.base.yaml"
     [4]="docker-compose.dev.apm-elastic.yaml"
-    [5]="docker-compose.dev.ui.yaml -f docker-compose.dev.ui.override.yaml"
+    [5]="docker-compose.dev.ui.yaml"
     [6]="docker-compose.dev.relay.yaml"
 )
 
@@ -25,7 +25,7 @@ declare -A addon_files=(
     [2]="docker-compose.logs-base.yaml -f docker-compose.logs.yaml"
     [3]="docker-compose.logs-elastic.yaml -f docker-compose.logs-elastic.base.yaml"
     [4]="docker-compose.dev.apm-elastic.yaml"
-    [5]="docker-compose.dev.ui.yaml -f docker-compose.dev.ui.override.yaml"
+    [5]="docker-compose.dev.ui.yaml"
     [6]="docker-compose.relay.yaml"
 )
 

@@ -103,9 +103,6 @@ The Tazama system is built with a modular Docker Compose architecture that allow
 - **`docker-compose.dev.ui.yaml`**: Demo UI interface
   - `ui`: Frontend interface for the system
   
-- **`docker-compose.dev.ui.override.yaml`**: UI configuration
-  - Disables event flow for rule-901 deployment
-
 #### 5. Utilities
 - **`docker-compose.dev.nats-utils.yaml`**: NATS utilities
   - `nats-utilities`: Tools for working with NATS
