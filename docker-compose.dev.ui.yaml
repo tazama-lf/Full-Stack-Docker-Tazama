@@ -1,16 +1,9 @@
 services:
   ui:
-    image: tazamaorg/demo-ui:v1.0.16
-    environment:
-      - NEXT_TELEMETRY_DISABLED=1
-      - NEXT_PUBLIC_URL=http://localhost:3001
-      - NEXT_PUBLIC_TMS_SERVER_URL=http://localhost:${TMS_PORT}
-      - NEXT_PUBLIC_CMS_NATS_HOSTING=nats://localhost:14222
-      - NEXT_PUBLIC_ARANGO_DB_HOSTING=http://localhost:18529
-      - NEXT_PUBLIC_DB_USER="root"
-      - NEXT_PUBLIC_WS_URL=localhost:3001
-      - NEXT_PUBLIC_NATS_SUBSCRIPTIONS="['connection', '>']
+    image: tazamaorg/demo-ui:v2.0.12-uat
     restart: always
+    env_file:
+      - env/ui.env
     depends_on:
       - tms
       - arango
