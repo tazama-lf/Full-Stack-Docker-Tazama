@@ -2,21 +2,23 @@
 
 <a id="top"></a>
 
-- [INTRODUCTION](#introduction)
-- [PRE-REQUISITES](#pre-requisites)
-- [INSTALLATION STEPS](#installation-steps)
-- [TESTING THE END-TO-END DEPLOYMENT](#testing-the-end-to-end-deployment)
-- [TROUBLESHOOTING TIPS](#troubleshooting-tips)
-- [APPENDIX](#appendix)
+- [1. INTRODUCTION](#1-introduction)
+- [2. PRE-REQUISITES](#2-pre-requisites)
+- [3. INSTALLATION STEPS](#3-installation-steps)
+- [4. TESTING THE END-TO-END DEPLOYMENT](#4-testing-the-end-to-end-deployment)
+- [5. TROUBLESHOOTING TIPS](#5-troubleshooting-tips)
+- [6. APPENDIX](#6-appendix)
 
 
-## INTRODUCTION
+## 1. INTRODUCTION
 
 This guide will show you how to install the Tazama system, using only the publicly available open source software components, in a Docker container on a single local Windows machine. This is a multi-layered docker compose stack which spins up Tazama components. A Windows [batch script](start.bat) and a Unix [shell script](start.sh) have been provided which may be used to start containers that are usually used together in Tazama.
 
-## PRE-REQUISITES
+The full stack docker installation is intended for exploratory purposes and not for a production implementation.
 
-Set up your development environment as recommended in the [Tazama Contribution Guide](../Guides/dev-set-up-environment.md)
+## 2. PRE-REQUISITES
+
+Set up your development environment as recommended in the [Tazama Contribution Guide](./guides/dev-set-up-environment.md)
 
 The pre-requisites that are essential to be able to follow this guide to the letter are:
 
@@ -33,7 +35,7 @@ The pre-requisites that are essential to be able to follow this guide to the let
         set GH_TOKEN
         ```
 
-## INSTALLATION STEPS
+## 3. INSTALLATION STEPS
 
 **1. Clone the Full-Stack-Docker-Tazama Repository to Your Local Machine**
 
@@ -50,6 +52,9 @@ If you would like to deploy the system from the `dev` branch, replace `main` abo
 ![clone-the-repo](/images/full-stack-docker-tazama-clone-the-repo.png)
 
 **2. Update the Full-Stack-Docker-Tazama Configuration Files**
+
+
+**2.1. Optional updates to .env file**
 
 This optional step is only applicable to Option 1 (Deployment from GitHub) and allows editing of the basic environment variables to guide the Docker Compose installation.
 
@@ -109,6 +114,68 @@ KB_MEM_LIMIT=1073741824
 LS_MEM_LIMIT=1073741824
 ```
 <div style="text-align: right"><a href="#top">Top</a></div>
+
+**2.2. Optional steps for deploying the demo UI**
+
+One of the optional items in the deployment step below, is to deploy the demo UI.  In order to successfully deploy the demo, the following 2 files `ui.env` and `docker-compose.dev.ui.yaml` must be created or updated before the deployment step (start.bat/ start.sh) below. The demo will not deploy successfully without them.  
+
+##### FILE 1: ui.env <!-- omit in toc -->
+
+The `ui.env` file should exist in the following location (as shown below in a code editor such as VSCode)
+
+![location of ui.env file](../images/demo-uienv-location.png)
+
+The `ui.env` file should contain the following contents
+
+```JSON
+# SPDX-License-Identifier: Apache-2.0
+
+NEXT_PUBLIC_URL="http://localhost:3001"
+PORT="3001"
+NEXT_PUBLIC_TMS_SERVER_URL="http://localhost:5000"
+NEXT_PUBLIC_TMS_KEY="no_key_set"
+NEXT_PUBLIC_CMS_NATS_HOSTING="nats://nats:4222"
+NEXT_PUBLIC_NATS_USERNAME=""
+NEXT_PUBLIC_NATS_PASSWORD=""
+NEXT_PUBLIC_ARANGO_DB_HOSTING="http://localhost:18529"
+NEXT_PUBLIC_ADMIN_SERVICE_HOSTING="http://localhost:5100"
+NEXT_PUBLIC_DB_USER="root"
+NEXT_PUBLIC_DB_PASSWORD=""
+NEXT_PUBLIC_WS_URL="http://localhost:3001"
+NEXT_PUBLIC_NATS_SUBSCRIPTIONS="['connection', '>', 'typology-999@1.0.0']"
+NEXT_PUBLIC_CONDITION_TYPES="['non-overridable-block', 'overridable-block', 'override']"
+NEXT_PUBLIC_EVENT_TYPES="['pacs.008.001.10', 'pacs.002.001.12', 'pain.001.001.11', 'pain.013.001.09']"
+NEXT_PUBLIC_CONDITION_REASONS="['Suspicion of Money Laundering', 'Violation of KYC/AML Requirements', 'Suspicion of Terrorist Financing', 'Tax Evasion Concerns', 'Regulatory Reporting Thresholds', 'Unusual Transaction Patterns', 'High-Risk Countries', 'Multiple Failed Login Attempts', 'Fraudulent Activity', 'Phishing or Account Takeover', 'Suspicious Beneficiaries', 'System Errors', 'Exceeding Limits', 'Legal Holds or Court Orders', 'Adverse media reports', 'Dormant or Inactive Accounts', 'Internal Bank Policies']"
+```
+
+##### FILE 2: docker-compose.dev.ui.yaml <!-- omit in toc -->
+
+The `docker-compose.dev.ui.yaml` file should exist in the following location (as shown below in a code editor such as VSCode)
+
+![location of ui.env file](../images/demo-ui-yaml-location.png)
+
+The `docker-compose.dev.ui.yaml` file should contain the following contents
+
+```JSON
+services:
+  ui:
+    image: tazamaorg/demo-ui:v2.1.0
+    restart: always
+    env_file:
+      - env/ui.env
+    depends_on:
+      - tms
+      - arango
+      - nats
+    ports:
+      - "3001:3001"
+  tms:
+    environment:
+      - CORS_POLICY=demo
+  admin-service:
+      environment:
+      - CORS_POLICY=demo
+```
 
 **3. Deploy the services via script**
 
@@ -201,7 +268,7 @@ curl localhost:5000
 
 [Top](#introduction)
 
-## TESTING THE END-TO-END DEPLOYMENT
+## 4. TESTING THE END-TO-END DEPLOYMENT
 
 Now, if everything went according to plan, you'll be able to submit a test transaction to the Transaction Monitoring Service API and then be able to see the result of a complete end-to-end evaluation in the database. 
 
@@ -239,7 +306,7 @@ For this example, where the source code and test scripts are located in the C:\T
 
 <div style="text-align: right"><a href="#top">Top</a></div>
 
-## TROUBLESHOOTING TIPS
+## 5. TROUBLESHOOTING TIPS
 
 The services are split up in multiple yamls, 
 
@@ -295,13 +362,11 @@ List of \<services\>
 
 <div style="text-align: right"><a href="#top">Top</a></div>
 
-## Docker Compose YAML structure
+**Docker Compose YAML structure** 
 
-View this file for additional detail about the various Docker Compose YAML files and how they are structured and related:
+View this file for additional detail about the various Docker Compose YAML files and how they are structured and related: [Docker Compose YAML Structure Overview](./docker-yaml-structure.md)
 
-[Docker Compose YAML Structure Overview](./docker-yaml-structure.md)
-
-## APPENDIX 
+## 6. APPENDIX 
 
 This appendix will show you how to manually load the configuration and environment files in the Tazama full stack docker deployment for the public deployment option.
 
