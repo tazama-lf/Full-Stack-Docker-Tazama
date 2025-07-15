@@ -76,6 +76,9 @@ TAZAMA_VERSION=2.1.0
 # Authentication
 GH_TOKEN=${GH_TOKEN}
 
+# Docker CLI settings
+COMPOSE_BAKE=false
+
 # Branches
 TMS_BRANCH=main
 ED_BRANCH=main
