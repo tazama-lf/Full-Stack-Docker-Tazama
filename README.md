@@ -5,6 +5,11 @@
 - [1. INTRODUCTION](#1-introduction)
 - [2. PRE-REQUISITES](#2-pre-requisites)
 - [3. INSTALLATION STEPS](#3-installation-steps)
+  - [3.1. Clone the Full-Stack-Docker-Tazama Repository to Your Local Machine](#31-clone-the-full-stack-docker-tazama-repository-to-your-local-machine)
+  - [3.2. Update the Full-Stack-Docker-Tazama Configuration Files (optional)](#32-update-the-full-stack-docker-tazama-configuration-files-optional)
+  - [3.3. Deploy the services via script](#33-deploy-the-services-via-script)
+  - [3.4. Access deployed components](#34-access-deployed-components)
+  - [3.5. Overview of services](#35-overview-of-services)
 - [4. TESTING THE END-TO-END DEPLOYMENT](#4-testing-the-end-to-end-deployment)
 - [5. TROUBLESHOOTING TIPS](#5-troubleshooting-tips)
 - [6. APPENDIX](#6-appendix)
@@ -32,9 +37,11 @@ The pre-requisites that are essential to be able to follow this guide to the let
 
 Instructions for installing the dependencies and setting up the GH_TOKEN environment variable can be found in the [Development Environment Set up Guide](https://github.com/tazama-lf/docs/blob/dev/Guides/dev-set-up-environment.md)
 
+<div style="text-align: right"><a href="#top">Top</a></div>
+
 ## 3. INSTALLATION STEPS
 
-**1. Clone the Full-Stack-Docker-Tazama Repository to Your Local Machine**
+### 3.1. Clone the Full-Stack-Docker-Tazama Repository to Your Local Machine  
 
 In a Windows Command Prompt, navigate to the folder where you want to store a copy of the source code. For example, the source code root folder path I have been using to compile this guide is C:\Tazama\GitHub. Once in your source code root folder, clone (copy) the repository with the following command:
 
@@ -48,10 +55,11 @@ If you would like to deploy the system from the `dev` branch, replace `main` abo
 
 ![clone-the-repo](/images/full-stack-docker-tazama-clone-the-repo.png)
 
-**2. Update the Full-Stack-Docker-Tazama Configuration Files**
+<div style="text-align: right"><a href="#top">Top</a></div>
 
+### 3.2. Update the Full-Stack-Docker-Tazama Configuration Files (optional)  
 
-**2.1. Optional updates to .env file**
+**3.2.1. Optional updates to .env file**
 
 This optional step is only applicable to Option 1 (Deployment from GitHub) and allows editing of the basic environment variables to guide the Docker Compose installation.
 
@@ -115,7 +123,7 @@ LS_MEM_LIMIT=1073741824
 ```
 <div style="text-align: right"><a href="#top">Top</a></div>
 
-**2.2. Optional steps for deploying the demo UI**
+**3.2.2 Optional steps for deploying the demo UI**
 
 One of the optional items in the deployment step below, is to deploy the demo UI.  In order to successfully deploy the demo, the following 2 files `ui.env` and `docker-compose.dev.ui.yaml` must be created or updated before the deployment step (start.bat/ start.sh) below. The demo will not deploy successfully without them.  
 
@@ -123,7 +131,7 @@ One of the optional items in the deployment step below, is to deploy the demo UI
 
 The `ui.env` file should exist in the following location (as shown below in a code editor such as VSCode)
 
-![location of ui.env file](../images/demo-uienv-location.png)
+![location of ui.env file](/images/demo-uienv-location.png)
 
 The `ui.env` file should contain the following contents
 
@@ -148,11 +156,11 @@ NEXT_PUBLIC_EVENT_TYPES="['pacs.008.001.10', 'pacs.002.001.12', 'pain.001.001.11
 NEXT_PUBLIC_CONDITION_REASONS="['Suspicion of Money Laundering', 'Violation of KYC/AML Requirements', 'Suspicion of Terrorist Financing', 'Tax Evasion Concerns', 'Regulatory Reporting Thresholds', 'Unusual Transaction Patterns', 'High-Risk Countries', 'Multiple Failed Login Attempts', 'Fraudulent Activity', 'Phishing or Account Takeover', 'Suspicious Beneficiaries', 'System Errors', 'Exceeding Limits', 'Legal Holds or Court Orders', 'Adverse media reports', 'Dormant or Inactive Accounts', 'Internal Bank Policies']"
 ```
 
-##### FILE 2: docker-compose.dev.ui.yaml <!-- omit in toc -->
+##### FILE 2: docker-compose.dev.ui.yaml  <!-- omit in toc -->
 
 The `docker-compose.dev.ui.yaml` file should exist in the following location (as shown below in a code editor such as VSCode)
 
-![location of ui.env file](../images/demo-ui-yaml-location.png)
+![location of ui.env file](/images/demo-ui-yaml-location.png)
 
 The `docker-compose.dev.ui.yaml` file should contain the following contents
 
@@ -177,7 +185,9 @@ services:
       - CORS_POLICY=demo
 ```
 
-**3. Deploy the services via script**
+<div style="text-align: right"><a href="#top">Top</a></div>
+
+### 3.3. Deploy the services via script  
 
 First, start the Docker Desktop for Windows application.
 
@@ -190,7 +200,7 @@ Powershell: `.\start.bat`
 **Unix (Linux/MacOS)**
 Any terminal: `./start.sh`
 
-> [!IMPORTANT]  
+> !!!IMPORTANT
 > Ensure the script has the correct permissions to run. You may need to run `chmod +x start.sh` beforehand.
 
 **Output:**
@@ -198,9 +208,9 @@ Any terminal: `./start.sh`
 ![start-services-1](/images/full-stack-docker-tazama-start-bat-1.png)
 
 The installation script provides 3 docker deployment options
-1. Public deployment is a basic rule sample where the system is built from the source code in GitHub (this option is most useful for developers to explore the system)
-2. Full service deployment using pre-built images published on DockerHub.  Full service includes deploying all the current Tazama rules
-3. Public deployment using pre-built images published on DockerHub. This option is similar to option 1 but instead of building the images from source code, the deployment is from pre-built images on DockerHub
+1. Public deployment is a basic rule sample where the system is built from the source code in GitHub (this option is most useful for developers to explore the system). By changing the branches in the `.env` file it is possible to deploy from branches other than main e.g. dev or a feature branch
+2. Full service deployment using pre-built images published on DockerHub from the main branch.  Full service includes deploying all the current Tazama rules
+3. Public deployment using pre-built images published on DockerHub from the main branch. This option is similar to option 1 but instead of building the images from source code, the deployment is from pre-built images on DockerHub
 
 ![select-option](/images/full-stack-docker-tazama-select-option.png)
 
@@ -208,7 +218,7 @@ Enter your choice, type `1`, `2` or `3` and press enter.
 
 **PUBLIC DEPLOYMENT**
 
-For options 1 and 3 (Public deployment), the following optional addons will appear as per the screen below
+For options 1 and 3 (Public deployment), the following optional add-ons will appear as per the screen below
 
 > NOTE: It is currently not possible to select `Authentication` and `Demo UI` at the same time.
 
@@ -228,7 +238,7 @@ For option 2 (Full service deployment) the output will be as follows:
 
 ![full-service-deployed](/images/full-stack-docker-tazama-full-service-option.png)
 
-**4. Access deployed components**
+### 3.4. Access deployed components  
 
 You'll be able to access the web interfaces for the deployed components through their respective TCP/IP ports on your local machine as defined in the `docker-compose.yaml` file.
 
@@ -239,7 +249,7 @@ If your machine is open to your local area network, you will also be able to acc
 
 <div style="text-align: right"><a href="#top">Top</a></div>
 
-**5. Overview of services**
+### 3.5. Overview of services
 
 Tazama core services provides the foundational infrastructure components for the system and includes the ArangoDB, NATS and valkey services: ArangoDB provides the database infrastructure, NATS provides the pub/sub functionality and valkey provides for fast in-memory processor data caching.
 
@@ -266,7 +276,7 @@ curl localhost:5000
 
 ![execute-config](./images/full-stack-docker-tazama-curl.png)
 
-[Top](#introduction)
+<div style="text-align: right"><a href="#top">Top</a></div>
 
 ## 4. TESTING THE END-TO-END DEPLOYMENT
 
@@ -322,10 +332,10 @@ The services are split up in multiple yamls,
 | docker-compose.(dev.)apm-elastic  | event-sidecar, lumberjack, elasticsearch, kibana, apmserver |
 | docker-compose.(dev.)relay        | relay-service                                               |
 
-> [!IMPORTANT]  
+> !!!Note
 > Turn off `tms` API authentication for the `Demo UI` to work.
 
-> [!NOTE]
+> !!!Note
 > Compose files without (.dev.) will pull pre-built images from DockerHub
 
 If you want to restart or alter certain processors - 
