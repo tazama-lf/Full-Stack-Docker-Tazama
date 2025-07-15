@@ -14,26 +14,23 @@
 
 This guide will show you how to install the Tazama system, using only the publicly available open source software components, in a Docker container on a single local Windows machine. This is a multi-layered docker compose stack which spins up Tazama components. A Windows [batch script](start.bat) and a Unix [shell script](start.sh) have been provided which may be used to start containers that are usually used together in Tazama.
 
-The full stack docker installation is intended for exploratory purposes and not for a production implementation.
+This full stack docker installation is intended for exploratory purposes and not for a production implementation.
 
 ## 2. PRE-REQUISITES
 
-Set up your development environment as recommended in the [Tazama Contribution Guide](./guides/dev-set-up-environment.md)
-
 The pre-requisites that are essential to be able to follow this guide to the letter are:
 
- - Docker Desktop for Windows (and WSL)
- - Git
- - A code editor (this guide will assume you are using VS Code)
-  - A GitHub personal access token with `packages:write` and `read:org` permissions
-   - Ensure that your GitHub Personal Access Token is added as a Windows Environment Variable called "`GH_TOKEN`".
-  - Instructions for creating the GH_TOKEN environment variable can be found in the [Setting up GitHub Token Locally](https://github.com/tazama-lf/docs/blob/dev/Guides/dev-set-up-environment.md)
+- Git
+- Code editor (this guide will assume you are using VS Code)
+- Docker Desktop for Windows (and WSL)
+- GitHub personal access token
 
-     - We will be referencing your GitHub Personal Access Token throughout the installation process as your `GH_TOKEN`. It is not possible to retrieve the token from GitHub after you initially created it, but if the token had been set in Windows as an environment variable, you can retrieve it with the following command from a Windows Command Prompt:
+> **Notes on GitHub personal access token**
+> - A GitHub personal access token must be created with `packages:write` and `read:org` permissions
+> - Ensure that your GitHub Personal Access Token is added as a Windows Environment Variable called "`GH_TOKEN`"
+> - We will be referencing your GitHub Personal Access Token throughout the installation process as your `GH_TOKEN`. It is not possible to retrieve the token from GitHub after you initially created it, but if the token had been set in Windows as an environment variable, you can retrieve it with the following command from a Windows Command Prompt: `set GH_TOKEN`
 
-        ```
-        set GH_TOKEN
-        ```
+Instructions for installing the dependencies and setting up the GH_TOKEN environment variable can be found in the [Development Environment Set up Guide](https://github.com/tazama-lf/docs/blob/dev/Guides/dev-set-up-environment.md)
 
 ## 3. INSTALLATION STEPS
 
