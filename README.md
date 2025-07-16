@@ -2,24 +2,33 @@
 
 <a id="top"></a>
 
-- [1. INTRODUCTION](#1-introduction)
-- [2. PRE-REQUISITES](#2-pre-requisites)
-- [3. INSTALLATION STEPS](#3-installation-steps)
-  - [3.1. Clone the Full-Stack-Docker-Tazama Repository to Your Local Machine](#31-clone-the-full-stack-docker-tazama-repository-to-your-local-machine)
-  - [3.2. Update the Full-Stack-Docker-Tazama Configuration Files (optional)](#32-update-the-full-stack-docker-tazama-configuration-files-optional)
-  - [3.3. Deploy the services via script](#33-deploy-the-services-via-script)
-  - [3.4. Access deployed components](#34-access-deployed-components)
-  - [3.5. Overview of services](#35-overview-of-services)
-- [4. TESTING THE END-TO-END DEPLOYMENT](#4-testing-the-end-to-end-deployment)
-- [5. TROUBLESHOOTING TIPS](#5-troubleshooting-tips)
-- [6. APPENDIX](#6-appendix)
+- [FULL STACK DOCKER DEPLOYMENT](#full-stack-docker-deployment)
+  - [1. INTRODUCTION](#1-introduction)
+  - [2. PRE-REQUISITES](#2-pre-requisites)
+  - [3. INSTALLATION STEPS](#3-installation-steps)
+    - [3.1. Clone the Full-Stack-Docker-Tazama Repository to Your Local Machine](#31-clone-the-full-stack-docker-tazama-repository-to-your-local-machine)
+    - [3.2. Update the Full-Stack-Docker-Tazama Configuration Files (optional)](#32-update-the-full-stack-docker-tazama-configuration-files-optional)
+    - [3.3. Deploy the services via script](#33-deploy-the-services-via-script)
+    - [3.4. Access deployed components](#34-access-deployed-components)
+    - [3.5. Overview of services](#35-overview-of-services)
+  - [4. TESTING THE END-TO-END DEPLOYMENT](#4-testing-the-end-to-end-deployment)
+  - [5. TROUBLESHOOTING TIPS](#5-troubleshooting-tips)
+  - [6. APPENDIX](#6-appendix)
 
+#### $\color{red}{\text{WARNING - THIS TAZAMA REPOSITORY IS TO BE USED FOR DEMONSTRATION, EXPLORATION AND TESTING PURPOSES ONLY.}}$
+
+For production deployment instructions:
+
+ - [On-Premise Detailed Installation Guide](https://github.com/tazama-lf/On-Prem-helm)
+ - [AWS Detailed Installation Guide](https://github.com/tazama-lf/EKS-helm)
+ - [Google Cloud Detailed Installation Guide](https://github.com/tazama-lf/GKE-helm)
+ - [Azure Detailed Installation Guide](https://github.com/tazama-lf/AKS-helm)
+
+# FULL STACK DOCKER DEPLOYMENT
 
 ## 1. INTRODUCTION
 
 This guide will show you how to install the Tazama system, using only the publicly available open source software components, in a Docker container on a single local Windows machine. This is a multi-layered docker compose stack which spins up Tazama components. A Windows [batch script](start.bat) and a Unix [shell script](start.sh) have been provided which may be used to start containers that are usually used together in Tazama.
-
-This full stack docker installation is intended for exploratory purposes and not for a production implementation.
 
 ## 2. PRE-REQUISITES
 
