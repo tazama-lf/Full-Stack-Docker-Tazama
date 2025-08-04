@@ -144,7 +144,7 @@ The `ui.env` file should exist in the following location (as shown below in a co
 
 The `ui.env` file should contain the following contents
 
-```JSON
+```javascript
 # SPDX-License-Identifier: Apache-2.0
 
 NEXT_PUBLIC_URL="http://localhost:3001"
@@ -173,7 +173,7 @@ The `docker-compose.dev.ui.yaml` file should exist in the following location (as
 
 The `docker-compose.dev.ui.yaml` file should contain the following contents
 
-```JSON
+```javascript
 services:
   ui:
     image: tazamaorg/demo-ui:v2.1.0
