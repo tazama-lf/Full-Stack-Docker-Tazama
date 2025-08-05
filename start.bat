@@ -71,7 +71,7 @@ goto :addons
 if "%IS_GITHUB_DEPLOYMENT%" == "1" (
     set "cmd=docker compose -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.dev.db.yaml -f docker-compose.dev.rule.yaml -f docker-compose.dev.yaml"
 ) else (
-    set "cmd=docker compose -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.rule.yaml"
+    set "cmd=docker compose -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.dev.db.yaml -f docker-compose.rule.yaml"
 )
 if "%auth%" == "[X]" (
     if "%IS_GITHUB_DEPLOYMENT%" == "1" (
