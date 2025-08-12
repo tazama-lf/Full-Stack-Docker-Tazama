@@ -15,12 +15,10 @@ services:
       args:
         - GH_TOKEN
     env_file:
-      - env/rs.env
+      - env/rs-nats-tp.env
       - .env
     restart: always
-    environment:
-      FUNCTION_NAME: tp-relay
-      CONSUMER_STREAM: interdiction-service
+#    environment:
     depends_on:
       - tp
 
@@ -31,11 +29,9 @@ services:
       args:
         - GH_TOKEN
     env_file:
-      - env/rs.env
+      - env/rs-nats-tadp.env
       - .env
     restart: always
-    environment:
-      FUNCTION_NAME: tadp-relay
-      CONSUMER_STREAM: cms
+#    environment:
     depends_on:
       - tadp

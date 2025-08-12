@@ -1,6 +1,6 @@
 services:
   ui:
-    image: tazamaorg/demo-ui:v2.0.12-uat
+    image: tazamaorg/demo-ui:v2.2.0
     restart: always
     env_file:
       - env/ui.env
