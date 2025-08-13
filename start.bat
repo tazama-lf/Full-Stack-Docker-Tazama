@@ -106,6 +106,11 @@ if "%relay%" == "[X]" if "%IS_GITHUB_DEPLOYMENT%" == "1" (
 echo.
 echo Command to run: %cmd% -p tazama up -d
 set /p "confirm=Press (e) to execute, (q) to quit or any other key to go back: "
+rem echo stopping existing tazama containers...
+rem docker compose -p tazama down > nul 2>&1
+echo.
+echo deploying tazama from docker hub...
+echo.
 if "%confirm%"=="e" (
     %cmd% -p tazama up -d --remove-orphans
     goto :end
@@ -121,6 +126,7 @@ cls
 set "cmd=docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.full.yaml -f docker-compose.relay.yaml -f docker-compose.dev.ui.yaml -f docker-compose.dev.nats-utils.yaml up -d"
 echo stopping existing tazama containers...
 docker compose -p tazama down > nul 2>&1
+echo.
 echo deploying tazama from docker hub...
 echo.
 echo Command to run: %cmd% -p tazama up -d
