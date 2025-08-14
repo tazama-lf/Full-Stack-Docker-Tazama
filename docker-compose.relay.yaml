@@ -9,23 +9,21 @@ services:
     environment:
       SUPPRESS_ALERTS: false
   rs1:
-    image: tazamaorg/relay-service:${TAZAMA_VERSION}
+    image: tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}
     env_file:
-      - env/rs.env
+      - env/rs-nats-tp.env
       - .env
-    environment:
-      FUNCTION_NAME: tp-relay
-      CONSUMER_STREAM: interdiction-service
+    restart: always
+#    environment:
     depends_on:
       - tp
 
   rs2:
-    image: tazamaorg/relay-service:${TAZAMA_VERSION}
+    image: tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}
     env_file:
-      - env/rs.env
+      - env/rs-nats-tadp.env
       - .env
-    environment:
-      FUNCTION_NAME: tadp-relay
-      CONSUMER_STREAM: cms
+    restart: always
+#    environment:
     depends_on:
       - tadp

@@ -1,5 +1,6 @@
 services:
   nats-utilities:
+    image: !reset null
     build:
       context: https://github.com/tazama-lf/nats-utilities.git#${NATS_UTILITIES_BRANCH}
       args:

@@ -9,6 +9,7 @@ declare -A addons=(
     [4]="[Elastic] APM"
     [5]="Demo UI"
     [6]="Relay"
+    [99]="NATS Utilities"
 )
 
 declare -A addon_files_dev=(
@@ -16,8 +17,9 @@ declare -A addon_files_dev=(
     [2]="docker-compose.dev.logs-base.yaml -f docker-compose.logs.yaml"
     [3]="docker-compose.dev.logs-elastic.yaml -f docker-compose.logs-elastic.base.yaml"
     [4]="docker-compose.dev.apm-elastic.yaml"
-    [5]="docker-compose.dev.ui.yaml -f docker-compose.dev.ui.override.yaml"
+    [5]="docker-compose.dev.ui.yaml"
     [6]="docker-compose.dev.relay.yaml"
+    [99]="docker-compose.dev.nats-utils.yaml"
 )
 
 declare -A addon_files=(
@@ -25,8 +27,9 @@ declare -A addon_files=(
     [2]="docker-compose.logs-base.yaml -f docker-compose.logs.yaml"
     [3]="docker-compose.logs-elastic.yaml -f docker-compose.logs-elastic.base.yaml"
     [4]="docker-compose.dev.apm-elastic.yaml"
-    [5]="docker-compose.dev.ui.yaml -f docker-compose.dev.ui.override.yaml"
+    [5]="docker-compose.dev.ui.yaml"
     [6]="docker-compose.relay.yaml"
+    [99]="docker-compose.dev.nats-utils.yaml"
 )
 
 declare -A selected
@@ -35,7 +38,8 @@ deploy_full_service() {
     echo "stopping existing tazama containers..."
     docker compose -p tazama down > /dev/null 2>&1
     echo "deploying Tazama from docker hub..."
-    docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.full.yaml -f docker-compose.relay.yaml -f docker-compose.dev.ui.yaml up -d
+    # with authentication: docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.full.yaml -f docker-compose.auth.base.yaml -f docker-compose.relay.yaml -f docker-compose.dev.ui.yaml -f docker-compose.dev.nats-utils.yaml up -d
+    docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.full.yaml -f docker-compose.relay.yaml -f docker-compose.dev.ui.yaml -f docker-compose.dev.nats-utils.yaml up -d
     exit 0
 }
 
@@ -43,7 +47,7 @@ print_menu() {
     clear
     echo "Select docker deployment type:"
     echo "1. Public - (GitHub)"
-    echo "2. Full-service (DockerHub)"
+    echo "2 Full-service (DockerHub)"
     echo "3. Public (DockerHub)"
     # echo "2. Advanced"
     echo
