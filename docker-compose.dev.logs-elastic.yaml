@@ -4,6 +4,7 @@ services:
       file: docker-compose.dev.logs-base.yaml
       service: event-sidecar
   lumberjack:
+    image: !reset null
     build:
       context: https://github.com/tazama-lf/lumberjack.git#${LUMBERJACK_BRANCH}
       args:

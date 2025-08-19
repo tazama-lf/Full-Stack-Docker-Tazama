@@ -7,6 +7,7 @@ services:
     command: "start-dev --import-realm"
     env_file:
       - env/keycloak.env
+    restart: always
     environment:
       - KC_HOSTNAME=localhost
       - KC_HOSTNAME_STRICT_BACKCHANNEL=false
@@ -16,7 +17,6 @@ services:
       - ./auth/keycloak/realms/tazama-test-realm.json:/opt/keycloak/data/import/tazama-test-realm.json
     ports:
       - 8080:8080
-    restart: always
 
   # AUTH SERVICE
   auth:
@@ -24,11 +24,10 @@ services:
     env_file:
       - env/auth-service.env
       - .env
+    restart: always
     volumes:
       - ./auth/test-private-key.pem:/home/app/test-private-key.pem
     ports:
       - 3020:3020
-    restart: always
     depends_on:
-      - arango
       - keycloak

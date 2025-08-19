@@ -1,37 +1,56 @@
-- [INTRODUCTION](#introduction)
-- [PRE-REQUISITES](#pre-requisites)
-- [INSTALLATION STEPS](#installation-steps)
-- [TESTING THE END-TO-END DEPLOYMENT](#testing-the-end-to-end-deployment)
-- [TROUBLESHOOTING TIPS](#troubleshooting-tips)
-- [APPENDIX](#appendix)
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
-## INTRODUCTION
+<a id="top"></a>
+
+- [FULL STACK DOCKER DEPLOYMENT](#full-stack-docker-deployment)
+  - [1. INTRODUCTION](#1-introduction)
+  - [2. PRE-REQUISITES](#2-pre-requisites)
+  - [3. INSTALLATION STEPS](#3-installation-steps)
+    - [3.1. Clone the Full-Stack-Docker-Tazama Repository to Your Local Machine](#31-clone-the-full-stack-docker-tazama-repository-to-your-local-machine)
+    - [3.2. Update the Full-Stack-Docker-Tazama Configuration Files (optional)](#32-update-the-full-stack-docker-tazama-configuration-files-optional)
+    - [3.3. Deploy the services via script](#33-deploy-the-services-via-script)
+    - [3.4. Access deployed components](#34-access-deployed-components)
+    - [3.5. Overview of services](#35-overview-of-services)
+  - [4. TESTING THE END-TO-END DEPLOYMENT](#4-testing-the-end-to-end-deployment)
+  - [5. TROUBLESHOOTING TIPS](#5-troubleshooting-tips)
+  - [6. APPENDIX](#6-appendix)
+
+#### $\color{red}{\text{WARNING - THIS TAZAMA REPOSITORY IS TO BE USED FOR DEMONSTRATION, EXPLORATION AND TESTING PURPOSES ONLY.}}$
+
+For production deployment instructions:
+
+ - [On-Premise Detailed Installation Guide](https://github.com/tazama-lf/On-Prem-helm)
+ - [AWS Detailed Installation Guide](https://github.com/tazama-lf/EKS-helm)
+ - [Google Cloud Detailed Installation Guide](https://github.com/tazama-lf/GKE-helm)
+ - [Azure Detailed Installation Guide](https://github.com/tazama-lf/AKS-helm)
+
+# FULL STACK DOCKER DEPLOYMENT
+
+## 1. INTRODUCTION
 
 This guide will show you how to install the Tazama system, using only the publicly available open source software components, in a Docker container on a single local Windows machine. This is a multi-layered docker compose stack which spins up Tazama components. A Windows [batch script](start.bat) and a Unix [shell script](start.sh) have been provided which may be used to start containers that are usually used together in Tazama.
 
-## PRE-REQUISITES
-
-Set up your development environment as recommended in the [Tazama Contribution Guide](https://github.com/tazama-lf/.github/blob/main/CONTRIBUTING.md#32-setting-up-the-development-environment) section 3.2.1.
+## 2. PRE-REQUISITES
 
 The pre-requisites that are essential to be able to follow this guide to the letter are:
 
- - Docker Desktop for Windows (and WSL)
- - Git
- - A code editor (this guide will assume you are using VS Code)
-  - A GitHub personal access token with `packages:write` and `read:org` permissions
-   - Ensure that your GitHub Personal Access Token is added as a Windows Environment Variable called "`GH_TOKEN`".
-   - Instructions for creating the GH_TOKEN environment variable can be found in the [Tazama Contribution Guide (A. Preparation)](https://github.com/tazama-lf/.github/blob/main/CONTRIBUTING.md#a-preparation-)
+- Git
+- Code editor (this guide will assume you are using VS Code)
+- Docker Desktop for Windows (and WSL)
+- GitHub personal access token
 
-     - We will be referencing your GitHub Personal Access Token throughout the installation process as your `GH_TOKEN`. It is not possible to retrieve the token from GitHub after you initially created it, but if the token had been set in Windows as an environment variable, you can retrieve it with the following command from a Windows Command Prompt:
+> **Notes on GitHub personal access token**
+> - A GitHub personal access token must be created with `packages:write` and `read:org` permissions
+> - Ensure that your GitHub Personal Access Token is added as a Windows Environment Variable called "`GH_TOKEN`"
+> - We will be referencing your GitHub Personal Access Token throughout the installation process as your `GH_TOKEN`. It is not possible to retrieve the token from GitHub after you initially created it, but if the token had been set in Windows as an environment variable, you can retrieve it with the following command from a Windows Command Prompt: `set GH_TOKEN`
 
-        ```
-        set GH_TOKEN
-        ```
+Instructions for installing the dependencies and setting up the GH_TOKEN environment variable can be found in the [Development Environment Set up Guide](https://github.com/tazama-lf/docs/blob/dev/Guides/dev-set-up-environment.md)
 
-## INSTALLATION STEPS
+<div style="text-align: right"><a href="#top">Top</a></div>
 
-**1. Clone the Full-Stack-Docker-Tazama Repository to Your Local Machine**
+## 3. INSTALLATION STEPS
+
+### 3.1. Clone the Full-Stack-Docker-Tazama Repository to Your Local Machine  
 
 In a Windows Command Prompt, navigate to the folder where you want to store a copy of the source code. For example, the source code root folder path I have been using to compile this guide is C:\Tazama\GitHub. Once in your source code root folder, clone (copy) the repository with the following command:
 
@@ -45,7 +64,11 @@ If you would like to deploy the system from the `dev` branch, replace `main` abo
 
 ![clone-the-repo](/images/full-stack-docker-tazama-clone-the-repo.png)
 
-**2. Update the Full-Stack-Docker-Tazama Configuration Files**
+<div style="text-align: right"><a href="#top">Top</a></div>
+
+### 3.2. Update the Full-Stack-Docker-Tazama Configuration Files (optional)  
+
+**3.2.1. Optional updates to .env file**
 
 This optional step is only applicable to Option 1 (Deployment from GitHub) and allows editing of the basic environment variables to guide the Docker Compose installation.
 
@@ -69,6 +92,9 @@ TAZAMA_VERSION=2.1.0
 
 # Authentication
 GH_TOKEN=${GH_TOKEN}
+
+# Docker CLI settings
+COMPOSE_BAKE=false
 
 # Branches
 TMS_BRANCH=main
@@ -104,9 +130,73 @@ ES_MEM_LIMIT=1073741824
 KB_MEM_LIMIT=1073741824
 LS_MEM_LIMIT=1073741824
 ```
-[Top](#introduction)
+<div style="text-align: right"><a href="#top">Top</a></div>
 
-**3. Deploy the services via script**
+**3.2.2 Optional steps for deploying the demo UI**
+
+One of the optional items in the deployment step below, is to deploy the demo UI.  In order to successfully deploy the demo, the following 2 files `ui.env` and `docker-compose.dev.ui.yaml` must be created or updated before the deployment step (start.bat/ start.sh) below. The demo will not deploy successfully without them.  
+
+##### FILE 1: ui.env <!-- omit in toc -->
+
+The `ui.env` file should exist in the following location (as shown below in a code editor such as VSCode)
+
+![location of ui.env file](/images/demo-uienv-location.png)
+
+The `ui.env` file should contain the following contents
+
+```javascript
+# SPDX-License-Identifier: Apache-2.0
+
+NEXT_PUBLIC_URL="http://localhost:3001"
+PORT="3001"
+NEXT_PUBLIC_TMS_SERVER_URL="http://localhost:5000"
+NEXT_PUBLIC_TMS_KEY="no_key_set"
+NEXT_PUBLIC_CMS_NATS_HOSTING="nats://nats:4222"
+NEXT_PUBLIC_NATS_USERNAME=""
+NEXT_PUBLIC_NATS_PASSWORD=""
+NEXT_PUBLIC_ARANGO_DB_HOSTING="http://localhost:18529"
+NEXT_PUBLIC_ADMIN_SERVICE_HOSTING="http://localhost:5100"
+NEXT_PUBLIC_DB_USER="root"
+NEXT_PUBLIC_DB_PASSWORD=""
+NEXT_PUBLIC_WS_URL="http://localhost:3001"
+NEXT_PUBLIC_NATS_SUBSCRIPTIONS="['connection', '>', 'typology-999@1.0.0']"
+NEXT_PUBLIC_CONDITION_TYPES="['non-overridable-block', 'overridable-block', 'override']"
+NEXT_PUBLIC_EVENT_TYPES="['pacs.008.001.10', 'pacs.002.001.12', 'pain.001.001.11', 'pain.013.001.09']"
+NEXT_PUBLIC_CONDITION_REASONS="['Suspicion of Money Laundering', 'Violation of KYC/AML Requirements', 'Suspicion of Terrorist Financing', 'Tax Evasion Concerns', 'Regulatory Reporting Thresholds', 'Unusual Transaction Patterns', 'High-Risk Countries', 'Multiple Failed Login Attempts', 'Fraudulent Activity', 'Phishing or Account Takeover', 'Suspicious Beneficiaries', 'System Errors', 'Exceeding Limits', 'Legal Holds or Court Orders', 'Adverse media reports', 'Dormant or Inactive Accounts', 'Internal Bank Policies']"
+```
+
+##### FILE 2: docker-compose.dev.ui.yaml  <!-- omit in toc -->
+
+The `docker-compose.dev.ui.yaml` file should exist in the following location (as shown below in a code editor such as VSCode)
+
+![location of ui.env file](/images/demo-ui-yaml-location.png)
+
+The `docker-compose.dev.ui.yaml` file should contain the following contents
+
+```javascript
+services:
+  ui:
+    image: tazamaorg/demo-ui:v2.1.0
+    restart: always
+    env_file:
+      - env/ui.env
+    depends_on:
+      - tms
+      - arango
+      - nats
+    ports:
+      - "3001:3001"
+  tms:
+    environment:
+      - CORS_POLICY=demo
+  admin-service:
+      environment:
+      - CORS_POLICY=demo
+```
+
+<div style="text-align: right"><a href="#top">Top</a></div>
+
+### 3.3. Deploy the services via script  
 
 First, start the Docker Desktop for Windows application.
 
@@ -119,7 +209,7 @@ Powershell: `.\start.bat`
 **Unix (Linux/MacOS)**
 Any terminal: `./start.sh`
 
-> [!IMPORTANT]  
+> !!!IMPORTANT
 > Ensure the script has the correct permissions to run. You may need to run `chmod +x start.sh` beforehand.
 
 **Output:**
@@ -127,9 +217,9 @@ Any terminal: `./start.sh`
 ![start-services-1](/images/full-stack-docker-tazama-start-bat-1.png)
 
 The installation script provides 3 docker deployment options
-1. Public deployment is a basic rule sample where the system is built from the source code in GitHub (this option is most useful for developers to explore the system)
-2. Full service deployment using pre-built images published on DockerHub.  Full service includes deploying all the current Tazama rules
-3. Public deployment using pre-built images published on DockerHub. This option is similar to option 1 but instead of building the images from source code, the deployment is from pre-built images on DockerHub
+1. Public deployment is a basic rule sample where the system is built from the source code in GitHub (this option is most useful for developers to explore the system). By changing the branches in the `.env` file it is possible to deploy from branches other than main e.g. dev or a feature branch
+2. Full service deployment using pre-built images published on DockerHub from the main branch.  Full service includes deploying all the current Tazama rules
+3. Public deployment using pre-built images published on DockerHub from the main branch. This option is similar to option 1 but instead of building the images from source code, the deployment is from pre-built images on DockerHub
 
 ![select-option](/images/full-stack-docker-tazama-select-option.png)
 
@@ -137,7 +227,7 @@ Enter your choice, type `1`, `2` or `3` and press enter.
 
 **PUBLIC DEPLOYMENT**
 
-For options 1 and 3 (Public deployment), the following optional addons will appear as per the screen below
+For options 1 and 3 (Public deployment), the following optional add-ons will appear as per the screen below
 
 > NOTE: It is currently not possible to select `Authentication` and `Demo UI` at the same time.
 
@@ -157,7 +247,7 @@ For option 2 (Full service deployment) the output will be as follows:
 
 ![full-service-deployed](/images/full-stack-docker-tazama-full-service-option.png)
 
-**4. Access deployed components**
+### 3.4. Access deployed components  
 
 You'll be able to access the web interfaces for the deployed components through their respective TCP/IP ports on your local machine as defined in the `docker-compose.yaml` file.
 
@@ -166,9 +256,9 @@ You'll be able to access the web interfaces for the deployed components through 
 
 If your machine is open to your local area network, you will also be able to access these services from other computers on your network via your local machine's IP address.
 
-[Top](#introduction)
+<div style="text-align: right"><a href="#top">Top</a></div>
 
-**5. Overview of services**
+### 3.5. Overview of services
 
 Tazama core services provides the foundational infrastructure components for the system and includes the ArangoDB, NATS and valkey services: ArangoDB provides the database infrastructure, NATS provides the pub/sub functionality and valkey provides for fast in-memory processor data caching.
 
@@ -195,9 +285,9 @@ curl localhost:5000
 
 ![execute-config](./images/full-stack-docker-tazama-curl.png)
 
-[Top](#introduction)
+<div style="text-align: right"><a href="#top">Top</a></div>
 
-## TESTING THE END-TO-END DEPLOYMENT
+## 4. TESTING THE END-TO-END DEPLOYMENT
 
 Now, if everything went according to plan, you'll be able to submit a test transaction to the Transaction Monitoring Service API and then be able to see the result of a complete end-to-end evaluation in the database. 
 
@@ -233,9 +323,9 @@ For this example, where the source code and test scripts are located in the C:\T
 
 ![success](./images/full-stack-docker-tazama-success.png)
 
-[Top](#introduction)
+<div style="text-align: right"><a href="#top">Top</a></div>
 
-## TROUBLESHOOTING TIPS
+## 5. TROUBLESHOOTING TIPS
 
 The services are split up in multiple yamls, 
 
@@ -251,10 +341,10 @@ The services are split up in multiple yamls,
 | docker-compose.(dev.)apm-elastic  | event-sidecar, lumberjack, elasticsearch, kibana, apmserver |
 | docker-compose.(dev.)relay        | relay-service                                               |
 
-> [!IMPORTANT]  
+> !!!Note
 > Turn off `tms` API authentication for the `Demo UI` to work.
 
-> [!NOTE]
+> !!!Note
 > Compose files without (.dev.) will pull pre-built images from DockerHub
 
 If you want to restart or alter certain processors - 
@@ -289,7 +379,13 @@ List of \<services\>
 - kibana
 - apm-server
 
-## APPENDIX 
+<div style="text-align: right"><a href="#top">Top</a></div>
+
+**Docker Compose YAML structure** 
+
+View this file for additional detail about the various Docker Compose YAML files and how they are structured and related: [Docker Compose YAML Structure Overview](./docker-yaml-structure.md)
+
+## 6. APPENDIX 
 
 This appendix will show you how to manually load the configuration and environment files in the Tazama full stack docker deployment for the public deployment option.
 
@@ -316,3 +412,4 @@ newman run collection-file -e environment-file --timeout-request 10200
 
 ![execute-config](/images/full-stack-docker-tazama-load-config.png) 
 
+<div style="text-align: right"><a href="#top">Top</a></div>

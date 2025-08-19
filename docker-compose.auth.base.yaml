@@ -7,6 +7,7 @@ services:
     command: "start-dev --import-realm"
     env_file:
       - env/keycloak.env
+    restart: always
     environment:
       - KC_HOSTNAME=localhost
       - KC_HOSTNAME_STRICT_BACKCHANNEL=false
@@ -16,7 +17,6 @@ services:
       - ./auth/keycloak/realms/tazama-test-realm.json:/opt/keycloak/data/import/tazama-test-realm.json
     ports:
       - 8080:8080
-    restart: always
 
   tms:
     environment:
