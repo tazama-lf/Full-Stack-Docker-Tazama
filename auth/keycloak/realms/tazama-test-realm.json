@@ -519,6 +519,17 @@
           "containerId": "0f26b3dc-629d-4fcd-a2e6-de122af1a721",
           "attributes": {}
         }
+      ],
+      "tazama-tenant-client": [
+        {
+          "id": "7f8e9d6c-5b4a-3c2b-1a9d-8e7f6c5b4a32",
+          "name": "tenant-user",
+          "description": "Tenant user role for multi-tenant access",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "3d4e5f6a-7b8c-9d0e-1f2a-3b4c5d6e7f8a",
+          "attributes": {}
+        }
       ]
     }
   },
@@ -528,7 +539,9 @@
       "name": "tazama-admin",
       "path": "/tazama-admin",
       "subGroups": [],
-      "attributes": {},
+      "attributes": {
+        "TENANT_ID": ["tazama-tenant-default"]
+      },
       "realmRoles": [
         "GET_V1_EVENT_FLOW_CONTROL_ACCOUNT",
         "PUT_V1_EVENT_FLOW_CONTROL_CACHE",
@@ -546,7 +559,9 @@
       "name": "tazama-tms",
       "path": "/tazama-tms",
       "subGroups": [],
-      "attributes": {},
+      "attributes": {
+        "TENANT_ID": ["tazama-tenant-default"]
+      },
       "realmRoles": [
         "POST_V1_EVALUATE_ISO20022_PACS_008_001_10",
         "POST_V1_EVALUATE_ISO20022_PACS_002_001_12",
@@ -554,6 +569,21 @@
         "POST_V1_EVALUATE_ISO20022_PAIN_001_001_11"
       ],
       "clientRoles": {}
+    },
+    {
+      "id": "9f8e2c45-1a2b-4c3d-8e9f-f1e2d3c4b5a6",
+      "name": "tazama-tenant",
+      "path": "/tazama-tenant",
+      "subGroups": [],
+      "attributes": {
+        "TENANT_ID": ["tazama-tenant-default"]
+      },
+      "realmRoles": [],
+      "clientRoles": {
+        "tazama-tenant-client": [
+          "tenant-user"
+        ]
+      }
     }
   ],
   "defaultRole": {
@@ -636,6 +666,9 @@
       "enabled": true,
       "totp": false,
       "emailVerified": false,
+      "attributes": {
+        "TENANT_ID": ["tazama-tenant-default"]
+      },
       "credentials": [
         {
           "id": "a3e6fc0d-9243-4d1f-a41d-e38c47ff692f",
@@ -651,10 +684,16 @@
       "realmRoles": [
         "default-roles-tazama"
       ],
+      "clientRoles": {
+        "tazama-tenant-client": [
+          "tenant-user"
+        ]
+      },
       "notBefore": 0,
       "groups": [
         "/tazama-admin",
-        "/tazama-tms"
+        "/tazama-tms",
+        "/tazama-tenant"
       ]
     }
   ],
@@ -929,6 +968,108 @@
         "scopes": [],
         "decisionStrategy": "UNANIMOUS"
       }
+    },
+    {
+      "id": "3f8e9c2d-5a6b-4c7d-8e9f-1a2b3c4d5e6f",
+      "clientId": "tazama-tenant-client",
+      "name": "Tazama Tenant Client",
+      "description": "Client for Tazama tenant management and multi-tenancy support",
+      "rootUrl": "",
+      "adminUrl": "",
+      "baseUrl": "",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "tazama-tenant-client-secret",
+      "redirectUris": [
+        "/*"
+      ],
+      "webOrigins": [
+        "/*"
+      ],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": false,
+      "publicClient": false,
+      "frontchannelLogout": true,
+      "protocol": "openid-connect",
+      "attributes": {
+        "oidc.ciba.grant.enabled": "false",
+        "client.secret.creation.time": "1723456789",
+        "backchannel.logout.session.required": "true",
+        "post.logout.redirect.uris": "+",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.revoke.offline.tokens": "false"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "protocolMappers": [
+        {
+          "id": "7e2f3a4b-5c6d-7e8f-9a0b-1c2d3e4f5a6b",
+          "name": "TENANT_ID Mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "TENANT_ID",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "TENANT_ID",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "id": "8f3e4b5c-6d7e-8f9a-0b1c-2d3e4f5a6b7c",
+          "name": "Group TENANT_ID Mapper", 
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true", 
+            "access.token.claim": "true",
+            "claim.name": "groups",
+            "full.path": "false"
+          }
+        },
+        {
+          "id": "9a4f5c6d-7e8f-9a0b-1c2d-3e4f5a6b7c8d",
+          "name": "Client ID Mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usersessionmodel-note-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.session.note": "client_id",
+            "introspection.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "client_id",
+            "jsonType.label": "String"
+          }
+        }
+      ],
+      "defaultClientScopes": [
+        "web-origins",
+        "acr", 
+        "roles",
+        "profile",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ]
     },
     {
       "id": "8335d6d7-fb58-4297-ae7b-1c0418a1a830",
