@@ -11,6 +11,7 @@ set "elasticapm=[ ]"
 set "natsutils=[ ]"
 set "ui=[ ]"
 set "relay=[ ]"
+set "config=[ ]"
 
 cls
 echo Select docker deployment type:
@@ -47,6 +48,7 @@ echo 3. %elasticlogs% [Elastic] Logging
 echo 4. %elasticapm% [Elastic] APM
 echo 5. %ui% Demo UI
 echo 6. %relay% Relay
+echo 7. %config% Config Service
 echo.
 echo Apply current selection (a), Toggle addon (1-6) or quit (q)
 set /p "choice=Enter your choice: "
@@ -61,6 +63,7 @@ if "%choice%"=="3" if "%elasticlogs%" == "[ ]" (set "elasticlogs=[X]") else (set
 if "%choice%"=="4" if "%elasticapm%" == "[ ]" (set "elasticapm=[X]") else (set "elasticapm=[ ]")
 if "%choice%"=="5" if "%ui%" == "[ ]" (set "ui=[X]") else (set "ui=[ ]")
 if "%choice%"=="6" if "%relay%" == "[ ]" (set "relay=[X]") else (set "relay=[ ]")
+if "%choice%"=="7" if "%config%" == "[ ]" (set "config=[X]") else (set "config=[ ]")
 
 @REM Nats utils not part of standard deployment
 if "%choice%"=="99" if "%natsutils%" == "[ ]" (set "natsutils=[X]") else (set "natsutils=[ ]")
@@ -101,6 +104,11 @@ if "%relay%" == "[X]" if "%IS_GITHUB_DEPLOYMENT%" == "1" (
     set "cmd=%cmd% -f docker-compose.dev.relay.yaml"
 ) else (
     set "cmd=%cmd% -f docker-compose.relay.yaml"
+)
+if "%config%" == "[X]" if "%IS_GITHUB_DEPLOYMENT%" == "1" (
+    set "cmd=%cmd% -f docker-compose.dev.config.yaml"
+) else (
+    set "cmd=%cmd% -f docker-compose.config.yaml"
 )
 
 echo.
