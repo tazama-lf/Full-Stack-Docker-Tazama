@@ -19,7 +19,7 @@ services:
       - ${TMS_PORT}:3000
     depends_on:
       - valkey
-      - arango
+      - postgres
       - nats
 
   # EVENT DIRECTOR
@@ -35,7 +35,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
       - nats
 
   # TYPOLOGY PROCESSOR
@@ -51,7 +51,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
       - nats
 
   # TRANSACTION AGGREGATION AND DECISIONING PROCESSOR
@@ -67,7 +67,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
       - nats
   
   admin-service:
@@ -83,19 +83,19 @@ services:
     ports:
       - ${ADMIN_PORT}:3100
     depends_on:
-      - arango
+      - postgres
       - valkey
 
-  ef:
-    image: !reset null
-    build:
-      context: https://github.com/tazama-lf/event-flow.git#${EVENT_FLOW_BRANCH}
-      args:
-        - GH_TOKEN
-    env_file:
-      - env/event-flow.env
-      - .env
-    restart: always
-    depends_on:
-      - arango
-      - valkey
+  # ef:
+  #   image: !reset null
+  #   build:
+  #     context: https://github.com/tazama-lf/event-flow.git#${EVENT_FLOW_BRANCH}
+  #     args:
+  #       - GH_TOKEN
+  #   env_file:
+  #     - env/event-flow.env
+  #     - .env
+  #   restart: always
+  #   depends_on:
+  #     - postgres
+  #     - valkey

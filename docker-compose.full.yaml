@@ -13,7 +13,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 002
   rule-002:
@@ -28,7 +28,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 003
   rule-003:
@@ -43,7 +43,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 004
   rule-004:
@@ -58,7 +58,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 006
   rule-006:
@@ -73,7 +73,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 007
   rule-007:
@@ -88,7 +88,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 008
   rule-008:
@@ -103,7 +103,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 010
   rule-010:
@@ -118,7 +118,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 011
   rule-011:
@@ -133,7 +133,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 016
   rule-016:
@@ -148,7 +148,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 017
   rule-017:
@@ -163,7 +163,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 018
   rule-018:
@@ -178,7 +178,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 020
   rule-020:
@@ -193,7 +193,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 021
   rule-021:
@@ -208,7 +208,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 024
   rule-024:
@@ -223,7 +223,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 025
   rule-025:
@@ -238,7 +238,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 026
   rule-026:
@@ -253,7 +253,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 027
   rule-027:
@@ -268,7 +268,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 028
   rule-028:
@@ -283,7 +283,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 030
   rule-030:
@@ -298,7 +298,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 044
   rule-044:
@@ -313,7 +313,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 045
   rule-045:
@@ -328,7 +328,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 048
   rule-048:
@@ -343,7 +343,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 054
   rule-054:
@@ -358,7 +358,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 063
   rule-063:
@@ -373,7 +373,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 074
   rule-074:
@@ -388,7 +388,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 075
   rule-075:
@@ -403,7 +403,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 076
   rule-076:
@@ -418,7 +418,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 078
   rule-078:
@@ -433,7 +433,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 083
   rule-083:
@@ -448,7 +448,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 084
   rule-084:
@@ -463,7 +463,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 090
   rule-090:
@@ -478,7 +478,7 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
 
   # RULE 091
   rule-091:
@@ -493,4 +493,4 @@ services:
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres

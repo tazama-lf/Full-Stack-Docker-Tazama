@@ -6,7 +6,7 @@ services:
       - env/ui.env
     depends_on:
       - tms
-      - arango
+      - postgres
       - nats
     ports:
       - "3001:3001"
