@@ -14,6 +14,11 @@ services:
     env_file:
       - env/tms.env
       - .env
+    environment:
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=UNUSED
     restart: always
     ports:
       - ${TMS_PORT}:3000
@@ -32,6 +37,9 @@ services:
     env_file:
       - env/ed.env
       - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
     restart: always
     depends_on:
       - valkey
@@ -48,6 +56,9 @@ services:
     env_file:
       - env/tp.env
       - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
     restart: always
     depends_on:
       - valkey
@@ -64,6 +75,13 @@ services:
     env_file:
       - env/tadp.env
       - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+      - EVALUATION_DATABASE_USER=postgres
+      - EVALUATION_DATABASE_PASSWORD=unused
     restart: always
     depends_on:
       - valkey
@@ -79,6 +97,15 @@ services:
     env_file:
       - env/admin.env
       - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+      - EVALUATION_DATABASE_USER=postgres
+      - EVALUATION_DATABASE_PASSWORD=unused
     restart: always
     ports:
       - ${ADMIN_PORT}:3100

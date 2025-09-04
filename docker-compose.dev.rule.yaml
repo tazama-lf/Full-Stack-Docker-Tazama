@@ -9,6 +9,13 @@ services:
     env_file:
       - env/rule-executer.env
       - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
     restart: always
     depends_on:
       - valkey
