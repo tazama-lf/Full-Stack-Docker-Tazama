@@ -182,7 +182,7 @@ services:
       - env/ui.env
     depends_on:
       - tms
-      - arango
+      - postgres
       - nats
     ports:
       - "3001:3001"
@@ -251,7 +251,7 @@ For option 2 (Full service deployment) the output will be as follows:
 
 You'll be able to access the web interfaces for the deployed components through their respective TCP/IP ports on your local machine as defined in the `docker-compose.yaml` file.
 
- - ArangoDB: <http://localhost:18529>
+ - PostgresSQL: <http://localhost:15432>
  - NATS: <http://localhost:18222>
 
 If your machine is open to your local area network, you will also be able to access these services from other computers on your network via your local machine's IP address.
@@ -260,9 +260,9 @@ If your machine is open to your local area network, you will also be able to acc
 
 ### 3.5. Overview of services
 
-Tazama core services provides the foundational infrastructure components for the system and includes the ArangoDB, NATS and valkey services: ArangoDB provides the database infrastructure, NATS provides the pub/sub functionality and valkey provides for fast in-memory processor data caching.
+Tazama core services provides the foundational infrastructure components for the system and includes the Postgres, NATS and valkey services: Postgres provides the database infrastructure, NATS provides the pub/sub functionality and valkey provides for fast in-memory processor data caching.
 
-Tazama is configured by loading the network map, rules and typology configurations required to evaluate a transaction via the ArangoDB API. The steps above have already loaded the default configuration into the database.
+Tazama is configured by loading the network map, rules and typology configurations required to evaluate a transaction supplied by PostgreSQL. The steps above have already loaded the default configuration into the database.
 
 For an optional step to load the Tazama configuration manually, follow the instructions in the [Appendix](#appendix)
 
@@ -333,7 +333,7 @@ The services are split up in multiple yamls,
 | --------------------------------- | ----------------------------------------------------------- |
 | docker-compose                    | tms, ed, tp, tadp, admin, ef                                |
 | docker-compose.override           | rule-901, set up all services                               |
-| docker-compose.infrastructure     | arango, nats, valkey                                        |
+| docker-compose.infrastructure     | postgres, nats, valkey                                        |
 | docker-compose.(dev.)nats-utils   | nats-utilities                                              |
 | docker-compose.(dev.)auth         | keycloak, auth-service, tms changes                         |
 | docker-compose.(dev.)logs-base    | event-sidecar, lumberjack, all service changes              |
@@ -361,7 +361,7 @@ Stopping individual (or multiple) services
 `docker compose down <service> <service2> <service3>`
 
 List of \<services\>  
-- arango  
+- postgres  
 - nats  
 - tms   
 - ed  
@@ -398,7 +398,7 @@ git clone https://github.com/tazama-lf/postman -b main
 
 ![clone-config](/images/full-stack-docker-tazama-clone-postman.png)
 
-Perform the following Newman command to load the configuration into the ArangoDB databases and collections:
+Perform the following Newman command to load the configuration into the PostgreSQL databases and collections:
 
 ```
 newman run collection-file -e environment-file --timeout-request 10200
