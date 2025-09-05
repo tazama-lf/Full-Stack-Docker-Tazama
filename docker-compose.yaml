@@ -94,12 +94,12 @@ services:
       - postgres
       - valkey
 
-  # ef:
-  #   image: tazamaorg/event-flow:${TAZAMA_VERSION}
-  #   env_file:
-  #     - env/event-flow.env
-  #     - .env
-  #   restart: always
-  #   depends_on:
-  #     - postgres
-  #     - valkey
+  ef:
+    image: tazamaorg/event-flow:${TAZAMA_VERSION}
+    env_file:
+      - env/event-flow.env
+      - .env
+    restart: always
+    depends_on:
+      - postgres
+      - valkey
