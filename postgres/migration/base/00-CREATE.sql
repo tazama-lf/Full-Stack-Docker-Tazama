@@ -55,43 +55,39 @@ create table condition (
 );
 
 create table governed_as_creditor_account_by (
-    id serial,
     source varchar references account(id),
     destination varchar references condition(id),
     evtTp text [] not null,
     incptnDtTm timestamptz not null,
     xprtnDtTm timestamptz,
-    primary key (id, source, destination)
+    primary key (source, destination)
 );
 
 create table governed_as_creditor_by (
-    id serial,
     source varchar references entity(id),
     destination varchar references condition(id),
     evtTp TEXT [] not null,
     incptnDtTm timestamptz not null,
     xprtnDtTm timestamptz,
-    primary key (id, source, destination)
+    primary key (source, destination)
 );
 
 create table governed_as_debtor_account_by (
-    id serial,
     source varchar references account(id),
     destination varchar references condition(id),
     evtTp TEXT [] not null,
     incptnDtTm timestamptz not null,
     xprtnDtTm timestamptz,
-    primary key (id, source, destination)
+    primary key (source, destination)
 );
 
 create table governed_as_debtor_by (
-    id serial,
     source varchar references entity(id),
     destination varchar references condition(id),
     evtTp TEXT [] not null,
     incptnDtTm timestamptz not null,
     xprtnDtTm timestamptz,
-    primary key (id, source, destination)
+    primary key (source, destination)
 );
 /* transaction_relationship*/
 create table transaction (
