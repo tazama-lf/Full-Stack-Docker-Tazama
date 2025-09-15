@@ -340,6 +340,7 @@ The services are split up in multiple yamls,
 | docker-compose.(dev.)logs-elastic | event-sidecar, lumberjack, elasticsearch, kibana            |
 | docker-compose.(dev.)apm-elastic  | event-sidecar, lumberjack, elasticsearch, kibana, apmserver |
 | docker-compose.(dev.)relay        | relay-service                                               |
+| docker-compose.(dev.)test-service | test-service                                               |
 
 > !!!Note
 > Turn off `tms` API authentication for the `Demo UI` to work.

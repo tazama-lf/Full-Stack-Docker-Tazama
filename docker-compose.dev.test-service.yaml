@@ -1,0 +1,22 @@
+services:
+  test-service:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/test-service.git#${TEST_SERVICE_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/test-service.env
+      - .env
+    environment:
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+      - EVALUATION_DATABASE_USER=postgres
+      - EVALUATION_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - postgres 
+    ports:
+      - 6100:6100

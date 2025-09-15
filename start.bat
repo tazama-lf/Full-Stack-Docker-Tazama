@@ -11,6 +11,7 @@ set "elasticapm=[ ]"
 set "natsutils=[ ]"
 set "ui=[ ]"
 set "relay=[ ]"
+set "test=[ ]"
 
 cls
 echo Select docker deployment type:
@@ -47,8 +48,9 @@ echo 3. %elasticlogs% [Elastic] Logging
 echo 4. %elasticapm% [Elastic] APM
 echo 5. %ui% Demo UI
 echo 6. %relay% Relay
+echo 7. %test% Testing (+test-service)
 echo.
-echo Apply current selection (a), Toggle addon (1-6) or quit (q)
+echo Apply current selection (a), Toggle addon (1-7) or quit (q)
 set /p "choice=Enter your choice: "
 
 if /i "%choice%"=="q" goto :end
@@ -61,6 +63,7 @@ if "%choice%"=="3" if "%elasticlogs%" == "[ ]" (set "elasticlogs=[X]") else (set
 if "%choice%"=="4" if "%elasticapm%" == "[ ]" (set "elasticapm=[X]") else (set "elasticapm=[ ]")
 if "%choice%"=="5" if "%ui%" == "[ ]" (set "ui=[X]") else (set "ui=[ ]")
 if "%choice%"=="6" if "%relay%" == "[ ]" (set "relay=[X]") else (set "relay=[ ]")
+if "%choice%"=="7" if "%test%" == "[ ]" (set "test=[X]") else (set "test=[ ]")
 
 @REM Nats utils not part of standard deployment
 if "%choice%"=="99" if "%natsutils%" == "[ ]" (set "natsutils=[X]") else (set "natsutils=[ ]")
@@ -94,14 +97,16 @@ if "%elasticlogs%" == "[X]" (
         set "cmd=%cmd% -f docker-compose.logs-elastic.yaml -f docker-compose.logs-elastic.base.yaml"
     )
 )
-if "%elasticapm%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.apm-elastic.yaml"
-if "%natsutils%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.nats-utils.yaml"
-if "%ui%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.ui.yaml"
 if "%relay%" == "[X]" if "%IS_GITHUB_DEPLOYMENT%" == "1" (
     set "cmd=%cmd% -f docker-compose.dev.relay.yaml"
 ) else (
     set "cmd=%cmd% -f docker-compose.relay.yaml"
 )
+if "%test%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.test-service.yaml"
+if "%elasticapm%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.apm-elastic.yaml"
+if "%natsutils%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.nats-utils.yaml"
+if "%ui%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.ui.yaml"
+
 
 echo.
 echo Command to run: %cmd% -p tazama up -d
@@ -123,7 +128,7 @@ goto :addons
 
 :deploy_full
 cls
-set "cmd=docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.full.yaml -f docker-compose.relay.yaml -f docker-compose.dev.ui.yaml -f docker-compose.dev.nats-utils.yaml up -d"
+set "cmd=docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.full.yaml -f docker-compose.relay.yaml -f  docker-compose.dev.ui.yaml -f docker-compose.dev.nats-utils.yaml up -d"
 echo stopping existing tazama containers...
 docker compose -p tazama down > nul 2>&1
 echo.

@@ -9,6 +9,7 @@ declare -A addons=(
     [4]="[Elastic] APM"
     [5]="Demo UI"
     [6]="Relay"
+    [7]="Testing (+test-service)"
     [99]="NATS Utilities"
 )
 
@@ -19,6 +20,7 @@ declare -A addon_files_dev=(
     [4]="docker-compose.dev.apm-elastic.yaml"
     [5]="docker-compose.dev.ui.yaml"
     [6]="docker-compose.dev.relay.yaml"
+    [7]="docker-compose.dev.test-service.yaml"
     [99]="docker-compose.dev.nats-utils.yaml"
 )
 
@@ -29,6 +31,7 @@ declare -A addon_files=(
     [4]="docker-compose.dev.apm-elastic.yaml"
     [5]="docker-compose.dev.ui.yaml"
     [6]="docker-compose.relay.yaml"
+    [7]="docker-compose.dev.test-service.yaml"
     [99]="docker-compose.dev.nats-utils.yaml"
 )
 
@@ -38,8 +41,24 @@ deploy_full_service() {
     echo "stopping existing tazama containers..."
     docker compose -p tazama down > /dev/null 2>&1
     echo "deploying Tazama from docker hub..."
-    # with authentication: docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.full.yaml -f docker-compose.auth.base.yaml -f docker-compose.relay.yaml -f docker-compose.dev.ui.yaml -f docker-compose.dev.nats-utils.yaml up -d
-    docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.full.yaml -f docker-compose.relay.yaml -f docker-compose.dev.ui.yaml -f docker-compose.dev.nats-utils.yaml up -d
+
+    # Build base full-service command, WITHOUT forcing test-service.
+    local cmd="docker compose -p tazama \
+        -f docker-compose.yaml \
+        -f docker-compose.override.yaml \
+        -f docker-compose.db.yaml \
+        -f docker-compose.full.yaml \
+        -f docker-compose.relay.yaml \
+        -f docker-compose.dev.ui.yaml \
+        -f docker-compose.dev.nats-utils.yaml"
+
+    # If you want test-service optionally for full-service too, honor the selection:
+    if [[ ${selected[7]} == 1 ]]; then
+        cmd+=" -f docker-compose.dev.test-service.yaml"
+    fi
+
+    echo "Command to run: $cmd up -d"
+    $cmd up -d --remove-orphans
     exit 0
 }
 
@@ -47,7 +66,7 @@ print_menu() {
     clear
     echo "Select docker deployment type:"
     echo "1. Public - (GitHub)"
-    echo "2 Full-service (DockerHub)"
+    echo "2. Full-service (DockerHub)"
     echo "3. Public (DockerHub)"
     # echo "2. Advanced"
     echo
@@ -58,40 +77,42 @@ handle_menu() {
     local type
     read -p "Enter your choice: " type
     case $type in
-        1) 
-        print_addon_menu
-        is_github_deployment=1
-        ;;
+        1)
+            is_github_deployment=1
+            print_addon_menu
+            ;;
         2)
-        deploy_full_service
-        is_github_deployment=2
-        # Advanced: Not Yet Implemented
-#        print_menu
-        ;;
+            is_github_deployment=2
+            # If you want to allow toggles for full-service too, show addon menu first:
+            # print_addon_menu
+            # (otherwise go straight to deploy)
+            deploy_full_service
+            ;;
         3)
-        print_addon_menu
-        is_github_deployment=3
-        ;;
-        Q | q) 
-        exit 0
-        ;;
+            is_github_deployment=3
+            print_addon_menu
+            ;;
+        Q|q)
+            exit 0
+            ;;
         *)
-        print_menu
-        ;;
+            print_menu
+            ;;
     esac
 }
 
 print_addon_menu() {
     clear
     echo "Enable optional docker configuration addons:"
-    for ((i = 1; i <= ${#addons[@]}; i++)); do
+    # Show 1..7 in order; keep 99 hidden/advanced
+    for i in 1 2 3 4 5 6 7; do
         if [[ ${selected[$i]} == 1 ]]; then
             echo "$i. [X] ${addons[$i]}"
         else
             echo "$i. [ ] ${addons[$i]}"
         fi
     done
-    echo 
+    echo
 }
 
 build_command() {
@@ -112,8 +133,9 @@ build_command() {
 
 apply_addon_config() {
     local confirm=""
-    local compose_files=$(build_command)
-    echo 
+    local compose_files
+    compose_files=$(build_command)
+    echo
     echo "Command to run: docker compose$compose_files -p tazama up -d"
     read -p "Press (e) to execute, (q) to quit or any other key to go back: " confirm
     echo
@@ -128,28 +150,28 @@ apply_addon_config() {
 print_menu
 handle_menu
 
-while true; do  
-    echo "Apply current selection (a), Toggle addon (1-6) or quit (q)"
+while true; do
+    echo "Apply current selection (a), Toggle addon (1-7/99) or quit (q)"
     read -p "Enter your choice: " choice
 
     case "$choice" in
-    [1-6])
-        if [[ ${selected[$choice]} == 1 ]]; then
-            selected[$choice]=0
-        else
-            selected[$choice]=1
-        fi
-        ;;
-    A | a)
-        apply_addon_config
-        ;;
-    Q | q)
-        exit 0
-        ;;
-    *)
-        echo "Invalid option. Press any key to continue..."
-        read -n 1
-        ;;
+        1|2|3|4|5|6|7|99)
+            if [[ ${selected[$choice]} == 1 ]]; then
+                selected[$choice]=0
+            else
+                selected[$choice]=1
+            fi
+            ;;
+        A|a)
+            apply_addon_config
+            ;;
+        Q|q)
+            exit 0
+            ;;
+        *)
+            echo "Invalid option. Press any key to continue..."
+            read -n 1
+            ;;
     esac
     print_addon_menu
 done
