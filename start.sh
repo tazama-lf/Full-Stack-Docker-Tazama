@@ -3,6 +3,7 @@
 is_github_deployment=0
 
 declare -A addons=(
+    [0]="Reset database data"
     [1]="Authentication"
     [2]="Basic (stdout) Logging"
     [3]="[Elastic] Logging"
@@ -14,6 +15,7 @@ declare -A addons=(
 )
 
 declare -A addon_files_dev=(
+    #[0]= #Placeholder
     [1]="docker-compose.dev.auth.yaml -f docker-compose.auth.base.yaml"
     [2]="docker-compose.dev.logs-base.yaml -f docker-compose.logs.yaml"
     [3]="docker-compose.dev.logs-elastic.yaml -f docker-compose.logs-elastic.base.yaml"
@@ -25,6 +27,7 @@ declare -A addon_files_dev=(
 )
 
 declare -A addon_files=(
+    #[0]= #Placeholder
     [1]="docker-compose.auth.yaml -f docker-compose.auth.base.yaml"
     [2]="docker-compose.logs-base.yaml -f docker-compose.logs.yaml"
     [3]="docker-compose.logs-elastic.yaml -f docker-compose.logs-elastic.base.yaml"
@@ -38,12 +41,9 @@ declare -A addon_files=(
 declare -A selected
 
 deploy_full_service() {
-    echo "stopping existing tazama containers..."
-    docker compose -p tazama down > /dev/null 2>&1
-    echo "deploying Tazama from docker hub..."
+    echo "Deploying Tazama from docker hub..."
 
-    # Build base full-service command, WITHOUT forcing test-service.
-    local cmd="docker compose -p tazama \
+    local cmd="docker compose \
         -f docker-compose.yaml \
         -f docker-compose.override.yaml \
         -f docker-compose.db.yaml \
@@ -52,13 +52,8 @@ deploy_full_service() {
         -f docker-compose.dev.ui.yaml \
         -f docker-compose.dev.nats-utils.yaml"
 
-    # If you want test-service optionally for full-service too, honor the selection:
-    if [[ ${selected[7]} == 1 ]]; then
-        cmd+=" -f docker-compose.dev.test-service.yaml"
-    fi
-
-    echo "Command to run: $cmd up -d"
-    $cmd up -d --remove-orphans
+    echo "Command to run: $cmd -p tazama up -d"
+    $cmd -p tazama up -d --remove-orphans --force-recreate --renew-anon-volumes
     exit 0
 }
 
@@ -83,9 +78,6 @@ handle_menu() {
             ;;
         2)
             is_github_deployment=2
-            # If you want to allow toggles for full-service too, show addon menu first:
-            # print_addon_menu
-            # (otherwise go straight to deploy)
             deploy_full_service
             ;;
         3)
@@ -104,8 +96,7 @@ handle_menu() {
 print_addon_menu() {
     clear
     echo "Enable optional docker configuration addons:"
-    # Show 1..7 in order; keep 99 hidden/advanced
-    for i in 1 2 3 4 5 6 7; do
+    for ((i = 0; i < ${#addons[@]} - 1; i++)); do
         if [[ ${selected[$i]} == 1 ]]; then
             echo "$i. [X] ${addons[$i]}"
         else
@@ -140,7 +131,19 @@ apply_addon_config() {
     read -p "Press (e) to execute, (q) to quit or any other key to go back: " confirm
     echo
     if [[ -z $confirm || $confirm == "e" ]]; then
-        docker compose$compose_files -p tazama up -d --remove-orphans
+        if [[ $is_github_deployment == 1 ]]; then
+            echo Building tazama from github...
+        else
+            echo Deploying tazama from docker hub...
+        fi
+
+        if [[ ${selected[0]} == 1 ]]; then
+            echo Reset database and reinitiatlize
+            docker compose$compose_files -p tazama up -d --remove-orphans --force-recreate --renew-anon-volumes
+        else
+            docker compose$compose_files -p tazama up -d --remove-orphans
+        fi
+        
         exit 0
     elif [[ $confirm == "q" ]]; then
         exit 0
@@ -151,11 +154,11 @@ print_menu
 handle_menu
 
 while true; do
-    echo "Apply current selection (a), Toggle addon (1-7/99) or quit (q)"
+    echo "Apply current selection (a), Toggle addon (0-7) or quit (q)"
     read -p "Enter your choice: " choice
 
     case "$choice" in
-        1|2|3|4|5|6|7|99)
+        [0-7]|99)
             if [[ ${selected[$choice]} == 1 ]]; then
                 selected[$choice]=0
             else

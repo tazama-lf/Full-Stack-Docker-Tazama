@@ -4,6 +4,7 @@ setlocal enabledelayedexpansion
 :menu
 set "type="
 
+set "volumes=[ ]"
 set "auth=[ ]"
 set "basiclogs=[ ]"
 set "elasticlogs=[ ]"
@@ -42,6 +43,7 @@ if /i "%type%"=="3" (
 set "choice="
 cls
 echo Enable optional docker configuration addons:
+echo 0. %volumes% Reset database data
 echo 1. %auth% Authentication
 echo 2. %basiclogs% Basic Logs
 echo 3. %elasticlogs% [Elastic] Logging
@@ -57,6 +59,7 @@ if /i "%choice%"=="q" goto :end
 if /i "%choice%"=="" goto :apply
 if /i "%choice%"=="a" goto :apply
 
+if "%choice%"=="0" if "%volumes%" == "[ ]" (set "volumes=[X]") else (set "volumes=[ ]")
 if "%choice%"=="1" if "%auth%" == "[ ]" (set "auth=[X]") else (set "auth=[ ]")
 if "%choice%"=="2" if "%basiclogs%" == "[ ]" (set "basiclogs=[X]") else (set "basiclogs=[ ]")
 if "%choice%"=="3" if "%elasticlogs%" == "[ ]" (set "elasticlogs=[X]") else (set "elasticlogs=[ ]")
@@ -111,13 +114,21 @@ if "%ui%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.ui.yaml"
 echo.
 echo Command to run: %cmd% -p tazama up -d
 set /p "confirm=Press (e) to execute, (q) to quit or any other key to go back: "
-rem echo stopping existing tazama containers...
-rem docker compose -p tazama down > nul 2>&1
-echo.
-echo deploying tazama from docker hub...
 echo.
 if "%confirm%"=="e" (
-    %cmd% -p tazama up -d --remove-orphans
+    if "%IS_GITHUB_DEPLOYMENT%" == "1" (
+        echo Building tazama from github...
+    ) else (
+        echo Deploying tazama from docker hub...
+    )
+    echo.
+
+    if "%volumes%" == "[X]" (
+        echo Reset database and reinitiatlize
+        %cmd% -p tazama up -d --remove-orphans --force-recreate --renew-anon-volumes
+    ) else (
+        %cmd% -p tazama up -d --remove-orphans
+    )
     goto :end
 ) else ( 
     if "%confirm%"=="q" (
@@ -128,14 +139,11 @@ goto :addons
 
 :deploy_full
 cls
-set "cmd=docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.full.yaml -f docker-compose.relay.yaml -f  docker-compose.dev.ui.yaml -f docker-compose.dev.nats-utils.yaml up -d"
-echo stopping existing tazama containers...
-docker compose -p tazama down > nul 2>&1
-echo.
-echo deploying tazama from docker hub...
+set "cmd=docker compose -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.full.yaml -f docker-compose.relay.yaml -f docker-compose.dev.ui.yaml -f docker-compose.dev.nats-utils.yaml"
+echo Deploying Tazama from docker hub...
 echo.
 echo Command to run: %cmd% -p tazama up -d
-%cmd% --remove-orphans
+%cmd% -p tazama up -d --remove-orphans --force-recreate --renew-anon-volumes
 goto :end
 
 :end
