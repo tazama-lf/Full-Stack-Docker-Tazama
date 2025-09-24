@@ -2,6 +2,7 @@ const ruleConfigData = [
   {
     _key: "901@1.0.0@1.0.0",
     _id: "901@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "901@1.0.0",
     cfg: "1.0.0",
     desc: "Number of outgoing transactions - debtor",
@@ -41,7 +42,8 @@ const typologyConfigData = [
   {
     _key: "typology-999@1.0.0@999@1.0.0",
     _id: "typology-999@1.0.0@999@1.0.0",
-    typology_name: "Rule-901-Typology-999",
+    tenantId: "DEFAULT",
+    desc: "Rule-901-Typology-999",
     id: "typology-processor@1.0.0",
     cfg: "999@1.0.0",
     workflow: {
@@ -111,6 +113,7 @@ const typologyConfigData = [
 
 const networkConfigData = [
   {
+    tenantId: "DEFAULT",
     active: true,
     name: "Public Network Map",
     cfg: "1.0.0",

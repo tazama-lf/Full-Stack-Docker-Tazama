@@ -1,6 +1,7 @@
 const ruleConfigData = [
   {
     _key: "001@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "001@1.0.0",
     cfg: "1.0.0",
     desc: "Derived account age - creditor",
@@ -28,6 +29,7 @@ const ruleConfigData = [
   },
   {
     _key: "002@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "002@1.0.0",
     cfg: "1.0.0",
     desc: "Transaction convergence - debtor",
@@ -52,6 +54,7 @@ const ruleConfigData = [
   },
   {
     _key: "003@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "003@1.0.0",
     cfg: "1.0.0",
     desc: "Account dormancy - creditor",
@@ -79,6 +82,7 @@ const ruleConfigData = [
   },
   {
     _key: "004@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "004@1.0.0",
     cfg: "1.0.0",
     desc: "Account dormancy - debtor",
@@ -106,6 +110,7 @@ const ruleConfigData = [
   },
   {
     _key: "006@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "006@1.0.0",
     cfg: "1.0.0",
     desc: "Outgoing transfer similarity - amounts",
@@ -142,6 +147,7 @@ const ruleConfigData = [
   },
   {
     _key: "007@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "007@1.0.0",
     cfg: "1.0.0",
     desc: "Outgoing transfer similarity - descriptions",
@@ -183,6 +189,7 @@ const ruleConfigData = [
   },
   {
     _key: "008@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "008@1.0.0",
     cfg: "1.0.0",
     desc: "Outgoing transfer similarity - creditor",
@@ -217,6 +224,7 @@ const ruleConfigData = [
   },
   {
     _key: "010@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "010@1.0.0",
     cfg: "1.0.0",
     desc: "Increased account activity: volume - debtor",
@@ -262,6 +270,7 @@ const ruleConfigData = [
   },
   {
     _key: "011@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "011@1.0.0",
     cfg: "1.0.0",
     desc: "Increased account activity: volume - creditor",
@@ -307,6 +316,7 @@ const ruleConfigData = [
   },
   {
     _key: "016@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "016@1.0.0",
     cfg: "1.0.0",
     desc: "Transaction convergence - creditor",
@@ -331,6 +341,7 @@ const ruleConfigData = [
   },
   {
     _key: "017@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "017@1.0.0",
     cfg: "1.0.0",
     desc: "Transaction divergence - debtor",
@@ -356,6 +367,7 @@ const ruleConfigData = [
   {
     _key: "018@1.0.0@1.0.0",
     id: "018@1.0.0",
+    tenantId: "DEFAULT",
     cfg: "1.0.0",
     desc: "Exceptionally large outgoing transfer - debtor",
     config: {
@@ -389,6 +401,7 @@ const ruleConfigData = [
   {
     _key: "020@1.0.0@1.0.0",
     id: "020@1.0.0",
+    tenantId: "DEFAULT",
     cfg: "1.0.0",
     desc: "Large transaction amount vs history - creditor",
     config: {
@@ -431,6 +444,7 @@ const ruleConfigData = [
   },
   {
     _key: "021@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "021@1.0.0",
     cfg: "1.0.0",
     desc: "A large number of similar transaction amounts - creditor",
@@ -467,6 +481,7 @@ const ruleConfigData = [
   },
   {
     _key: "024@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "024@1.0.0",
     cfg: "1.0.0",
     desc: "Non-commissioned transaction mirroring - creditor",
@@ -505,6 +520,7 @@ const ruleConfigData = [
   },
   {
     _key: "025@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "025@1.0.0",
     cfg: "1.0.0",
     desc: "Non-commissioned transaction mirroring - debtor",
@@ -543,6 +559,7 @@ const ruleConfigData = [
   },
   {
     _key: "026@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "026@1.0.0",
     cfg: "1.0.0",
     desc: "Commissioned transaction mirroring - creditor",
@@ -582,6 +599,7 @@ const ruleConfigData = [
   },
   {
     _key: "027@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "027@1.0.0",
     cfg: "1.0.0",
     desc: "Commissioned transaction mirroring - debtor",
@@ -621,6 +639,7 @@ const ruleConfigData = [
   },
   {
     _key: "028@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "028@1.0.0",
     cfg: "1.0.0",
     desc: "Age classification - debtor",
@@ -644,6 +663,7 @@ const ruleConfigData = [
   },
   {
     _key: "030@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "030@1.0.0",
     cfg: "1.0.0",
     desc: "Transfer to unfamiliar creditor account - debtor",
@@ -673,6 +693,7 @@ const ruleConfigData = [
   },
   {
     _key: "044@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "044@1.0.0",
     cfg: "1.0.0",
     desc: "Successful transactions from the debtor, including the new transaction",
@@ -704,6 +725,7 @@ const ruleConfigData = [
   },
   {
     _key: "045@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "045@1.0.0",
     cfg: "1.0.0",
     desc: "Successful transactions to the creditor, including the new transaction",
@@ -735,6 +757,7 @@ const ruleConfigData = [
   },
   {
     _key: "048@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "048@1.0.0",
     cfg: "1.0.0",
     desc: "Large transaction amount vs history - debtor",
@@ -778,6 +801,7 @@ const ruleConfigData = [
   },
   {
     _key: "054@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "054@1.0.0",
     cfg: "1.0.0",
     desc: "Synthetic data check - Benford's Law - debtor",
@@ -813,6 +837,7 @@ const ruleConfigData = [
   },
   {
     _key: "063@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "063@1.0.0",
     cfg: "1.0.0",
     desc: "Synthetic data check - Benford's Law - creditor",
@@ -848,6 +873,7 @@ const ruleConfigData = [
   },
   {
     _key: "074@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "074@1.0.0",
     cfg: "1.0.0",
     desc: "Distance over time from last transaction location - debtor",
@@ -877,6 +903,7 @@ const ruleConfigData = [
   },
   {
     _key: "075@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "075@1.0.0",
     cfg: "1.0.0",
     desc: "Distance from habitual locations - debtor",
@@ -913,6 +940,7 @@ const ruleConfigData = [
   },
   {
     _key: "076@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "076@1.0.0",
     cfg: "1.0.0",
     desc: "Time since last transaction - debtor",
@@ -940,6 +968,7 @@ const ruleConfigData = [
   },
   {
     _key: "078@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "078@1.0.0",
     cfg: "1.0.0",
     desc: "Transaction type",
@@ -973,6 +1002,7 @@ const ruleConfigData = [
   },
   {
     _key: "083@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "083@1.0.0",
     cfg: "1.0.0",
     desc: "Multiple accounts associated with a debtor",
@@ -995,6 +1025,7 @@ const ruleConfigData = [
   },
   {
     _key: "084@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "084@1.0.0",
     cfg: "1.0.0",
     desc: "Multiple accounts associated with a creditor",
@@ -1017,6 +1048,7 @@ const ruleConfigData = [
   },
   {
     _key: "090@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "090@1.0.0",
     cfg: "1.0.0",
     desc: "Upstream transaction divergence - debtor",
@@ -1042,6 +1074,7 @@ const ruleConfigData = [
   },
   {
     _key: "091@1.0.0@1.0.0",
+    tenantId: "DEFAULT",
     id: "091@1.0.0",
     cfg: "1.0.0",
     desc: "Transaction amount vs regulatory threshold",
@@ -1064,6 +1097,7 @@ const ruleConfigData = [
   },
   {
     _key: "EFRuP@1.0.0@none",
+    tenantId: "DEFAULT",
     id: "EFRuP@1.0.0",
     cfg: "none",
     desc: "Event-Flow Rule Processor",
@@ -1089,6 +1123,7 @@ const ruleConfigData = [
 const typologyConfigData = [
   {
     _key: "000@1.0.0",
+    tenantId: "DEFAULT",
     desc: "Complete rule coverage",
     id: "typology-processor@1.0.0",
     cfg: "000@1.0.0",
@@ -2014,6 +2049,7 @@ const typologyConfigData = [
 
 const networkConfigData = [
   {
+    tenantId: "DEFAULT",
     active: true,
     cfg: "1.0.0",
     messages: [
