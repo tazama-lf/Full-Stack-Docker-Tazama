@@ -113,9 +113,8 @@ const typologyConfigData = [
 
 const networkConfigData = [
   {
-    tenantId: "DEFAULT",
     active: true,
-    name: "Public Network Map",
+    tenantId: "DEFAULT",
     cfg: "1.0.0",
     messages: [
       {
@@ -125,6 +124,7 @@ const networkConfigData = [
         typologies: [
           {
             id: "typology-processor@1.0.0",
+            tenantId: "DEFAULT",
             cfg: "999@1.0.0",
             rules: [
               {

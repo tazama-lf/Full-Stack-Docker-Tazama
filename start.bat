@@ -84,14 +84,12 @@ goto :addons
 :multi
 set "basiclogs=[X]"
 set "relay=[X]"
-set "natsutils=[X]"
 
 cls
 echo Multi-tenancy installation will contain the following addons:
 echo 1. %auth% Authentication
 echo 2. %basiclogs% Basic Logs
 echo 3. %relay% Relay services
-echo 4. %natsutils% NATS Utilities
 echo.
 echo Apply current selection (a), Toggle authentication (1), or quit (q)
 set /p "choice=Enter your choice: "
@@ -112,7 +110,7 @@ if %IS_GITHUB_DEPLOYMENT% EQU 1 (
     set "cmd=docker compose -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.dev.db.yaml -f docker-compose.dev.rule.yaml -f docker-compose.dev.yaml"
 ) else (
     if %IS_MULTITENANT_DEPLOYMENT% EQU 1 (
-        set "cmd=docker compose -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.dev.db.yaml -f docker-compose.rule.yaml"
+        set "cmd=docker compose -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.rule.yaml"
     ) else (
         set "cmd=docker compose -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.dev.db.yaml -f docker-compose.rule.yaml"
     )
@@ -153,7 +151,7 @@ if "%relay%" == "[X]" if %IS_GITHUB_DEPLOYMENT% EQU 1 (
     set "cmd=%cmd% -f docker-compose.dev.relay.yaml"
 ) else (
     if %IS_MULTITENANT_DEPLOYMENT% EQU 1 (
-        set "cmd=%cmd% -f docker-compose.relay.multitenant.yaml"
+        set "cmd=%cmd% -f docker-compose.multitenant.yaml"
     ) else (
         set "cmd=%cmd% -f docker-compose.relay.yaml"
     )

@@ -1,4 +1,16 @@
 services:
+  arango:
+    environment:
+      - ARANGO_NO_AUTH=1
+    volumes:
+      - ./arango/migration/local/03-MULTITENANT.js:/docker-entrypoint-initdb.d/03-MULTITENANT.js
+    ports:
+      - 18529:8529
+
+  keycloak:
+    volumes:
+      - ./auth/keycloak/realms/tazama-test-realm-multitenant.json:/opt/keycloak/data/import/tazama-test-realm-multitenant.json
+
   ef:
     environment:
       SUPPRESS_ALERTS: false

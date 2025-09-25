@@ -2060,6 +2060,7 @@ const networkConfigData = [
         typologies: [
           {
             id: "typology-processor@1.0.0",
+            tenantId: "DEFAULT",
             cfg: "000@1.0.0",
             rules: [
               {
