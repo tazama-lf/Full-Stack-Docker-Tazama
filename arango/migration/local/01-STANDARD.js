@@ -1,7 +1,7 @@
 const ruleConfigData = [
   {
-    _key: "901@1.0.0@1.0.0",
-    _id: "901@1.0.0@1.0.0",
+    _key: "DEFAULT@901@1.0.0@1.0.0",
+    _id: "DEFAULT@901@1.0.0@1.0.0",
     tenantId: "DEFAULT",
     id: "901@1.0.0",
     cfg: "1.0.0",
@@ -40,8 +40,8 @@ const ruleConfigData = [
 
 const typologyConfigData = [
   {
-    _key: "typology-999@1.0.0@999@1.0.0",
-    _id: "typology-999@1.0.0@999@1.0.0",
+    _key: "DEFAULT@1.0.0@999@1.0.0",
+    _id: "DEFAULT@1.0.0@999@1.0.0",
     tenantId: "DEFAULT",
     desc: "Rule-901-Typology-999",
     id: "typology-processor@1.0.0",

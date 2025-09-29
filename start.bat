@@ -17,15 +17,16 @@ set "IS_GITHUB_DEPLOYMENT=0"
 set "IS_MULTITENANT_DEPLOYMENT=0"
 
 cls
+echo.
 echo Select docker deployment type:
+echo.
 echo 1. Public (GitHub)
 echo 2. Full-service (DockerHub)
 echo 3. Public (DockerHub)
 echo 4. Multi-Tenant Public (DockerHub)
 echo 5. Utilities
-@REM echo 2. Advanced
 echo.
-echo Choose (1-4) or quit (q):
+echo Select option (1-5), or (q)uit:
 set /p "type=Enter your choice: "
 
 if /i "%type%"=="q" goto :end
@@ -52,7 +53,9 @@ if /i "%type%"=="5" (
 :addons
 set "choice="
 cls
+echo.
 echo Enable optional docker configuration addons:
+echo.
 echo 1. %auth% Authentication
 echo 2. %basiclogs% Basic Logs
 echo 3. %elasticlogs% [Elastic] Logging
@@ -61,12 +64,13 @@ echo 5. %ui% Demo UI
 echo 6. %relay% Relay
 echo 7. %config% Config Service
 echo.
-echo Apply current selection (a), Toggle addon (1-6) or quit (q)
+echo Toggle addons (1-7), (a)pply current selection, (r)eturn, or (q)uit
 set /p "choice=Enter your choice: "
 
-if /i "%choice%"=="q" goto :end
-if /i "%choice%"=="" goto :apply
 if /i "%choice%"=="a" goto :apply
+if /i "%choice%"=="" goto :apply
+if /i "%choice%"=="r" goto :menu
+if /i "%choice%"=="q" goto :end
 
 if "%choice%"=="1" if "%auth%" == "[ ]" (set "auth=[X]") else (set "auth=[ ]")
 if "%choice%"=="2" if "%basiclogs%" == "[ ]" (set "basiclogs=[X]") else (set "basiclogs=[ ]")
@@ -86,17 +90,20 @@ set "basiclogs=[X]"
 set "relay=[X]"
 
 cls
+echo.
 echo Multi-tenancy installation will contain the following addons:
+echo.
 echo 1. %auth% Authentication
 echo 2. %basiclogs% Basic Logs
 echo 3. %relay% Relay services
 echo.
-echo Apply current selection (a), Toggle authentication (1), or quit (q)
+echo Toggle authentication (1), (a)pply current selection, (r)eturn, or (q)uit
 set /p "choice=Enter your choice: "
 
-if /i "%choice%"=="q" goto :end
-if /i "%choice%"=="" goto :apply
 if /i "%choice%"=="a" goto :apply
+if /i "%choice%"=="" goto :apply
+if /i "%choice%"=="r" goto :menu
+if /i "%choice%"=="q" goto :end
 
 if "%choice%"=="1" if "%auth%" == "[ ]" (set "auth=[X]") else (set "auth=[ ]")
 
@@ -181,21 +188,39 @@ if "%confirm%"=="e" (
 goto :end
 
 :deploy_full
+set "choice="
 cls
-set "cmd=docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.full.yaml -f docker-compose.relay.yaml -f docker-compose.dev.ui.yaml -f docker-compose.dev.nats-utils.yaml up -d"
+echo.
+echo Full deployment includes:
+echo.
+echo 1. Core services
+echo 2. Core processors
+echo 3. All available rule processors
+echo 4. Basic Logs
+echo 5. Relay services
+echo 6. Demo UI
+echo 7. NATS Utilities
+echo.
+
+pause
+
+set "cmd=docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.full.yaml -f docker-compose.logs-base.yaml -f docker-compose.full.logs.yaml -f docker-compose.relay.yaml -f docker-compose.dev.ui.yaml -f docker-compose.dev.nats-utils.yaml up -d"
+echo.
 echo Stopping existing tazama containers...
 docker compose -p tazama down
 echo.
-echo Deploying tazama from docker hub...
+echo Deploying tazama from Docker Hub...
 echo.
-echo Command to run: %cmd% -p tazama up -d
+echo Command to run: %cmd%
 %cmd% --remove-orphans
 goto :end
 
 :utils
 set "choice="
 cls
+echo.
 echo Execute some Docker commands:
+echo.
 echo 1. Stop and remove Tazama project containers
 echo 2. Remove all unused containers, networks, images and volumes
 echo 3. List all images
@@ -203,10 +228,11 @@ echo 4. List all containers
 echo 5. List all volumes
 echo 6. List all networks
 echo.
-echo Select function (1-6) or quit (q)
+echo Select function (1-6), (r)eturn or (q)uit
 set /p "choice=Enter your choice: "
 
 if /i "%choice%"=="q" goto :end
+if /i "%choice%"=="r" goto :menu
 if /i "%choice%"=="" goto :utils
 
 if "%choice%"=="1" (

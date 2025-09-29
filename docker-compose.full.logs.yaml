@@ -1,0 +1,222 @@
+services:
+  tms:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+  
+  ed:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+  
+  tp:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+    
+  tadp:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-001:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-002:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-003:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-004:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-006:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-007:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-008:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-010:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-011:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-016:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-017:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-018:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-020:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-021:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-024:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-025:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-026:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-027:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-028:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-030:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-044:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-045:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-048:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-054:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-063:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-074:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-075:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-076:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-078:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-083:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-084:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-090:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
+
+  rule-091:
+    depends_on:
+      - event-sidecar
+    environment:
+      SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}

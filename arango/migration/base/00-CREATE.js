@@ -33,7 +33,6 @@ db._create(transactionsColName);
 // Pseudonyms DB
 const pseudonymsDbName = "pseudonyms";
 // Pseudonyms Collections
-const pseudonymsColName = "pseudonyms";
 const accountHolderColName = "account_holder";
 const accountsColName = "accounts";
 const entitiesColName = "entities";
@@ -48,7 +47,6 @@ const conditionsCreditorAccountName = "governed_as_creditor_account_by";
 db._useDatabase(systemDb);
 db._createDatabase(pseudonymsDbName);
 db._useDatabase(pseudonymsDbName);
-db._create(pseudonymsColName);
 db._createEdgeCollection(accountHolderColName);
 db._create(accountsColName);
 db._create(entitiesColName);
@@ -69,18 +67,6 @@ db._collection(entitiesColName).ensureIndex({
   deduplicate: false,
   estimates: true,
   cacheEnabled: false,
-  inBackground: false,
-});
-
-db._collection(pseudonymsColName).ensureIndex({
-  type: "persistent",
-  fields: ["pseudonym"],
-  name: "pi_pseudonym",
-  unique: true,
-  sparse: false,
-  deduplicate: false,
-  estimates: true,
-  cacheEnabled: true,
   inBackground: false,
 });
 
