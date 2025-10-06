@@ -24,5 +24,5 @@ services:
       - ./arango/migration/base/00-CREATE.js:/docker-entrypoint-initdb.d/00-CREATE.js
 
   nats:
-    image: docker.io/bitnami/nats:2
+    image: nats:2
     restart: always
