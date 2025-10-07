@@ -189,3 +189,77 @@ create index idx_pacs008_dbtr_acct_id on pacs008 (debtorAccountId);
 create index idx_pacs008_cdtr_acct_id on pacs008 (creditorAccountId);
 
 create index idx_pacs008_credttm on pacs008 (creDtTm);
+
+create table pain001 (
+    document jsonb not null,
+    -- cast when querying
+    creDtTm text generated always as (
+        document -> 'CstmrCdtTrfInitn' -> 'GrpHdr' ->> 'CreDtTm'
+    ) stored,
+    messageId text generated always as (
+        document -> 'CstmrCdtTrfInitn' -> 'GrpHdr' ->> 'MsgId'
+    ) stored,
+    endToEndId text generated always as (
+        document -> 'CstmrCdtTrfInitn' -> 'PmtInf' -> 'CdtTrfTxInf' -> 'PmtId' ->> 'EndToEndId'
+    ) stored,
+    debtorAccountId text generated always as (
+        document -> 'CstmrCdtTrfInitn' -> 'PmtInf' -> 'DbtrAcct' -> 'Id' -> 'Othr' -> 0 ->> 'Id'
+    ) stored,
+    creditorAccountId text generated always as (
+        document -> 'CstmrCdtTrfInitn' -> 'PmtInf' -> 'CdtTrfTxInf' -> 'CdtrAcct' -> 'Id' -> 'Othr' -> 0 ->> 'Id'
+    ) stored,
+    constraint unique_msgid_e2eid_pain001 unique (messageId, endToEndId),
+    constraint unique_e2eid_pain001 unique (endToEndId),
+    constraint message_id_not_null check (messageId is not null),
+    constraint cre_dt_tm check (creDtTm is not null),
+    constraint dbtr_acct_id_not_null check (debtorAccountId is not null),
+    constraint cdtr_acct_id_not_null check (creditorAccountId is not null),
+    constraint end_to_end_id_not_null check (endToEndId is not null)
+);
+
+create index idx_pain001_msg_id on pain001 (messageId);
+
+create index idx_pain001_end_to_end_id on pain001 (endToEndId);
+
+create index idx_pain001_dbtr_acct_id on pain001 (debtorAccountId);
+
+create index idx_pain001_cdtr_acct_id on pain001 (creditorAccountId);
+
+create index idx_pain001_credttm on pain001 (creDtTm);
+
+create table pain013 (
+    document jsonb not null,
+    -- cast when querying
+    creDtTm text generated always as (
+        document -> 'CdtrPmtActvtnReq' -> 'GrpHdr' ->> 'CreDtTm'
+    ) stored,
+    messageId text generated always as (
+        document -> 'CdtrPmtActvtnReq' -> 'GrpHdr' ->> 'MsgId'
+    ) stored,
+    endToEndId text generated always as (
+        document -> 'CdtrPmtActvtnReq' -> 'PmtInf' -> 'CdtTrfTxInf' -> 'PmtId' ->> 'EndToEndId'
+    ) stored,
+    debtorAccountId text generated always as (
+        document -> 'CdtrPmtActvtnReq' -> 'PmtInf' -> 'DbtrAcct' -> 'Id' -> 'Othr' -> 0 ->> 'Id'
+    ) stored,
+    creditorAccountId text generated always as (
+        document -> 'CdtrPmtActvtnReq' -> 'PmtInf' -> 'CdtTrfTxInf' -> 'CdtrAcct' -> 'Id' -> 'Othr' -> 0 ->> 'Id'
+    ) stored,
+    constraint unique_msgid_e2eid_pain013 unique (messageId, endToEndId),
+    constraint unique_e2eid_pain013 unique (endToEndId),
+    constraint message_id_not_null check (messageId is not null),
+    constraint cre_dt_tm check (creDtTm is not null),
+    constraint dbtr_acct_id_not_null check (debtorAccountId is not null),
+    constraint cdtr_acct_id_not_null check (creditorAccountId is not null),
+    constraint end_to_end_id_not_null check (endToEndId is not null)
+);
+
+create index idx_pain013_msg_id on pain013 (messageId);
+
+create index idx_pain013_end_to_end_id on pain013 (endToEndId);
+
+create index idx_pain013_dbtr_acct_id on pain013 (debtorAccountId);
+
+create index idx_pain013_cdtr_acct_id on pain013 (creditorAccountId);
+
+create index idx_pain013_credttm on pain013 (creDtTm);
