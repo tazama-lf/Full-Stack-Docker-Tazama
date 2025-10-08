@@ -172,11 +172,13 @@ if "%config%" == "[X]" if %IS_GITHUB_DEPLOYMENT% EQU 1 (
 echo.
 echo Command to run: %cmd% -p tazama up -d
 set /p "confirm=Press (e) to execute, (q) to quit or any other key to go back: "
-rem echo stopping existing tazama containers...
-rem docker compose -p tazama down
+echo.
+echo stopping existing Tazama containers...
+echo.
+docker compose -p tazama down
 if "%confirm%"=="e" (
     echo.
-    echo Deploying tazama from docker hub...
+    echo Deploying Tazama from docker hub...
     echo.
     %cmd% -p tazama up -d --remove-orphans
     goto :end
@@ -206,10 +208,11 @@ pause
 
 set "cmd=docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.full.yaml -f docker-compose.logs-base.yaml -f docker-compose.full.logs.yaml -f docker-compose.relay.yaml -f docker-compose.dev.ui.yaml -f docker-compose.dev.nats-utils.yaml up -d"
 echo.
-echo Stopping existing tazama containers...
+echo Stopping existing Tazama containers...
+echo.
 docker compose -p tazama down
 echo.
-echo Deploying tazama from Docker Hub...
+echo Deploying Tazama from Docker Hub...
 echo.
 echo Command to run: %cmd%
 %cmd% --remove-orphans
@@ -221,14 +224,15 @@ cls
 echo.
 echo Execute some Docker commands:
 echo.
-echo 1. Stop and remove Tazama project containers
-echo 2. Remove all unused containers, networks, images and volumes
-echo 3. List all images
-echo 4. List all containers
-echo 5. List all volumes
-echo 6. List all networks
+echo 1. Stop and restart ED, TP and TADP (reload network configuration)
+echo 2. Stop and remove Tazama project containers
+echo 3. Remove all unused containers, networks, images and volumes
+echo 4. List all images
+echo 5. List all containers
+echo 6. List all volumes
+echo 7. List all networks
 echo.
-echo Select function (1-6), (r)eturn or (q)uit
+echo Select function (1-7), (r)eturn or (q)uit
 set /p "choice=Enter your choice: "
 
 if /i "%choice%"=="q" goto :end
@@ -236,21 +240,24 @@ if /i "%choice%"=="r" goto :menu
 if /i "%choice%"=="" goto :utils
 
 if "%choice%"=="1" (
-    set "cmd=docker compose -p tazama down"
+    set "cmd=docker restart tazama-tp-1 tazama-tadp-1 tazama-ed-1"
 )
 if "%choice%"=="2" (
-    set "cmd=docker system prune -a -f --volumes"
+    set "cmd=docker compose -p tazama down"
 )
 if "%choice%"=="3" (
-    set "cmd=docker image ls"
+    set "cmd=docker system prune -a -f --volumes"
 )
 if "%choice%"=="4" (
-    set "cmd=docker container ls"
+    set "cmd=docker image ls"
 )
 if "%choice%"=="5" (
-    set "cmd=docker volume ls"
+    set "cmd=docker container ls"
 )
 if "%choice%"=="6" (
+    set "cmd=docker volume ls"
+)
+if "%choice%"=="7" (
     set "cmd=docker network ls"
 )
 
