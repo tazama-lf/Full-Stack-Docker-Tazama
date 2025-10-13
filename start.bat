@@ -204,9 +204,11 @@ echo 6. Demo UI
 echo 7. NATS Utilities
 echo.
 
+set "cmd=docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.full.yaml -f docker-compose.logs-base.yaml -f docker-compose.full.logs.yaml -f docker-compose.relay.yaml -f docker-compose.dev.ui.yaml -f docker-compose.dev.nats-utils.yaml up -d"
+echo %cmd%
+echo.
 pause
 
-set "cmd=docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.full.yaml -f docker-compose.logs-base.yaml -f docker-compose.full.logs.yaml -f docker-compose.relay.yaml -f docker-compose.dev.ui.yaml -f docker-compose.dev.nats-utils.yaml up -d"
 echo.
 echo Stopping existing Tazama containers...
 echo.

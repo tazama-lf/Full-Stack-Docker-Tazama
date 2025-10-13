@@ -23,11 +23,27 @@ db._create(networkConfigColName);
 const evaluationsDbName = "evaluationResults";
 // Transactions Collections
 const transactionsColName = "transactions";
+const ruleResults = "ruleResults";
 // Transactions Setup
 db._useDatabase(systemDb);
 db._createDatabase(evaluationsDbName);
 db._useDatabase(evaluationsDbName);
 db._create(transactionsColName);
+db._create(ruleResults);
+
+// evaluationResults Indices
+// ruleResults
+db._collection(ruleResults).ensureIndex({
+  type: "persistent",
+  fields: ["transaction.FIToFIPmtSts.TxInfAndSts.OrgnlEndToEndId", "ruleResult.id", "ruleResult.cfg"],
+  name: "pi_ruleResult",
+  unique: true,
+  sparse: false,
+  deduplicate: false,
+  estimates: true,
+  cacheEnabled: true,
+  inBackground: false,
+});
 
 /*** PSEUDONYMS ***/
 // Pseudonyms DB
