@@ -37,7 +37,7 @@ db._collection(ruleResults).ensureIndex({
   type: "persistent",
   fields: ["transaction.FIToFIPmtSts.TxInfAndSts.OrgnlEndToEndId", "ruleResult.id", "ruleResult.cfg"],
   name: "pi_ruleResult",
-  unique: true,
+  unique: false,
   sparse: false,
   deduplicate: false,
   estimates: true,
