@@ -8,20 +8,25 @@ create database evaluation;
 
 \connect configuration;
 
-create table network_map (configuration jsonb not null);
+create table network_map (
+    configuration jsonb not null,
+    tenantId text generated always as (configuration ->> 'tenantId') stored
+);
 
 create table typology (
     configuration jsonb not null,
     typologyId text generated always as (configuration ->> 'id') stored,
     typologyCfg text generated always as (configuration ->> 'cfg') stored,
-    unique (typologyId, typologyCfg)
+    tenantId text generated always as (configuration ->> 'tenantId') stored,
+    primary key (typologyId, typologyCfg, tenantId)
 );
 
 create table rule (
     configuration jsonb not null,
     ruleId text generated always as (configuration ->> 'id') stored,
     ruleCfg text generated always as (configuration ->> 'cfg') stored,
-    unique (ruleId, ruleCfg)
+    tenantId text generated always as (configuration ->> 'tenantId') stored,
+    primary key (ruleId, ruleCfg, tenantId)
 );
 
 \connect evaluation;
@@ -30,69 +35,93 @@ create table evaluation (
     evaluation jsonb not null,
     messageId text generated always as (
         evaluation -> 'transaction' -> 'FIToFIPmtSts' -> 'GrpHdr' ->> 'MsgId'
-    ) stored
+    ) stored,
+    tenantId text generated always as (evaluation ->> 'tenantId') stored
 );
 
 \connect event_history;
 
-create table account (id varchar primary key);
+create table account (
+    id varchar not null,
+    tenantId text not null,
+    primary key (id, tenantId)
+);
 
 create table entity (
-    id varchar primary key,
-    creDtTm timestamptz not null
+    id varchar not null,
+    tenantId text not null,
+    creDtTm timestamptz not null,
+    primary key (id, tenantId)
 );
 
 create table account_holder (
-    source varchar references entity (id),
-    destination varchar references account (id),
+    source varchar not null,
+    destination varchar not null,
+    tenantId text not null,
     creDtTm timestamptz not null,
-    primary key (source, destination)
+    foreign key (source, tenantId) references entity (id, tenantId),
+    foreign key (destination, tenantId) references account (id, tenantId),
+    primary key (source, destination, tenantId)
 );
 
 create table condition (
-    id varchar primary key generated always as (condition ->> 'condId') stored,
-    condition jsonb not null
+    id varchar generated always as (condition ->> 'condId') stored,
+    tenantId text generated always as (condition ->> 'tenantId') stored,
+    condition jsonb not null,
+    primary key (id, tenantId)
 );
 
 create table governed_as_creditor_account_by (
-    source varchar references account(id),
-    destination varchar references condition(id),
+    source varchar not null,
+    destination varchar not null,
     evtTp text [] not null,
     incptnDtTm timestamptz not null,
     xprtnDtTm timestamptz,
-    primary key (source, destination)
+    tenantId text not null,
+    foreign key (source, tenantId) references account (id, tenantId),
+    foreign key (destination, tenantId) references condition (id, tenantId),
+    primary key (source, destination, tenantId)
 );
 
 create table governed_as_creditor_by (
-    source varchar references entity(id),
-    destination varchar references condition(id),
+    source varchar not null,
+    destination varchar not null,
     evtTp TEXT [] not null,
     incptnDtTm timestamptz not null,
     xprtnDtTm timestamptz,
-    primary key (source, destination)
+    tenantId text not null,
+    foreign key (source, tenantId) references entity (id, tenantId),
+    foreign key (destination, tenantId) references condition (id, tenantId),
+    primary key (source, destination, tenantId)
 );
 
 create table governed_as_debtor_account_by (
-    source varchar references account(id),
-    destination varchar references condition(id),
+    source varchar not null,
+    destination varchar not null,
     evtTp TEXT [] not null,
     incptnDtTm timestamptz not null,
     xprtnDtTm timestamptz,
-    primary key (source, destination)
+    tenantId text not null,
+    foreign key (source, tenantId) references account (id, tenantId),
+    foreign key (destination, tenantId) references condition (id, tenantId),
+    primary key (source, destination, tenantId)
 );
 
 create table governed_as_debtor_by (
-    source varchar references entity(id),
-    destination varchar references condition(id),
+    source varchar not null,
+    destination varchar not null,
     evtTp TEXT [] not null,
     incptnDtTm timestamptz not null,
     xprtnDtTm timestamptz,
-    primary key (source, destination)
+    tenantId text not null,
+    foreign key (source, tenantId) references entity (id, tenantId),
+    foreign key (destination, tenantId) references condition (id, tenantId),
+    primary key (source, destination, tenantId)
 );
 /* transaction_relationship*/
 create table transaction (
-    source varchar references account(id),
-    destination varchar references account(id),
+    source varchar not null,
+    destination varchar not null,
     transaction jsonb not null,
     endToEndId text generated always as (transaction->>'EndToEndId') stored,
     amt numeric(18, 2) generated always as (
@@ -103,6 +132,9 @@ create table transaction (
     creDtTm text generated always as (transaction->>'CreDtTm') stored,
     txTp varchar generated always as (transaction->>'TxTp') stored,
     txSts varchar generated always as (transaction->>'TxSts') stored,
+    tenantId text generated always as (transaction->>'TenantId') stored,
+    foreign key (source, tenantId) references account (id, tenantId),
+    foreign key (destination, tenantId) references account (id, tenantId),
     primary key (msgId, endToEndId, txTp)
 );
 
@@ -142,6 +174,8 @@ create table pacs002 (
     endToEndId text generated always as (
         document -> 'FIToFIPmtSts' -> 'TxInfAndSts' ->> 'OrgnlEndToEndId'
     ) stored,
+    tenantId text generated always as (
+        document ->> 'TenantId' ) stored,
     constraint unique_e2eid_pacs002 unique (endToEndId),
     constraint unique_msgid_pacs002 unique (messageId),
     constraint message_id_not_null check (messageId is not null),
@@ -171,6 +205,8 @@ create table pacs008 (
     creditorAccountId text generated always as (
         document -> 'FIToFICstmrCdtTrf' -> 'CdtTrfTxInf' -> 'CdtrAcct' -> 'Id' -> 'Othr' -> 0 ->> 'Id'
     ) stored,
+    tenantId text generated always as (
+        document ->> 'TenantId' ) stored,
     constraint unique_msgid_e2eid_pacs008 unique (messageId, endToEndId),
     constraint unique_e2eid_pacs008 unique (endToEndId),
     constraint message_id_not_null check (messageId is not null),
@@ -208,6 +244,8 @@ create table pain001 (
     creditorAccountId text generated always as (
         document -> 'CstmrCdtTrfInitn' -> 'PmtInf' -> 'CdtTrfTxInf' -> 'CdtrAcct' -> 'Id' -> 'Othr' -> 0 ->> 'Id'
     ) stored,
+    tenantId text generated always as (
+        document ->> 'TenantId' ) stored,
     constraint unique_msgid_e2eid_pain001 unique (messageId, endToEndId),
     constraint unique_e2eid_pain001 unique (endToEndId),
     constraint message_id_not_null check (messageId is not null),
@@ -245,6 +283,8 @@ create table pain013 (
     creditorAccountId text generated always as (
         document -> 'CdtrPmtActvtnReq' -> 'PmtInf' -> 'CdtTrfTxInf' -> 'CdtrAcct' -> 'Id' -> 'Othr' -> 0 ->> 'Id'
     ) stored,
+    tenantId text generated always as (
+        document ->> 'TenantId' ) stored,
     constraint unique_msgid_e2eid_pain013 unique (messageId, endToEndId),
     constraint unique_e2eid_pain013 unique (endToEndId),
     constraint message_id_not_null check (messageId is not null),
