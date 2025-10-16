@@ -23,17 +23,32 @@ db._create(networkConfigColName);
 const evaluationsDbName = "evaluationResults";
 // Transactions Collections
 const transactionsColName = "transactions";
+const ruleResults = "ruleResults";
 // Transactions Setup
 db._useDatabase(systemDb);
 db._createDatabase(evaluationsDbName);
 db._useDatabase(evaluationsDbName);
 db._create(transactionsColName);
+db._create(ruleResults);
+
+// evaluationResults Indices
+// ruleResults
+db._collection(ruleResults).ensureIndex({
+  type: "persistent",
+  fields: ["transaction.FIToFIPmtSts.TxInfAndSts.OrgnlEndToEndId", "ruleResult.id", "ruleResult.cfg"],
+  name: "pi_ruleResult",
+  unique: false,
+  sparse: false,
+  deduplicate: false,
+  estimates: true,
+  cacheEnabled: true,
+  inBackground: false,
+});
 
 /*** PSEUDONYMS ***/
 // Pseudonyms DB
 const pseudonymsDbName = "pseudonyms";
 // Pseudonyms Collections
-const pseudonymsColName = "pseudonyms";
 const accountHolderColName = "account_holder";
 const accountsColName = "accounts";
 const entitiesColName = "entities";
@@ -48,7 +63,6 @@ const conditionsCreditorAccountName = "governed_as_creditor_account_by";
 db._useDatabase(systemDb);
 db._createDatabase(pseudonymsDbName);
 db._useDatabase(pseudonymsDbName);
-db._create(pseudonymsColName);
 db._createEdgeCollection(accountHolderColName);
 db._create(accountsColName);
 db._create(entitiesColName);
@@ -69,18 +83,6 @@ db._collection(entitiesColName).ensureIndex({
   deduplicate: false,
   estimates: true,
   cacheEnabled: false,
-  inBackground: false,
-});
-
-db._collection(pseudonymsColName).ensureIndex({
-  type: "persistent",
-  fields: ["pseudonym"],
-  name: "pi_pseudonym",
-  unique: true,
-  sparse: false,
-  deduplicate: false,
-  estimates: true,
-  cacheEnabled: true,
   inBackground: false,
 });
 

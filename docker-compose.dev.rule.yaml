@@ -7,7 +7,7 @@ services:
       args:
         - GH_TOKEN
     env_file:
-      - env/rule-executer.env
+      - env/rule-901.env
       - .env
     restart: always
     depends_on:

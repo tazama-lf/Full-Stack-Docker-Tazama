@@ -1,8 +1,8 @@
 const ruleConfigData = [
   {
-    _key: "DEFAULT@901@1.0.0@1.0.0",
-    _id: "DEFAULT@901@1.0.0@1.0.0",
-    tenantId: "DEFAULT",
+    _key: "tenant-001@901@1.0.0@1.0.0",
+    _id: "tenant-001@901@1.0.0@1.0.0",
+    tenantId: "tenant-001",
     id: "901@1.0.0",
     cfg: "1.0.0",
     desc: "Number of outgoing transactions - debtor",
@@ -37,12 +37,12 @@ const ruleConfigData = [
     },
   },
   {
-    _key: "DEFAULT@902@1.0.0@1.0.0",
-    _id: "DEFAULT@902@1.0.0@1.0.0",
-    tenantId: "DEFAULT",
-    id: "902@1.0.0",
+    _key: "tenant-002@901@1.0.0@1.0.0",
+    _id: "tenant-002@901@1.0.0@1.0.0",
+    tenantId: "tenant-002",
+    id: "901@1.0.0",
     cfg: "1.0.0",
-    desc: "Number of incoming transactions - creditor",
+    desc: "Number of outgoing transactions - debtor",
     config: {
       parameters: {
         maxQueryRange: 86400000,
@@ -57,18 +57,18 @@ const ruleConfigData = [
         {
           subRuleRef: ".01",
           upperLimit: 2,
-          reason: "The creditor has received one transaction to date",
+          reason: "The debtor has performed one transaction to date",
         },
         {
           subRuleRef: ".02",
           lowerLimit: 2,
           upperLimit: 3,
-          reason: "The creditor has received two transactions to date",
+          reason: "The debtor has performed two transactions to date",
         },
         {
           subRuleRef: ".03",
           lowerLimit: 3,
-          reason: "The creditor has received three or more transactions to date",
+          reason: "The debtor has performed three or more transactions to date",
         },
       ],
     },
@@ -77,15 +77,15 @@ const ruleConfigData = [
 
 const typologyConfigData = [
   {
-    _key: "DEFAULT@1.0.0@999@1.0.0",
-    _id: "DEFAULT@1.0.0@999@1.0.0",
-    tenantId: "DEFAULT",
-    desc: "Rule-901-Typology-999",
+    _key: "tenant-001@typology-999@1.0.0@999@1.0.0",
+    _id: "tenant-001@typology-999@1.0.0@999@1.0.0",
+    tenantId: "tenant-001",
+    desc: "Rule-901-Typology-999-Tenant-001",
     id: "typology-processor@1.0.0",
     cfg: "999@1.0.0",
     workflow: {
-      alertThreshold: 300,
-      interdictionThreshold: 500,
+      alertThreshold: 200,
+      interdictionThreshold: 400,
       flowProcessor: "EFRuP@1.0.0",
     },
     rules: [
@@ -93,33 +93,6 @@ const typologyConfigData = [
         id: "901@1.0.0",
         cfg: "1.0.0",
         termId: "v901at100at100",
-        wghts: [
-          {
-            ref: ".err",
-            wght: "0",
-          },
-          {
-            ref: ".x00",
-            wght: "100",
-          },
-          {
-            ref: ".01",
-            wght: "100",
-          },
-          {
-            ref: ".02",
-            wght: "200",
-          },
-          {
-            ref: ".03",
-            wght: "400",
-          },
-        ],
-      },
-      {
-        id: "902@1.0.0",
-        cfg: "1.0.0",
-        termId: "v902at100at100",
         wghts: [
           {
             ref: ".err",
@@ -171,14 +144,84 @@ const typologyConfigData = [
         ],
       },
     ],
-    expression: ["Add", "v901at100at100", "v902at100at100"],
+    expression: ["Add", "v901at100at100"],
+  },
+  {
+    _key: "tenant-002@typology-999@1.0.0@999@1.0.0",
+    _id: "tenant-002@typology-999@1.0.0@999@1.0.0",
+    tenantId: "tenant-002",
+    desc: "Rule-901-Typology-999-Tenant-002",
+    id: "typology-processor@1.0.0",
+    cfg: "999@1.0.0",
+    workflow: {
+      alertThreshold: 200,
+      interdictionThreshold: 400,
+      flowProcessor: "EFRuP@1.0.0",
+    },
+    rules: [
+      {
+        id: "901@1.0.0",
+        cfg: "1.0.0",
+        termId: "v901at100at100",
+        wghts: [
+          {
+            ref: ".err",
+            wght: "0",
+          },
+          {
+            ref: ".x00",
+            wght: "100",
+          },
+          {
+            ref: ".01",
+            wght: "100",
+          },
+          {
+            ref: ".02",
+            wght: "200",
+          },
+          {
+            ref: ".03",
+            wght: "400",
+          },
+        ],
+      },
+      {
+        id: "EFRuP@1.0.0",
+        cfg: "none",
+        termId: "vEFRuPat100atnone",
+        wghts: [
+          {
+            ref: ".err",
+            wght: "0",
+          },
+          {
+            ref: "override",
+            wght: "0",
+          },
+          {
+            ref: "non-overridable-block",
+            wght: "0",
+          },
+          {
+            ref: "overridable-block",
+            wght: "0",
+          },
+          {
+            ref: "none",
+            wght: "0",
+          },
+        ],
+      },
+    ],
+    expression: ["Add", "v901at100at100"],
   },
 ];
 
 const networkConfigData = [
   {
     active: true,
-    tenantId: "DEFAULT",
+    tenantId: "tenant-001",
     cfg: "1.0.0",
     messages: [
       {
@@ -188,7 +231,7 @@ const networkConfigData = [
         typologies: [
           {
             id: "typology-processor@1.0.0",
-            tenantId: "DEFAULT",
+            tenantId: "tenant-001",
             cfg: "999@1.0.0",
             rules: [
               {
@@ -199,8 +242,33 @@ const networkConfigData = [
                 id: "901@1.0.0",
                 cfg: "1.0.0",
               },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    active: true,
+    tenantId: "tenant-002",
+    cfg: "1.0.0",
+    messages: [
+      {
+        id: "004@1.0.0",
+        cfg: "1.0.0",
+        txTp: "pacs.002.001.12",
+        typologies: [
+          {
+            id: "typology-processor@1.0.0",
+            tenantId: "tenant-002",
+            cfg: "999@1.0.0",
+            rules: [
               {
-                id: "902@1.0.0",
+                id: "EFRuP@1.0.0",
+                cfg: "none",
+              },
+              {
+                id: "901@1.0.0",
                 cfg: "1.0.0",
               },
             ],

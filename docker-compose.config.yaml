@@ -1,0 +1,38 @@
+# For local testing
+services:
+  configbe:
+    image: tazamaorg/config-svc-be:rc
+    env_file:
+      - env/config-be.env
+      - .env
+    restart: always
+    ports:
+      - ${CONFIG_BE_PORT}:${CONFIG_BE_PORT}
+    volumes:
+      - ./auth/test-public-key.pem:/home/app/auth/test-public-key.pem
+      - ./auth/test-private-key.pem:/home/app/auth/test-private-key.pem
+    depends_on:
+      - keycloak
+      - arango
+      - auth
+
+  configfe:
+    image: tazamaorg/config-svc-fe:rc
+    env_file:
+      - env/config-fe.env
+      - .env
+    restart: always
+    ports:
+      - ${CONFIG_FE_PORT}:${CONFIG_FE_PORT}
+    volumes:
+      - ./auth/test-public-key.pem:/home/app/auth/test-public-key.pem
+      - ./auth/test-private-key.pem:/home/app/auth/test-private-key.pem
+    depends_on:
+      - keycloak
+      - arango
+      - configbe
+      - auth
+
+  keycloak:
+    volumes:
+      - ./auth/keycloak/realms/tazama-test-realm-config.json:/opt/keycloak/data/import/tazama-test-realm-config.json

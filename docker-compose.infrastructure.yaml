@@ -5,7 +5,7 @@ services:
     hostname: valkey
     image: valkey/valkey:7.2.5
     restart: always
-    command: "valkey-server --port 6379"
+    command: "valkey-server --port 6379 --loglevel verbose"
     healthcheck:
       test: ["CMD-SHELL", "valkey-cli -p 6379 ping | grep PONG"]
       interval: 1s
@@ -26,3 +26,4 @@ services:
   nats:
     image: nats:2
     restart: always
+    command: ["-DVV"]
