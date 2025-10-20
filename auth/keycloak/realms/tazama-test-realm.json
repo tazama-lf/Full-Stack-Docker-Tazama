@@ -48,35 +48,17 @@
   "roles": {
     "realm": [
       {
+        "id": "ac273d08-1de7-44ff-b592-f4afd283c691",
+        "name": "LIST_V1_ADMIN_CONFIGURATION_NETWORK_MAP",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+        "attributes": {}
+      },
+      {
         "id": "ecb764d2-ff43-4b3b-9077-db276e86c52f",
         "name": "POST_V1_EVALUATE_ISO20022_PACS_002_001_12",
-        "description": "",
-        "composite": false,
-        "clientRole": false,
-        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
-        "attributes": {}
-      },
-      {
-        "id": "c5c7d83a-d9a6-4db0-96de-3a420d47864c",
-        "name": "PUT_V1_EVENT_FLOW_CONTROL_CACHE",
-        "description": "",
-        "composite": false,
-        "clientRole": false,
-        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
-        "attributes": {}
-      },
-      {
-        "id": "c9ddf55c-aa98-4c88-a873-5ae306510d03",
-        "name": "POST_V1_EVENT_FLOW_CONTROL_ENTITY",
-        "description": "",
-        "composite": false,
-        "clientRole": false,
-        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
-        "attributes": {}
-      },
-      {
-        "id": "1184d0fc-e305-4429-9c06-04dc2ad1d7a4",
-        "name": "PUT_V1_EVENT_FLOW_CONTROL_ENTITY",
         "description": "",
         "composite": false,
         "clientRole": false,
@@ -93,9 +75,27 @@
         "attributes": {}
       },
       {
-        "id": "2f78319a-0eef-4391-997e-635ab59df5e2",
-        "name": "offline_access",
-        "description": "${role_offline-access}",
+        "id": "2d033acd-384c-4fd3-a1e0-56f4ef15bb35",
+        "name": "PUT_V1_ADMIN_CONFIGURATION_RULE",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+        "attributes": {}
+      },
+      {
+        "id": "4f34a12d-addb-4331-bdcb-548b8989ea06",
+        "name": "GET_V1_ADMIN_CONFIGURATION_RULE",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+        "attributes": {}
+      },
+      {
+        "id": "c19772f7-0f3f-4821-92da-baa95e91dd6a",
+        "name": "LIST_V1_ADMIN_CONFIGURATION_TYPOLOGY",
+        "description": "",
         "composite": false,
         "clientRole": false,
         "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
@@ -115,27 +115,6 @@
         "name": "GET_V1_GETREPORTBYMSGID",
         "description": "",
         "composite": false,
-        "clientRole": false,
-        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
-        "attributes": {}
-      },
-      {
-        "id": "f81a2378-c1bf-4c29-ae7a-6472d859ac19",
-        "name": "default-roles-tazama",
-        "description": "${role_default-roles}",
-        "composite": true,
-        "composites": {
-          "realm": [
-            "offline_access",
-            "uma_authorization"
-          ],
-          "client": {
-            "account": [
-              "view-profile",
-              "manage-account"
-            ]
-          }
-        },
         "clientRole": false,
         "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
         "attributes": {}
@@ -168,6 +147,135 @@
         "attributes": {}
       },
       {
+        "id": "8b76ff6d-d477-4d1e-a9e0-e9eecb4eed6c",
+        "name": "DELETE_V1_ADMIN_CONFIGURATION_RULE",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+        "attributes": {}
+      },
+      {
+        "id": "8f9a1a86-40b3-4484-a08d-4e17175eeac9",
+        "name": "POST_V1_ADMIN_CONFIGURATION_TYPOLOGY",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+        "attributes": {}
+      },
+      {
+        "id": "13d23010-bad0-4fa3-bf35-32cf063a2a4c",
+        "name": "POST_V1_EVALUATE_ISO20022_PAIN_001_001_11",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+        "attributes": {}
+      },
+      {
+        "id": "e6c6d9b8-c608-4559-bf22-0635c6cc2e10",
+        "name": "DELETE_V1_ADMIN_CONFIGURATION_NETWORK_MAP",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+        "attributes": {}
+      },
+      {
+        "id": "88dcff9b-071f-4b09-8e2f-7161537d5880",
+        "name": "PUT_V1_ADMIN_CONFIGURATION_TYPOLOGY",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+        "attributes": {}
+      },
+      {
+        "id": "c5c7d83a-d9a6-4db0-96de-3a420d47864c",
+        "name": "PUT_V1_EVENT_FLOW_CONTROL_CACHE",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+        "attributes": {}
+      },
+      {
+        "id": "c9ddf55c-aa98-4c88-a873-5ae306510d03",
+        "name": "POST_V1_EVENT_FLOW_CONTROL_ENTITY",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+        "attributes": {}
+      },
+      {
+        "id": "ad223114-4647-4972-aea4-6c9dcc5db8d8",
+        "name": "DELETE_V1_ADMIN_CONFIGURATION_TYPOLOGY",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+        "attributes": {}
+      },
+      {
+        "id": "1184d0fc-e305-4429-9c06-04dc2ad1d7a4",
+        "name": "PUT_V1_EVENT_FLOW_CONTROL_ENTITY",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+        "attributes": {}
+      },
+      {
+        "id": "2f78319a-0eef-4391-997e-635ab59df5e2",
+        "name": "offline_access",
+        "description": "${role_offline-access}",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+        "attributes": {}
+      },
+      {
+        "id": "e652c960-1061-432b-94eb-17c5bae87a59",
+        "name": "POST_V1_ADMIN_CONFIGURATION_NETWORK_MAP",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+        "attributes": {}
+      },
+      {
+        "id": "048e202c-5003-4e4d-a01f-cc19a4cc7fb1",
+        "name": "GET_V1_ADMIN_CONFIGURATION_TYPOLOGY",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+        "attributes": {}
+      },
+      {
+        "id": "f81a2378-c1bf-4c29-ae7a-6472d859ac19",
+        "name": "default-roles-tazama",
+        "description": "${role_default-roles}",
+        "composite": true,
+        "composites": {
+          "realm": [
+            "offline_access",
+            "uma_authorization"
+          ],
+          "client": {
+            "account": [
+              "view-profile",
+              "manage-account"
+            ]
+          }
+        },
+        "clientRole": false,
+        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+        "attributes": {}
+      },
+      {
         "id": "b9b052f9-59e3-4c2d-975b-82fbfe809c76",
         "name": "uma_authorization",
         "description": "${role_uma_authorization}",
@@ -177,8 +285,35 @@
         "attributes": {}
       },
       {
-        "id": "13d23010-bad0-4fa3-bf35-32cf063a2a4c",
-        "name": "POST_V1_EVALUATE_ISO20022_PAIN_001_001_11",
+        "id": "b7e81697-44b7-4b97-ab8e-46992a269376",
+        "name": "POST_V1_ADMIN_CONFIGURATION_RULE",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+        "attributes": {}
+      },
+      {
+        "id": "691bd827-017f-4ae4-8f7f-a6235083afac",
+        "name": "GET_V1_ADMIN_CONFIGURATION_NETWORK_MAP",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+        "attributes": {}
+      },
+      {
+        "id": "32db2c8c-b7fa-477c-8d25-056bc1cbbcbb",
+        "name": "LIST_V1_ADMIN_CONFIGURATION_RULE",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+        "attributes": {}
+      },
+      {
+        "id": "a18e09a1-c676-4a25-a25b-f1daf47f8151",
+        "name": "PUT_V1_ADMIN_CONFIGURATION_NETWORK_MAP",
         "description": "",
         "composite": false,
         "clientRole": false,
@@ -418,6 +553,17 @@
           "attributes": {}
         }
       ],
+      "tazama-tenant-client": [
+        {
+          "id": "7f8e9d6c-5b4a-3c2b-1a9d-8e7f6c5b4a32",
+          "name": "tenant-user",
+          "description": "Tenant user role for multi-tenant access",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "3f8e9c2d-5a6b-4c7d-8e9f-1a2b3c4d5e6f",
+          "attributes": {}
+        }
+      ],
       "security-admin-console": [],
       "admin-cli": [],
       "account-console": [],
@@ -519,17 +665,6 @@
           "containerId": "0f26b3dc-629d-4fcd-a2e6-de122af1a721",
           "attributes": {}
         }
-      ],
-      "tazama-tenant-client": [
-        {
-          "id": "7f8e9d6c-5b4a-3c2b-1a9d-8e7f6c5b4a32",
-          "name": "tenant-user",
-          "description": "Tenant user role for multi-tenant access",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "3d4e5f6a-7b8c-9d0e-1f2a-3b4c5d6e7f8a",
-          "attributes": {}
-        }
       ]
     }
   },
@@ -540,7 +675,9 @@
       "path": "/tazama-admin",
       "subGroups": [],
       "attributes": {
-        "TENANT_ID": ["tazama-tenant-default"]
+        "TENANT_ID": [
+          "tazama-tenant-default"
+        ]
       },
       "realmRoles": [
         "GET_V1_EVENT_FLOW_CONTROL_ACCOUNT",
@@ -555,12 +692,31 @@
       "clientRoles": {}
     },
     {
+      "id": "9f8e2c45-1a2b-4c3d-8e9f-f1e2d3c4b5a6",
+      "name": "tazama-tenant",
+      "path": "/tazama-tenant",
+      "subGroups": [],
+      "attributes": {
+        "TENANT_ID": [
+          "tazama-tenant-default"
+        ]
+      },
+      "realmRoles": [],
+      "clientRoles": {
+        "tazama-tenant-client": [
+          "tenant-user"
+        ]
+      }
+    },
+    {
       "id": "8922d510-3e54-45eb-9001-d06241754dab",
       "name": "tazama-tms",
       "path": "/tazama-tms",
       "subGroups": [],
       "attributes": {
-        "TENANT_ID": ["tazama-tenant-default"]
+        "TENANT_ID": [
+          "tazama-tenant-default"
+        ]
       },
       "realmRoles": [
         "POST_V1_EVALUATE_ISO20022_PACS_008_001_10",
@@ -569,21 +725,6 @@
         "POST_V1_EVALUATE_ISO20022_PAIN_001_001_11"
       ],
       "clientRoles": {}
-    },
-    {
-      "id": "9f8e2c45-1a2b-4c3d-8e9f-f1e2d3c4b5a6",
-      "name": "tazama-tenant",
-      "path": "/tazama-tenant",
-      "subGroups": [],
-      "attributes": {
-        "TENANT_ID": ["tazama-tenant-default"]
-      },
-      "realmRoles": [],
-      "clientRoles": {
-        "tazama-tenant-client": [
-          "tenant-user"
-        ]
-      }
     }
   ],
   "defaultRole": {
@@ -645,7 +786,6 @@
       "totp": false,
       "emailVerified": false,
       "serviceAccountClientId": "auth-lib-client",
-      "credentials": [],
       "disableableCredentialTypes": [],
       "requiredActions": [],
       "realmRoles": [
@@ -660,41 +800,20 @@
       "groups": []
     },
     {
-      "id": "ead422ef-27e9-4154-b456-5b48445adf73",
-      "createdTimestamp": 1725551564444,
-      "username": "tazama-user",
+      "id": "79eb4112-4f22-40f4-b21b-f8636eb5df93",
+      "createdTimestamp": 1760562180069,
+      "username": "service-account-tazama-tenant-client",
       "enabled": true,
       "totp": false,
       "emailVerified": false,
-      "attributes": {
-        "TENANT_ID": ["tazama-tenant-default"]
-      },
-      "credentials": [
-        {
-          "id": "a3e6fc0d-9243-4d1f-a41d-e38c47ff692f",
-          "type": "password",
-          "userLabel": "My password",
-          "createdDate": 1725551583924,
-          "secretData": "{\"value\":\"Fiu7IZUGSqC4iAHwlnsl69nY1RbityCFs9ywgEZ3N80=\",\"salt\":\"MnXcx9m3nJ8mmZ/c+8ZbCQ==\",\"additionalParameters\":{}}",
-          "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
-        }
-      ],
+      "serviceAccountClientId": "tazama-tenant-client",
       "disableableCredentialTypes": [],
       "requiredActions": [],
       "realmRoles": [
         "default-roles-tazama"
       ],
-      "clientRoles": {
-        "tazama-tenant-client": [
-          "tenant-user"
-        ]
-      },
       "notBefore": 0,
-      "groups": [
-        "/tazama-admin",
-        "/tazama-tms",
-        "/tazama-tenant"
-      ]
+      "groups": []
     }
   ],
   "scopeMappings": [
@@ -868,7 +987,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "auth-lib-client-test-secret",
+      "secret": "**********",
       "redirectUris": [
         "/*"
       ],
@@ -968,108 +1087,6 @@
         "scopes": [],
         "decisionStrategy": "UNANIMOUS"
       }
-    },
-    {
-      "id": "3f8e9c2d-5a6b-4c7d-8e9f-1a2b3c4d5e6f",
-      "clientId": "tazama-tenant-client",
-      "name": "Tazama Tenant Client",
-      "description": "Client for Tazama tenant management and multi-tenancy support",
-      "rootUrl": "",
-      "adminUrl": "",
-      "baseUrl": "",
-      "surrogateAuthRequired": false,
-      "enabled": true,
-      "alwaysDisplayInConsole": false,
-      "clientAuthenticatorType": "client-secret",
-      "secret": "tazama-tenant-client-secret",
-      "redirectUris": [
-        "/*"
-      ],
-      "webOrigins": [
-        "/*"
-      ],
-      "notBefore": 0,
-      "bearerOnly": false,
-      "consentRequired": false,
-      "standardFlowEnabled": true,
-      "implicitFlowEnabled": false,
-      "directAccessGrantsEnabled": true,
-      "serviceAccountsEnabled": true,
-      "authorizationServicesEnabled": false,
-      "publicClient": false,
-      "frontchannelLogout": true,
-      "protocol": "openid-connect",
-      "attributes": {
-        "oidc.ciba.grant.enabled": "false",
-        "client.secret.creation.time": "1723456789",
-        "backchannel.logout.session.required": "true",
-        "post.logout.redirect.uris": "+",
-        "oauth2.device.authorization.grant.enabled": "false",
-        "backchannel.logout.revoke.offline.tokens": "false"
-      },
-      "authenticationFlowBindingOverrides": {},
-      "fullScopeAllowed": true,
-      "nodeReRegistrationTimeout": -1,
-      "protocolMappers": [
-        {
-          "id": "7e2f3a4b-5c6d-7e8f-9a0b-1c2d3e4f5a6b",
-          "name": "TENANT_ID Mapper",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-attribute-mapper",
-          "consentRequired": false,
-          "config": {
-            "userinfo.token.claim": "true",
-            "user.attribute": "TENANT_ID",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "claim.name": "TENANT_ID",
-            "jsonType.label": "String"
-          }
-        },
-        {
-          "id": "8f3e4b5c-6d7e-8f9a-0b1c-2d3e4f5a6b7c",
-          "name": "Group TENANT_ID Mapper", 
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-group-membership-mapper",
-          "consentRequired": false,
-          "config": {
-            "userinfo.token.claim": "true",
-            "id.token.claim": "true", 
-            "access.token.claim": "true",
-            "claim.name": "groups",
-            "full.path": "false"
-          }
-        },
-        {
-          "id": "9a4f5c6d-7e8f-9a0b-1c2d-3e4f5a6b7c8d",
-          "name": "Client ID Mapper",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usersessionmodel-note-mapper",
-          "consentRequired": false,
-          "config": {
-            "user.session.note": "client_id",
-            "introspection.token.claim": "true",
-            "userinfo.token.claim": "true",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "claim.name": "client_id",
-            "jsonType.label": "String"
-          }
-        }
-      ],
-      "defaultClientScopes": [
-        "web-origins",
-        "acr", 
-        "roles",
-        "profile",
-        "email"
-      ],
-      "optionalClientScopes": [
-        "address",
-        "phone",
-        "offline_access",
-        "microprofile-jwt"
-      ]
     },
     {
       "id": "8335d6d7-fb58-4297-ae7b-1c0418a1a830",
@@ -1198,6 +1215,152 @@
             "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "locale",
+            "jsonType.label": "String"
+          }
+        }
+      ],
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "roles",
+        "profile",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ]
+    },
+    {
+      "id": "3f8e9c2d-5a6b-4c7d-8e9f-1a2b3c4d5e6f",
+      "clientId": "tazama-tenant-client",
+      "name": "Tazama Tenant Client",
+      "description": "Client for Tazama tenant management and multi-tenancy support",
+      "rootUrl": "",
+      "adminUrl": "",
+      "baseUrl": "",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "**********",
+      "redirectUris": [
+        "/*"
+      ],
+      "webOrigins": [
+        "/*"
+      ],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "publicClient": false,
+      "frontchannelLogout": true,
+      "protocol": "openid-connect",
+      "attributes": {
+        "oidc.ciba.grant.enabled": "false",
+        "client.secret.creation.time": "1723456789",
+        "backchannel.logout.session.required": "true",
+        "post.logout.redirect.uris": "+",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.revoke.offline.tokens": "false"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "protocolMappers": [
+        {
+          "id": "d97e835b-0e66-4754-837a-c592c3586455",
+          "name": "Client IP Address",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usersessionmodel-note-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.session.note": "clientAddress",
+            "introspection.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "clientAddress",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "id": "7e2f3a4b-5c6d-7e8f-9a0b-1c2d3e4f5a6b",
+          "name": "TENANT_ID Mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "TENANT_ID",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "TENANT_ID",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "id": "9a4f5c6d-7e8f-9a0b-1c2d-3e4f5a6b7c8d",
+          "name": "Client ID Mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usersessionmodel-note-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.session.note": "client_id",
+            "introspection.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "client_id",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "id": "8f3e4b5c-6d7e-8f9a-0b1c-2d3e4f5a6b7c",
+          "name": "Group TENANT_ID Mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "consentRequired": false,
+          "config": {
+            "id.token.claim": "true",
+            "full.path": "false",
+            "access.token.claim": "true",
+            "claim.name": "groups",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "id": "20fac174-1343-46df-9a8c-e1207b8d4a14",
+          "name": "Client ID",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usersessionmodel-note-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.session.note": "client_id",
+            "introspection.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "client_id",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "id": "15b3ed6d-b4e8-4c37-803c-3458cddaf6fe",
+          "name": "Client Host",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usersessionmodel-note-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.session.note": "clientHost",
+            "introspection.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "clientHost",
             "jsonType.label": "String"
           }
         }
@@ -1839,14 +2002,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "saml-user-property-mapper",
-            "oidc-usermodel-attribute-mapper",
-            "oidc-full-name-mapper",
-            "saml-role-list-mapper",
-            "oidc-usermodel-property-mapper",
             "saml-user-attribute-mapper",
+            "oidc-sha256-pairwise-sub-mapper",
+            "saml-role-list-mapper",
+            "saml-user-property-mapper",
             "oidc-address-mapper",
-            "oidc-sha256-pairwise-sub-mapper"
+            "oidc-usermodel-property-mapper",
+            "oidc-usermodel-attribute-mapper",
+            "oidc-full-name-mapper"
           ]
         }
       },
@@ -1886,14 +2049,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "saml-user-attribute-mapper",
-            "oidc-address-mapper",
-            "oidc-usermodel-property-mapper",
             "oidc-usermodel-attribute-mapper",
             "oidc-full-name-mapper",
-            "saml-role-list-mapper",
             "oidc-sha256-pairwise-sub-mapper",
-            "saml-user-property-mapper"
+            "saml-user-attribute-mapper",
+            "saml-role-list-mapper",
+            "saml-user-property-mapper",
+            "oidc-address-mapper",
+            "oidc-usermodel-property-mapper"
           ]
         }
       }
@@ -1905,12 +2068,6 @@
         "providerId": "rsa-enc-generated",
         "subComponents": {},
         "config": {
-          "privateKey": [
-            "MIIEowIBAAKCAQEAz3o1JPtq/UgUqy/vXwRNp+d2SECZAm8msEI+XzGAvUERFe09L1huvIKX2aR0p+BkNX9QSt6NGiXxizg60QNthnBeOSoZInUiTOBoeoQ8Yv9HzQIK9giDxvtOS91SpO1BoJPOr63Q6BJtlrl8w701nA5e7JJQoFwK57cnAmzpJQr8sFwoEx6s3VYFvqVHglTfTB97oTats06/HUTAjDlFvBcLsrC97sL8rS5HVPtqR9xIgK+T30wH7L6EB0NYUL3VTAZcKubQct4hrgEeZSmPCJkoJF8b2/G5g//lZlOkcUe5kQtDCiVqQxuYvLC1mvySlx/lWpu1abpz88i3PxpPAwIDAQABAoIBABCWvNkQISXPNZfaZVE7jtn178cnIxTGvlkpcsM5uglnwm32YgX/FBuOdYW5WHpzvo9odosF8FI+5mkzPcCofYFaSq5XZ1sR8oQjDTd+izV/I8aIe0fgtmiaf1AhihIVxkGIj+YMB8AGeSyr+AXOgxLPM1fG+xtXQKf2RPA0tQ95BHsNzcrxb6oEdCZp3Bkd01tLZ4yE4pJ8ohvrO4MwH5GuvIZh2xgdcTVhC/w8QO4o/ZWPG0LFpIVvKIZzPNt42h40gLQwjJp90Pa97L+y0Pk5E1AfUO7ztttgbrDa75YC2E0a3v73v6gNoBo7pqRra+pwAG6K92Ym0tiScMkWXkECgYEA9o1u4EE3OmBkMod/FRloALSy/R+ou3W/84sLv6Bk3Vn2qTH8P5oHYQrBb7vYIt4prWkLzBJ8lS3wih0TmmgEGNhOgL+DdeH1JuQ+/fcYnfmHTMm7VuAx2cm0hQAYg4NXXDZP/wmqtMItAy9OHgGhn/GT+jpUxa+0XqlvzRYVWdUCgYEA1213NKHeVJ2S8Md3Xm3phjT+I3G0Sv3jxhKMR72Icz0UWzeyd5cmPhYA511T4a04Fw8z9dPNI0EqUGg+bqG0YdLCdoyMWmrhYoders/MHvsJbXg3EIAEYL/NCMnQzHY5JK9jhGaMwT0PBCq1zFvkgcxwa2SCDcRFvcWYKhXo2XcCgYADGoqvxgJk+LuqKyx9XoGBqMSsDQ75tSTCcxilw+YhJzXEsX1ka5L2NMV0m5+/6J4LscvVONJaqmZhxrXtdqu+iFKMqlyESmDkqXDlj4u+yVpbrBpwoIfgHvrnxbWJSkj6PzDInB2LAvrAFINeO1UGh2r+dmeEyY5ytp1Srpl8NQKBgGCYWt0kv5ZdWWfRaLrUueNNm66060y87wb/hhsc5zQU7S3Bmap6AdHQ9/LGLDiC/SWJ0ZimsdLfA2QueeANbd53LG8PsldQmWMeo9vqnPI/Sgjl4HrrjAr9taf9JjynvhOu+QaDHRYAlN0fcYkCo0F4M+hTluUpXsQq94HXdSMdAoGBAMhAmIuncoGR1rNNxg1N+ifwPLWV0Jl1/WWHgjspEl4qfj4/fMc/VpdG2NRRB61VfG+kvOttTlwPpm8swYZ/k8g+wrH6JQsdrWIzfPyOztNM8pZEzEiANyBnEK+cGlw6CXIwhXFTZNsROlLeFIslJGlBOaj6GIiC3wWL34nGKYnU"
-          ],
-          "certificate": [
-            "MIICmzCCAYMCBgGRwtM3PTANBgkqhkiG9w0BAQsFADARMQ8wDQYDVQQDDAZ0YXphbWEwHhcNMjQwOTA1MTUzMzI3WhcNMzQwOTA1MTUzNTA3WjARMQ8wDQYDVQQDDAZ0YXphbWEwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDPejUk+2r9SBSrL+9fBE2n53ZIQJkCbyawQj5fMYC9QREV7T0vWG68gpfZpHSn4GQ1f1BK3o0aJfGLODrRA22GcF45KhkidSJM4Gh6hDxi/0fNAgr2CIPG+05L3VKk7UGgk86vrdDoEm2WuXzDvTWcDl7sklCgXArntycCbOklCvywXCgTHqzdVgW+pUeCVN9MH3uhNq2zTr8dRMCMOUW8FwuysL3uwvytLkdU+2pH3EiAr5PfTAfsvoQHQ1hQvdVMBlwq5tBy3iGuAR5lKY8ImSgkXxvb8bmD/+VmU6RxR7mRC0MKJWpDG5i8sLWa/JKXH+Vam7VpunPzyLc/Gk8DAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAJIJkgDosNvJxcx0PYOegpevbadozbIIxjuwQnEgbBP20/OjGf8HtJ/abfdrGySA3+UvrqLEIdJR805HRb6Fzy0z/oJtDiVMalZ8+zrqZ+14g3kslOgMv0XOmKLUYpZfcSuu9URO46nSgnRXOrbFNUBUt8N7posrsikS6PjrKOf2Jrhmo7Mu39b26JvfrD4YT746SQS1if7/PbPIVd7fZyWbXiwbIKcygCQTl3pePofp2UTJzg9/0KX7JL0d8kOGeiB3TWdkTGmCQJIiXC3NgEULJ/vCvOvqc7dRzC3QmhoXZmt7lTmNjmJsINPvu34TGprgzkJzSbbma1WSnqE+GLg="
-          ],
           "priority": [
             "100"
           ],
@@ -1925,12 +2082,6 @@
         "providerId": "hmac-generated",
         "subComponents": {},
         "config": {
-          "kid": [
-            "5c8466a3-4fda-40ff-b575-a22d3da5a08d"
-          ],
-          "secret": [
-            "_JqQs8R-9ldFOzUzmey5P7pkYXAXMwxAcT2ug1CRBuKl7wMC2_vxb-VSF0Jj_LLGRYVKmRzUZBeXOD9UuoCm-g"
-          ],
           "priority": [
             "100"
           ],
@@ -1945,12 +2096,6 @@
         "providerId": "aes-generated",
         "subComponents": {},
         "config": {
-          "kid": [
-            "e9a71b9f-ff0d-4365-8401-5b773b927ab9"
-          ],
-          "secret": [
-            "zdbzDyOYLqdTZTM9gQGSnw"
-          ],
           "priority": [
             "100"
           ]
@@ -1962,12 +2107,6 @@
         "providerId": "rsa-generated",
         "subComponents": {},
         "config": {
-          "privateKey": [
-            "MIIEogIBAAKCAQEAr/SRATSrzwC94wh4XbBMFWbkkqkB3vu5p/AYqoLAUmUEpaHbE4BimABzzrJJ75XnYNowT6BRpNVTbqnZXtigFcUFpST40WhVlKEequFo+ulPCmXPtlNzqH450j88g2uzrFfew2eDTAQPt5AscgzGPdiG3/bDHJVXUjDganWCQ01zz2hhJI5vavZbW/0xU7NatztYZEbvjQ/CXal0FQPp8G6+N9TNYZSnyI6Q2f9LcQCH7DOP1lrdCkxPRx2JfwVRBkiX+VISrEUybWdPP/aHqU+6gYYEakV6Pe9V7c8c/Y1HvpdDnoQi0sR0ywzSfXCdB8ovJ2ZIIqGcM42bbX49ZQIDAQABAoIBAANvP25Z2BmyDsLR/UF86btINyF6vY/b84eI6v5XD4h8Ms9F3cgfay1C4v/PoJxV3X6ZO7SuMTHJvTdthtHwYg2SuzW6R0YVJoiAbaARxtIRAEs4agnJzrnk/t1xAQ4iqc7tJyrCyEARWzouzQNL5wm5goZ4I15ZNutii1rgoNKN9fHJFc9gwznY0cWnIQk0wI9H2de51Cc5a5rXDKaYXFj29vRgMnYqZsLyhnHw1SghoQoDHTQWgD2GWrsnmv+A/2fIUh6MpC1jbzPUapgdIW4LxUcj4KdNa+mzb6+WWzSQWeJNtcvPY+9SzGp/2ZruREm2xbD+O+apsnVLZGMm3iECgYEA1i8+hACvDsq7N51BbesKDPskx52a9bDDMAh/xGrf34vyNpC6n+dBZ82Lcs8hCzZUozuRY4IxJE8vbyCz6BqnmRgmg4obEPwRKgqibZoMqebrrxh8RQW0ZHGbK1MDHyMslhLrzL+9cHsGFXmmiPzNTKYZluqiTs7DpERefND/1qECgYEA0k6o605Iaw9jFtfRY2KzQZ79LQ1hAZq++QpwLejgD+5BNhY8ri5CDe5yjd1izx6/eH+S+Jup+yoormtJIX7ITI+uu1uziMLxIBjNTTSAi7nYf38FFg7AXqqW0//MLuXSuKTMA3LTWuYUkzBTtI8fPiy/LBInzbkBtxkWqzwi5EUCgYAzlZ1Q3XlL7re4ZT9k4b7B8ZqiGOtBURkxcFqVS8gvZt0nFyRbbq7p+S8kr44dzTAFQEt709dSD2A1O4MY25KR5Kch9xkdthfMMFN+YiO6p8sLmLIVTZJsvo/Il22hCi+q1VPFNEjD1l1YvrvFMl2foEF5f3kn0dR8s5quJQf5AQKBgBklRpU7+vSyFkr46xRTDNPfyq3EV8D1W7gzQ0559bBx8GIjLoY1CbjYteG4gsP5DTO/LTeEhUJ+u/Z+5XOX0SM2WtIUGNdVV7dav9FnYadTRUuZSGZmxSGMjBQ1FZjV6egh7DLNW/AWaode0+NW6YlpmEIQuamjYU0fNtKqkhFxAoGAccXCg8HG6grBRN9CBH05NCkvq2Ow9YytbjU64vaMx1mMJipZYjyJS5COXqFBuc7arX2+1QFwCfKnHp1u90ui3hcYixY36HkIgYiAVmSMYQDbAXsQpqIcPlDpd31/mFDH9n+N/AFYaIN3pyOADDeLcW64ippOV1+6o/kXJCq760M="
-          ],
-          "certificate": [
-            "MIICmzCCAYMCBgGRwtM3vDANBgkqhkiG9w0BAQsFADARMQ8wDQYDVQQDDAZ0YXphbWEwHhcNMjQwOTA1MTUzMzI3WhcNMzQwOTA1MTUzNTA3WjARMQ8wDQYDVQQDDAZ0YXphbWEwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCv9JEBNKvPAL3jCHhdsEwVZuSSqQHe+7mn8BiqgsBSZQSlodsTgGKYAHPOsknvledg2jBPoFGk1VNuqdle2KAVxQWlJPjRaFWUoR6q4Wj66U8KZc+2U3OofjnSPzyDa7OsV97DZ4NMBA+3kCxyDMY92Ibf9sMclVdSMOBqdYJDTXPPaGEkjm9q9ltb/TFTs1q3O1hkRu+ND8JdqXQVA+nwbr431M1hlKfIjpDZ/0txAIfsM4/WWt0KTE9HHYl/BVEGSJf5UhKsRTJtZ08/9oepT7qBhgRqRXo971Xtzxz9jUe+l0OehCLSxHTLDNJ9cJ0Hyi8nZkgioZwzjZttfj1lAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAIJqi9FyJGOhPok/+KhzYnSG16FoAZDjQzeMi0Dws09iA5N3PBUgKk8Wm+9W0xB9hkkd7D3eQzAYio0yhd2sV/4TGdY/m2D/DvF6Qt7wIQAyAmkSQJRQ5/PXjnU5q2dAGInRgcWFWazI8Pppg2FmQTdFDcS1OHs0fcVD1bLY1HmD5wxTfrd3J7R9w0PInOxh6dC2QHymsF8UMulGqMAzPuRV2oX8DC4IabxSsno94oyG8H1FnI2SCusiz2jcAZ2+exNKp5z9DyqwkUENLIgqDCKxYWX885SaCXZ8OJLJ6/qg3BgR3Ai0xobcQl2cMVA9p5asOQ+IjLpffHIsNfvhvTY="
-          ],
           "priority": [
             "100"
           ]
