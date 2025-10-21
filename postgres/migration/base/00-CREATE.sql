@@ -36,7 +36,7 @@ create table evaluation (
     messageId text generated always as (
         evaluation -> 'transaction' -> 'FIToFIPmtSts' -> 'GrpHdr' ->> 'MsgId'
     ) stored,
-    tenantId text generated always as (evaluation -> 'transaction' ->> 'tenantId') stored
+    tenantId text generated always as (evaluation -> 'transaction' ->> 'TenantId') stored
 );
 
 \connect event_history;
