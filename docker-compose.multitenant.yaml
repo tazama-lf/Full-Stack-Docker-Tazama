@@ -1,11 +1,9 @@
 services:
-  arango:
+  postgres:
     environment:
-      - ARANGO_NO_AUTH=1
+      - POSTGRES_HOST_AUTH_METHOD=trust
     volumes:
-      - ./arango/migration/local/03-MULTITENANT.js:/docker-entrypoint-initdb.d/03-MULTITENANT.js
-    ports:
-      - 18529:8529
+      - ./postgres/migration/test/00-CREATE.sql:/docker-entrypoint-initdb.d/00-CREATE.sql
 
   keycloak:
     volumes:
