@@ -17,5 +17,5 @@ services:
     ports:
       - 3020:3020
     depends_on:
-      - arango
+      - postgres
       - keycloak

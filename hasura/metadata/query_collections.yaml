@@ -1,0 +1,174 @@
+- name: allowed-queries
+  definition:
+    queries:
+      # Event History inserts
+      - name: insert_entity
+        query: |
+          mutation InsertEntity($objects: [entity_insert_input!]!) {
+            insert_entity(objects: $objects) {
+              returning {
+                id
+                tenantId
+                creDtTm
+              }
+            }
+          }
+      
+      - name: insert_account
+        query: |
+          mutation InsertAccount($objects: [account_insert_input!]!) {
+            insert_account(objects: $objects) {
+              returning {
+                id
+                tenantId
+              }
+            }
+          }
+      
+      - name: insert_account_holder
+        query: |
+          mutation InsertAccountHolder($objects: [account_holder_insert_input!]!) {
+            insert_account_holder(objects: $objects) {
+              returning {
+                tenantId
+                source
+                destination
+                creDtTm
+              }
+            }
+          }
+      
+      - name: insert_transaction
+        query: |
+          mutation InsertTransaction($objects: [transaction_insert_input!]!) {
+            insert_transaction(objects: $objects) {
+              returning {
+                source
+                destination
+                TenantId
+                TxTp
+              }
+            }
+          }
+      
+      - name: insert_condition
+        query: |
+          mutation InsertCondition($objects: [condition_insert_input!]!) {
+            insert_condition(objects: $objects) {
+              returning {
+                id
+              }
+            }
+          }
+      
+      - name: insert_goverened_as_debtor_by
+        query: |
+          mutation InsertGoverenedAsDebtorBy($objects: [goverened_as_debtor_by_insert_input!]!) {
+            insert_goverened_as_debtor_by(objects: $objects) {
+              returning {
+                id
+              }
+            }
+          }
+      
+      - name: insert_goverened_as_debtor_account_by
+        query: |
+          mutation InsertGoverenedAsDebtorAccountBy($objects: [goverened_as_debtor_account_by_insert_input!]!) {
+            insert_goverened_as_debtor_account_by(objects: $objects) {
+              returning {
+                id
+              }
+            }
+          }
+      
+      - name: insert_goverened_as_creditor_by
+        query: |
+          mutation InsertGoverenedAsCreditBy($objects: [goverened_as_creditor_by_insert_input!]!) {
+            insert_goverened_as_creditor_by(objects: $objects) {
+              returning {
+                id
+              }
+            }
+          }
+      
+      - name: insert_goverened_as_creditor_account_by
+        query: |
+          mutation InsertGoverenedAsCreditorAccountBy($objects: [goverened_as_creditor_account_by_insert_input!]!) {
+            insert_goverened_as_creditor_account_by(objects: $objects) {
+              returning {
+                id
+              }
+            }
+          }
+      
+      # Raw History inserts
+      - name: insert_pacs002
+        query: |
+          mutation InsertPacs002($objects: [pacs002_insert_input!]!) {
+            insert_pacs002(objects: $objects) {
+              returning {
+                TxTp
+              }
+            }
+          }
+      
+      - name: insert_pacs008
+        query: |
+          mutation InsertPacs008($objects: [pacs008_insert_input!]!) {
+            insert_pacs008(objects: $objects) {
+              returning {
+                TxTp
+              }
+            }
+          }
+      
+      - name: insert_pain001
+        query: |
+          mutation InsertPain001($objects: [pain001_insert_input!]!) {
+            insert_pain001(objects: $objects) {
+              returning {
+                TxTp
+              }
+            }
+          }
+      
+      - name: insert_pain013
+        query: |
+          mutation InsertPain013($objects: [pain013_insert_input!]!) {
+            insert_pain013(objects: $objects) {
+              returning {
+                TxTp
+              }
+            }
+          }
+
+      # Configuration inserts
+      - name: insert_network_map
+        query: |
+          mutation InsertNetworkMap($objects: [network_map_insert_input!]!) {
+            insert_network_map(objects: $objects) {
+              returning {
+                TxTp
+              }
+            }
+          }
+
+      - name: insert_typology
+        query: |
+          mutation InsertTypology($objects: [typology_insert_input!]!) {
+            insert_typology(objects: $objects) {
+              returning {
+                TxTp
+              }
+            }
+          }
+
+      - name: insert_rule
+        query: |
+          mutation InsertRule($objects: [rule_insert_input!]!) {
+            insert_rule(objects: $objects) {
+              returning {
+                TxTp
+              }
+            }
+          }

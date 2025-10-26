@@ -15,7 +15,7 @@ The Tazama system is built with a modular Docker Compose architecture that allow
 ### Base Infrastructure
 - **`docker-compose.infrastructure.yaml`**: Core infrastructure services
   - `valkey`: Redis-compatible key-value store
-  - `arango`: ArangoDB database
+  - `postgres`: PostgresSQL database
   - `nats`: Messaging system
 
 ### Core Service Types
@@ -34,10 +34,10 @@ The Tazama system is built with a modular Docker Compose architecture that allow
 
 #### 2. Database Configuration
 - **`docker-compose.db.yaml`**: Full service database setup
-  - Configures ArangoDB for full deployment
+  - Configures PostgresSQL for full deployment
   
 - **`docker-compose.dev.db.yaml`**: Development database setup
-  - Configures ArangoDB with standard test data
+  - Configures PostgresSQL with standard test data
 
 #### 3. Rules Processing
 - **`docker-compose.full.yaml`**: All production rules (001-091)

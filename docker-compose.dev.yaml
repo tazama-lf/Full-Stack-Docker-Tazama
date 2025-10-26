@@ -4,7 +4,7 @@ include:
   - path:
     - docker-compose.infrastructure.yaml
 services:
-  # TRANSACTION MONITORING SERVICE
+  # TRANSACTION MONITORING SERVICE API
   tms:
     image: !reset null
     build:
@@ -14,12 +14,17 @@ services:
     env_file:
       - env/tms.env
       - .env
+    environment:
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=UNUSED
     restart: always
     ports:
       - ${TMS_PORT}:3000
     depends_on:
       - valkey
-      - arango
+      - postgres
       - nats
 
   # EVENT DIRECTOR
@@ -32,10 +37,13 @@ services:
     env_file:
       - env/ed.env
       - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
       - nats
 
   # TYPOLOGY PROCESSOR
@@ -48,10 +56,13 @@ services:
     env_file:
       - env/tp.env
       - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
       - nats
 
   # TRANSACTION AGGREGATION AND DECISIONING PROCESSOR
@@ -64,13 +75,21 @@ services:
     env_file:
       - env/tadp.env
       - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+      - EVALUATION_DATABASE_USER=postgres
+      - EVALUATION_DATABASE_PASSWORD=unused
     restart: always
     depends_on:
       - valkey
-      - arango
+      - postgres
       - nats
   
-  admin-service:
+  # ADMIN SERVICE API
+    admin-service:
     image: !reset null
     build:
       context: https://github.com/tazama-lf/admin-service.git#${ADMIN_BRANCH}
@@ -79,13 +98,21 @@ services:
     env_file:
       - env/admin.env
       - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - EVALUATION_DATABASE_USER=postgres
+      - EVALUATION_DATABASE_PASSWORD=unused
     restart: always
     ports:
       - ${ADMIN_PORT}:3100
     depends_on:
-      - arango
+      - postgres
       - valkey
 
+  # EVENT FLOW RULE PROCESSOR
   ef:
     image: !reset null
     build:
@@ -95,7 +122,10 @@ services:
     env_file:
       - env/event-flow.env
       - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
     restart: always
     depends_on:
-      - arango
+      - postgres
       - valkey

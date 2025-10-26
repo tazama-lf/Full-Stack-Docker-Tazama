@@ -1,6 +1,4 @@
 services:
-  arango:
-    environment:
-      - ARANGO_NO_AUTH=1
+  postgres:
     volumes:
-      - ./arango/migration/local/02-FULL.js:/docker-entrypoint-initdb.d/01-DATA.js
+      - ./postgres/migration/local/02-FULL.sql:/docker-entrypoint-initdb.d/01-DATA.sql
