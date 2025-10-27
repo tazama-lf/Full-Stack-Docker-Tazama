@@ -159,7 +159,7 @@ if "%elasticlogs%" == "[X]" (
         set "cmd=%cmd% -f docker-compose.logs-elastic.yaml -f docker-compose.logs-elastic.base.yaml"
     )
 )
-if "%test%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.test-service.yaml"
+if "%test%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.hasura.yaml"
 if "%elasticapm%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.apm-elastic.yaml"
 if "%natsutils%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.nats-utils.yaml"
 if "%ui%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.ui.yaml"
@@ -215,7 +215,7 @@ echo 7. NATS Utilities
 echo 8. Test Service (Hasura GraphQL API for PostgreSQL)
 echo.
 
-set "cmd=docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.full.yaml -f docker-compose.logs-base.yaml -f docker-compose.full.logs.yaml -f docker-compose.relay.yaml -f docker-compose.dev.ui.yaml -f docker-compose.dev.nats-utils.yaml -f docker-compose.dev.test-service.yaml up -d"
+set "cmd=docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.full.yaml -f docker-compose.logs-base.yaml -f docker-compose.full.logs.yaml -f docker-compose.relay.yaml -f docker-compose.dev.ui.yaml -f docker-compose.dev.nats-utils.yaml -f docker-compose.dev.hasura.yaml up -d"
 echo %cmd%
 echo.
 pause

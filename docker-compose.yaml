@@ -15,7 +15,7 @@ services:
       - EVENT_HISTORY_DATABASE_USER=postgres
       - EVENT_HISTORY_DATABASE_PASSWORD=unused
       - RAW_HISTORY_DATABASE_USER=postgres
-      - RAW_HISTORY_DATABASE_PASSWORD=UNUSED
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
     restart: always
     ports:
       - ${TMS_PORT}:3000

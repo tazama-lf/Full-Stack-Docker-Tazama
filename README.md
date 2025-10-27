@@ -333,14 +333,14 @@ The services are split up in multiple yamls,
 | --------------------------------- | ----------------------------------------------------------- |
 | docker-compose                    | tms, ed, tp, tadp, admin, ef                                |
 | docker-compose.override           | rule-901, set up all services                               |
-| docker-compose.infrastructure     | postgres, nats, valkey                                        |
+| docker-compose.infrastructure     | postgres, nats, valkey                                      |
 | docker-compose.(dev.)nats-utils   | nats-utilities                                              |
 | docker-compose.(dev.)auth         | keycloak, auth-service, tms changes                         |
 | docker-compose.(dev.)logs-base    | event-sidecar, lumberjack, all service changes              |
 | docker-compose.(dev.)logs-elastic | event-sidecar, lumberjack, elasticsearch, kibana            |
 | docker-compose.(dev.)apm-elastic  | event-sidecar, lumberjack, elasticsearch, kibana, apmserver |
 | docker-compose.(dev.)relay        | relay-service                                               |
-| docker-compose.(dev.)test-service | test-service                                               |
+| docker-compose.(dev.)hasura       | hasura                                                      |
 
 > !!!Note
 > Turn off `tms` API authentication for the `Demo UI` to work.
