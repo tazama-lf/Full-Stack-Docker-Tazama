@@ -8,14 +8,3 @@ services:
       context: https://github.com/tazama-lf/auth-service.git#${AUTH_SERVICE_BRANCH}
       args:
         - GH_TOKEN
-    env_file:
-      - env/auth-service.env
-      - .env
-    restart: always
-    volumes:
-      - ./auth/test-private-key.pem:/home/app/test-private-key.pem
-    ports:
-      - 3020:3020
-    depends_on:
-      - postgres
-      - keycloak

@@ -1,14 +1,4 @@
 services:
-  postgres:
-    environment:
-      - POSTGRES_HOST_AUTH_METHOD=trust
-    volumes:
-      - ./postgres/migration/test/00-CREATE.sql:/docker-entrypoint-initdb.d/00-CREATE.sql
-
-  keycloak:
-    volumes:
-      - ./auth/keycloak/realms/tazama-test-realm-multitenant.json:/opt/keycloak/data/import/tazama-test-realm-multitenant.json
-
   ef:
     environment:
       SUPPRESS_ALERTS: false

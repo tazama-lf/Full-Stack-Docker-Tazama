@@ -7,15 +7,14 @@ set "type="
 set "volumes=[ ]"
 set "auth=[ ]"
 set "basiclogs=[ ]"
-set "elasticlogs=[ ]"
-set "elasticapm=[ ]"
 set "natsutils=[ ]"
 set "ui=[ ]"
 set "relay=[ ]"
-set "test=[ ]"
-set "config=[ ]"
+set "pgadmin=[ ]"
+set "hasura=[ ]"
 
 set "IS_GITHUB_DEPLOYMENT=0"
+set "IS_FULL_DEPLOYMENT=0"
 set "IS_MULTITENANT_DEPLOYMENT=0"
 
 cls
@@ -23,8 +22,8 @@ echo.
 echo Select docker deployment type:
 echo.
 echo 1. Public (GitHub)
-echo 2. Full-service (DockerHub)
-echo 3. Public (DockerHub)
+echo 2. Public (DockerHub)
+echo 3. Full-service (DockerHub)
 echo 4. Multi-Tenant Public (DockerHub)
 echo 5. General Utilities
 echo 6. Database Utilities
@@ -37,17 +36,29 @@ if /i "%type%"=="" goto :menu
 
 if /i "%type%"=="1" (
     set "IS_GITHUB_DEPLOYMENT=1"
+    set "IS_FULL_DEPLOYMENT=0"
+    set "IS_MULTITENANT_DEPLOYMENT=0"
     goto :addons
 )
 if /i "%type%"=="2" (
-    goto :deploy_full
+    set "IS_GITHUB_DEPLOYMENT=0"
+    set "IS_FULL_DEPLOYMENT=0"
+    set "IS_MULTITENANT_DEPLOYMENT=0"
+    goto :addons
 )
 if /i "%type%"=="3" (
+    set "IS_FULL_DEPLOYMENT=1"
+    set "IS_GITHUB_DEPLOYMENT=0"
+    set "IS_MULTITENANT_DEPLOYMENT=0"
     goto :addons
 )
 if /i "%type%"=="4" (
+    set "IS_GITHUB_DEPLOYMENT=0"
+    set "IS_FULL_DEPLOYMENT=0"
     set "IS_MULTITENANT_DEPLOYMENT=1"
-    goto :multi
+    set "auth=[X]"
+    set "relay=[X]"
+    goto :addons
 )
 if /i "%type%"=="5" (
     goto :utils
@@ -60,16 +71,20 @@ if /i "%type%"=="6" (
 set "choice="
 cls
 echo.
-echo Enable optional docker configuration addons:
+echo Enable optional deployment configuration addons:
+echo.
+echo CORE ADDONS:
 echo.
 echo 1. %auth% Authentication
-echo 2. %basiclogs% Basic Logs
-echo 3. %elasticlogs% [Elastic] Logging
-echo 4. %elasticapm% [Elastic] APM
-echo 5. %ui% Demo UI
-echo 6. %relay% Relay
-echo 7. %test% Hasura GraphQL API for PostgreSQL (Testing)
-rem echo 8. %config% Config Service
+echo 2. %relay% Relay services (NATS)
+echo 3. %basiclogs% Basic Logs
+echo 4. %ui% Demo UI
+echo.
+echo UTILITY ADDONS:
+echo.
+echo 5. %natsutils% NATS Utilities
+echo 6. %pgadmin% pgAdmin for PostgreSQL
+echo 7. %hasura% Hasura GraphQL API for PostgreSQL
 echo.
 echo Toggle addons (1-7), (a)pply current selection, (r)eturn, or (q)uit
 set /p "choice=Enter your choice: "
@@ -78,108 +93,83 @@ if /i "%choice%"=="a" goto :apply
 if /i "%choice%"=="r" goto :menu
 if /i "%choice%"=="q" goto :end
 
-if "%choice%"=="1" if "%auth%" == "[ ]" (set "auth=[X]") else (set "auth=[ ]")
-if "%choice%"=="2" if "%basiclogs%" == "[ ]" (set "basiclogs=[X]") else (set "basiclogs=[ ]")
-if "%choice%"=="3" if "%elasticlogs%" == "[ ]" (set "elasticlogs=[X]") else (set "elasticlogs=[ ]")
-if "%choice%"=="4" if "%elasticapm%" == "[ ]" (set "elasticapm=[X]") else (set "elasticapm=[ ]")
-if "%choice%"=="5" if "%ui%" == "[ ]" (set "ui=[X]") else (set "ui=[ ]")
-if "%choice%"=="6" if "%relay%" == "[ ]" (set "relay=[X]") else (set "relay=[ ]")
-if "%choice%"=="7" if "%test%" == "[ ]" (set "test=[X]") else (set "test=[ ]")
-rem if "%choice%"=="8" if "%config%" == "[ ]" (set "config=[X]") else (set "config=[ ]")
-
-@REM Nats utils not part of standard deployment
-if "%choice%"=="99" if "%natsutils%" == "[ ]" (set "natsutils=[X]") else (set "natsutils=[ ]")
+rem If multitenant, can't unset auth or relay...
+if "%choice%"=="1" if %IS_MULTITENANT_DEPLOYMENT% NEQ 1 if "%auth%" == "[ ]" (set "auth=[X]") else (set "auth=[ ]")
+if "%choice%"=="2" if %IS_MULTITENANT_DEPLOYMENT% NEQ 1 if "%relay%" == "[ ]" (set "relay=[X]") else (set "relay=[ ]")
+if "%choice%"=="3" if "%basiclogs%" == "[ ]" (set "basiclogs=[X]") else (set "basiclogs=[ ]")
+if "%choice%"=="4" if "%ui%" == "[ ]" (set "ui=[X]") else (set "ui=[ ]")
+if "%choice%"=="5" if "%natsutils%" == "[ ]" (set "natsutils=[X]") else (set "natsutils=[ ]")
+if "%choice%"=="6" if "%pgadmin%" == "[ ]" (set "pgadmin=[X]") else (set "pgadmin=[ ]")
+if "%choice%"=="7" if "%hasura%" == "[ ]" (set "hasura=[X]") else (set "hasura=[ ]")
 
 goto :addons
 
-:multi
-set "basiclogs=[X]"
-set "relay=[X]"
-
-cls
-echo.
-echo Multi-tenancy installation will contain the following addons:
-echo.
-echo 1. %auth% Authentication
-echo 2. %test% Hasura GraphQL API for PostgreSQL (Testing)
-echo 2. %basiclogs% Basic Logs
-echo 3. %relay% Relay services
-echo.
-echo Toggle addons (1-2), (a)pply current selection, (r)eturn, or (q)uit
-set /p "choice=Enter your choice: "
-
-if /i "%choice%"=="a" goto :apply
-if /i "%choice%"=="r" goto :menu
-if /i "%choice%"=="q" goto :end
-
-if "%choice%"=="1" if "%auth%" == "[ ]" (set "auth=[X]") else (set "auth=[ ]")
-if "%choice%"=="2" if "%test%" == "[ ]" (set "test=[X]") else (set "test=[ ]")
-
-@REM Nats utils not part of standard deployment
-if "%choice%"=="99" if "%natsutils%" == "[ ]" (set "natsutils=[X]") else (set "natsutils=[ ]")
-
-goto :multi
-
 :apply
+rem Base command for all options
+set "cmd=docker compose -f docker-compose.base.infrastructure.yaml -f docker-compose.base.override.yaml"
+
+rem Add core processors and configuration
 if %IS_GITHUB_DEPLOYMENT% EQU 1 (
-    set "cmd=docker compose -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.dev.db.yaml -f docker-compose.dev.rule.yaml -f docker-compose.dev.yaml"
+    set "cmd=!cmd! -f docker-compose.dev.cfg.yaml -f docker-compose.dev.core.yaml"
 ) else (
     if %IS_MULTITENANT_DEPLOYMENT% EQU 1 (
-        set "cmd=docker compose -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.rule.yaml"
+        set "cmd=!cmd! -f docker-compose.multitenant.cfg.yaml"
     ) else (
-        set "cmd=docker compose -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.dev.db.yaml -f docker-compose.rule.yaml"
+        if %IS_FULL_DEPLOYMENT% EQU 1 (
+            set "cmd=!cmd! -f docker-compose.full.cfg.yaml"
+        ) else (
+            set "cmd=!cmd! -f docker-compose.hub.cfg.yaml"
+        )
+    )
+    set "cmd=!cmd! -f docker-compose.hub.core.yaml"
+    if %IS_FULL_DEPLOYMENT% EQU 1 (
+        set "cmd=!cmd! -f docker-compose.full.rules.yaml"
+    ) else (
+        set "cmd=!cmd! -f docker-compose.hub.rules.yaml"
     )
 )
+
+rem Add authentication services (mandatory for multitenancy)
 if "%auth%" == "[X]" (
+    set "cmd=!cmd! -f docker-compose.base.auth.yaml"
     if %IS_GITHUB_DEPLOYMENT% EQU 1 (
-        set "cmd=%cmd% -f docker-compose.dev.auth.yaml -f docker-compose.auth.base.yaml"
+        set "cmd=!cmd! -f docker-compose.dev.auth.yaml"
     ) else (
         if %IS_MULTITENANT_DEPLOYMENT% EQU 1 (
-            set "cmd=%cmd% -f docker-compose.auth.yaml -f docker-compose.auth.base.yaml"
-        ) else (
-            set "cmd=%cmd% -f docker-compose.auth.yaml -f docker-compose.auth.base.yaml"
+            set "cmd=!cmd! -f docker-compose.multitenant.auth.yaml"
         )
     )
 )
+
+rem Add relay services (mandatory for multitenancy)
+if "%relay%" == "[X]" (
+    if %IS_GITHUB_DEPLOYMENT% EQU 1 (
+        set "cmd=!cmd! -f docker-compose.dev.relay.yaml"
+    ) else (
+        if %IS_MULTITENANT_DEPLOYMENT% EQU 1 (
+            set "cmd=!cmd! -f docker-compose.multitenant.relay.yaml"
+        ) else (
+            set "cmd=!cmd! -f docker-compose.hub.relay.yaml"
+        )
+    )
+)
+
+rem Add basic logging services
 if "%basiclogs%" == "[X]" (
     if %IS_GITHUB_DEPLOYMENT% EQU 1 (
-        set "cmd=%cmd% -f docker-compose.dev.logs-base.yaml -f docker-compose.logs.yaml"
+        set "cmd=!cmd! -f docker-compose.dev.logs.base.yaml"
     ) else (
-        if %IS_MULTITENANT_DEPLOYMENT% EQU 1 (
-            set "cmd=%cmd% -f docker-compose.logs-base.yaml -f docker-compose.logs.yaml"
-        ) else (
-            set "cmd=%cmd% -f docker-compose.logs-base.yaml -f docker-compose.logs.yaml"
-        )
+        set "cmd=!cmd! -f docker-compose.hub.logs.base.yaml"
     )
-)
-if "%elasticlogs%" == "[X]" (
-    if %IS_GITHUB_DEPLOYMENT% EQU 1 (
-        set "cmd=%cmd% -f docker-compose.dev.logs-elastic.yaml -f docker-compose.logs-elastic.base.yaml"
-    ) else (
-        set "cmd=%cmd% -f docker-compose.logs-elastic.yaml -f docker-compose.logs-elastic.base.yaml"
-    )
-)
-if "%test%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.hasura.yaml"
-if "%elasticapm%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.apm-elastic.yaml"
-if "%natsutils%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.nats-utils.yaml"
-if "%ui%" == "[X]" set "cmd=%cmd% -f docker-compose.dev.ui.yaml"
-if "%relay%" == "[X]" if %IS_GITHUB_DEPLOYMENT% EQU 1 (
-    set "cmd=%cmd% -f docker-compose.dev.relay.yaml"
-) else (
-    if %IS_MULTITENANT_DEPLOYMENT% EQU 1 (
-        set "cmd=%cmd% -f docker-compose.multitenant.yaml"
-    ) else (
-        set "cmd=%cmd% -f docker-compose.relay.yaml"
-    )
-)
-if "%config%" == "[X]" if %IS_GITHUB_DEPLOYMENT% EQU 1 (
-    set "cmd=%cmd% -f docker-compose.dev.config.yaml"
-) else (
-    set "cmd=%cmd% -f docker-compose.config.yaml"
 )
 
+if "%ui%" == "[X]" set "cmd=!cmd! -f docker-compose.hub.ui.yaml"
+if "%natsutils%" == "[X]" set "cmd=!cmd! -f docker-compose.utils.nats-utils.yaml"
+if "%pgadmin%" == "[X]" set "cmd=!cmd! -f docker-compose.utils.pgadmin.yaml"
+if "%hasura%" == "[X]" set "cmd=!cmd! -f docker-compose.utils.hasura.yaml"
+
 echo.
-echo Command to run: %cmd% -p tazama up -d
+echo Command to run: !cmd! -p tazama up -d
 echo.
 set /p "confirm=Press (e) to execute, (q) to quit or any other key to go back: "
 echo.
@@ -190,45 +180,16 @@ if "%confirm%"=="e" (
     echo.
     echo Deploying Tazama from Docker Hub...
     echo.
-    %cmd% -p tazama up -d --remove-orphans
+    !cmd! -p tazama up -d --remove-orphans
     goto :end
 ) else ( 
     if "%confirm%"=="q" (
         goto :end
     )
+    if "%confirm%"=="" (
+        goto :addons
+    )
 ) 
-goto :end
-
-:deploy_full
-set "choice="
-cls
-echo.
-echo Full deployment includes:
-echo.
-echo 1. Core services (PostgreSQL, NATS, ValKey)
-echo 2. Core processors
-echo 3. All available rule processors
-echo 4. Basic Logs
-echo 5. Relay services
-echo 6. Demo UI
-echo 7. NATS Utilities
-echo 8. Test Service (Hasura GraphQL API for PostgreSQL)
-echo.
-
-set "cmd=docker compose -p tazama -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.db.yaml -f docker-compose.full.yaml -f docker-compose.logs-base.yaml -f docker-compose.full.logs.yaml -f docker-compose.relay.yaml -f docker-compose.dev.ui.yaml -f docker-compose.dev.nats-utils.yaml -f docker-compose.dev.hasura.yaml up -d"
-echo %cmd%
-echo.
-pause
-
-echo.
-echo Stopping existing Tazama containers...
-echo.
-docker compose -p tazama down
-echo.
-echo Deploying Tazama from Docker Hub...
-echo.
-echo Command to run: %cmd%
-%cmd% --remove-orphans
 goto :end
 
 :utils
@@ -274,9 +235,9 @@ if "%choice%"=="7" (
     set "cmd=docker network ls"
 )
 
-echo Executing command: %cmd%
+echo Executing command: !cmd!
 echo.
-call %cmd%
+call !cmd!
 echo.
 pause
 

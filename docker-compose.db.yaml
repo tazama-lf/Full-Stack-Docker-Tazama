@@ -1,4 +1,0 @@
-services:
-  postgres:
-    volumes:
-      - ./postgres/migration/local/02-FULL.sql:/docker-entrypoint-initdb.d/01-DATA.sql

@@ -1,10 +1,4 @@
 services:
-  postgres:
-    volumes:
-      - ./postgres/migration/local/01-STANDARD.sql:/docker-entrypoint-initdb.d/01-DATA.sql
-    ports:
-      - 15432:5432
-
   pgadmin:
     image: dpage/pgadmin4:9
     env_file:

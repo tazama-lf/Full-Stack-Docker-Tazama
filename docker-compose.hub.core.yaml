@@ -1,16 +1,7 @@
-# base
-
-include:
-  - path:
-    - docker-compose.infrastructure.yaml
 services:
   # TRANSACTION MONITORING SERVICE API
   tms:
-    image: !reset null
-    build:
-      context: https://github.com/tazama-lf/tms-service.git#${TMS_BRANCH}
-      args:
-        - GH_TOKEN
+    image: tazamaorg/tms-service:${TAZAMA_VERSION}
     env_file:
       - env/tms.env
       - .env
@@ -18,7 +9,7 @@ services:
       - EVENT_HISTORY_DATABASE_USER=postgres
       - EVENT_HISTORY_DATABASE_PASSWORD=unused
       - RAW_HISTORY_DATABASE_USER=postgres
-      - RAW_HISTORY_DATABASE_PASSWORD=UNUSED
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
     restart: always
     ports:
       - ${TMS_PORT}:3000
@@ -29,17 +20,13 @@ services:
 
   # EVENT DIRECTOR
   ed:
-    image: !reset null
-    build:
-      context: https://github.com/tazama-lf/event-director.git#${ED_BRANCH}
-      args:
-        - GH_TOKEN
-    env_file:
-      - env/ed.env
-      - .env
+    image: tazamaorg/event-director:${TAZAMA_VERSION}
     environment:
       - CONFIGURATION_DATABASE_USER=postgres
       - CONFIGURATION_DATABASE_PASSWORD=unused
+    env_file:
+      - env/ed.env
+      - .env
     restart: always
     depends_on:
       - valkey
@@ -48,17 +35,13 @@ services:
 
   # TYPOLOGY PROCESSOR
   tp:
-    image: !reset null
-    build:
-      context: https://github.com/tazama-lf/typology-processor.git#${TP_BRANCH}
-      args:
-        - GH_TOKEN
-    env_file:
-      - env/tp.env
-      - .env
+    image: tazamaorg/typology-processor:${TAZAMA_VERSION}
     environment:
       - CONFIGURATION_DATABASE_USER=postgres
       - CONFIGURATION_DATABASE_PASSWORD=unused
+    env_file:
+      - env/tp.env
+      - .env
     restart: always
     depends_on:
       - valkey
@@ -67,11 +50,7 @@ services:
 
   # TRANSACTION AGGREGATION AND DECISIONING PROCESSOR
   tadp:
-    image: !reset null
-    build:
-      context: https://github.com/tazama-lf/transaction-aggregation-decisioning-processor.git#${TADP_BRANCH}
-      args:
-        - GH_TOKEN
+    image: tazamaorg/transaction-aggregation-decisioning-processor:${TAZAMA_VERSION}
     env_file:
       - env/tadp.env
       - .env
@@ -89,12 +68,8 @@ services:
       - nats
   
   # ADMIN SERVICE API
-    admin-service:
-    image: !reset null
-    build:
-      context: https://github.com/tazama-lf/admin-service.git#${ADMIN_BRANCH}
-      args:
-        - GH_TOKEN
+  admin-service:
+    image: tazamaorg/admin-service:${TAZAMA_VERSION}
     env_file:
       - env/admin.env
       - .env
@@ -114,11 +89,7 @@ services:
 
   # EVENT FLOW RULE PROCESSOR
   ef:
-    image: !reset null
-    build:
-      context: https://github.com/tazama-lf/event-flow.git#${EVENT_FLOW_BRANCH}
-      args:
-        - GH_TOKEN
+    image: tazamaorg/event-flow:${TAZAMA_VERSION}
     env_file:
       - env/event-flow.env
       - .env

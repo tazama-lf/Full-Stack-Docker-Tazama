@@ -38,8 +38,7 @@ values (
     ]
   }
 }'
-    ),
-    (
+    ), (
         '{
   "id": "902@1.0.0",
   "cfg": "1.0.0",
@@ -81,7 +80,76 @@ insert into
     typology (configuration)
 values (
         '{
-  "typology_name": "Rule-901-Typology-999",
+  "typology_name": "Typology-999-Rule-901",
+  "id": "typology-processor@1.0.0",
+  "cfg": "999-901@1.0.0",
+  "tenantId": "DEFAULT",
+  "workflow": {
+    "alertThreshold": 200,
+    "interdictionThreshold": 400,
+    "flowProcessor": "EFRuP@1.0.0"
+  },
+  "rules": [
+    {
+      "id": "901@1.0.0",
+      "cfg": "1.0.0",
+      "termId": "v901at100at100",
+      "wghts": [
+        {
+          "ref": ".err",
+          "wght": "0"
+        },
+        {
+          "ref": ".x00",
+          "wght": "100"
+        },
+        {
+          "ref": ".01",
+          "wght": "100"
+        },
+        {
+          "ref": ".02",
+          "wght": "200"
+        },
+        {
+          "ref": ".03",
+          "wght": "400"
+        }
+      ]
+    },
+    {
+      "id": "EFRuP@1.0.0",
+      "cfg": "none",
+      "termId": "vEFRuPat100atnone",
+      "wghts": [
+        {
+          "ref": ".err",
+          "wght": "0"
+        },
+        {
+          "ref": "override",
+          "wght": "0"
+        },
+        {
+          "ref": "non-overridable-block",
+          "wght": "0"
+        },
+        {
+          "ref": "overridable-block",
+          "wght": "0"
+        },
+        {
+          "ref": "none",
+          "wght": "0"
+        }
+      ]
+    }
+  ],
+  "expression": ["Add", "v901at100at100"]
+}'
+    ), (
+        '{
+  "typology_name": "Typology-999-Rule-901-and-902",
   "id": "typology-processor@1.0.0",
   "cfg": "999@1.0.0",
   "tenantId": "DEFAULT",
@@ -174,44 +242,5 @@ values (
     }
   ],
   "expression": ["Add", "v901at100at100", "v902at100at100"]
-}'
-    );
-
-insert into
-    network_map (configuration)
-values (
-        '{
-  "active": true,
-  "name": "Public Network Map",
-  "cfg": "1.0.0",
-  "tenantId": "DEFAULT",
-  "messages": [
-    {
-      "id": "004@1.0.0",
-      "cfg": "1.0.0",
-      "txTp": "pacs.002.001.12",
-      "typologies": [
-        {
-          "id": "typology-processor@1.0.0",
-          "cfg": "999@1.0.0",
-          "tenantId": "DEFAULT",
-          "rules": [
-            {
-              "id": "EFRuP@1.0.0",
-              "cfg": "none"
-            },
-            {
-              "id": "901@1.0.0",
-              "cfg": "1.0.0"
-            },
-            {
-              "id": "902@1.0.0",
-              "cfg": "1.0.0"
-            }
-          ]
-        }
-      ]
-    }
-  ]
 }'
     );
