@@ -970,31 +970,27 @@ values (
       "parameters": {},
       "exitConditions": [],
       "cases": {
-        "parameters": {},
-        "exitConditions": [],
-        "cases": {
-          "expressions": [
-            {
-              "subRuleRef": ".01",
-              "value": "MP2B",
-              "reason": "The transaction is identified as a Mobile P2B Payment"
-            },
-            {
-              "subRuleRef": ".02",
-              "value": "MP2P",
-              "reason": "The transaction is identified as a Mobile P2P Payment"
-            },
-            {
-              "subRuleRef": ".03",
-              "value": "CASH",
-              "reason": "The transaction is identified as a general cash management instruction"
-            }
-          ],
-          "alternative": {
-            "subRuleRef": ".00",
-            "reason": "The transaction type is not defined in this rule configuration"
+        "expressions": [
+          {
+            "subRuleRef": ".01",
+            "value": "MP2B",
+            "reason": "The transaction is identified as a Mobile P2B Payment"
+          },
+          {
+            "subRuleRef": ".02",
+            "value": "MP2P",
+            "reason": "The transaction is identified as a Mobile P2P Payment"
+          },
+          {
+            "subRuleRef": ".03",
+            "value": "CASH",
+            "reason": "The transaction is identified as a general cash management instruction"
           }
-        }
+        ],
+        "alternative": {
+          "subRuleRef": ".00",
+          "reason": "The transaction type is not defined in this rule configuration"
+        }        
       }
     }
   }'

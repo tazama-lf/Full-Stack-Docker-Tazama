@@ -1,0 +1,15 @@
+services:
+  nats-utilities:
+    build:
+      context: https://github.com/tazama-lf/batch-ppa.git#${BATCH_PPA_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/batch-ppa.env
+      - .env
+    restart: always
+    depends_on:
+      - postgres
+      - tms
+    ports:
+      - 4000:4000

@@ -24,7 +24,7 @@ services:
       args:
         - GH_TOKEN
     env_file:
-      - env/rs-nats-ef.env
+      - env/rs-nats.env
       - .env
     restart: always
     environment:
@@ -41,7 +41,7 @@ services:
       args:
         - GH_TOKEN
     env_file:
-      - env/rs-nats-tp.env
+      - env/rs-nats.env
       - .env
     restart: always
     environment:
@@ -58,7 +58,7 @@ services:
       args:
         - GH_TOKEN
     env_file:
-      - env/rs-nats-tadp.env
+      - env/rs-nats.env
       - .env
     restart: always
     environment:

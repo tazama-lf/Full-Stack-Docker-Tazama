@@ -3,5 +3,4 @@ services:
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
     volumes:
-      - ./postgres/migration/test/00-CREATE.sql:/docker-entrypoint-initdb.d/00-CREATE.sql
       - ./postgres/migration/config/04-multitenancy.sql:/docker-entrypoint-initdb.d/01-DATA.sql

@@ -1,4 +1,24 @@
 services:
+  # ADMIN SERVICE API
+  admin-service:
+    image: tazamaorg/admin-service:${TAZAMA_VERSION}
+    env_file:
+      - env/admin.env
+      - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - EVALUATION_DATABASE_USER=postgres
+      - EVALUATION_DATABASE_PASSWORD=unused
+    restart: always
+    ports:
+      - ${ADMIN_PORT}:3100
+    depends_on:
+      - postgres
+      - valkey
+
   # TRANSACTION MONITORING SERVICE API
   tms:
     image: tazamaorg/tms-service:${TAZAMA_VERSION}
@@ -67,26 +87,6 @@ services:
       - postgres
       - nats
   
-  # ADMIN SERVICE API
-  admin-service:
-    image: tazamaorg/admin-service:${TAZAMA_VERSION}
-    env_file:
-      - env/admin.env
-      - .env
-    environment:
-      - CONFIGURATION_DATABASE_USER=postgres
-      - CONFIGURATION_DATABASE_PASSWORD=unused
-      - EVENT_HISTORY_DATABASE_USER=postgres
-      - EVENT_HISTORY_DATABASE_PASSWORD=unused
-      - EVALUATION_DATABASE_USER=postgres
-      - EVALUATION_DATABASE_PASSWORD=unused
-    restart: always
-    ports:
-      - ${ADMIN_PORT}:3100
-    depends_on:
-      - postgres
-      - valkey
-
   # EVENT FLOW RULE PROCESSOR
   ef:
     image: tazamaorg/event-flow:${TAZAMA_VERSION}
@@ -100,3 +100,4 @@ services:
     depends_on:
       - postgres
       - valkey
+      - nats

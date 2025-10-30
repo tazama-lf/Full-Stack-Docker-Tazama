@@ -12,6 +12,7 @@ set "ui=[ ]"
 set "relay=[ ]"
 set "pgadmin=[ ]"
 set "hasura=[ ]"
+set "batchppa=[ ]"
 
 set "IS_GITHUB_DEPLOYMENT=0"
 set "IS_FULL_DEPLOYMENT=0"
@@ -27,8 +28,9 @@ echo 3. Full-service (DockerHub)
 echo 4. Multi-Tenant Public (DockerHub)
 echo 5. General Utilities
 echo 6. Database Utilities
+echo 7. Consoles
 echo.
-echo Select option (1-6), or (q)uit:
+echo Select option (1-7), or (q)uit:
 set /p "type=Enter your choice: "
 
 if /i "%type%"=="q" goto :end
@@ -66,6 +68,9 @@ if /i "%type%"=="5" (
 if /i "%type%"=="6" (
     goto :dbutils
 )
+if /i "%type%"=="7" (
+    goto :consoles
+)
 
 :addons
 set "choice="
@@ -83,10 +88,11 @@ echo.
 echo UTILITY ADDONS:
 echo.
 echo 5. %natsutils% NATS Utilities
-echo 6. %pgadmin% pgAdmin for PostgreSQL
-echo 7. %hasura% Hasura GraphQL API for PostgreSQL
+echo 6. %batchppa% Batch PPA
+echo 7. %pgadmin% pgAdmin for PostgreSQL
+echo 8. %hasura% Hasura GraphQL API for PostgreSQL
 echo.
-echo Toggle addons (1-7), (a)pply current selection, (r)eturn, or (q)uit
+echo Toggle addons (1-8), (a)pply current selection, (r)eturn, or (q)uit
 set /p "choice=Enter your choice: "
 
 if /i "%choice%"=="a" goto :apply
@@ -99,8 +105,9 @@ if "%choice%"=="2" if %IS_MULTITENANT_DEPLOYMENT% NEQ 1 if "%relay%" == "[ ]" (s
 if "%choice%"=="3" if "%basiclogs%" == "[ ]" (set "basiclogs=[X]") else (set "basiclogs=[ ]")
 if "%choice%"=="4" if "%ui%" == "[ ]" (set "ui=[X]") else (set "ui=[ ]")
 if "%choice%"=="5" if "%natsutils%" == "[ ]" (set "natsutils=[X]") else (set "natsutils=[ ]")
-if "%choice%"=="6" if "%pgadmin%" == "[ ]" (set "pgadmin=[X]") else (set "pgadmin=[ ]")
-if "%choice%"=="7" if "%hasura%" == "[ ]" (set "hasura=[X]") else (set "hasura=[ ]")
+if "%choice%"=="6" if "%batchppa%" == "[ ]" (set "batchppa=[X]") else (set "batchppa=[ ]")
+if "%choice%"=="7" if "%pgadmin%" == "[ ]" (set "pgadmin=[X]") else (set "pgadmin=[ ]")
+if "%choice%"=="8" if "%hasura%" == "[ ]" (set "hasura=[X]") else (set "hasura=[ ]")
 
 goto :addons
 
@@ -165,6 +172,7 @@ if "%basiclogs%" == "[X]" (
 
 if "%ui%" == "[X]" set "cmd=!cmd! -f docker-compose.hub.ui.yaml"
 if "%natsutils%" == "[X]" set "cmd=!cmd! -f docker-compose.utils.nats-utils.yaml"
+if "%batchppa%" == "[X]" set "cmd=!cmd! -f docker-compose.utils.batch-ppa.yaml"
 if "%pgadmin%" == "[X]" set "cmd=!cmd! -f docker-compose.utils.pgadmin.yaml"
 if "%hasura%" == "[X]" set "cmd=!cmd! -f docker-compose.utils.hasura.yaml"
 
@@ -278,6 +286,37 @@ echo.
 pause
 
 goto :dbutils
+
+:consoles
+set "choice="
+cls
+echo.
+echo Execute some Docker commands in tazama-postgres-1:
+echo.
+echo 1. pgAdmin - localhost:15050
+echo 2. hasura - localhost:6100
+echo.
+echo Select function (1-2), (r)eturn or (q)uit
+set /p "choice=Enter your choice: "
+
+if /i "%choice%"=="q" goto :end
+if /i "%choice%"=="r" goto :menu
+if /i "%choice%"=="" goto :consoles
+
+echo Executing command...
+echo.
+
+if "%choice%"=="1" (
+    start http://localhost:15050
+)
+if "%choice%"=="2" (
+    start http://localhost:6100
+)
+
+echo.
+pause
+
+goto :consoles
 
 :end
 echo.
