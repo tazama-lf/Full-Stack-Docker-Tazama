@@ -6,13 +6,34 @@ echo "=========================================="
 echo "Hasura Initialization Script"
 echo "=========================================="
 
-# Wait for Hasura to be ready
-echo "Waiting for Hasura to be ready..."
-until curl -s http://hasura:8080/healthz > /dev/null 2>&1; do
-  echo "  ... waiting"
-  sleep 2
+echo ""
+echo "=========================================="
+echo "Clearing existing metadata..."
+echo "=========================================="
+
+# Reset Hasura metadata
+curl -s -X POST \
+    -H "Content-Type: application/json" \
+    -H "x-hasura-admin-secret: password" \
+    -d '{"type":"clear_metadata","args":{}}' \
+    http://hasura:8080/v1/metadata > /dev/null 2>&1
+echo "✓ Metadata cleared"
+echo ""
+
+echo ""
+echo "=========================================="
+echo "Removing existing data sources..."
+echo "=========================================="
+
+for source in event_history raw_history configuration evaluation; do
+    curl -s -X POST \
+        -H "Content-Type: application/json" \
+        -H "x-hasura-admin-secret: password" \
+        -d "{\"type\":\"pg_drop_source\",\"args\":{\"name\":\"$source\",\"cascade\":true}}" \
+        http://hasura:8080/v1/metadata > /dev/null 2>&1
 done
-echo "✓ Hasura is ready!"
+echo "✓ Sources removed"
+echo ""
 
 # Function to make API calls to Hasura
 call_hasura_api() {

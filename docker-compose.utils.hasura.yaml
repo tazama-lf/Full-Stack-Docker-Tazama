@@ -26,7 +26,7 @@ services:
       HASURA_GRAPHQL_DATABASE_URL_EVALUATION: postgres://postgres:@postgres:5432/evaluation
       
       # Auto-apply metadata on startup
-      HASURA_GRAPHQL_METADATA_DIR: /hasura/metadata
+      # HASURA_GRAPHQL_METADATA_DIR: /hasura/metadata
       
       # Console and dev settings
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
@@ -39,20 +39,23 @@ services:
       HASURA_GRAPHQL_CORS_DOMAIN: "*"
       HASURA_GRAPHQL_ENABLE_TELEMETRY: "false"
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/healthz || exit 1"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 10s
+      retries: 10
+      start_period: 120s
 
   hasura-init:
     image: curlimages/curl:latest
     depends_on:
       hasura:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
     volumes:
       - ./hasura/init.sh:/init.sh:ro
     entrypoint:
       - /bin/sh
-      - /init.sh
+      - -c
+      - "echo 'Waiting 60s for system to stabilize...' && sleep 60 && sh /init.sh"
     restart: "no"

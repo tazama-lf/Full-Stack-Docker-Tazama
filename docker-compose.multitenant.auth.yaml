@@ -1,4 +1,4 @@
 services:
   keycloak:
-    volumes: !reset
-      - ./auth/keycloak/realms/tazama-test-realm-multitenant.json:/opt/keycloak/data/import/tazama-test-realm-multitenant.json
+    volumes:
+      - ./auth/keycloak/realms/01-tazama-test-realm-multitenant.json:/opt/keycloak/data/import/01-tazama-test-realm-multitenant.json

@@ -26,14 +26,14 @@ echo 1. Public (GitHub)
 echo 2. Public (DockerHub)
 echo 3. Full-service (DockerHub)
 echo 4. Multi-Tenant Public (DockerHub)
-echo 5. General Utilities
+echo 5. Docker Utilities
 echo 6. Database Utilities
 echo 7. Consoles
 echo.
 echo Select option (1-7), or (q)uit:
 set /p "type=Enter your choice: "
 
-if /i "%type%"=="q" goto :end
+if /i "%type%"=="q" goto :quit
 if /i "%type%"=="" goto :menu
 
 if /i "%type%"=="1" (
@@ -49,8 +49,8 @@ if /i "%type%"=="2" (
     goto :addons
 )
 if /i "%type%"=="3" (
-    set "IS_FULL_DEPLOYMENT=1"
     set "IS_GITHUB_DEPLOYMENT=0"
+    set "IS_FULL_DEPLOYMENT=1"
     set "IS_MULTITENANT_DEPLOYMENT=0"
     goto :addons
 )
@@ -97,7 +97,7 @@ set /p "choice=Enter your choice: "
 
 if /i "%choice%"=="a" goto :apply
 if /i "%choice%"=="r" goto :menu
-if /i "%choice%"=="q" goto :end
+if /i "%choice%"=="q" goto :quit
 
 rem If multitenant, can't unset auth or relay...
 if "%choice%"=="1" if %IS_MULTITENANT_DEPLOYMENT% NEQ 1 if "%auth%" == "[ ]" (set "auth=[X]") else (set "auth=[ ]")
@@ -184,11 +184,11 @@ echo.
 if "%confirm%"=="e" (
     echo stopping existing Tazama containers...
     echo.
-    docker compose -p tazama down
+    docker compose -p tazama down --volumes --remove-orphans
     echo.
     echo Deploying Tazama from Docker Hub...
     echo.
-    !cmd! -p tazama up -d --remove-orphans
+    !cmd! -p tazama up -d --remove-orphans --force-recreate
     goto :end
 ) else ( 
     if "%confirm%"=="q" (
@@ -207,7 +207,7 @@ echo.
 echo Execute some Docker commands:
 echo.
 echo 1. Stop and restart ED, TP and TADP (reload network configuration)
-echo 2. Stop and remove Tazama project containers
+echo 2. Stop and remove Tazama project containers and volumes
 echo 3. Remove all unused containers, networks, images and volumes
 echo 4. List all images
 echo 5. List all containers
@@ -217,7 +217,7 @@ echo.
 echo Select function (1-7), (r)eturn or (q)uit
 set /p "choice=Enter your choice: "
 
-if /i "%choice%"=="q" goto :end
+if /i "%choice%"=="q" goto :quit
 if /i "%choice%"=="r" goto :menu
 if /i "%choice%"=="" goto :utils
 
@@ -225,7 +225,7 @@ if "%choice%"=="1" (
     set "cmd=docker restart tazama-tp-1 tazama-tadp-1 tazama-ed-1"
 )
 if "%choice%"=="2" (
-    set "cmd=docker compose -p tazama down"
+    set "cmd=docker compose -p tazama down --volumes"
 )
 if "%choice%"=="3" (
     set "cmd=docker system prune -a -f --volumes"
@@ -255,15 +255,16 @@ goto :utils
 set "choice="
 cls
 echo.
-echo Execute some Docker commands in tazama-postgres-1:
+echo Database utilities:
 echo.
 echo 1. List all PostgreSQL databases
 echo 2. List all PostgreSQL tables in all databases
+echo 3. Reset Hasura metadata
 echo.
-echo Select function (1-2), (r)eturn or (q)uit
+echo Select function (1-3), (r)eturn or (q)uit
 set /p "choice=Enter your choice: "
 
-if /i "%choice%"=="q" goto :end
+if /i "%choice%"=="q" goto :quit
 if /i "%choice%"=="r" goto :menu
 if /i "%choice%"=="" goto :dbutils
 
@@ -281,7 +282,18 @@ if "%choice%"=="2" (
     call docker exec -it tazama-postgres-1 psql -U postgres -d %%d -c "\dt"
     )
 )
-
+if "%choice%"=="3" (
+    echo.
+    echo Stopping Hasura containers...
+    call docker stop tazama-hasura-1 tazama-hasura-init-1 2>nul
+    echo.
+    echo Removing Hasura containers...
+    call docker rm tazama-hasura-1 tazama-hasura-init-1 2>nul
+    echo.
+    echo Dropping Hasura metadata database...
+    call docker exec tazama-postgres-1 psql -U postgres -c "DROP DATABASE IF EXISTS hasura;"
+    call docker exec tazama-postgres-1 psql -U postgres -c "CREATE DATABASE hasura;"
+)
 echo.
 pause
 
@@ -291,15 +303,18 @@ goto :dbutils
 set "choice="
 cls
 echo.
-echo Execute some Docker commands in tazama-postgres-1:
+echo Access a service web console:
 echo.
 echo 1. pgAdmin - localhost:15050
 echo 2. hasura - localhost:6100
+echo 3. Keycloak - localhost:8080
+echo 4. TMS-service Swagger - localhost:5000/documentation
+echo 5. Admin-service Swagger - localhost:5100/documentation
 echo.
-echo Select function (1-2), (r)eturn or (q)uit
+echo Select function (1-5), (r)eturn or (q)uit
 set /p "choice=Enter your choice: "
 
-if /i "%choice%"=="q" goto :end
+if /i "%choice%"=="q" goto :quit
 if /i "%choice%"=="r" goto :menu
 if /i "%choice%"=="" goto :consoles
 
@@ -312,6 +327,15 @@ if "%choice%"=="1" (
 if "%choice%"=="2" (
     start http://localhost:6100
 )
+if "%choice%"=="3" (
+    start http://localhost:8080
+)
+if "%choice%"=="4" (
+    start http://localhost:5000/documentation
+)
+if "%choice%"=="5" (
+    start http://localhost:5100/documentation
+)
 
 echo.
 pause
@@ -320,5 +344,11 @@ goto :consoles
 
 :end
 echo.
-echo All done, quiting...
+echo All done!
+echo.
+pause
+
+goto :menu
+
+:quit
 exit /b 0
