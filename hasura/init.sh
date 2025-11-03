@@ -182,6 +182,316 @@ call_hasura_api '{
 
 echo ""
 echo "=========================================="
+echo "Tracking Relationships - event_history"
+echo "=========================================="
+
+# Track foreign key relationships in event_history
+
+# governed_as_creditor_by -> entity
+call_hasura_api '{
+  "type": "pg_create_object_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "governed_as_creditor_by",
+    "name": "entity",
+    "using": {
+      "foreign_key_constraint_on": ["source", "tenantid"]
+    }
+  }
+}' "Relationship: governed_as_creditor_by -> entity (source)"
+
+call_hasura_api '{
+  "type": "pg_create_object_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "governed_as_creditor_by",
+    "name": "condition",
+    "using": {
+      "foreign_key_constraint_on": ["destination", "tenantid"]
+    }
+  }
+}' "Relationship: governed_as_creditor_by -> condition (destination)"
+
+# governed_as_debtor_by -> entity
+call_hasura_api '{
+  "type": "pg_create_object_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "governed_as_debtor_by",
+    "name": "entity",
+    "using": {
+      "foreign_key_constraint_on": ["source", "tenantid"]
+    }
+  }
+}' "Relationship: governed_as_debtor_by -> entity (source)"
+
+call_hasura_api '{
+  "type": "pg_create_object_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "governed_as_debtor_by",
+    "name": "condition",
+    "using": {
+      "foreign_key_constraint_on": ["destination", "tenantid"]
+    }
+  }
+}' "Relationship: governed_as_debtor_by -> condition (destination)"
+
+# governed_as_creditor_account_by -> account
+call_hasura_api '{
+  "type": "pg_create_object_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "governed_as_creditor_account_by",
+    "name": "account",
+    "using": {
+      "foreign_key_constraint_on": ["source", "tenantid"]
+    }
+  }
+}' "Relationship: governed_as_creditor_account_by -> account (source)"
+
+call_hasura_api '{
+  "type": "pg_create_object_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "governed_as_creditor_account_by",
+    "name": "condition",
+    "using": {
+      "foreign_key_constraint_on": ["destination", "tenantid"]
+    }
+  }
+}' "Relationship: governed_as_creditor_account_by -> condition (destination)"
+
+# governed_as_debtor_account_by -> account
+call_hasura_api '{
+  "type": "pg_create_object_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "governed_as_debtor_account_by",
+    "name": "account",
+    "using": {
+      "foreign_key_constraint_on": ["source", "tenantid"]
+    }
+  }
+}' "Relationship: governed_as_debtor_account_by -> account (source)"
+
+call_hasura_api '{
+  "type": "pg_create_object_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "governed_as_debtor_account_by",
+    "name": "condition",
+    "using": {
+      "foreign_key_constraint_on": ["destination", "tenantid"]
+    }
+  }
+}' "Relationship: governed_as_debtor_account_by -> condition (destination)"
+
+# account_holder -> entity (creditor)
+call_hasura_api '{
+  "type": "pg_create_object_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "account_holder",
+    "name": "creditor_entity",
+    "using": {
+      "foreign_key_constraint_on": ["creditor", "tenantid"]
+    }
+  }
+}' "Relationship: account_holder -> entity (creditor)"
+
+# account_holder -> entity (debtor)
+call_hasura_api '{
+  "type": "pg_create_object_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "account_holder",
+    "name": "debtor_entity",
+    "using": {
+      "foreign_key_constraint_on": ["debtor", "tenantid"]
+    }
+  }
+}' "Relationship: account_holder -> entity (debtor)"
+
+# transaction -> account (source)
+call_hasura_api '{
+  "type": "pg_create_object_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "transaction",
+    "name": "source_account",
+    "using": {
+      "foreign_key_constraint_on": ["source", "tenantid"]
+    }
+  }
+}' "Relationship: transaction -> account (source)"
+
+# transaction -> account (destination)
+call_hasura_api '{
+  "type": "pg_create_object_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "transaction",
+    "name": "destination_account",
+    "using": {
+      "foreign_key_constraint_on": ["destination", "tenantid"]
+    }
+  }
+}' "Relationship: transaction -> account (destination)"
+
+# Array relationships (one-to-many, reverse direction)
+call_hasura_api '{
+  "type": "pg_create_array_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "entity",
+    "name": "governed_as_creditor_by_relationships",
+    "using": {
+      "foreign_key_constraint_on": {
+        "table": "governed_as_creditor_by",
+        "columns": ["source", "tenantid"]
+      }
+    }
+  }
+}' "Array Relationship: entity -> governed_as_creditor_by"
+
+call_hasura_api '{
+  "type": "pg_create_array_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "entity",
+    "name": "governed_as_debtor_by_relationships",
+    "using": {
+      "foreign_key_constraint_on": {
+        "table": "governed_as_debtor_by",
+        "columns": ["source", "tenantid"]
+      }
+    }
+  }
+}' "Array Relationship: entity -> governed_as_debtor_by"
+
+call_hasura_api '{
+  "type": "pg_create_array_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "account",
+    "name": "governed_as_creditor_account_by_relationships",
+    "using": {
+      "foreign_key_constraint_on": {
+        "table": "governed_as_creditor_account_by",
+        "columns": ["source", "tenantid"]
+      }
+    }
+  }
+}' "Array Relationship: account -> governed_as_creditor_account_by"
+
+call_hasura_api '{
+  "type": "pg_create_array_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "account",
+    "name": "governed_as_debtor_account_by_relationships",
+    "using": {
+      "foreign_key_constraint_on": {
+        "table": "governed_as_debtor_account_by",
+        "columns": ["source", "tenantid"]
+      }
+    }
+  }
+}' "Array Relationship: account -> governed_as_debtor_account_by"
+
+call_hasura_api '{
+  "type": "pg_create_array_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "condition",
+    "name": "governed_as_creditor_by_relationships",
+    "using": {
+      "foreign_key_constraint_on": {
+        "table": "governed_as_creditor_by",
+        "columns": ["destination", "tenantid"]
+      }
+    }
+  }
+}' "Array Relationship: condition -> governed_as_creditor_by"
+
+call_hasura_api '{
+  "type": "pg_create_array_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "condition",
+    "name": "governed_as_debtor_by_relationships",
+    "using": {
+      "foreign_key_constraint_on": {
+        "table": "governed_as_debtor_by",
+        "columns": ["destination", "tenantid"]
+      }
+    }
+  }
+}' "Array Relationship: condition -> governed_as_debtor_by"
+
+call_hasura_api '{
+  "type": "pg_create_array_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "condition",
+    "name": "governed_as_creditor_account_by_relationships",
+    "using": {
+      "foreign_key_constraint_on": {
+        "table": "governed_as_creditor_account_by",
+        "columns": ["destination", "tenantid"]
+      }
+    }
+  }
+}' "Array Relationship: condition -> governed_as_creditor_account_by"
+
+call_hasura_api '{
+  "type": "pg_create_array_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "condition",
+    "name": "governed_as_debtor_account_by_relationships",
+    "using": {
+      "foreign_key_constraint_on": {
+        "table": "governed_as_debtor_account_by",
+        "columns": ["destination", "tenantid"]
+      }
+    }
+  }
+}' "Array Relationship: condition -> governed_as_debtor_account_by"
+
+call_hasura_api '{
+  "type": "pg_create_array_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "account",
+    "name": "source_transactions",
+    "using": {
+      "foreign_key_constraint_on": {
+        "table": "transaction",
+        "columns": ["source", "tenantid"]
+      }
+    }
+  }
+}' "Array Relationship: account -> transaction (as source)"
+
+call_hasura_api '{
+  "type": "pg_create_array_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "account",
+    "name": "destination_transactions",
+    "using": {
+      "foreign_key_constraint_on": {
+        "table": "transaction",
+        "columns": ["destination", "tenantid"]
+      }
+    }
+  }
+}' "Array Relationship: account -> transaction (as destination)"
+
+echo ""
+echo "=========================================="
 echo "Setting Permissions - event_history"
 echo "=========================================="
 
@@ -445,5 +755,6 @@ echo "  - Tracked 9 tables in event_history"
 echo "  - Tracked 4 tables in raw_history"
 echo "  - Tracked 3 tables in configuration"
 echo "  - Tracked 1 table in evaluation"
+echo "  - Set up foreign key relationships" in event_history
 echo "  - Set full permissions for 'anonymous' role on all tables"
 echo "=========================================="
