@@ -538,7 +538,7 @@ This configuration is intended to override the default full-service configuratio
 
 In a Windows Command prompt, navigate to your source code root folder. Then clone the `tms-config` following repository with the following command:
 ```
-git clone https://github.com/frmscoe/tms-config -b main
+git clone https://github.com/frmscoe/tms-configuration -b main
 ```
 > [!NOTE]
 > You must be a member of the Tazama `frmscoe` organization to access this repository. If you are not yet a member, please contact the Tazama Product team.
