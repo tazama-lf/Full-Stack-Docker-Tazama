@@ -7,12 +7,13 @@ set "type="
 set "volumes=[ ]"
 set "auth=[ ]"
 set "basiclogs=[ ]"
-set "natsutils=[ ]"
-set "ui=[ ]"
 set "relay=[ ]"
-set "pgadmin=[ ]"
-set "hasura=[ ]"
+set "ui=[ ]"
+set "natsutils=[ ]"
 set "batchppa=[ ]"
+rem These options default to enabled
+set "pgadmin=[X]"
+set "hasura=[X]"
 
 set "IS_GITHUB_DEPLOYMENT=0"
 set "IS_FULL_DEPLOYMENT=0"
@@ -40,18 +41,24 @@ if /i "%type%"=="1" (
     set "IS_GITHUB_DEPLOYMENT=1"
     set "IS_FULL_DEPLOYMENT=0"
     set "IS_MULTITENANT_DEPLOYMENT=0"
+    set "relay=[X]"
+    set "nats=[X]"
     goto :addons
 )
 if /i "%type%"=="2" (
     set "IS_GITHUB_DEPLOYMENT=0"
     set "IS_FULL_DEPLOYMENT=0"
     set "IS_MULTITENANT_DEPLOYMENT=0"
+    set "relay=[X]"
+    set "nats=[X]"
     goto :addons
 )
 if /i "%type%"=="3" (
     set "IS_GITHUB_DEPLOYMENT=0"
     set "IS_FULL_DEPLOYMENT=1"
     set "IS_MULTITENANT_DEPLOYMENT=0"
+    set "relay=[X]"
+    set "nats=[X]"
     goto :addons
 )
 if /i "%type%"=="4" (
@@ -60,6 +67,7 @@ if /i "%type%"=="4" (
     set "IS_MULTITENANT_DEPLOYMENT=1"
     set "auth=[X]"
     set "relay=[X]"
+    set "nats=[X]"
     goto :addons
 )
 if /i "%type%"=="5" (
@@ -141,10 +149,6 @@ if "%auth%" == "[X]" (
     set "cmd=!cmd! -f docker-compose.base.auth.yaml"
     if %IS_GITHUB_DEPLOYMENT% EQU 1 (
         set "cmd=!cmd! -f docker-compose.dev.auth.yaml"
-    ) else (
-        if %IS_MULTITENANT_DEPLOYMENT% EQU 1 (
-            set "cmd=!cmd! -f docker-compose.multitenant.auth.yaml"
-        )
     )
 )
 
@@ -260,8 +264,9 @@ echo.
 echo 1. List all PostgreSQL databases
 echo 2. List all PostgreSQL tables in all databases
 echo 3. Reset Hasura metadata
+echo 4. Reinitialize Hasura
 echo.
-echo Select function (1-3), (r)eturn or (q)uit
+echo Select function (1-4), (r)eturn or (q)uit
 set /p "choice=Enter your choice: "
 
 if /i "%choice%"=="q" goto :quit
@@ -293,6 +298,11 @@ if "%choice%"=="3" (
     echo Dropping Hasura metadata database...
     call docker exec tazama-postgres-1 psql -U postgres -c "DROP DATABASE IF EXISTS hasura;"
     call docker exec tazama-postgres-1 psql -U postgres -c "CREATE DATABASE hasura;"
+)
+if "%choice%"=="4" (
+    echo.
+    echo Restarting Hasura-init container...
+    call docker restart tazama-hasura-init-1
 )
 echo.
 pause

@@ -13,7 +13,9 @@ services:
       - KC_HOSTNAME_STRICT_BACKCHANNEL=false
       - KC_HTTP_ENABLED=true
       - KC_HOSTNAME_STRICT_HTTPS=false
-      - KEYCLOAK_IMPORT_STRATEGY=OVERWRITE_EXISTING  # Add this
+      - KEYCLOAK_IMPORT_STRATEGY=OVERWRITE_EXISTING
+      - QUARKUS_HTTP_ACCESS_LOG_ENABLED=true
+      - KC_LOG_LEVEL=INFO
     volumes:
       - ./auth/keycloak/realms/00-tazama-test-realm.json:/opt/keycloak/data/import/00-tazama-test-realm.json
     ports:
