@@ -2,8 +2,8 @@
 
 <a id="top"></a>
 
-#
-# $\color{red}{\text{WARNING - THIS TAZAMA REPOSITORY IS TO BE USED FOR DEMONSTRATION, EXPLORATION AND TESTING PURPOSES ONLY.}}$
+<h1></h1>
+<h1 style="color: red;">WARNING - THIS TAZAMA REPOSITORY IS TO BE USED FOR DEMONSTRATION, EXPLORATION AND TESTING PURPOSES ONLY.</h1>
 
 - [1. INTRODUCTION](#1-introduction)
 - [2. PRE-REQUISITES](#2-pre-requisites)
@@ -23,8 +23,8 @@
   - [7.2. Exporting the Keycloak Tazama realm](#72-exporting-the-keycloak-tazama-realm)
   - [7.3. Docker Compose YAML structure](#73-docker-compose-yaml-structure)
 
-#
-# $\color{red}{\text{WARNING - THIS TAZAMA REPOSITORY IS TO BE USED FOR DEMONSTRATION, EXPLORATION AND TESTING PURPOSES ONLY.}}$
+<h1></h1>
+<h1 style="color: red;">WARNING - THIS TAZAMA REPOSITORY IS TO BE USED FOR DEMONSTRATION, EXPLORATION AND TESTING PURPOSES ONLY.</h1>
 
 For production deployment instructions:
  - [On-Premise Detailed Installation Guide](https://github.com/tazama-lf/On-Prem-helm)
