@@ -1,0 +1,61 @@
+services:
+  postgres:
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - ./postgres/migration/test/01-HASURA.sql:/docker-entrypoint-initdb.d/01-HASURA.sql
+
+  hasura:
+    image: hasura/graphql-engine:v2.36.0
+    restart: unless-stopped
+    ports:
+      - "6100:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./hasura:/hasura-metadata
+    environment:
+      # Metadata database
+      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://postgres:@postgres:5432/hasura
+      
+      # Data source connections
+      HASURA_GRAPHQL_DATABASE_URL_EVENT_HISTORY: postgres://postgres:@postgres:5432/event_history
+      HASURA_GRAPHQL_DATABASE_URL_RAW_HISTORY: postgres://postgres:@postgres:5432/raw_history
+      HASURA_GRAPHQL_DATABASE_URL_CONFIGURATION: postgres://postgres:@postgres:5432/configuration
+      HASURA_GRAPHQL_DATABASE_URL_EVALUATION: postgres://postgres:@postgres:5432/evaluation
+      
+      # Auto-apply metadata on startup
+      # HASURA_GRAPHQL_METADATA_DIR: /hasura/metadata
+      
+      # Console and dev settings
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup,http-log,webhook-log,websocket-log,query-log
+      
+      # No authentication
+      HASURA_GRAPHQL_ADMIN_SECRET: "password"
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: anonymous
+      HASURA_GRAPHQL_CORS_DOMAIN: "*"
+      HASURA_GRAPHQL_ENABLE_TELEMETRY: "false"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 120s
+
+  hasura-init:
+    image: curlimages/curl:latest
+    depends_on:
+      hasura:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./hasura/init.sh:/init.sh:ro
+    entrypoint:
+      - /bin/sh
+      - -c
+      - "echo 'Waiting 60s for system to stabilize...' && sleep 60 && sh /init.sh"
+    restart: "no"

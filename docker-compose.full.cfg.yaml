@@ -1,0 +1,8 @@
+services:
+  postgres:
+    volumes:
+      - ./postgres/migration/config/03-full-dockerhub.sql:/docker-entrypoint-initdb.d/01-DATA.sql
+    environment:
+      - POSTGRES_MAX_CONNECTIONS=1000
+      - POSTGRES_SHARED_BUFFERS=512MB
+      - POSTGRES_EFFECTIVE_CACHE_SIZE=2GB

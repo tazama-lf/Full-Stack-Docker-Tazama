@@ -1,0 +1,57 @@
+# For local testing
+
+services:
+  # AUTH PROVIDER
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.6
+    command: "start-dev --import-realm"
+    env_file:
+      - env/keycloak.env
+    restart: always
+    environment:
+      - KC_HOSTNAME=localhost
+      - KC_HOSTNAME_STRICT_BACKCHANNEL=false
+      - KC_HTTP_ENABLED=true
+      - KC_HOSTNAME_STRICT_HTTPS=false
+      - KEYCLOAK_IMPORT_STRATEGY=OVERWRITE_EXISTING
+      - QUARKUS_HTTP_ACCESS_LOG_ENABLED=true
+      - KC_LOG_LEVEL=INFO
+    volumes:
+      - ./auth/keycloak/realms/00-tazama-test-realm.json:/opt/keycloak/data/import/00-tazama-test-realm.json
+    ports:
+      - 8080:8080
+
+  # POSTGRES WITH TRUST AUTHENTICATION FOR LOCAL TESTING ONLY
+  postgres:
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+
+  # AUTH SERVICE
+  auth:
+    image: tazamaorg/auth-service:${TAZAMA_VERSION}
+    env_file:
+      - env/auth-service.env
+      - .env
+    restart: always
+    volumes:
+      - ./auth/test-private-key.pem:/home/app/test-private-key.pem
+    ports:
+      - 3020:3020
+    depends_on:
+      - keycloak
+
+  # TRANSACTION MONITORING SERVICE API
+  tms:
+    environment:
+      - AUTHENTICATED=true
+      - CERT_PATH_PUBLIC=test-public-key.pem
+    volumes:
+      - ./auth/test-public-key.pem:/home/app/test-public-key.pem
+
+  # ADMIN SERVICE API      
+  admin-service:
+    environment:
+      - AUTHENTICATED=true
+      - CERT_PATH_PUBLIC=test-public-key.pem
+    volumes:
+      - ./auth/test-public-key.pem:/home/app/test-public-key.pem

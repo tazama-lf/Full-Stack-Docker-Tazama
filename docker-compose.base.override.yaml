@@ -1,0 +1,14 @@
+services:
+  valkey:
+    ports:
+      - 16379:6379
+
+  nats:
+    ports:
+      - 14222:4222
+      - 16222:6222
+      - 18222:8222
+
+  postgres:
+      ports:
+      - 15432:5432

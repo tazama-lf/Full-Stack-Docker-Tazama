@@ -1,0 +1,30 @@
+# base infrastructure
+
+services:
+  valkey:
+    hostname: valkey
+    image: valkey/valkey:7.2.5
+    restart: always
+    command: "valkey-server --port 6379 --loglevel verbose"
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli -p 6379 ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+
+  postgres:
+    image: postgres:18
+    restart: always
+    volumes:
+      - ./postgres/migration/base/00-CREATE.sql:/docker-entrypoint-initdb.d/00-CREATE.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  nats:
+    image: nats:2
+    restart: always
+    command: ["-DVV"]

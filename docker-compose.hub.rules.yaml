@@ -1,0 +1,35 @@
+# For local testing
+services:
+  rule-901:
+    image: tazamaorg/rule-901:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-901.env
+      - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  rule-902:
+    image: tazamaorg/rule-902:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-902.env
+      - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres

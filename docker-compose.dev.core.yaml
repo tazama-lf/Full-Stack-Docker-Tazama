@@ -1,0 +1,156 @@
+# base
+
+include:
+  - path:
+    - docker-compose.base.infrastructure.yaml
+
+services:
+  # ADMIN SERVICE API
+  admin-service:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/admin-service.git#${ADMIN_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/admin.env
+      - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - EVALUATION_DATABASE_USER=postgres
+      - EVALUATION_DATABASE_PASSWORD=unused
+    restart: always
+    ports:
+      - ${ADMIN_PORT}:3100
+    depends_on:
+      - postgres
+      - valkey
+
+  # TRANSACTION MONITORING SERVICE API
+  tms:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/tms-service.git#${TMS_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/tms.env
+      - .env
+    environment:
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=UNUSED
+    restart: always
+    ports:
+      - ${TMS_PORT}:3000
+    depends_on:
+      - valkey
+      - postgres
+      - nats
+
+  # EVENT DIRECTOR
+  ed:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/event-director.git#${ED_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/ed.env
+      - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+      - nats
+
+  # RULE PROCESSOR
+  rule-901:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/rule-executer.git#${RULE_901_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule-901.env
+      - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+      - nats
+
+  # TYPOLOGY PROCESSOR
+  tp:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/typology-processor.git#${TP_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/tp.env
+      - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+      - nats
+
+  # TRANSACTION AGGREGATION AND DECISIONING PROCESSOR
+  tadp:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/transaction-aggregation-decisioning-processor.git#${TADP_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/tadp.env
+      - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+      - EVALUATION_DATABASE_USER=postgres
+      - EVALUATION_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+      - nats
+  
+  # EVENT FLOW RULE PROCESSOR
+  ef:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/event-flow.git#${EVENT_FLOW_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/event-flow.env
+      - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - postgres
+      - valkey
+      - nats
