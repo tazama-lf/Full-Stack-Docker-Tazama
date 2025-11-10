@@ -3,7 +3,7 @@
 <a id="top"></a>
 
 #
-# $\color{red}{\text{WARNING - THIS TAZAMA REPOSITORY IS TO BE USED FOR DEMONSTRATION, EXPLORATION AND TESTING PURPOSES ONLY.}}$
+# $\color{red}{\text{WARNING - THIS TAZAMA REPOSITORY IS TO BE USED FOR<br/> DEMONSTRATION, EXPLORATION AND TESTING PURPOSES ONLY.}}$
 
 - [1. INTRODUCTION](#1-introduction)
 - [2. PRE-REQUISITES](#2-pre-requisites)
@@ -24,7 +24,7 @@
   - [7.3. Docker Compose YAML structure](#73-docker-compose-yaml-structure)
 
 #
-# $\color{red}{\text{WARNING - THIS TAZAMA REPOSITORY IS TO BE USED FOR DEMONSTRATION, EXPLORATION AND TESTING PURPOSES ONLY.}}$
+# $\color{red}{\text{WARNING - THIS TAZAMA REPOSITORY IS TO BE USED FOR<br/> DEMONSTRATION, EXPLORATION AND TESTING PURPOSES ONLY.}}$
 
 For production deployment instructions:
  - [On-Premise Detailed Installation Guide](https://github.com/tazama-lf/On-Prem-helm)
