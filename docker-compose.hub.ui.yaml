@@ -1,0 +1,18 @@
+services:
+  ui:
+    image: tazamaorg/demo-ui:v2.2.0
+    restart: always
+    env_file:
+      - env/ui.env
+    depends_on:
+      - tms
+      - postgres
+      - nats
+    ports:
+      - "3001:3001"
+  tms:
+    environment:
+      - CORS_POLICY=demo
+  admin-service:
+    environment:
+      - CORS_POLICY=demo

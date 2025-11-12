@@ -1,0 +1,694 @@
+# For local testing
+services:
+  # RULE 001
+  rule-001:
+    image: tazamaorg/rule-001:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-001-rel-${TAZAMA_VERSION}
+      - RULE_NAME=001
+      - APM_SERVICE_NAME=rule-001
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 002
+  rule-002:
+    image: tazamaorg/rule-002:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-002-rel-${TAZAMA_VERSION}
+      - RULE_NAME=002
+      - APM_SERVICE_NAME=rule-002
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 003
+  rule-003:
+    image: tazamaorg/rule-003:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-003-rel-${TAZAMA_VERSION}
+      - RULE_NAME=003
+      - APM_SERVICE_NAME=rule-003
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 004
+  rule-004:
+    image: tazamaorg/rule-004:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-004-rel-${TAZAMA_VERSION}
+      - RULE_NAME=004
+      - APM_SERVICE_NAME=rule-004
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 006
+  rule-006:
+    image: tazamaorg/rule-006:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-006-rel-${TAZAMA_VERSION}
+      - RULE_NAME=006
+      - APM_SERVICE_NAME=rule-006
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 007
+  rule-007:
+    image: tazamaorg/rule-007:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-007-rel-${TAZAMA_VERSION}
+      - RULE_NAME=007
+      - APM_SERVICE_NAME=rule-007
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 008
+  rule-008:
+    image: tazamaorg/rule-008:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-008-rel-${TAZAMA_VERSION}
+      - RULE_NAME=008
+      - APM_SERVICE_NAME=rule-008
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 010
+  rule-010:
+    image: tazamaorg/rule-010:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-010-rel-${TAZAMA_VERSION}
+      - RULE_NAME=010
+      - APM_SERVICE_NAME=rule-010
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 011
+  rule-011:
+    image: tazamaorg/rule-011:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-011-rel-${TAZAMA_VERSION}
+      - RULE_NAME=011
+      - APM_SERVICE_NAME=rule-011
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 016
+  rule-016:
+    image: tazamaorg/rule-016:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-016-rel-${TAZAMA_VERSION}
+      - RULE_NAME=016
+      - APM_SERVICE_NAME=rule-016
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 017
+  rule-017:
+    image: tazamaorg/rule-017:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-017-rel-${TAZAMA_VERSION}
+      - RULE_NAME=017
+      - APM_SERVICE_NAME=rule-017
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 018
+  rule-018:
+    image: tazamaorg/rule-018:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-018-rel-${TAZAMA_VERSION}
+      - RULE_NAME=018
+      - APM_SERVICE_NAME=rule-018
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 020
+  rule-020:
+    image: tazamaorg/rule-020:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-020-rel-${TAZAMA_VERSION}
+      - RULE_NAME=020
+      - APM_SERVICE_NAME=rule-020
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 021
+  rule-021:
+    image: tazamaorg/rule-021:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-021-rel-${TAZAMA_VERSION}
+      - RULE_NAME=021
+      - APM_SERVICE_NAME=rule-021
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 024
+  rule-024:
+    image: tazamaorg/rule-024:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-024-rel-${TAZAMA_VERSION}
+      - RULE_NAME=024
+      - APM_SERVICE_NAME=rule-024
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 025
+  rule-025:
+    image: tazamaorg/rule-025:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-025-rel-${TAZAMA_VERSION}
+      - RULE_NAME=025
+      - APM_SERVICE_NAME=rule-025
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 026
+  rule-026:
+    image: tazamaorg/rule-026:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-026-rel-${TAZAMA_VERSION}
+      - RULE_NAME=026
+      - APM_SERVICE_NAME=rule-026
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 027
+  rule-027:
+    image: tazamaorg/rule-027:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-027-rel-${TAZAMA_VERSION}
+      - RULE_NAME=027
+      - APM_SERVICE_NAME=rule-027
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 028
+  rule-028:
+    image: tazamaorg/rule-028:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-028-rel-${TAZAMA_VERSION}
+      - RULE_NAME=028
+      - APM_SERVICE_NAME=rule-028
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 030
+  rule-030:
+    image: tazamaorg/rule-030:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-030-rel-${TAZAMA_VERSION}
+      - RULE_NAME=030
+      - APM_SERVICE_NAME=rule-030
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 044
+  rule-044:
+    image: tazamaorg/rule-044:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-044-rel-${TAZAMA_VERSION}
+      - RULE_NAME=044
+      - APM_SERVICE_NAME=rule-044
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 045
+  rule-045:
+    image: tazamaorg/rule-045:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-045-rel-${TAZAMA_VERSION}
+      - RULE_NAME=045
+      - APM_SERVICE_NAME=rule-045
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 048
+  rule-048:
+    image: tazamaorg/rule-048:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-048-rel-${TAZAMA_VERSION}
+      - RULE_NAME=048
+      - APM_SERVICE_NAME=rule-048
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 054
+  rule-054:
+    image: tazamaorg/rule-054:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-054-rel-${TAZAMA_VERSION}
+      - RULE_NAME=054
+      - APM_SERVICE_NAME=rule-054
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 063
+  rule-063:
+    image: tazamaorg/rule-063:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-063-rel-${TAZAMA_VERSION}
+      - RULE_NAME=063
+      - APM_SERVICE_NAME=rule-063
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 074
+  rule-074:
+    image: tazamaorg/rule-074:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-074-rel-${TAZAMA_VERSION}
+      - RULE_NAME=074
+      - APM_SERVICE_NAME=rule-074
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 075
+  rule-075:
+    image: tazamaorg/rule-075:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-075-rel-${TAZAMA_VERSION}
+      - RULE_NAME=075
+      - APM_SERVICE_NAME=rule-075
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 076
+  rule-076:
+    image: tazamaorg/rule-076:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-076-rel-${TAZAMA_VERSION}
+      - RULE_NAME=076
+      - APM_SERVICE_NAME=rule-076
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 078
+  rule-078:
+    image: tazamaorg/rule-078:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-078-rel-${TAZAMA_VERSION}
+      - RULE_NAME=078
+      - APM_SERVICE_NAME=rule-078
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 083
+  rule-083:
+    image: tazamaorg/rule-083:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-083-rel-${TAZAMA_VERSION}
+      - RULE_NAME=083
+      - APM_SERVICE_NAME=rule-083
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 084
+  rule-084:
+    image: tazamaorg/rule-084:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-084-rel-${TAZAMA_VERSION}
+      - RULE_NAME=084
+      - APM_SERVICE_NAME=rule-084
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 090
+  rule-090:
+    image: tazamaorg/rule-090:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-090-rel-${TAZAMA_VERSION}
+      - RULE_NAME=090
+      - APM_SERVICE_NAME=rule-090
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+
+  # RULE 091
+  rule-091:
+    image: tazamaorg/rule-091:${TAZAMA_VERSION}
+    env_file:
+      - env/rule-executer.env
+      - .env
+    environment:
+      - FUNCTION_NAME=rule-091-rel-${TAZAMA_VERSION}
+      - RULE_NAME=091
+      - APM_SERVICE_NAME=rule-091
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres

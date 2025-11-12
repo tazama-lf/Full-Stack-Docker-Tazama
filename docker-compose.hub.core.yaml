@@ -1,0 +1,103 @@
+services:
+  # ADMIN SERVICE API
+  admin-service:
+    image: tazamaorg/admin-service:${TAZAMA_VERSION}
+    env_file:
+      - env/admin.env
+      - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - EVALUATION_DATABASE_USER=postgres
+      - EVALUATION_DATABASE_PASSWORD=unused
+    restart: always
+    ports:
+      - ${ADMIN_PORT}:3100
+    depends_on:
+      - postgres
+      - valkey
+
+  # TRANSACTION MONITORING SERVICE API
+  tms:
+    image: tazamaorg/tms-service:${TAZAMA_VERSION}
+    env_file:
+      - env/tms.env
+      - .env
+    environment:
+      - EVENT_HISTORY_DATABASE_USER=postgres
+      - EVENT_HISTORY_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+    restart: always
+    ports:
+      - ${TMS_PORT}:3000
+    depends_on:
+      - valkey
+      - postgres
+      - nats
+
+  # EVENT DIRECTOR
+  ed:
+    image: tazamaorg/event-director:${TAZAMA_VERSION}
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+    env_file:
+      - env/ed.env
+      - .env
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+      - nats
+
+  # TYPOLOGY PROCESSOR
+  tp:
+    image: tazamaorg/typology-processor:${TAZAMA_VERSION}
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+    env_file:
+      - env/tp.env
+      - .env
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+      - nats
+
+  # TRANSACTION AGGREGATION AND DECISIONING PROCESSOR
+  tadp:
+    image: tazamaorg/transaction-aggregation-decisioning-processor:${TAZAMA_VERSION}
+    env_file:
+      - env/tadp.env
+      - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+      - RAW_HISTORY_DATABASE_USER=postgres
+      - RAW_HISTORY_DATABASE_PASSWORD=unused
+      - EVALUATION_DATABASE_USER=postgres
+      - EVALUATION_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - valkey
+      - postgres
+      - nats
+  
+  # EVENT FLOW RULE PROCESSOR
+  ef:
+    image: tazamaorg/event-flow:${TAZAMA_VERSION}
+    env_file:
+      - env/event-flow.env
+      - .env
+    environment:
+      - CONFIGURATION_DATABASE_USER=postgres
+      - CONFIGURATION_DATABASE_PASSWORD=unused
+    restart: always
+    depends_on:
+      - postgres
+      - valkey
+      - nats

@@ -1,0 +1,98 @@
+- name: event_history
+  kind: postgres
+  configuration:
+    connection_info:
+      database_url:
+        from_env: HASURA_GRAPHQL_DATABASE_URL_EVENT_HISTORY
+      pool_settings:
+        idle_timeout: 180
+        max_connections: 50
+        retries: 1
+  tables:
+    - table:
+        name: entity
+        schema: public
+    - table:
+        name: account
+        schema: public
+    - table:
+        name: account_holder
+        schema: public
+    - table:
+        name: transaction
+        schema: public
+    - table:
+        name: condition
+        schema: public
+    - table:
+        name: goverened_as_debtor_by
+        schema: public
+    - table:
+        name: goverened_as_creditor_by
+        schema: public
+    - table:
+        name: goverened_as_debtor_account_by
+        schema: public
+    - table:
+        name: goverened_as_creditor_account_by
+        schema: public
+
+- name: raw_history
+  kind: postgres
+  configuration:
+    connection_info:
+      database_url:
+        from_env: HASURA_GRAPHQL_DATABASE_URL_RAW_HISTORY
+      pool_settings:
+        idle_timeout: 180
+        max_connections: 50
+        retries: 1
+  tables:
+    - table:
+        name: pacs002
+        schema: public
+    - table:
+        name: pacs008
+        schema: public
+    - table:
+        name: pain001
+        schema: public
+    - table:
+        name: pain013
+        schema: public
+
+- name: configuration
+  kind: postgres
+  configuration:
+    connection_info:
+      database_url:
+        from_env: HASURA_GRAPHQL_DATABASE_URL_CONFIGURATION
+      pool_settings:
+        idle_timeout: 180
+        max_connections: 50
+        retries: 1
+  tables:
+    - table:
+        name: network_map
+        schema: public
+    - table:
+        name: typology
+        schema: public
+    - table:
+        name: rule
+        schema: public
+
+- name: evaluation
+  kind: postgres
+  configuration:
+    connection_info:
+      database_url:
+        from_env: HASURA_GRAPHQL_DATABASE_URL_EVALUATION
+      pool_settings:
+        idle_timeout: 180
+        max_connections: 50
+        retries: 1
+  tables:
+    - table:
+        name: evaluation
+        schema: public

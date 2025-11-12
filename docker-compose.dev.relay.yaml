@@ -2,36 +2,69 @@ services:
   ef:
     environment:
       SUPPRESS_ALERTS: false
+      INTERDICTION_DESTINATION: global
+      INTERDICTION_PRODUCER: interdiction-service-ef
+
   tp:
     environment:
       SUPPRESS_ALERTS: false
+      INTERDICTION_DESTINATION: global
+      INTERDICTION_PRODUCER: interdiction-service-tp
+
   tadp:
     environment:
       SUPPRESS_ALERTS: false
-  rs1:
-    image: !reset null
+      ALERT_DESTINATION: global
+      ALERT_PRODUCER: investigation-service
+      ALERTS_ONLY: true
+
+  rsef:
     build:
       context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
       args:
         - GH_TOKEN
     env_file:
-      - env/rs-nats-tp.env
+      - env/rs-nats.env
       - .env
     restart: always
-#    environment:
+    environment:
+      FUNCTION_NAME: relay-service-ef
+      CONSUMER_STREAM: interdiction-service-ef
+      PRODUCER_STREAM: relay-service-nats-ef
+      APM_SERVICE_NAME: relay-service-ef
+    depends_on:
+      - ef
+
+  rstp:
+    build:
+      context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rs-nats.env
+      - .env
+    restart: always
+    environment:
+      FUNCTION_NAME: relay-service-tp
+      CONSUMER_STREAM: interdiction-service-tp
+      PRODUCER_STREAM: relay-service-nats-tp
+      APM_SERVICE_NAME: relay-service-tp
     depends_on:
       - tp
 
-  rs2:
-    image: !reset null
+  rstadp:
     build:
       context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
       args:
         - GH_TOKEN
     env_file:
-      - env/rs-nats-tadp.env
+      - env/rs-nats.env
       - .env
     restart: always
-#    environment:
+    environment:
+      FUNCTION_NAME: relay-service-tadp
+      CONSUMER_STREAM: investigation-service
+      PRODUCER_STREAM: relay-service-nats-tadp
+      APM_SERVICE_NAME: relay-service-tadp
     depends_on:
       - tadp
