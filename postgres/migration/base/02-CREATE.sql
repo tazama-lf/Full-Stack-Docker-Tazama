@@ -2,7 +2,7 @@
 
 create table network_map (
     configuration jsonb not null,
-    tenantId uuid not null default public.current_tenant_id(),
+    tenantId text not null default public.current_tenant_id(),
     foreign key (tenantId) references tenant(id) on delete cascade
 );
 
@@ -18,7 +18,7 @@ create table typology (
     configuration jsonb not null,
     typologyId text generated always as (configuration ->> 'id') stored,
     typologyCfg text generated always as (configuration ->> 'cfg') stored,
-    tenantId uuid not null default public.current_tenant_id(),
+    tenantId text not null default public.current_tenant_id(),
     foreign key (tenantId) references tenant(id) on delete cascade,
     primary key (typologyId, typologyCfg, tenantId)
 );
@@ -36,7 +36,7 @@ create table rule (
     configuration jsonb not null,
     ruleId text generated always as (configuration ->> 'id') stored,
     ruleCfg text generated always as (configuration ->> 'cfg') stored,
-    tenantId uuid not null default public.current_tenant_id(),
+    tenantId text not null default public.current_tenant_id(),
     foreign key (tenantId) references tenant(id) on delete cascade,
     primary key (ruleId, ruleCfg, tenantId)
 );
@@ -56,7 +56,7 @@ create table evaluation (
     messageId text generated always as (
         evaluation -> 'transaction' -> 'FIToFIPmtSts' -> 'GrpHdr' ->> 'MsgId'
     ) stored,
-    tenantId uuid not null default public.current_tenant_id(),
+    tenantId text not null default public.current_tenant_id(),
     foreign key (tenantId) references tenant(id) on delete cascade,
     constraint unique_msgid_evaluation unique (messageId, tenantId)
 );
@@ -73,7 +73,7 @@ create policy evaluation_tenant_isolation on evaluation
 
 create table account (
     id varchar not null,
-    tenantId uuid not null default public.current_tenant_id(),
+    tenantId text not null default public.current_tenant_id(),
     foreign key (tenantId) references tenant(id) on delete cascade,
     primary key (id, tenantId)
 );
@@ -88,7 +88,7 @@ create policy account_tenant_isolation on account
 
 create table entity (
     id varchar not null,
-    tenantId uuid not null default public.current_tenant_id(),
+    tenantId text not null default public.current_tenant_id(),
     creDtTm timestamptz not null,
     foreign key (tenantId) references tenant(id) on delete cascade,
     primary key (id, tenantId)
@@ -105,7 +105,7 @@ create policy entity_tenant_isolation on entity
 create table account_holder (
     source varchar not null,
     destination varchar not null,
-    tenantId uuid not null default public.current_tenant_id(),
+    tenantId text not null default public.current_tenant_id(),
     creDtTm timestamptz not null,
     foreign key (source, tenantId) references entity (id, tenantId),
     foreign key (destination, tenantId) references account (id, tenantId),
@@ -123,7 +123,7 @@ create policy account_holder_tenant_isolation on account_holder
 
 create table condition (
     id varchar generated always as (condition ->> 'condId') stored,
-    tenantId uuid not null default public.current_tenant_id(),
+    tenantId text not null default public.current_tenant_id(),
     condition jsonb not null,
     foreign key (tenantId) references tenant(id) on delete cascade,
     primary key (id, tenantId)
@@ -143,7 +143,7 @@ create table governed_as_creditor_account_by (
     evtTp text [] not null,
     incptnDtTm timestamptz not null,
     xprtnDtTm timestamptz,
-    tenantId uuid not null default public.current_tenant_id(),
+    tenantId text not null default public.current_tenant_id(),
     foreign key (source, tenantId) references account (id, tenantId),
     foreign key (tenantId) references tenant(id) on delete cascade,
     foreign key (destination, tenantId) references condition (id, tenantId),
@@ -164,7 +164,7 @@ create table governed_as_creditor_by (
     evtTp TEXT [] not null,
     incptnDtTm timestamptz not null,
     xprtnDtTm timestamptz,
-    tenantId uuid not null default public.current_tenant_id(),
+    tenantId text not null default public.current_tenant_id(),
     foreign key (source, tenantId) references entity (id, tenantId),
     foreign key (tenantId) references tenant(id) on delete cascade,
     foreign key (destination, tenantId) references condition (id, tenantId),
@@ -185,7 +185,7 @@ create table governed_as_debtor_account_by (
     evtTp TEXT [] not null,
     incptnDtTm timestamptz not null,
     xprtnDtTm timestamptz,
-    tenantId uuid not null default public.current_tenant_id(),
+    tenantId text not null default public.current_tenant_id(),
     foreign key (source, tenantId) references account (id, tenantId),
     foreign key (tenantId) references tenant(id) on delete cascade,
     foreign key (destination, tenantId) references condition (id, tenantId),
@@ -206,7 +206,7 @@ create table governed_as_debtor_by (
     evtTp TEXT [] not null,
     incptnDtTm timestamptz not null,
     xprtnDtTm timestamptz,
-    tenantId uuid not null default public.current_tenant_id(),
+    tenantId text not null default public.current_tenant_id(),
     foreign key (source, tenantId) references entity (id, tenantId),
     foreign key (tenantId) references tenant(id) on delete cascade,
     foreign key (destination, tenantId) references condition (id, tenantId),
@@ -235,7 +235,7 @@ create table transaction (
     creDtTm text generated always as (transaction->>'CreDtTm') stored,
     txTp varchar generated always as (transaction->>'TxTp') stored,
     txSts varchar generated always as (transaction->>'TxSts') stored,
-    tenantId uuid not null default public.current_tenant_id(),
+    tenantId text not null default public.current_tenant_id(),
     constraint unique_msgid unique (msgId, tenantId),
     foreign key (tenantId) references tenant(id) on delete cascade,
     foreign key (source, tenantId) references account (id, tenantId),
@@ -283,7 +283,7 @@ create table pacs002 (
     endToEndId text generated always as (
         document -> 'FIToFIPmtSts' -> 'TxInfAndSts' ->> 'OrgnlEndToEndId'
     ) stored,
-    tenantId uuid not null default public.current_tenant_id(),
+    tenantId text not null default public.current_tenant_id(),
     foreign key (tenantId) references tenant(id) on delete cascade,
     constraint unique_msgid_pacs002 unique (messageId, tenantId),
     constraint message_id_not_null check (messageId is not null),
@@ -318,7 +318,7 @@ create table pacs008 (
     creditorAccountId text generated always as (
         document -> 'FIToFICstmrCdtTrf' -> 'CdtTrfTxInf' -> 'CdtrAcct' -> 'Id' -> 'Othr' -> 0 ->> 'Id'
     ) stored,
-    tenantId uuid not null default public.current_tenant_id(),
+    tenantId text not null default public.current_tenant_id(),
     constraint unique_msgid_e2eid_pacs008 unique (messageId, tenantId),
     constraint message_id_not_null check (messageId is not null),
     constraint cre_dt_tm check (creDtTm is not null),
@@ -360,7 +360,7 @@ create table pain001 (
     creditorAccountId text generated always as (
         document -> 'CstmrCdtTrfInitn' -> 'PmtInf' -> 'CdtTrfTxInf' -> 'CdtrAcct' -> 'Id' -> 'Othr' -> 0 ->> 'Id'
     ) stored,
-    tenantId uuid not null default public.current_tenant_id(),
+    tenantId text not null default public.current_tenant_id(),
     constraint unique_msgid_e2eid_pain001 unique (messageId, tenantId),
     constraint message_id_not_null check (messageId is not null),
     constraint cre_dt_tm check (creDtTm is not null),
@@ -402,7 +402,7 @@ create table pain013 (
     creditorAccountId text generated always as (
         document -> 'CdtrPmtActvtnReq' -> 'PmtInf' -> 'CdtTrfTxInf' -> 'CdtrAcct' -> 'Id' -> 'Othr' -> 0 ->> 'Id'
     ) stored,
-    tenantId uuid not null default public.current_tenant_id(),
+    tenantId text not null default public.current_tenant_id(),
     constraint unique_msgid_e2eid_pain013 unique (messageId, tenantId),
     constraint message_id_not_null check (messageId is not null),
     constraint cre_dt_tm check (creDtTm is not null),
