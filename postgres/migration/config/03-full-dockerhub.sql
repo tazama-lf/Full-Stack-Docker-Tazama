@@ -6,6 +6,7 @@ values (
         '{
     "id": "001@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Derived account age - creditor",
     "config": {
       "parameters": {},
@@ -34,6 +35,7 @@ values (
         '{
     "id": "002@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Transaction convergence - debtor",
     "config": {
       "parameters": {
@@ -59,6 +61,7 @@ values (
         '{
     "id": "003@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Account dormancy - creditor",
     "config": {
       "parameters": {},
@@ -87,6 +90,7 @@ values (
         '{
     "id": "004@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Account dormancy - debtor",
     "config": {
       "parameters": {},
@@ -115,6 +119,7 @@ values (
         '{
     "id": "006@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Outgoing transfer similarity - amounts",
     "config": {
       "parameters": {
@@ -150,6 +155,7 @@ values (
         '{
     "id": "007@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Outgoing transfer similarity - descriptions",
     "config": {
       "parameters": {},
@@ -189,6 +195,7 @@ values (
         '{
     "id": "008@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Outgoing transfer similarity - creditor",
     "config": {
       "parameters": {
@@ -223,6 +230,7 @@ values (
         '{
     "id": "010@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Increased account activity: volume - debtor",
     "config": {
       "parameters": {
@@ -265,6 +273,7 @@ values (
         '{
     "id": "011@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Increased account activity: volume - creditor",
     "config": {
       "parameters": {
@@ -307,6 +316,7 @@ values (
         '{
     "id": "016@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Transaction convergence - creditor",
     "config": {
       "parameters": {
@@ -332,6 +342,7 @@ values (
         '{
     "id": "017@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Transaction divergence - debtor",
     "config": {
       "parameters": {
@@ -357,6 +368,7 @@ values (
         '{
     "id": "018@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Exceptionally large outgoing transfer - debtor",
     "config": {
       "parameters": {
@@ -391,6 +403,7 @@ values (
         '{
     "id": "020@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Large transaction amount vs history - creditor",
     "config": {
       "parameters": {},
@@ -431,6 +444,7 @@ values (
         '{
     "id": "021@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "A large number of similar transaction amounts - creditor",
     "config": {
       "parameters": {
@@ -466,6 +480,7 @@ values (
         '{
     "id": "024@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Non-commissioned transaction mirroring - creditor",
     "config": {
       "parameters": {
@@ -505,6 +520,7 @@ values (
         '{
     "id": "025@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Non-commissioned transaction mirroring - debtor",
     "config": {
       "parameters": {
@@ -544,6 +560,7 @@ values (
         '{
     "id": "026@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Commissioned transaction mirroring - creditor",
     "config": {
       "parameters": {
@@ -584,6 +601,7 @@ values (
         '{
     "id": "027@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Commissioned transaction mirroring - debtor",
     "config": {
       "parameters": {
@@ -624,6 +642,7 @@ values (
         '{
     "id": "028@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Age classification - debtor",
     "config": {
       "parameters": {},
@@ -648,6 +667,7 @@ values (
         '{
     "id": "030@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Transfer to unfamiliar creditor account - debtor",
     "config": {
       "parameters": {},
@@ -676,6 +696,7 @@ values (
         '{
     "id": "044@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Successful transactions from the debtor, including the new transaction",
     "config": {
       "parameters": {},
@@ -705,6 +726,7 @@ values (
         '{
     "id": "045@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Successful transactions to the creditor, including the new transaction",
     "config": {
       "parameters": {},
@@ -734,6 +756,7 @@ values (
         '{
     "id": "048@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Large transaction amount vs history - debtor",
     "config": {
       "parameters": {},
@@ -774,6 +797,7 @@ values (
         '{
     "id": "054@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Synthetic data check - Benford''s Law - debtor",
     "config": {
       "parameters": {
@@ -808,6 +832,7 @@ values (
         '{
     "id": "063@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Synthetic data check - Benford''s Law - creditor",
     "config": {
       "parameters": {
@@ -842,6 +867,7 @@ values (
         '{
     "id": "074@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Distance over time from last transaction location - debtor",
     "config": {
       "parameters": {
@@ -872,6 +898,7 @@ values (
         '{
     "id": "075@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Distance from habitual locations - debtor",
     "config": {
       "parameters": {
@@ -908,6 +935,7 @@ values (
         '{
     "id": "076@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Time since last transaction - debtor",
     "config": {
       "parameters": {},
@@ -936,6 +964,7 @@ values (
         '{
     "id": "078@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Transaction type",
     "config": {
       "parameters": {},
@@ -970,6 +999,7 @@ values (
         '{
     "id": "083@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Multiple accounts associated with a debtor",
     "config": {
       "parameters": {},
@@ -993,6 +1023,7 @@ values (
         '{
     "id": "084@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Multiple accounts associated with a creditor",
     "config": {
       "parameters": {},
@@ -1016,6 +1047,7 @@ values (
         '{
     "id": "090@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Upstream transaction divergence - debtor",
     "config": {
       "parameters": {
@@ -1042,6 +1074,7 @@ values (
         '{
     "id": "091@1.0.0",
     "cfg": "1.0.0",
+    "tenantId": "DEFAULT",
     "desc": "Transaction amount vs regulatory threshold",
     "config": {
       "parameters": {},
@@ -1070,6 +1103,7 @@ values (
     "desc": "Complete rule coverage",
     "id": "typology-processor@1.0.0",
     "cfg": "000@1.0.0",
+    "tenantId": "DEFAULT",
     "workflow": {
         "alertThreshold": 2200,
         "interdictionThreshold": 2600,
@@ -1996,6 +2030,7 @@ values (
         '{
   "active": true,
   "cfg": "1.0.0",
+  "tenantId": "DEFAULT",
   "messages": [
     {
       "id": "004@1.0.0",

@@ -7,6 +7,7 @@ values (
   "active": true,
   "name": "Public Network Map",
   "cfg": "1.0.0",
+  "tenantId": "DEFAULT",
   "messages": [
     {
       "id": "004@1.0.0",
