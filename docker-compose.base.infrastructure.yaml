@@ -23,6 +23,9 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+    environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=unused
 
   nats:
     image: nats:2

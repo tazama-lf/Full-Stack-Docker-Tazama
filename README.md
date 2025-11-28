@@ -181,6 +181,9 @@ This option allows the deployment of an example multi-tenant instance of Tazama 
 
 As with the Public (DockerHub) deployment above, you also have the ability to choose an `rc` or `latest` release deployment by updating the `Full-Stack-Docker-Tazama/.env` file.
 
+> [!NOTE]
+> The Tazama Demo UI is not currently available for this deployment scenario.
+
 ### Additional deployment options
 
 On the selection of any of the deployment types from the main Tazama script menu, you will be presented with a number of additional options for your deployment on a new menu:
@@ -242,7 +245,27 @@ This option deploys the Tazama logging sub-system on top of the selected deploym
 This option will deploy the Tazama Demo User Interface contained and described in the [Demo UI repository](https://github.com/tazama-lf/tazama-demo) repository.
 
 > [!NOTE]
-> The Tazama Demo UI is being updated to support Tazama 3.0.0 and will be released shortly.
+> The Tazama Demo UI is not designed to work with the Authentication or Relay services in this deployment. As these components are a key dependency for a Multi-tenancy deployment, the Demo UI is not available for selection during a Multi-Tenant deployment. The selection of the Demo UI during other deployments will initially deselect the Authentication and Relay services, though they can be selected again to force their deployment, though the Demo UI will then not function properly.
+
+The Demo UI is configured, by default, to connect via `localhost`. If you want to access the Demo UI from a different device, you would need to alter the follwing environment variables in the configuration defined in the `docker-compose.hub.ui.yaml` as follows:
+
+```javascript
+NEXT_PUBLIC_URL="http://<host_IP_address>:3001"
+NEXT_PUBLIC_TMS_SERVER_URL="http://<host_IP_address>:5000"
+NEXT_PUBLIC_CMS_NATS_HOSTING="nats://nats:14222"
+NEXT_PUBLIC_PG_HOST=postgres
+NEXT_PUBLIC_PG_PORT=15432
+NEXT_PUBLIC_ADMIN_SERVICE_HOSTING="http://<host_IP_address>:5100"
+NEXT_PUBLIC_WS_URL="http://<host_IP_address>:3001"
+```
+
+Summary of changes required:
+1. Update all instances of `localhost` to the IP address of the host computer
+2. Update the NATS port in `NEXT_PUBLIC_CMS_NATS_HOSTING` from `4222` to `14222`
+3. Update the postgres port in `NEXT_PUBLIC_PG_PORT` from `5432` to `15432`
+
+> [!NOTE]
+> When running on `localhost`, the Tazama Demo UI back-end client will interact with the NATS and Postgres containers from _within_ the Docker Compose network, but when the Demo UI is running on a different device, the Tazama Demo UI back-end client will interact with the NATS and Postgres containers from _outside_ the Docker Compose network.
 
 #### NATS Utilities
 
