@@ -16,7 +16,10 @@ services:
     image: postgres:18
     restart: always
     volumes:
-      - ./postgres/migration/base/00-CREATE.sql:/docker-entrypoint-initdb.d/00-CREATE.sql
+      - ./postgres/migration/base/rls.sql:/tmp/rls.sql
+      - ./postgres/migration/base/00-DB.sql:/docker-entrypoint-initdb.d/00-DB.sql
+      - ./postgres/migration/base/01-RLS.sh:/docker-entrypoint-initdb.d/01-RLS.sh
+      - ./postgres/migration/base/02-CREATE.sql:/docker-entrypoint-initdb.d/02-CREATE.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s

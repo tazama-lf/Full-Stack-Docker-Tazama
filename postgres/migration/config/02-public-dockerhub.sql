@@ -17,7 +17,6 @@ values (
         {
           "id": "typology-processor@1.0.0",
           "cfg": "999@1.0.0",
-          "tenantId": "DEFAULT",
           "rules": [
             {
               "id": "EFRuP@1.0.0",

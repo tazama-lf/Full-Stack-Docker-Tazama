@@ -2040,7 +2040,6 @@ values (
         {
           "id": "typology-processor@1.0.0",
           "cfg": "000@1.0.0",
-          "tenantId": "DEFAULT",
           "rules": [
             {
               "id": "001@1.0.0",
