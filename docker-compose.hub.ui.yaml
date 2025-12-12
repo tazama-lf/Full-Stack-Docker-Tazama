@@ -19,7 +19,7 @@ services:
       ALERTS_ONLY: true
 
   ui:
-    image: tazamaorg/demo-ui:${TAZAMA_VERSION}
+    image: tazamaorg/demo-ui:rc
     restart: always
     env_file:
       - env/ui.env
