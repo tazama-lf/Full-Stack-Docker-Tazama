@@ -30,4 +30,4 @@ services:
   nats:
     image: nats:2
     restart: always
-    command: ["-DVV"]
+    command: ["-DVV", "--jetstream" , "-m", "8222"]
