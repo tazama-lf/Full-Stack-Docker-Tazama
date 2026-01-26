@@ -91,7 +91,7 @@ echo.
 echo 1. %auth% Authentication
 echo 2. %relay% Relay services (NATS)
 echo 3. %basiclogs% Basic Logs
-echo 4. %ui% Demo UI
+if %IS_MULTITENANT_DEPLOYMENT% NEQ 1 echo 4. %ui% Demo UI
 echo.
 echo UTILITY ADDONS:
 echo.
@@ -111,7 +111,17 @@ rem If multitenant, can't unset auth or relay...
 if "%choice%"=="1" if %IS_MULTITENANT_DEPLOYMENT% NEQ 1 if "%auth%" == "[ ]" (set "auth=[X]") else (set "auth=[ ]")
 if "%choice%"=="2" if %IS_MULTITENANT_DEPLOYMENT% NEQ 1 if "%relay%" == "[ ]" (set "relay=[X]") else (set "relay=[ ]")
 if "%choice%"=="3" if "%basiclogs%" == "[ ]" (set "basiclogs=[X]") else (set "basiclogs=[ ]")
-if "%choice%"=="4" if "%ui%" == "[ ]" (set "ui=[X]") else (set "ui=[ ]")
+if "%choice%"=="4" if %IS_MULTITENANT_DEPLOYMENT% NEQ 1 if "%ui%" == "[ ]" (
+    rem If enabling UI, disable auth and relay
+    set "ui=[X]"
+    set "auth=[ ]"
+    set "relay=[ ]"
+    echo.
+    echo Note: Enabling the Demo UI addon will disable Authentication and Relay services.
+    echo You can re-enable these services again, but the Demo UI will not function correctly.
+    echo.
+    pause
+    ) else (set "ui=[ ]")
 if "%choice%"=="5" if "%natsutils%" == "[ ]" (set "natsutils=[X]") else (set "natsutils=[ ]")
 if "%choice%"=="6" if "%batchppa%" == "[ ]" (set "batchppa=[X]") else (set "batchppa=[ ]")
 if "%choice%"=="7" if "%pgadmin%" == "[ ]" (set "pgadmin=[X]") else (set "pgadmin=[ ]")

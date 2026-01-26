@@ -1,6 +1,25 @@
 services:
+  ef:
+    environment:
+      SUPPRESS_ALERTS: false
+      INTERDICTION_DESTINATION: global
+      INTERDICTION_PRODUCER: interdiction-service-tp
+
+  tp:
+    environment:
+      SUPPRESS_ALERTS: false
+      INTERDICTION_DESTINATION: global
+      INTERDICTION_PRODUCER: interdiction-service-tp
+
+  tadp:
+    environment:
+      SUPPRESS_ALERTS: false
+      ALERT_DESTINATION: global
+      ALERT_PRODUCER: investigation-service
+      ALERTS_ONLY: true
+
   ui:
-    image: tazamaorg/demo-ui:v2.2.0
+    image: tazamaorg/demo-ui:${TAZAMA_VERSION}
     restart: always
     env_file:
       - env/ui.env

@@ -26,6 +26,7 @@ relay="[ ]"
 ui="[ ]"
 natsutils="[ ]"
 batchppa="[ ]"
+# These options default to enabled
 pgadmin="[X]"
 hasura="[X]"
 
@@ -73,7 +74,9 @@ show_addons_menu() {
     echo "1. $auth Authentication"
     echo "2. $relay Relay services (NATS)"
     echo "3. $basiclogs Basic Logs"
-    echo "4. $ui Demo UI"
+    if [[ $IS_MULTITENANT_DEPLOYMENT -ne 1 ]]; then
+        echo "4. $ui Demo UI"
+    fi
     echo ""
     print_color $CYAN "UTILITY ADDONS:"
     echo ""
@@ -248,6 +251,7 @@ while true; do
             IS_GITHUB_DEPLOYMENT=1
             IS_FULL_DEPLOYMENT=0
             IS_MULTITENANT_DEPLOYMENT=0
+            relay="[X]"
             
             # Addons loop
             while true; do
@@ -273,7 +277,22 @@ while true; do
                         [[ $IS_MULTITENANT_DEPLOYMENT -ne 1 ]] && toggle_addon "relay"
                         ;;
                     3) toggle_addon "basiclogs" ;;
-                    4) toggle_addon "ui" ;;
+                    4) 
+                        if [[ $IS_MULTITENANT_DEPLOYMENT -ne 1 ]]; then
+                            if [[ "$ui" == "[ ]" ]]; then
+                                ui="[X]"
+                                auth="[ ]"
+                                relay="[ ]"
+                                echo ""
+                                print_color $YELLOW "Note: Enabling the Demo UI addon will disable Authentication and Relay services."
+                                print_color $YELLOW "You can re-enable these services again, but the Demo UI will not function correctly."
+                                echo ""
+                                read -p "Press any key to continue..."
+                            else
+                                ui="[ ]"
+                            fi
+                        fi
+                        ;;
                     5) toggle_addon "natsutils" ;;
                     6) toggle_addon "batchppa" ;;
                     7) toggle_addon "pgadmin" ;;
@@ -289,6 +308,7 @@ while true; do
             IS_GITHUB_DEPLOYMENT=0
             IS_FULL_DEPLOYMENT=0
             IS_MULTITENANT_DEPLOYMENT=0
+            relay="[X]"
             
             while true; do
                 show_addons_menu
@@ -305,7 +325,20 @@ while true; do
                     1) toggle_addon "auth" ;;
                     2) toggle_addon "relay" ;;
                     3) toggle_addon "basiclogs" ;;
-                    4) toggle_addon "ui" ;;
+                    4) 
+                        if [[ "$ui" == "[ ]" ]]; then
+                            ui="[X]"
+                            auth="[ ]"
+                            relay="[ ]"
+                            echo ""
+                            print_color $YELLOW "Note: Enabling the Demo UI addon will disable Authentication and Relay services."
+                            print_color $YELLOW "You can re-enable these services again, but the Demo UI will not function correctly."
+                            echo ""
+                            read -p "Press any key to continue..."
+                        else
+                            ui="[ ]"
+                        fi
+                        ;;
                     5) toggle_addon "natsutils" ;;
                     6) toggle_addon "batchppa" ;;
                     7) toggle_addon "pgadmin" ;;
@@ -321,6 +354,7 @@ while true; do
             IS_GITHUB_DEPLOYMENT=0
             IS_FULL_DEPLOYMENT=1
             IS_MULTITENANT_DEPLOYMENT=0
+            relay="[X]"
             
             while true; do
                 show_addons_menu
@@ -337,7 +371,20 @@ while true; do
                     1) toggle_addon "auth" ;;
                     2) toggle_addon "relay" ;;
                     3) toggle_addon "basiclogs" ;;
-                    4) toggle_addon "ui" ;;
+                    4) 
+                        if [[ "$ui" == "[ ]" ]]; then
+                            ui="[X]"
+                            auth="[ ]"
+                            relay="[ ]"
+                            echo ""
+                            print_color $YELLOW "Note: Enabling the Demo UI addon will disable Authentication and Relay services."
+                            print_color $YELLOW "You can re-enable these services again, but the Demo UI will not function correctly."
+                            echo ""
+                            read -p "Press any key to continue..."
+                        else
+                            ui="[ ]"
+                        fi
+                        ;;
                     5) toggle_addon "natsutils" ;;
                     6) toggle_addon "batchppa" ;;
                     7) toggle_addon "pgadmin" ;;
@@ -373,7 +420,10 @@ while true; do
                         sleep 1
                         ;;
                     3) toggle_addon "basiclogs" ;;
-                    4) toggle_addon "ui" ;;
+                    4)
+                        print_color $YELLOW "Demo UI is not available for multitenant deployment"
+                        sleep 1
+                        ;;
                     5) toggle_addon "natsutils" ;;
                     6) toggle_addon "batchppa" ;;
                     7) toggle_addon "pgadmin" ;;
