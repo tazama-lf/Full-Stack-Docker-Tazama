@@ -287,44 +287,31 @@ call_hasura_api '{
   }
 }' "Relationship: governed_as_debtor_account_by -> condition (destination)"
 
-# account_holder -> entity (creditor)
+# account_holder -> entity (via source)
 call_hasura_api '{
   "type": "pg_create_object_relationship",
   "args": {
     "source": "event_history",
     "table": "account_holder",
-    "name": "creditor_entity",
-    "using": {
-      "foreign_key_constraint_on": ["creditor", "tenantid"]
-    }
-  }
-}' "Relationship: account_holder -> entity (creditor)"
-
-# account_holder -> entity (debtor)
-call_hasura_api '{
-  "type": "pg_create_object_relationship",
-  "args": {
-    "source": "event_history",
-    "table": "account_holder",
-    "name": "debtor_entity",
-    "using": {
-      "foreign_key_constraint_on": ["debtor", "tenantid"]
-    }
-  }
-}' "Relationship: account_holder -> entity (debtor)"
-
-# transaction -> account (source)
-call_hasura_api '{
-  "type": "pg_create_object_relationship",
-  "args": {
-    "source": "event_history",
-    "table": "transaction",
-    "name": "source_account",
+    "name": "entity",
     "using": {
       "foreign_key_constraint_on": ["source", "tenantid"]
     }
   }
-}' "Relationship: transaction -> account (source)"
+}' "Relationship: account_holder -> entity (source)"
+
+# account_holder -> account (via destination)
+call_hasura_api '{
+  "type": "pg_create_object_relationship",
+  "args": {
+    "source": "event_history",
+    "table": "account_holder",
+    "name": "account",
+    "using": {
+      "foreign_key_constraint_on": ["destination", "tenantid"]
+    }
+  }
+}' "Relationship: account_holder -> account (destination)"
 
 # transaction -> account (destination)
 call_hasura_api '{
