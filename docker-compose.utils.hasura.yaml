@@ -57,5 +57,5 @@ services:
     entrypoint:
       - /bin/sh
       - -c
-      - "echo 'Waiting 60s for system to stabilize...' && sleep 60 && sh /init.sh"
+      - "echo 'Waiting 10s for system to stabilize...' && sleep 10 && sh /init.sh"
     restart: "no"
