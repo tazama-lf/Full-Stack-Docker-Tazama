@@ -6,7 +6,7 @@ values (
         '{
   "id": "901@1.0.0",
   "cfg": "1.0.0",
-  "tenantId": "tenant-001",
+  "tenantId": "421849b8-7eb8-4908-b8c3-1ee61c83a249",
   "desc": "Number of outgoing transactions - debtor",
   "config": {
     "parameters": {
@@ -42,7 +42,7 @@ values (
         '{
   "id": "902@1.0.0",
   "cfg": "1.0.0",
-  "tenantId": "tenant-001",
+  "tenantId": "421849b8-7eb8-4908-b8c3-1ee61c83a249",
   "desc": "Number of incoming transactions - creditor",
   "config": {
     "parameters": {
@@ -78,7 +78,7 @@ values (
         '{
   "id": "901@1.0.0",
   "cfg": "1.0.0",
-  "tenantId": "tenant-002",
+  "tenantId": "0f1e5116-9f9d-46cc-8539-0e2b64ac3ed6",
   "desc": "Number of outgoing transactions - debtor",
   "config": {
     "parameters": {
@@ -114,7 +114,7 @@ values (
         '{
   "id": "902@1.0.0",
   "cfg": "1.0.0",
-  "tenantId": "tenant-002",
+  "tenantId": "0f1e5116-9f9d-46cc-8539-0e2b64ac3ed6",
   "desc": "Number of incoming transactions - creditor",
   "config": {
     "parameters": {
@@ -155,7 +155,7 @@ values (
   "typology_name": "Typology-999-Rule-901-and-902",
   "id": "typology-processor@1.0.0",
   "cfg": "999@1.0.0",
-  "tenantId": "tenant-001",
+  "tenantId": "421849b8-7eb8-4908-b8c3-1ee61c83a249",
   "workflow": {
     "alertThreshold": 300,
     "interdictionThreshold": 500,
@@ -251,7 +251,7 @@ values (
   "typology_name": "Typology-999-Rule-901-and-902",
   "id": "typology-processor@1.0.0",
   "cfg": "999@1.0.0",
-  "tenantId": "tenant-002",
+  "tenantId": "0f1e5116-9f9d-46cc-8539-0e2b64ac3ed6",
   "workflow": {
     "alertThreshold": 300,
     "interdictionThreshold": 500,
@@ -351,7 +351,7 @@ values (
   "active": true,
   "name": "Public Network Map",
   "cfg": "1.0.0",
-  "tenantId": "tenant-001",
+  "tenantId": "421849b8-7eb8-4908-b8c3-1ee61c83a249",
   "messages": [
     {
       "id": "004@1.0.0",
@@ -361,7 +361,6 @@ values (
         {
           "id": "typology-processor@1.0.0",
           "cfg": "999@1.0.0",
-          "tenantId": "tenant-001",
           "rules": [
             {
               "id": "EFRuP@1.0.0",
@@ -386,7 +385,7 @@ values (
   "active": true,
   "name": "Public Network Map",
   "cfg": "1.0.0",
-  "tenantId": "tenant-002",
+  "tenantId": "0f1e5116-9f9d-46cc-8539-0e2b64ac3ed6",
   "messages": [
     {
       "id": "004@1.0.0",
@@ -396,7 +395,6 @@ values (
         {
           "id": "typology-processor@1.0.0",
           "cfg": "999@1.0.0",
-          "tenantId": "tenant-002",
           "rules": [
             {
               "id": "EFRuP@1.0.0",

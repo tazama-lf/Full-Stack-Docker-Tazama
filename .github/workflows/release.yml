@@ -10,7 +10,6 @@ on:
     properties:
       milestone_number:
         type: string
-  workflow_dispatch:
 
 jobs:
   release:
@@ -42,32 +41,33 @@ jobs:
         if: ${{ steps.release-label.outputs.level != null }}
         with:
           semver_only: true
-
-      - name: Get Last Merged PR
-        id: get_merged_pr
-        uses: actions-ecosystem/action-get-merged-pull-request@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
         
-      # Determine the release type (major, minor, patch) based on Last Merged PR Title  
-      - name: Determine Release Type from PR Title
+      # Determine the release type (major, minor, patch) based on commit messages  
+      - name: Determine Release Type
         id: determine_release
         run: |
-          PR_TITLE="${{ steps.get_merged_pr.outputs.title }}"
-          echo "PR Title: $PR_TITLE"
-      
-          RELEASE_TYPE="patch"  # Default release type
-          if echo "$PR_TITLE" | grep -q "^BREAKING CHANGE:"; then
+          PREV_VERSION=$(git describe --abbrev=0 --tags)
+          echo "Previous Version: $PREV_VERSION"
+          
+          COMMIT_MESSAGES=$(git log $PREV_VERSION^..HEAD --format=%B)
+          echo "Commit Messages: $COMMIT_MESSAGES"
+          
+          # Determine release type based on commit messages and labels
+          RELEASE_TYPE="patch"  # Default to patch
+          
+          if echo "$COMMIT_MESSAGES" | grep -q -e "BREAKING CHANGE:"; then
             RELEASE_TYPE="major"
-          elif echo "$PR_TITLE" | grep -q "^feat!:"; then
+          elif echo "$COMMIT_MESSAGES" | grep -q -e "feat!:"; then
             RELEASE_TYPE="major"
-          elif echo "$PR_TITLE" | grep -q "^feat:"; then
+          elif echo "$COMMIT_MESSAGES" | grep -q -e "feat:"; then
             RELEASE_TYPE="minor"
-          else
+          elif echo "$COMMIT_MESSAGES" | grep -q -e "feat:" && (echo "$COMMIT_MESSAGES" | grep -q -e "fix:" || echo "$COMMIT_MESSAGES" | grep -q -e "enhancement:" || echo "$COMMIT_MESSAGES" | grep -q -e "docs:" || echo "$COMMIT_MESSAGES" | grep -q -e "refactor:" || echo "$COMMIT_MESSAGES" | grep -q -e "chore:"); then
+            RELEASE_TYPE="minor"
+          elif echo "$COMMIT_MESSAGES" | grep -q -e "fix:" -e "enhancement:" -e "docs:" -e "refactor:" -e "chore:" -e "build:" -e "ci:" -e "perf:" -e "style:" -e "test:" -e "chore(deps):" -e "chore(deps-dev):"; then
             RELEASE_TYPE="patch"
           fi
-      
-          echo "Determined Release Type: $RELEASE_TYPE"
+          
+          echo "Release Type: $RELEASE_TYPE"
           echo "::set-output name=release_type::$RELEASE_TYPE"
         
       # Bump the version based on the determined release type
