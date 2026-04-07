@@ -11,20 +11,26 @@ on: [pull_request]
 
 jobs:
   dco:
-    if: github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]'
+    if: |
+      github.actor != 'dependabot[bot]' &&
+      github.actor != 'dependabot-preview[bot]' &&
+      github.actor != 'github-actions[bot]'
     # Define the runner environment
     runs-on: ubuntu-latest
     
     steps:
     # Step to check out the repository
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
       with:
         fetch-depth: 0  # Fetch all history for all branches to ensure complete commit history is available
 
     - name: Set up environment variables
+      env:
+        PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
+        PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
       run: |
-        echo "BASE_BRANCH=${{ github.event.pull_request.base.ref }}" >> $GITHUB_ENV
-        echo "HEAD_BRANCH=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
+        printf 'BASE_BRANCH=%s\n' "$PR_BASE_REF" >> "$GITHUB_ENV"
+        printf 'HEAD_BRANCH=%s\n' "$PR_HEAD_REF" >> "$GITHUB_ENV"
 
     # Step to check each commit in the pull request for a Signed-off-by line
     - name: Check for DCO Sign-off
@@ -33,14 +39,14 @@ jobs:
         base_branch=$BASE_BRANCH
         head_branch=$HEAD_BRANCH
 
-        # Get the list of commit hashes between the head branch and base branch
-        commits=$(git log --pretty=format:%H origin/${head_branch}..origin/${base_branch})
+        # Get the list of commit hashes introduced by this PR (head commits not yet in base)
+        commits=$(git log --pretty=format:%H origin/${base_branch}..origin/${head_branch})
         non_compliant_commits=""
 
         # Loop through each commit and check for the Signed-off-by line
         for commit in $commits; do
           # Check if the commit message contains the Signed-off-by line
-          if ! git show --quiet --format=%B $commit | grep -q "^Signed-off-by: "; then
+          if ! git show --quiet --format=%B "$commit" | grep -q "^Signed-off-by: "; then
             # If not, add the commit hash to the list of non-compliant commits
             non_compliant_commits="$non_compliant_commits $commit"
           fi

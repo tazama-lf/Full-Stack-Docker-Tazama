@@ -7,10 +7,6 @@ name: Release Workflow
 on:
   repository_dispatch:
     types: [release]
-    properties:
-      milestone_number:
-        type: string
-  workflow_dispatch:
 
 jobs:
   release:
@@ -19,62 +15,43 @@ jobs:
     steps:
       # Checkout the main branch with all history
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2 (upgraded from v2)
         with:
           ref: main
           fetch-depth: 0 # Fetch all tags
 
-      # Fetch merged pull request and determine release labels
-      - uses: actions-ecosystem/action-get-merged-pull-request@v1
-        id: get-merged-pull-request
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: actions-ecosystem/action-release-label@v1
-        id: release-label
-        if: ${{ steps.get-merged-pull-request.outputs.title != null }}
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      # Get the latest tag in the repository
-      - uses: actions-ecosystem/action-get-latest-tag@v1
-        id: get-latest-tag
-        if: ${{ steps.release-label.outputs.level != null }}
-        with:
-          semver_only: true
-
-      - name: Get Last Merged PR
-        id: get_merged_pr
-        uses: actions-ecosystem/action-get-merged-pull-request@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-        
-      # Determine the release type (major, minor, patch) based on Last Merged PR Title  
-      - name: Determine Release Type from PR Title
+      # Determine the release type (major, minor, patch) based on commit messages  
+      - name: Determine Release Type
         id: determine_release
         run: |
-          PR_TITLE="${{ steps.get_merged_pr.outputs.title }}"
-          echo "PR Title: $PR_TITLE"
-      
-          RELEASE_TYPE="patch"  # Default release type
-          if echo "$PR_TITLE" | grep -q "^BREAKING CHANGE:"; then
+          PREV_VERSION=$(git describe --abbrev=0 --tags 2>/dev/null || echo "")
+          echo "Previous Version: ${PREV_VERSION:-none (first release)}"
+          GIT_LOG_RANGE="${PREV_VERSION:+${PREV_VERSION}..}HEAD"
+
+          COMMIT_MESSAGES=$(git log $GIT_LOG_RANGE --format=%B)
+          echo "Commit Messages: $COMMIT_MESSAGES"
+          
+          # Determine release type based on commit messages and labels
+          RELEASE_TYPE="patch"  # Default to patch
+          
+          if echo "$COMMIT_MESSAGES" | grep -q -e "BREAKING CHANGE:"; then
             RELEASE_TYPE="major"
-          elif echo "$PR_TITLE" | grep -q "^feat!:"; then
+          elif echo "$COMMIT_MESSAGES" | grep -q -e "feat!:"; then
             RELEASE_TYPE="major"
-          elif echo "$PR_TITLE" | grep -q "^feat:"; then
+          elif echo "$COMMIT_MESSAGES" | grep -q -e "feat:"; then
             RELEASE_TYPE="minor"
-          else
+          elif echo "$COMMIT_MESSAGES" | grep -q -e "fix:" -e "enhancement:" -e "docs:" -e "refactor:" -e "chore:" -e "build:" -e "ci:" -e "perf:" -e "style:" -e "test:" -e "chore(deps):" -e "chore(deps-dev):"; then
             RELEASE_TYPE="patch"
           fi
-      
-          echo "Determined Release Type: $RELEASE_TYPE"
-          echo "::set-output name=release_type::$RELEASE_TYPE"
+          
+          echo "Release Type: $RELEASE_TYPE"
+          echo "release_type=$RELEASE_TYPE" >> "$GITHUB_OUTPUT"
         
       # Bump the version based on the determined release type
       - name: Bump Version
         id: bump_version
         run: |
-          PREV_VERSION=$(git describe --abbrev=0 --tags)
+          PREV_VERSION=$(git describe --abbrev=0 --tags 2>/dev/null || echo "v0.0.0")
           echo "Previous Version: $PREV_VERSION"
           
           RELEASE_TYPE=${{ steps.determine_release.outputs.release_type }}
@@ -98,21 +75,29 @@ jobs:
           
           NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
           echo "New Version: $NEW_VERSION"
-          echo "::set-output name=new_version::$NEW_VERSION"
+          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
 
       # Get the milestone details
       - name: Get Milestone Details
         id: get_milestone
+        env:
+          MILESTONE_NUMBER: ${{ github.event.client_payload.milestone_number }}
         run: |
-          # Retrieve the milestone ID from the workflow input
-          MILESTONE_ID=${{ github.event.client_payload.milestone_number }}
-          MILESTONE_RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/milestones/${MILESTONE_ID}")
+          if [[ -z "$MILESTONE_NUMBER" ]]; then
+            echo "::error::MILESTONE_NUMBER is not set in client_payload"
+            exit 1
+          fi
+          MILESTONE_RESPONSE=$(curl --fail -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/milestones/${MILESTONE_NUMBER}")
           MILESTONE_TITLE=$(echo "$MILESTONE_RESPONSE" | jq -r '.title')
           MILESTONE_DESCRIPTION=$(echo "$MILESTONE_RESPONSE" | jq -r '.description')
           MILESTONE_DATE=$(echo "$MILESTONE_RESPONSE" | jq -r '.due_on')
-          echo "::set-output name=milestone_title::$MILESTONE_TITLE"
-          echo "::set-output name=milestone_description::$MILESTONE_DESCRIPTION"
-          echo "::set-output name=milestone_date::$MILESTONE_DATE"
+          echo "milestone_title=$MILESTONE_TITLE" >> "$GITHUB_OUTPUT"
+          {
+            echo 'milestone_description<<EOF'
+            echo "$MILESTONE_DESCRIPTION"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+          echo "milestone_date=$MILESTONE_DATE" >> "$GITHUB_OUTPUT"
 
       # Generate the changelog based on commit messages and labels
       - name: Generate Changelog
@@ -137,8 +122,9 @@ jobs:
           LABEL_DEPS="chore(deps):"
           LABEL_DEPS_DEV="chore(deps-dev):"
           # Get the last release tag
-          LAST_RELEASE_TAG=$(git describe --abbrev=0 --tags)
-          echo "Last Release Tag: $LAST_RELEASE_TAG"
+          LAST_RELEASE_TAG=$(git describe --abbrev=0 --tags 2>/dev/null || echo "")
+          GIT_LOG_RANGE="${LAST_RELEASE_TAG:+${LAST_RELEASE_TAG}..}HEAD"
+          echo "Last Release Tag: ${LAST_RELEASE_TAG:-none (first release)}"
           # Get the milestone details from the output of the previous step
           MILESTONE_TITLE="${{ steps.get_milestone.outputs.milestone_title }}"
           MILESTONE_DESCRIPTION="${{ steps.get_milestone.outputs.milestone_description }}"
@@ -154,7 +140,7 @@ jobs:
             local section_label="$2"
             local section_icon="$3"
             # Get the commit messages with the specified label between the last release and the current release
-            local commit_messages=$(git log --pretty=format:"- %s (Linked Issues: %C(yellow)%H%Creset)" "$LAST_RELEASE_TAG..HEAD" --grep="$section_label" --no-merges --decorate --decorate-refs=refs/issues)
+            local commit_messages=$(git log --pretty=format:"- %s (Linked Issues: %C(yellow)%H%Creset)" $GIT_LOG_RANGE --grep="$section_label" --no-merges --decorate --decorate-refs=refs/issues)
             # If there are commit messages, append the section to the changelog file
             if [ -n "$commit_messages" ]; then
               # Remove duplicate commit messages
@@ -185,7 +171,7 @@ jobs:
           # Function to append non-labeled commits to the changelog file
           append_non_labeled_commits() {
             # Get the commit messages that do not match any conventional commit labels between the last release and the current release
-            local non_labeled_commit_messages=$(git log --pretty=format:"- %s (Linked Issues: %C(yellow)%H%Creset)" "$LAST_RELEASE_TAG..HEAD" --invert-grep --grep="^fix:\|^feat:\|^enhancement:\|^docs:\|^refactor:\|^chore:\|^build:\|^ci:\|^perf:\|^style:\|^test:\|^BREAKING CHANGE:\|^feat!:\|^chore(deps):\|^chore(deps-dev):")
+            local non_labeled_commit_messages=$(git log --pretty=format:"- %s (Linked Issues: %C(yellow)%H%Creset)" $GIT_LOG_RANGE --invert-grep --grep="^fix:\|^feat:\|^enhancement:\|^docs:\|^refactor:\|^chore:\|^build:\|^ci:\|^perf:\|^style:\|^test:\|^BREAKING CHANGE:\|^feat!:\|^chore(deps):\|^chore(deps-dev):")
             # If there are non-labeled commit messages, append the section to the changelog file
             if [ -n "$non_labeled_commit_messages" ]; then
               # Remove duplicate commit messages
@@ -199,13 +185,17 @@ jobs:
           # Append non-labeled commits to the changelog file
           append_non_labeled_commits
 
-          echo "::set-output name=changelog_file::$CHANGELOG_FILE"
+          echo "changelog_file=$CHANGELOG_FILE" >> "$GITHUB_OUTPUT"
 
       # Read changelog contents into a variable
       - name: Read Changelog Contents
         id: read_changelog
         run: |
-          echo "::set-output name=changelog_contents::$(cat /home/runner/work/changelog.txt)"
+          {
+            echo 'changelog_contents<<EOF'
+            cat /home/runner/work/changelog.txt
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
       
       # Display changelog
       - name: Display Changelog
@@ -213,34 +203,26 @@ jobs:
       
       # Attach changelog as an artifact
       - name: Attach Changelog to Release
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: Changelog
           path: /home/runner/work/changelog.txt
       
       # Create release while including the changelog
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.bump_version.outputs.new_version }}
-          release_name: ${{ steps.bump_version.outputs.new_version }}
-          body_path: /home/runner/work/changelog.txt
-          draft: false
-          prerelease: false
-
-      - name: Get Latest Release
         run: |
-          echo "LATEST_RELEASE=$(gh release list --limit 1 | awk '{print $1}')" >> $GITHUB_ENV
-          echo "The latest release tag is $LATEST_RELEASE"
+          gh release create "${{ steps.bump_version.outputs.new_version }}" \
+            --title "${{ steps.bump_version.outputs.new_version }}" \
+            --notes-file /home/runner/work/changelog.txt
 
       - name: Send Slack Notification
+        continue-on-error: true
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          curl -X POST -H 'Content-type: application/json' --data '{
+          curl --fail -sS -X POST -H 'Content-type: application/json' --data '{
             "blocks": [
               {
                 "type": "header",
@@ -259,9 +241,9 @@ jobs:
                   },
                   {
                     "type": "mrkdwn",
-                    "text": "*Release:*\n<https://github.com/${{ github.repository }}/releases/tag/${{ env.LATEST_RELEASE }}|Release notes>"
+                    "text": "*Release:*\n<https://github.com/${{ github.repository }}/releases/tag/${{ steps.bump_version.outputs.new_version }}|Release notes>"
                   }
                 ]
               }
             ]
-          }' ${{ secrets.SLACK_WEBHOOK_URL }}
+          }' "$SLACK_WEBHOOK_URL"
