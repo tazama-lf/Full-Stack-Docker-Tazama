@@ -33,10 +33,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout the code
-      uses: actions/checkout@v4
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
     - name: Build the Docker image
+      if: hashFiles('Dockerfile') != ''
       run: docker build . --file Dockerfile --tag localbuild/testimage:latest
     - name: Scan the image and upload dependency results
+      if: hashFiles('Dockerfile') != ''
       uses: anchore/sbom-action@bb716408e75840bbb01e839347cd213767269d4a
       with:
         image: "localbuild/testimage:latest"
