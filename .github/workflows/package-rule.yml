@@ -1,0 +1,208 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Reusable workflow: builds and pushes a stable Docker image for a rule processor.
+#
+# Triggered on merge to main in the rule repo (stable release). Produces both a
+# versioned tag and the :latest moving pointer.
+#
+# Each rule repo calls this workflow with its own rule_number and rule_org rather
+# than maintaining a full copy of the job definition locally.
+#
+# Caller stub example (place in each rule repo's .github/workflows/package-rule.yml):
+#
+#   on:
+#     push:
+#       branches: [main]
+#     workflow_dispatch:
+#   jobs:
+#     build:
+#       uses: tazama-lf/workflows/.github/workflows/package-rule.yml@dev
+#       with:
+#         rule_number: "901"
+#         rule_org: "tazama-lf"
+#       secrets: inherit
+#
+# Please do not attempt to edit this flow without the direct consent from the DevOps team.
+# This file is managed centrally.
+
+name: Rule Executer - Rule processor stable automation (reusable)
+
+permissions:
+  contents: read
+
+on:
+  workflow_call:
+    inputs:
+      rule_number:
+        description: 'Zero-padded rule number (e.g. "001", "901")'
+        required: true
+        type: string
+      rule_org:
+        description: 'GitHub org that owns the rule repo ("tazama-lf" or "frmscoe")'
+        required: true
+        type: string
+    secrets:
+      GH_TOKEN_LIB:
+        required: true
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
+
+jobs:
+  automate-rule-executer:
+    if: github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout rule repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: '20'
+
+      - name: Read rule version from package.json
+        id: rule_version
+        run: |
+          VERSION=$(jq -r '.version' package.json)
+          if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
+            echo "❌ Could not read version from package.json"
+            exit 1
+          fi
+          if [[ "$VERSION" == *-* ]]; then
+            echo "❌ Stable package-rule.yml triggered but version '$VERSION' is a prerelease."
+            echo "   Merge to main should be blocked by version-check.yml — investigate branch protection."
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Rule version: $VERSION"
+
+      - name: Clone Rule Executer repository (main branch)
+        run: |
+          git config --global url."https://x-access-token:${GH_TOKEN_LIB}@github.com/".insteadOf "https://github.com/"
+          git clone https://github.com/tazama-lf/rule-executer -b main rule-executer
+          echo "Rule Executer clone complete."
+        env:
+          GH_TOKEN_LIB: ${{ secrets.GH_TOKEN_LIB }}
+
+      - name: Prepare rule-executer-${{ inputs.rule_number }}
+        run: |
+          cp -R rule-executer "rule-executer-${{ inputs.rule_number }}"
+          echo "Created rule-executer-${{ inputs.rule_number }}"
+
+      - name: Modify package.json and Dockerfile for rule ${{ inputs.rule_number }}
+        run: |
+          RULE_DIR="rule-executer-${{ inputs.rule_number }}"
+          RULE_NUM="${{ inputs.rule_number }}"
+          RULE_ORG="${{ inputs.rule_org }}"
+          VERSION="${{ steps.rule_version.outputs.VERSION }}"
+
+          echo "Applying substitutions for rule-${RULE_NUM} (org: ${RULE_ORG}, version: ${VERSION})"
+
+          # Update rule dependency in package.json
+          case "$RULE_ORG" in
+            frmscoe)
+              EXPECTED_SCOPE="@frmscoe"
+              sed -i "s|npm:@tazama-lf/rule-[^@]*@[^\"]*|npm:@frmscoe/rule-${RULE_NUM}@${VERSION}|g" "${RULE_DIR}/package.json"
+              ;;
+            tazama-lf)
+              EXPECTED_SCOPE="@tazama-lf"
+              sed -i "s|npm:@tazama-lf/rule-[^@]*@[^\"]*|npm:@tazama-lf/rule-${RULE_NUM}@${VERSION}|g" "${RULE_DIR}/package.json"
+              ;;
+            *)
+              echo "::error::Unknown RULE_ORG value: '${RULE_ORG}'. Expected 'frmscoe' or 'tazama-lf'."
+              exit 1
+              ;;
+          esac
+
+          # Validate rule dependency rewrite succeeded — fail if pattern didn't match
+          if ! grep -q "npm:${EXPECTED_SCOPE}/rule-${RULE_NUM}@${VERSION}" "${RULE_DIR}/package.json"; then
+            echo "❌ Failed to update rule dependency in package.json — pattern may have changed"
+            echo "   Expected: npm:${EXPECTED_SCOPE}/rule-${RULE_NUM}@${VERSION}"
+            grep '"rule"' "${RULE_DIR}/package.json" || echo "   (no 'rule' key found)"
+            exit 1
+          fi
+
+          # Update RULE_NAME and APM_SERVICE_NAME in Dockerfile (flexible pattern — not hardcoded to 901)
+          sed -i "s/ENV RULE_NAME=\"[^\"]*\"/ENV RULE_NAME=\"${RULE_NUM}\"/" "${RULE_DIR}/Dockerfile"
+          sed -i "s/ENV APM_SERVICE_NAME=rule-[^ ]*/ENV APM_SERVICE_NAME=rule-${RULE_NUM}/" "${RULE_DIR}/Dockerfile"
+
+          echo "=== package.json rule dep after substitution ==="
+          grep '"rule"' "${RULE_DIR}/package.json"
+          echo "=== Dockerfile RULE_NAME after substitution ==="
+          grep 'RULE_NAME\|APM_SERVICE_NAME' "${RULE_DIR}/Dockerfile"
+
+          # Validate substitutions actually occurred — fail fast if template changed upstream
+          if ! grep -q "ENV RULE_NAME=\"${RULE_NUM}\"" "${RULE_DIR}/Dockerfile"; then
+            echo "❌ Failed to update RULE_NAME in Dockerfile — template may have changed"
+            exit 1
+          fi
+          if ! grep -q "ENV APM_SERVICE_NAME=rule-${RULE_NUM}" "${RULE_DIR}/Dockerfile"; then
+            echo "❌ Failed to update APM_SERVICE_NAME in Dockerfile — template may have changed"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: |
+          cd "rule-executer-${{ inputs.rule_number }}"
+          npm install
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_LIB }}
+
+      - name: Build and push stable Docker image
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          VERSION="${{ steps.rule_version.outputs.VERSION }}"
+          RULE_NUM="${{ inputs.rule_number }}"
+          IMAGE="tazamaorg/rule-${RULE_NUM}"
+
+          echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+
+          # Build once, tag with versioned and :latest moving pointer
+          docker build -t "${IMAGE}:${VERSION}" -t "${IMAGE}:latest" "rule-executer-${RULE_NUM}"
+
+          docker push "${IMAGE}:${VERSION}"
+          docker push "${IMAGE}:latest"
+
+          docker rmi "${IMAGE}:${VERSION}" "${IMAGE}:latest"
+          echo "Stable image pushed: ${IMAGE}:${VERSION} and ${IMAGE}:latest"
+
+      - name: Send Slack notification
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -s -X POST -H 'Content-type: application/json' --data '{
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "New Rule stable Docker image published :white_check_mark:",
+                  "emoji": true
+                }
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Rule:*\nrule-${{ inputs.rule_number }}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Version:*\n${{ steps.rule_version.outputs.VERSION }}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*DockerHub:*\n<https://hub.docker.com/orgs/tazamaorg/repositories>"
+                  }
+                ]
+              }
+            ]
+          }' "$SLACK_WEBHOOK_URL" || true
