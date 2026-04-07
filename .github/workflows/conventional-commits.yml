@@ -16,16 +16,20 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   validate-pr-title:
     if: github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]'
     runs-on: ubuntu-latest  # Use the latest Ubuntu runner for the job
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4  # Checkout the repository code using the actions/checkout action
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
       - name: PR Conventional Commit Validation
-        uses: ytanikin/PRConventionalCommits@1.1.0  # Use the PRConventionalCommits action to validate PR titles
+        uses: ytanikin/PRConventionalCommits@b7be9213c4fa33260646db6c9b905332dc90b310  # 1.1.0
         with:
           # Define the task types that are valid for conventional commits
           task_types: '["build","ci","docs","feat","fix","perf","refactor","style","test","feat!"]'
