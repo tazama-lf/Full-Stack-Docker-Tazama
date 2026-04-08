@@ -26,21 +26,17 @@ jobs:
 
     - name: Set up environment variables
       env:
-        PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
-        PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       run: |
-        printf 'BASE_BRANCH=%s\n' "$PR_BASE_REF" >> "$GITHUB_ENV"
-        printf 'HEAD_BRANCH=%s\n' "$PR_HEAD_REF" >> "$GITHUB_ENV"
+        printf 'BASE_SHA=%s\n' "$PR_BASE_SHA" >> "$GITHUB_ENV"
+        printf 'HEAD_SHA=%s\n' "$PR_HEAD_SHA" >> "$GITHUB_ENV"
 
     # Step to check each commit in the pull request for a Signed-off-by line
     - name: Check for DCO Sign-off
       run: |
-        # Get the base branch and head branch of the pull request
-        base_branch=$BASE_BRANCH
-        head_branch=$HEAD_BRANCH
-
         # Get the list of commit hashes introduced by this PR (head commits not yet in base)
-        commits=$(git log --pretty=format:%H origin/${base_branch}..origin/${head_branch})
+        commits=$(git log --pretty=format:%H "$BASE_SHA..$HEAD_SHA")
         non_compliant_commits=""
 
         # Loop through each commit and check for the Signed-off-by line

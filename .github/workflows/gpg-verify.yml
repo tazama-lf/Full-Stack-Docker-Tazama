@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
-# This GitHub Actions workflow checks that all commits in a pull request (PR) have been verified with GPG signatures.
+# This GitHub Actions workflow checks that all commits in a pull request (PR) have a verified cryptographic signature (GPG, SSH, or S/MIME).
 
 # Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
 
-name: GPG Verify
+name: Signature Verify
 
 on: [pull_request]  # Trigger this workflow on pull request events
 
@@ -22,20 +22,20 @@ jobs:
 
     - name: Set up environment variables
       env:
-        PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
-        PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
+        PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GH_REPO: ${{ github.repository }}
       run: |
-        printf 'PR_HEAD_REF=%s\n' "$PR_HEAD_REF" >> "$GITHUB_ENV"
-        printf 'PR_BASE_REF=%s\n' "$PR_BASE_REF" >> "$GITHUB_ENV"
+        printf 'PR_HEAD_SHA=%s\n' "$PR_HEAD_SHA" >> "$GITHUB_ENV"
+        printf 'PR_BASE_SHA=%s\n' "$PR_BASE_SHA" >> "$GITHUB_ENV"
         printf 'GITHUB_TOKEN=%s\n' "$GH_TOKEN" >> "$GITHUB_ENV"
         printf 'GITHUB_REPOSITORY=%s\n' "$GH_REPO" >> "$GITHUB_ENV"
 
     - name: Check GPG verification status  # Step to check each commit for GPG signature verification
       run: |
         # Get the list of commits in the pull request (head commits not yet in base)
-        commits=$(git log --pretty=format:%H origin/${PR_BASE_REF}..origin/${PR_HEAD_REF})
+        commits=$(git log --pretty=format:%H "$PR_BASE_SHA..$PR_HEAD_SHA")
 
         if [[ -z "$commits" ]]; then
           echo "No commits to verify."
@@ -44,16 +44,14 @@ jobs:
 
         # Check the GPG verification status of each commit via the GitHub commit API
         for commit in $commits; do
-          response=$(curl -s --max-time 10 --fail \
+          response=$(curl -sS --max-time 10 --fail \
             -H "Authorization: token $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/$GITHUB_REPOSITORY/commits/$commit)
-          curl_exit=$?
-
-          if [[ $curl_exit -ne 0 ]]; then
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/commits/$commit") || {
+            curl_exit=$?
             echo "GitHub API request failed for commit $commit (curl exit $curl_exit). Check network or API availability."
-            exit 1
-          fi
+            exit "$curl_exit"
+          }
 
           verified=$(echo "$response" | jq -r '.commit.verification.verified')
 

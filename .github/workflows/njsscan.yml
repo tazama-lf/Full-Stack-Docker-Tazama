@@ -43,7 +43,8 @@ jobs:
       with:
         args: '. --sarif --output results.sarif'
     - name: Upload njsscan report
-      uses: github/codeql-action/upload-sarif@5c8a8a642e79153f5d047b10ec1cba1d1cc65699  # v3
-      if: hashFiles('results.sarif') != ''
+      uses: github/codeql-action/upload-sarif@60168ffe96596fce55ee3851b6bb7b2e1ea8dbb0  # v4.35.1
+      if: steps.njsscan.outcome == 'success'
       with:
         sarif_file: results.sarif
+        category: njsscan
