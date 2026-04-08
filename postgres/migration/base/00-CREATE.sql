@@ -15,12 +15,8 @@ create table network_map (
     active boolean generated always as (
         (configuration ->> 'active')::boolean
     ) stored,
-    creDtTm timestamptz generated always as (
-        (configuration ->> 'creDtTm')::timestamptz
-    ) stored,
-    updDtTm timestamptz generated always as (
-        (configuration ->> 'updDtTm')::timestamptz
-    ) stored,
+    creDtTm text generated always as (configuration ->> 'creDtTm') stored,
+    updDtTm text generated always as (configuration ->> 'updDtTm') stored,
     primary key (cfg, tenantId)
 );
 
@@ -35,12 +31,8 @@ create table typology (
     typologyId text generated always as (configuration ->> 'id') stored,
     typologyCfg text generated always as (configuration ->> 'cfg') stored,
     tenantId text generated always as (configuration ->> 'tenantId') stored,
-    creDtTm timestamptz generated always as (
-        (configuration ->> 'creDtTm')::timestamptz
-    ) stored,
-    updDtTm timestamptz generated always as (
-        (configuration ->> 'updDtTm')::timestamptz
-    ) stored,
+    creDtTm text generated always as (configuration ->> 'creDtTm') stored,
+    updDtTm text generated always as (configuration ->> 'updDtTm') stored,
     primary key (typologyId, typologyCfg, tenantId)
 );
 
@@ -52,13 +44,9 @@ create table rule (
     ruleId text generated always as (configuration ->> 'id') stored,
     ruleCfg text generated always as (configuration ->> 'cfg') stored,
     tenantId text generated always as (configuration ->> 'tenantId') stored,
-    creDtTm timestamptz generated always as (
-        (configuration ->> 'creDtTm')::timestamptz
-    ) stored,
-    updDtTm timestamptz generated always as (
-        (configuration ->> 'updDtTm')::timestamptz
-    ) stored,
-    primary key (ruleId, ruleCfg, tenantId)
+    creDtTm text generated always as (configuration ->> 'creDtTm') stored,
+    updDtTm text generated always as (configuration ->> 'updDtTm') stored,
+   primary key (ruleId, ruleCfg, tenantId)
 );
 
 create index idx_rule_cre_dt_tm on rule (creDtTm, tenantId);
@@ -68,9 +56,7 @@ create index idx_rule_upd_dt_tm on rule (updDtTm, tenantId);
 
 create table evaluation (
     evaluation jsonb not null,
-    creDtTm timestamptz generated always as (
-        (evaluation ->> 'timestamp')::timestamptz
-    ) stored,
+    creDtTm text generated always as (evaluation ->> 'timestamp') stored,
     messageId text generated always as (
         evaluation -> 'transaction' -> 'FIToFIPmtSts' -> 'GrpHdr' ->> 'MsgId'
     ) stored,
@@ -111,8 +97,8 @@ create table account_holder (
 create table condition (
     id varchar generated always as (condition ->> 'condId') stored,
     tenantId text generated always as (condition ->> 'tenantId') stored,
-    creDtTm timestamptz generated always as ((condition ->> 'creDtTm')::timestamptz) stored,
-    updDtTm timestamptz generated always as ((condition ->> 'updDtTm')::timestamptz) stored,
+    creDtTm text generated always as (condition ->> 'creDtTm') stored,
+    updDtTm text generated always as (condition ->> 'updDtTm') stored,
     condition jsonb not null,
     primary key (id, tenantId)
 );

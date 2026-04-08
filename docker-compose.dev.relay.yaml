@@ -23,6 +23,8 @@ services:
       context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
       args:
         - GH_TOKEN
+      secrets:
+        - GH_TOKEN
     env_file:
       - env/rs-nats.env
       - .env
@@ -40,6 +42,8 @@ services:
       context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
       args:
         - GH_TOKEN
+      secrets:
+        - GH_TOKEN
     env_file:
       - env/rs-nats.env
       - .env
@@ -56,6 +60,8 @@ services:
     build:
       context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
       args:
+        - GH_TOKEN
+      secrets:
         - GH_TOKEN
     env_file:
       - env/rs-nats.env

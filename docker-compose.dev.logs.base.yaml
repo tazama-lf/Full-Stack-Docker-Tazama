@@ -6,6 +6,8 @@ services:
       context: https://github.com/tazama-lf/event-sidecar.git#${SIDECAR_BRANCH}
       args:
         - GH_TOKEN
+      secrets:
+        - GH_TOKEN
     env_file:
       - .env
     ports:
@@ -24,6 +26,8 @@ services:
       context: https://github.com/tazama-lf/lumberjack.git#${LUMBERJACK_BRANCH}
       args:
         - GH_TOKEN
+      secrets:
+        - GH_TOKEN
     env_file:
       - env/lumberjack.env
       - .env
@@ -33,3 +37,7 @@ services:
     depends_on:
       - event-sidecar
       - nats
+
+secrets:
+  GH_TOKEN:
+    environment: GH_TOKEN
