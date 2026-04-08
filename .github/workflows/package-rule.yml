@@ -155,9 +155,15 @@ jobs:
 
       - name: Build and push stable Docker image
         env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_LIB }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
+          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "::error::Stable images must be published from main. Refusing to push from $GITHUB_REF."
+            exit 1
+          fi
+
           VERSION="${{ steps.rule_version.outputs.VERSION }}"
           RULE_NUM="${{ inputs.rule_number }}"
           IMAGE="tazamaorg/rule-${RULE_NUM}"
@@ -165,7 +171,10 @@ jobs:
           echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 
           # Build once, tag with versioned and :latest moving pointer
-          docker build -t "${IMAGE}:${VERSION}" -t "${IMAGE}:latest" "rule-executer-${RULE_NUM}"
+          docker build \
+            --secret id=GH_TOKEN,env=GH_TOKEN \
+            -t "${IMAGE}:${VERSION}" -t "${IMAGE}:latest" \
+            "rule-executer-${RULE_NUM}"
 
           docker push "${IMAGE}:${VERSION}"
           docker push "${IMAGE}:latest"

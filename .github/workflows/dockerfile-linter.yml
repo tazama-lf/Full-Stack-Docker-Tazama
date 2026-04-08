@@ -38,6 +38,8 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Run hadolint
+        id: hadolint
+        if: hashFiles('Dockerfile') != ''
         uses: hadolint/hadolint-action@f988afea3da57ee48710a9795b6bb677cc901183
         with:
           dockerfile: ./Dockerfile
@@ -46,6 +48,7 @@ jobs:
           no-fail: true
 
       - name: Upload analysis results to GitHub
+        if: steps.hadolint.outcome == 'success'
         uses: github/codeql-action/upload-sarif@5c8a8a642e79153f5d047b10ec1cba1d1cc65699  # v3
         with:
           sarif_file: hadolint-results.sarif
