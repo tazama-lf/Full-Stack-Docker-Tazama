@@ -4,6 +4,8 @@ services:
       context: https://github.com/tazama-lf/batch-ppa.git#${BATCH_PPA_BRANCH}
       args:
         - GH_TOKEN
+      secrets:
+        - GH_TOKEN
     env_file:
       - env/batch-ppa.env
       - .env
@@ -13,3 +15,7 @@ services:
       - tms
     ports:
       - 4000:4000
+
+secrets:
+  GH_TOKEN:
+    environment: GH_TOKEN

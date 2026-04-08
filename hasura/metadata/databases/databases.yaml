@@ -25,16 +25,16 @@
         name: condition
         schema: public
     - table:
-        name: goverened_as_debtor_by
+        name: governed_as_debtor_by
         schema: public
     - table:
-        name: goverened_as_creditor_by
+        name: governed_as_creditor_by
         schema: public
     - table:
-        name: goverened_as_debtor_account_by
+        name: governed_as_debtor_account_by
         schema: public
     - table:
-        name: goverened_as_creditor_account_by
+        name: governed_as_creditor_account_by
         schema: public
 
 - name: raw_history

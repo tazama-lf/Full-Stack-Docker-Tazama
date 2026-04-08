@@ -8,3 +8,9 @@ services:
       context: https://github.com/tazama-lf/auth-service.git#${AUTH_SERVICE_BRANCH}
       args:
         - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+
+secrets:
+  GH_TOKEN:
+    environment: GH_TOKEN

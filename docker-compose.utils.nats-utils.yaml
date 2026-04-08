@@ -4,6 +4,8 @@ services:
       context: https://github.com/tazama-lf/nats-utilities.git#${NATS_UTILITIES_BRANCH}
       args:
         - GH_TOKEN
+      secrets:
+        - GH_TOKEN
     env_file:
       - env/nats-utilities.env
       - .env
@@ -12,3 +14,7 @@ services:
       - nats
     ports:
       - 4000:4000
+
+secrets:
+  GH_TOKEN:
+    environment: GH_TOKEN

@@ -12,6 +12,8 @@ services:
       context: https://github.com/tazama-lf/admin-service.git#${ADMIN_BRANCH}
       args:
         - GH_TOKEN
+      secrets:
+        - GH_TOKEN
     env_file:
       - env/admin.env
       - .env
@@ -28,6 +30,8 @@ services:
     build:
       context: https://github.com/tazama-lf/tms-service.git#${TMS_BRANCH}
       args:
+        - GH_TOKEN
+      secrets:
         - GH_TOKEN
     env_file:
       - env/tms.env
@@ -47,6 +51,8 @@ services:
       context: https://github.com/tazama-lf/event-director.git#${ED_BRANCH}
       args:
         - GH_TOKEN
+      secrets:
+        - GH_TOKEN
     env_file:
       - env/ed.env
       - .env
@@ -62,6 +68,8 @@ services:
     build:
       context: https://github.com/tazama-lf/rule-executer.git#${RULE_901_BRANCH}
       args:
+        - GH_TOKEN
+      secrets:
         - GH_TOKEN
     env_file:
       - env/rule-901.env
@@ -79,6 +87,8 @@ services:
       context: https://github.com/tazama-lf/typology-processor.git#${TP_BRANCH}
       args:
         - GH_TOKEN
+      secrets:
+        - GH_TOKEN
     env_file:
       - env/tp.env
       - .env
@@ -94,6 +104,8 @@ services:
     build:
       context: https://github.com/tazama-lf/transaction-aggregation-decisioning-processor.git#${TADP_BRANCH}
       args:
+        - GH_TOKEN
+      secrets:
         - GH_TOKEN
     env_file:
       - env/tadp.env
@@ -111,6 +123,8 @@ services:
       context: https://github.com/tazama-lf/event-flow.git#${EVENT_FLOW_BRANCH}
       args:
         - GH_TOKEN
+      secrets:
+        - GH_TOKEN
     env_file:
       - env/event-flow.env
       - .env
@@ -119,3 +133,7 @@ services:
       - postgres
       - valkey
       - nats
+
+secrets:
+  GH_TOKEN:
+    environment: GH_TOKEN
