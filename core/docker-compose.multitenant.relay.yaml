@@ -1,0 +1,103 @@
+services:
+  ef:
+    environment:
+      SUPPRESS_ALERTS: false
+      INTERDICTION_DESTINATION: tenant
+      INTERDICTION_PRODUCER: interdiction-service-ef
+
+  tp:
+    environment:
+      SUPPRESS_ALERTS: false
+      INTERDICTION_DESTINATION: tenant
+      INTERDICTION_PRODUCER: interdiction-service-tp
+
+  tadp:
+    environment:
+      SUPPRESS_ALERTS: false
+      ALERT_DESTINATION: tenant
+      ALERT_PRODUCER: investigation-service
+      ALERTS_ONLY: true
+
+  rsef-tenant-001:
+    image: tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}
+    env_file:
+      - env/rs-nats.env
+      - .env
+    restart: always
+    environment:
+      FUNCTION_NAME: relay-service-ef-tenant-001
+      CONSUMER_STREAM: interdiction-service-ef-tenant-001
+      PRODUCER_STREAM: relay-service-nats-ef-tenant-001
+      APM_SERVICE_NAME: relay-service-ef-tenant-001
+    depends_on:
+      - ef
+
+  rsef-tenant-002:
+    image: tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}
+    env_file:
+      - env/rs-nats.env
+      - .env
+    restart: always
+    environment:
+      FUNCTION_NAME: relay-service-ef-tenant-002
+      CONSUMER_STREAM: interdiction-service-ef-tenant-002
+      PRODUCER_STREAM: relay-service-nats-ef-tenant-002
+      APM_SERVICE_NAME: relay-service-ef-tenant-002
+    depends_on:
+      - ef
+
+  rstp-tenant-001:
+    image: tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}
+    env_file:
+      - env/rs-nats.env
+      - .env
+    restart: always
+    environment:
+      FUNCTION_NAME: relay-service-tp-tenant-001
+      CONSUMER_STREAM: interdiction-service-tp-tenant-001
+      PRODUCER_STREAM: relay-service-nats-tp-tenant-001
+      APM_SERVICE_NAME: relay-service-tp-tenant-001
+    depends_on:
+      - tp
+
+  rstp-tenant-002:
+    image: tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}
+    env_file:
+      - env/rs-nats.env
+      - .env
+    restart: always
+    environment:
+      FUNCTION_NAME: relay-service-tp-tenant-002
+      CONSUMER_STREAM: interdiction-service-tp-tenant-002
+      PRODUCER_STREAM: relay-service-nats-tp-tenant-002
+      APM_SERVICE_NAME: relay-service-tp-tenant-002
+    depends_on:
+      - tp
+
+  rstadp-tenant-001:
+    image: tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}
+    env_file:
+      - env/rs-nats.env
+      - .env
+    restart: always
+    environment:
+      FUNCTION_NAME: relay-service-tadp-tenant-001
+      CONSUMER_STREAM: investigation-service-tenant-001
+      PRODUCER_STREAM: relay-service-nats-tadp-tenant-001
+      APM_SERVICE_NAME: relay-service-tadp-tenant-001
+    depends_on:
+      - tadp
+
+  rstadp-tenant-002:
+    image: tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}
+    env_file:
+      - env/rs-nats.env
+      - .env
+    restart: always
+    environment:
+      FUNCTION_NAME: relay-service-tadp-tenant-002
+      CONSUMER_STREAM: investigation-service-tenant-002
+      PRODUCER_STREAM: relay-service-nats-tadp-tenant-002
+      APM_SERVICE_NAME: relay-service-tadp-tenant-002
+    depends_on:
+      - tadp

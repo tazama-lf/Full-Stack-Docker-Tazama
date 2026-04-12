@@ -1,0 +1,103 @@
+# base infrastructure
+
+services:
+  postgres:
+    image: postgres:18
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    ports:
+      - "${POSTGRESQL_CMS_PORT}:5432"
+    environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=unused
+
+  sftp:
+    image: atmoz/sftp
+    container_name: tazama-sftp-1
+    restart: unless-stopped
+    ports:
+      - "${SFTP_PORT}:22"
+    volumes:
+      - sftp_data:/home/user/upload
+    command: user:password:1001
+    env_file:
+      - ./.env
+
+  couchdb:
+    image: couchdb:3.3
+    container_name: tazama-cms-couchdb
+    restart: unless-stopped
+    env_file:
+      - ./env/cms.env
+    ports:
+      - "${COUCHDB_PORT}:5984"
+    volumes:
+      - couchdb_data:/opt/couchdb/data
+      - ./couchdb/migration/local.ini:/opt/couchdb/etc/local.d/local.ini
+
+  migrate:
+    container_name: cms-migrations
+    build:
+      context: https://github.com/tazama-lf/case-management-system.git#${CMS_BRANCH}:backend
+      args:
+        - GH_TOKEN
+      target: migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+      - ./env/cms.env
+    command: sh /home/app/migrate.sh
+
+  flowable:
+    image: flowable/flowable-rest:latest
+    container_name: tazama-cms-flowable
+    restart: unless-stopped
+    depends_on:
+      - migrate
+    env_file:
+      - ./env/cms.env
+    ports:
+      - "${FLOWABLE_PORT}:8080"
+
+  opensearch-node1:
+    image: opensearchproject/opensearch:2.13.0
+    container_name: opensearch-node1
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-node1
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - DISABLE_SECURITY_PLUGIN=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    ports:
+      - "${OPENSEARCH_PORT:-9200}:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -v '\"status\":\"red\"'"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+volumes:
+  sftp_data:
+  couchdb_data:
+  postgres_data:
+  opensearch_data:

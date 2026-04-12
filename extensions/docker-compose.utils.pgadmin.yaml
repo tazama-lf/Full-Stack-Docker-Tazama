@@ -1,0 +1,33 @@
+services:
+  pgadmin:
+    image: dpage/pgadmin4:9
+    env_file:
+      - env/pgadmin.env
+    ports:
+      - ${PGADMIN_PORT:-5050}:80
+    configs:
+      - source: servers.json
+        target: /pgadmin4/servers.json
+    restart: always
+    depends_on:
+      - postgres
+
+configs:
+  servers.json:
+    content: |
+      {
+        "Servers": {
+          "1": {
+              "Name": "Tazama",
+              "Group": "Servers",
+              "Port": 5432,
+              "Username": "postgres",
+              "Host": "postgres",
+              "MaintenanceDB": "postgres",
+              "ConnectionParameters": {
+                  "sslmode": "prefer",
+                  "connect_timeout": 10
+              }
+          }
+        }
+      }
