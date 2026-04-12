@@ -1,0 +1,255 @@
+services:
+  tika:
+    image: logicalspark/docker-tikaserver:latest
+    container_name: biar-tika
+    restart: unless-stopped
+    ports:
+      - "${TIKA_PORT:-9998}:9998"
+    environment:
+      JAVA_OPTS: "-Xms256m -Xmx512m"
+    networks:
+      - tazama-core_default
+
+  solr:
+    image: solr:9
+    container_name: biar-solr
+    restart: unless-stopped
+    ports:
+      - "${SOLR_PORT:-8983}:8983"
+    environment:
+      SOLR_HEAP: 512m
+    volumes:
+      - solr_data:/var/solr
+    command:
+      - sh
+      - -c
+      - "solr-precreate biar_docs /opt/solr/server/solr/configsets/sample_techproducts_configs"
+    networks:
+      - tazama-core_default
+
+  nifi:
+    image: apache/nifi:1.24.0
+    container_name: biar-nifi
+    restart: unless-stopped
+    ports:
+      - "${NIFI_PORT:-8088}:8088"
+    environment:
+      NIFI_WEB_HTTP_PORT: 8088
+      NIFI_WEB_HTTP_HOST: 0.0.0.0
+      SINGLE_USER_CREDENTIALS_USERNAME: admin
+      SINGLE_USER_CREDENTIALS_PASSWORD: admin123456789
+      NIFI_JVM_HEAP_INIT: 512m
+      NIFI_JVM_HEAP_MAX: 1g
+    volumes:
+      - nifi_conf:/opt/nifi/nifi-current/conf
+      - nifi_state:/opt/nifi/nifi-current/state
+      - nifi_db:/opt/nifi/nifi-current/database_repository
+      - nifi_flowfile:/opt/nifi/nifi-current/flowfile_repository
+      - nifi_content:/opt/nifi/nifi-current/content_repository
+      - nifi_provenance:/opt/nifi/nifi-current/provenance_repository
+    networks:
+      - tazama-core_default
+
+  scm:
+    image: apache/ozone:2.0.0
+    command: ["ozone","scm"]
+    ports:
+      - "${OZONE_SCM_PORT:-9876}:9876"
+    environment:
+      OZONE-SITE.XML_hdds.datanode.dir: "/data/hdds"
+      OZONE-SITE.XML_ozone.metadata.dirs: "/data/metadata"
+      OZONE-SITE.XML_ozone.scm.names: "scm"
+      OZONE-SITE.XML_ozone.scm.client.address: "scm"
+      OZONE-SITE.XML_ozone.scm.block.client.address: "scm"
+      OZONE-SITE.XML_ozone.scm.pipeline.owner.container.count: "1"
+      OZONE-SITE.XML_ozone.scm.ratis.pipeline.limit: "1"
+      ENSURE_SCM_INITIALIZED: /data/metadata/scm/current/VERSION
+      OZONE-SITE.XML_ozone.om.service.ids: "omServiceIdDefault"
+      OZONE-SITE.XML_ozone.om.nodes.omServiceIdDefault: "om1"
+      OZONE-SITE.XML_ozone.om.node.id: "om1"
+      OZONE-SITE.XML_ozone.om.address.omServiceIdDefault.om1: "om:9862"
+    volumes:
+      - scm_data:/data
+    networks:
+      - tazama-core_default
+
+  om:
+    image: apache/ozone:2.0.0
+    command: ["ozone","om"]
+    ports:
+      - "${OZONE_OM_PORT:-9874}:9874"
+    environment:
+      OZONE-SITE.XML_hdds.datanode.dir: "/data/hdds"
+      OZONE-SITE.XML_ozone.metadata.dirs: "/data/metadata"
+      OZONE-SITE.XML_ozone.om.address: "om"
+      OZONE-SITE.XML_ozone.om.http-address: "om:9874"
+      OZONE-SITE.XML_ozone.scm.names: "scm"
+      OZONE-SITE.XML_ozone.scm.block.client.address: "scm"
+      OZONE-SITE.XML_ozone.scm.client.address: "scm"
+      ENSURE_OM_INITIALIZED: /data/metadata/om/current/VERSION
+      OZONE-SITE.XML_ozone.om.service.ids: "omServiceIdDefault"
+      WAITFOR: scm:9876
+      OZONE-SITE.XML_ozone.om.nodes.omServiceIdDefault: "om1"
+      OZONE-SITE.XML_ozone.om.node.id: "om1"
+      OZONE-SITE.XML_ozone.om.address.omServiceIdDefault.om1: "om:9862"
+    volumes:
+      - om_data:/data
+    networks:
+      - tazama-core_default
+
+  datanode:
+    image: apache/ozone:2.0.0
+    command: ["ozone","datanode"]
+    environment:
+      OZONE-SITE.XML_hdds.datanode.dir: "/data/hdds"
+      OZONE-SITE.XML_ozone.metadata.dirs: "/data/metadata"
+      OZONE-SITE.XML_ozone.scm.names: "scm"
+      OZONE-SITE.XML_ozone.scm.client.address: "scm"
+      OZONE-SITE.XML_ozone.scm.block.client.address: "scm"
+      OZONE-SITE.XML_ozone.om.address: "om"
+    volumes:
+      - datanode_data:/data
+    networks:
+      - tazama-core_default
+
+  recon:
+    image: apache/ozone:2.0.0
+    command: ["ozone","recon"]
+    ports:
+      - "${OZONE_RECON_PORT:-9888}:9888"
+    environment:
+      OZONE-SITE.XML_hdds.datanode.dir: "/data/hdds"
+      OZONE-SITE.XML_ozone.metadata.dirs: "/data/metadata"
+      OZONE-SITE.XML_ozone.om.address: "om"
+      OZONE-SITE.XML_ozone.om.http-address: "om:9874"
+      OZONE-SITE.XML_ozone.recon.address: "recon:9891"
+      OZONE-SITE.XML_ozone.recon.db.dir: "/data/metadata/recon"
+      OZONE-SITE.XML_ozone.replication: "1"
+      OZONE-SITE.XML_ozone.scm.block.client.address: "scm"
+      OZONE-SITE.XML_ozone.scm.client.address: "scm"
+      OZONE-SITE.XML_ozone.scm.datanode.id.dir: "/data"
+      OZONE-SITE.XML_ozone.scm.names: "scm"
+    volumes:
+      - recon_data:/data
+    depends_on:
+      - scm
+      - om
+    networks:
+      - tazama-core_default
+
+  s3g:
+    image: apache/ozone:2.0.0
+    command: ["ozone","s3g"]
+    ports:
+      - "${OZONE_S3G_PORT:-9878}:9878"
+    environment:
+      OZONE-SITE.XML_hdds.datanode.dir: "/data/hdds"
+      OZONE-SITE.XML_ozone.metadata.dirs: "/data/metadata"
+      OZONE-SITE.XML_ozone.om.address: "om"
+      OZONE-SITE.XML_ozone.om.http-address: "om:9874"
+      OZONE-SITE.XML_ozone.scm.names: "scm"
+      OZONE-SITE.XML_ozone.scm.block.client.address: "scm"
+      OZONE-SITE.XML_ozone.scm.client.address: "scm"
+      OZONE-SITE.XML_ozone.s3g.http-address: "0.0.0.0:9878"
+      OZONE-SITE.XML_ozone.s3g.domain.name: "s3g"
+      OZONE-SITE.XML_ozone.s3g.access.key: "admin"
+      OZONE-SITE.XML_ozone.s3g.secret.key: "admin"
+    depends_on:
+      - scm
+      - om
+    networks:
+      - tazama-core_default
+  
+  aws-cli:
+    image: amazon/aws-cli
+    container_name: ozone-aws-cli
+    depends_on:
+      - s3g
+    entrypoint: >
+      /bin/sh -c "
+      sleep 15;
+      aws configure set aws_access_key_id admin &&
+      aws configure set aws_secret_access_key admin &&
+      aws configure set default.region us-east-1 &&
+      aws --endpoint-url http://s3g:9878 s3 mb s3://biar-bucket || true;
+      tail -f /dev/null
+      "
+    networks:
+      - tazama-core_default
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    restart: unless-stopped
+    ports:
+      - "${ZOOKEEPER_PORT:-2181}:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - tazama-core_default
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    restart: unless-stopped
+    depends_on:
+      - zookeeper
+    ports:
+      - "${KAFKA_PORT:-9092}:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    networks:
+      - tazama-core_default
+
+  kafka-connect:
+    image: debezium/connect:2.5
+    container_name: kafka-connect
+    restart: unless-stopped
+    depends_on:
+      - kafka
+    ports:
+      - "${KAFKA_CONNECT_PORT:-8083}:8083"
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: connect-cluster
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      STATUS_STORAGE_TOPIC: connect_statuses
+      CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      STATUS_STORAGE_REPLICATION_FACTOR: 1
+      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      REST_ADVERTISED_HOST_NAME: kafka-connect
+      REST_PORT: 8083
+
+    networks:
+      - tazama-core_default
+
+
+volumes:
+  solr_data:
+  nifi_conf:
+  nifi_state:
+  nifi_db:
+  nifi_flowfile:
+  nifi_content:
+  nifi_provenance:
+  scm_data:
+  om_data:
+  datanode_data:
+  recon_data:
+
+
+networks:
+  tazama-core_default:
+    external: true

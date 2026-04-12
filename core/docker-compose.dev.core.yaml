@@ -1,0 +1,159 @@
+# base
+
+include:
+  - path:
+    - docker-compose.base.infrastructure.yaml
+
+services:
+  # ADMIN SERVICE API
+  admin-service:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/admin-service.git#${ADMIN_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+    env_file:
+      - env/admin.env
+      - .env
+    restart: always
+    ports:
+      - ${ADMIN_PORT}:3100
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_started
+
+  # TRANSACTION MONITORING SERVICE API
+  tms:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/tms-service.git#${TMS_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+    env_file:
+      - env/tms.env
+      - .env
+    restart: always
+    ports:
+      - ${TMS_PORT}:3000
+    depends_on:
+      valkey:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  # EVENT DIRECTOR
+  ed:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/event-director.git#${ED_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+    env_file:
+      - env/ed.env
+      - .env
+    restart: always
+    depends_on:
+      valkey:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  # RULE PROCESSOR
+  rule-901:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/rule-executer.git#${RULE_901_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+    env_file:
+      - env/rule-901.env
+      - .env
+    restart: always
+    depends_on:
+      valkey:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  # TYPOLOGY PROCESSOR
+  tp:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/typology-processor.git#${TP_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+    env_file:
+      - env/tp.env
+      - .env
+    restart: always
+    depends_on:
+      valkey:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  # TRANSACTION AGGREGATION AND DECISIONING PROCESSOR
+  tadp:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/transaction-aggregation-decisioning-processor.git#${TADP_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+    env_file:
+      - env/tadp.env
+      - .env
+    restart: always
+    depends_on:
+      valkey:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+  
+  # EVENT FLOW RULE PROCESSOR
+  ef:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/event-flow.git#${EVENT_FLOW_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+    env_file:
+      - env/event-flow.env
+      - .env
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_started
+      nats:
+        condition: service_started
+
+secrets:
+  GH_TOKEN:
+    environment: GH_TOKEN

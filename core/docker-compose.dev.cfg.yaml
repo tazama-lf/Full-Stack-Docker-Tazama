@@ -1,0 +1,5 @@
+services:
+  postgres:
+    volumes:
+      - ./postgres/migration/config/00-public-base.sql:/docker-entrypoint-initdb.d/01-DATA.sql
+      - ./postgres/migration/config/01-public-github.sql:/docker-entrypoint-initdb.d/02-DATA.sql
