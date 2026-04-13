@@ -24,14 +24,20 @@ if "%choice%"=="2"     goto :utils
 goto :menu
 
 :: ---------------------------------------------------------------
-:: Pre-flight: verify tazama-core is running
+:: Pre-flight: verify tazama-core is reachable
 :: ---------------------------------------------------------------
 :check_core
-docker compose -p tazama-core ps --status running -q 2>nul | findstr . >nul 2>&1
+:: Read SERVER_A_HOST from .env (default: localhost for single-machine; set to private IP for AWS multi-host)
+set "SERVER_A_HOST=localhost"
+for /f "usebackq tokens=1,* delims==" %%A in (".env") do (
+    if /i "%%A"=="SERVER_A_HOST" set "SERVER_A_HOST=%%B"
+)
+:: Verify core is reachable via NATS exterior port (14222)
+powershell -NoProfile -Command "try { $t = New-Object Net.Sockets.TcpClient('!SERVER_A_HOST!', 14222); $t.Close(); exit 0 } catch { exit 1 }" >nul 2>&1
 if errorlevel 1 (
     echo.
-    echo  ERROR: tazama-core is not running.
-    echo         Start tazama-core.bat on Server A first, then retry.
+    echo  ERROR: tazama-core is not reachable at !SERVER_A_HOST!:14222
+    echo         Ensure tazama-core is running and SERVER_A_HOST is set correctly in .env
     echo.
     pause
     goto :menu
