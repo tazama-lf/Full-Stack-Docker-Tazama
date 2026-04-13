@@ -1,0 +1,16 @@
+# Copy this file to terraform.tfvars (gitignored) and fill in your values.
+# Only `key_name` is required - all other variables have sensible defaults.
+
+# EC2 key pair name created in Phase B step B.7.
+key_name = "tazama-aws"
+
+# Override instance types if your workload needs more resources.
+# instance_type_a = "t3.xlarge"   # Server A - tazama-core
+# instance_type_b = "t3.xlarge"   # Server B - tazama-extensions
+# instance_type_c = "t3.2xlarge"  # Server C - tazama-biar (NiFi + Solr + Ozone)
+
+# Override region if deploying outside ap-south-1 (Mumbai).
+# region = "ap-south-1"
+
+# Override the AWS CLI named profile if yours is not called "tazama".
+# aws_profile = "tazama"

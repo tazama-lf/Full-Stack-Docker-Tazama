@@ -75,7 +75,7 @@ jobs:
           fi
           if [[ "$VERSION" == *-* ]]; then
             echo "❌ Stable package-rule.yml triggered but version '$VERSION' is a prerelease."
-            echo "   Merge to main should be blocked by version-check.yml — investigate branch protection."
+            echo "   Merge to main should be blocked by version-check.yml - investigate branch protection."
             exit 1
           fi
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
@@ -119,15 +119,15 @@ jobs:
               ;;
           esac
 
-          # Validate rule dependency rewrite succeeded — fail if pattern didn't match
+          # Validate rule dependency rewrite succeeded - fail if pattern didn't match
           if ! grep -q "npm:${EXPECTED_SCOPE}/rule-${RULE_NUM}@${VERSION}" "${RULE_DIR}/package.json"; then
-            echo "❌ Failed to update rule dependency in package.json — pattern may have changed"
+            echo "❌ Failed to update rule dependency in package.json - pattern may have changed"
             echo "   Expected: npm:${EXPECTED_SCOPE}/rule-${RULE_NUM}@${VERSION}"
             grep '"rule"' "${RULE_DIR}/package.json" || echo "   (no 'rule' key found)"
             exit 1
           fi
 
-          # Update RULE_NAME and APM_SERVICE_NAME in Dockerfile (flexible pattern — not hardcoded to 901)
+          # Update RULE_NAME and APM_SERVICE_NAME in Dockerfile (flexible pattern - not hardcoded to 901)
           sed -i "s/ENV RULE_NAME=\"[^\"]*\"/ENV RULE_NAME=\"${RULE_NUM}\"/" "${RULE_DIR}/Dockerfile"
           sed -i "s/ENV APM_SERVICE_NAME=rule-[^ ]*/ENV APM_SERVICE_NAME=rule-${RULE_NUM}/" "${RULE_DIR}/Dockerfile"
 
@@ -136,13 +136,13 @@ jobs:
           echo "=== Dockerfile RULE_NAME after substitution ==="
           grep 'RULE_NAME\|APM_SERVICE_NAME' "${RULE_DIR}/Dockerfile"
 
-          # Validate substitutions actually occurred — fail fast if template changed upstream
+          # Validate substitutions actually occurred - fail fast if template changed upstream
           if ! grep -q "ENV RULE_NAME=\"${RULE_NUM}\"" "${RULE_DIR}/Dockerfile"; then
-            echo "❌ Failed to update RULE_NAME in Dockerfile — template may have changed"
+            echo "❌ Failed to update RULE_NAME in Dockerfile - template may have changed"
             exit 1
           fi
           if ! grep -q "ENV APM_SERVICE_NAME=rule-${RULE_NUM}" "${RULE_DIR}/Dockerfile"; then
-            echo "❌ Failed to update APM_SERVICE_NAME in Dockerfile — template may have changed"
+            echo "❌ Failed to update APM_SERVICE_NAME in Dockerfile - template may have changed"
             exit 1
           fi
 
