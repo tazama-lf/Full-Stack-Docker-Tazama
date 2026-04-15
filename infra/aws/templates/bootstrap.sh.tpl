@@ -54,10 +54,11 @@ git clone --branch "$${REPO_BRANCH}" "$REPO_URL" "$REPO_DIR"
 chown -R "$EC2_USER:$EC2_USER" "$REPO_DIR"
 echo "[bootstrap] Repo cloned to $REPO_DIR"
 
-# ── Fetch GH_TOKEN from SSM Parameter Store ──────────────────────────────────
+# ── Fetch GH_TOKEN from SSM and authenticate with ghcr.io ────────────────────
 # The EC2 instance profile (AmazonSSMReadOnlyAccess) authorises this call.
-# The token is written to /etc/environment so it is available to all users
-# and to Docker Compose on subsequent logins.
+# The token is used only to authenticate Docker with ghcr.io. It is NOT
+# written to /etc/environment or any .env file — credentials are stored in
+# the Docker credential store (~/.docker/config.json) instead.
 echo "[bootstrap] Fetching GH_TOKEN from SSM..."
 GH_TOKEN=$(aws ssm get-parameter \
   --name /tazama/gh_token \
@@ -65,8 +66,6 @@ GH_TOKEN=$(aws ssm get-parameter \
   --region "$REGION" \
   --query Parameter.Value \
   --output text)
-
-echo "GH_TOKEN=$${GH_TOKEN}" >> /etc/environment
 
 # Log in as root and copy the credential store to ec2-user so deploy scripts
 # running as ec2-user can pull images without re-authenticating.

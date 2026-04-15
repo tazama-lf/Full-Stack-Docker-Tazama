@@ -48,10 +48,20 @@ The pre-requisites that are essential to be able to follow this guide to the let
 - GitHub personal access token
 
 > [!NOTE] **Notes on GitHub personal access token**
-> - A GitHub personal access token must be created with `packages:write` and `read:org` permissions
-> - Ensure that your GitHub Personal Access Token is added as a Windows Environment Variable called "`GH_TOKEN`"
-> - We will be referencing your GitHub Personal Access Token throughout the installation process as your `GH_TOKEN`. It is not possible to retrieve the token from GitHub after you initially created it, but if the token had been set in Windows as an environment variable, you can retrieve it with the following command from a Windows Command prompt: `set GH_TOKEN`
-> - If your GitHub Personal Access Token had not been added as a Windows Environment Variable, you would need to specify the token at the top of the `full-stack-docker-tazama/.env` file next to the GH_TOKEN key. If you had specified the GH_TOKEN as an environment variable, you can leave the `${GH_TOKEN}` shell variable in place to retrieve it automatically.
+> - A GitHub personal access token must be created with `read:packages` permissions to pull images from the GitHub Container Registry (`ghcr.io`)
+> - Add the token as a Windows environment variable called `GH_TOKEN`. If the token had been set as an environment variable, you can verify with: `echo %GH_TOKEN%` (cmd) or `echo $env:GH_TOKEN` (PowerShell)
+> - Once the token is set, authenticate Docker with `ghcr.io`. Docker stores the credential securely and reuses it automatically for all subsequent image pulls. Repeat this step whenever your PAT expires or is rotated:
+>
+>   **PowerShell:**
+>   ```powershell
+>   echo $env:GH_TOKEN | docker login ghcr.io -u <your-github-username> --password-stdin
+>   ```
+>   **Command prompt:**
+>   ```
+>   echo %GH_TOKEN% | docker login ghcr.io -u <your-github-username> --password-stdin
+>   ```
+> - The `echo ... | --password-stdin` pattern pipes the token to Docker via stdin rather than passing it as a command-line argument. This prevents the token from appearing in shell history or process listings.
+> - You do **not** need to add `GH_TOKEN` to the `.env` file — Docker authenticates via the credential store, not via environment variables passed to containers.
 
 Instructions for installing the dependencies and setting up the GH_TOKEN environment variable can be found in the [Development Environment Set up Guide](https://github.com/tazama-lf/docs/blob/dev/Guides/dev-set-up-environment.md)
 
