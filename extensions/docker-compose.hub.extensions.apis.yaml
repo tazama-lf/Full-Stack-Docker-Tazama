@@ -1,14 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 services:
-  # TODO: replace build with image once tazamaorg/event-monitoring-service is published to DockerHub
   dems:
-    image: !reset null
+    image: tazamaorg/event-monitoring-service:${TAZAMA_VERSION}
     container_name: tazama-dems-1
-    build:
-      context: https://github.com/tazama-lf/event-monitoring-service.git#${DEMS_BRANCH}
-      args:
-        - GH_TOKEN
     env_file:
       - env/dems.env
       - .env
@@ -18,14 +13,9 @@ services:
     ports:
       - ${DEMS_PORT}:3002
 
-  # TODO: replace build with image once tazamaorg/data-enrichment-service is published to DockerHub
   deapi:
-    image: !reset null
+    image: tazamaorg/data-enrichment-service:${TAZAMA_VERSION}
     container_name: tazama-deapi-1
-    build:
-      context: https://github.com/tazama-lf/data-enrichment-service.git#${DEAPI_BRANCH}
-      args:
-        - GH_TOKEN
     env_file:
       - env/deapi.env
       - .env

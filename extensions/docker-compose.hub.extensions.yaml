@@ -64,14 +64,8 @@ services:
     ports:
       - ${TRS_FRONTEND_PORT}:5174
 
-  # TODO: replace build with image once tazamaorg/case-management-system-backend is published to DockerHub
   cms-backend:
-    image: !reset null
-    build:
-      context: https://github.com/tazama-lf/case-management-system.git#${CMS_BRANCH}:backend
-      args:
-        - GH_TOKEN
-      target: run-env
+    image: tazamaorg/case-management-system-backend:${TAZAMA_VERSION}
     container_name: tazama-cms-backend
     restart: unless-stopped
     depends_on:
