@@ -25,4 +25,12 @@ resource "aws_instance" "main" {
   }
 
   tags = { Name = "${var.prefix}-${var.name}" }
+
+  # Prevent AMI drift from triggering instance replacement on subsequent applies.
+  # The data.aws_ami lookup always resolves "most_recent", which changes as
+  # Canonical publishes new Ubuntu images. Existing instances keep their
+  # original AMI; only brand-new instances get the latest image.
+  lifecycle {
+    ignore_changes = [ami]
+  }
 }

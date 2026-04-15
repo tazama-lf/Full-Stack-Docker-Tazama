@@ -31,26 +31,49 @@ $idB = $out.ServerB_InstanceId
 Write-Host "[Server A] Instance ID: $idA"
 Write-Host "[Server B] Instance ID: $idB"
 
-# -- 1. Server A: add DEMS + DEAPI to the tazama-core project -----------------
+# -- 1. Server A: copy extensions .env ---------------------------------------
+Write-Host '[Server A] Copying extensions/.env...' 
+$localExtEnv = Join-Path $PSScriptRoot '..\..\..\extensions\.env'
+Copy-ToRemote -InstanceId $idA -LocalPath $localExtEnv -RemotePath "$Script:RemoteRepo/extensions/.env"
+
+# -- 2. Server A: install Docker buildx plugin --------------------------------
+# The stock dnf docker package ships an older bundled buildx. Compose v2 build
+# (used by all dev/*.yaml files that build from source) requires buildx >= 0.17.0.
+Write-Host ''
+Write-Host '[Server A] Installing Docker buildx plugin (v0.33.0)...'
+Invoke-RemoteCommand -InstanceId $idA -Command "sudo mkdir -p /usr/local/lib/docker/cli-plugins && sudo curl -fsSL https://github.com/docker/buildx/releases/download/v0.33.0/buildx-v0.33.0.linux-amd64 -o /usr/local/lib/docker/cli-plugins/docker-buildx && sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx"
+Write-Host '[Server A] Buildx installed.' -ForegroundColor Green
+
+# -- 3. Server A: add DEMS + DEAPI to the tazama-core project -----------------
 # DEMS and DEAPI run inside the tazama-core Docker project on Server A.
 # They are not part of the core bat launch chain; they are added here before
 # the extensions stack starts so that Server B services can reach them.
+# bash -l forces a login shell so /etc/environment is sourced → GH_TOKEN is
+# available to the build args that need it.
 Write-Host ''
 Write-Host '[Server A] Adding DEMS + DEAPI to tazama-core...'
 
-Invoke-RemoteCommand -InstanceId $idA -Command @"
-cd $Script:RemoteRepo/extensions && \
-docker compose -p tazama-core \
-  -f ./docker-compose.dev.extensions.apis.yaml \
-  up -d
-"@
+Invoke-RemoteCommand -InstanceId $idA -Command "bash -l -c 'cd $Script:RemoteRepo/extensions && docker compose -p tazama-core -f ./docker-compose.dev.extensions.apis.yaml up -d'"
 
 Write-Host '[Server A] DEMS + DEAPI up.' -ForegroundColor Green
 
-# -- 2. Server B: wait for bootstrap ------------------------------------------
+# -- 4. Server B: wait for bootstrap ------------------------------------------
 Wait-Bootstrap -InstanceId $idB -ServerName 'Server B'
 
-# -- 3. Server B: apply .env overlay ------------------------------------------
+# -- 4a. Server B: ensure correct repo branch ----------------------------------
+# Servers bootstrapped before the bootstrap.sh.tpl branch fix cloned the default
+# 'dev' branch, which has a flat structure (no extensions/ subdirectory).
+# Switch to the correct mono-repo branch so all subdirectories exist.
+Write-Host '[Server B] Ensuring correct repo branch...'
+Invoke-RemoteCommand -InstanceId $idB -Command "cd $Script:RemoteRepo && git fetch origin tazama/feat/mono-repo-phased-deployment && git checkout tazama/feat/mono-repo-phased-deployment"
+Write-Host '[Server B] Repo branch OK.' -ForegroundColor Green
+
+# -- 5. Server B: copy .env ---------------------------------------------------
+Write-Host '[Server B] Copying extensions/.env...'
+$localExtEnv = Join-Path $PSScriptRoot '..\..\..\extensions\.env'
+Copy-ToRemote -InstanceId $idB -LocalPath $localExtEnv -RemotePath "$Script:RemoteRepo/extensions/.env"
+
+# -- 6. Server B: apply .env overlay ------------------------------------------
 # Replaces local-dev SERVER_A_HOST and SERVER_B_HOST defaults in extensions/.env
 # with the Route 53 private DNS names (core.tazama.internal etc.).
 Write-Host '[Server B] Applying .env overlay...'
@@ -61,7 +84,7 @@ Set-RemoteEnvOverlay -InstanceId $idB -OverlayFile $overlayFile -RemoteEnvFile $
 
 Write-Host '[Server B] .env overlay applied.' -ForegroundColor Green
 
-# -- 4. Server B: copy auth public key ----------------------------------------
+# -- 7. Server B: copy auth public key ----------------------------------------
 # TCS and TRS backends require the auth public key (used for JWT verification).
 # On single-machine deployments it is copied from ../core/auth/ automatically
 # by tazama-extensions.bat.  Here we copy it from the local repo to Server B.
@@ -75,7 +98,14 @@ Copy-ToRemote -InstanceId $idB `
 
 Write-Host '[Server B] Auth key copied.' -ForegroundColor Green
 
-# -- 5. Server B: start extensions stack --------------------------------------
+# -- 8. Server B: install Docker buildx plugin --------------------------------
+Write-Host '[Server B] Installing Docker buildx plugin (v0.33.0)...'
+Invoke-RemoteCommand -InstanceId $idB -Command "sudo mkdir -p /usr/local/lib/docker/cli-plugins && sudo curl -fsSL https://github.com/docker/buildx/releases/download/v0.33.0/buildx-v0.33.0.linux-amd64 -o /usr/local/lib/docker/cli-plugins/docker-buildx && sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx"
+Write-Host '[Server B] Buildx installed.' -ForegroundColor Green
+
+# -- 9. Server B: start extensions stack --------------------------------------
+# bash -l forces a login shell so /etc/environment is sourced → GH_TOKEN is
+# exported and available as a build arg for all source-built services.
 Write-Host '[Server B] Starting tazama-extensions stack...'
 
 $composeArgs = @(
@@ -84,7 +114,7 @@ $composeArgs = @(
     '-f ./docker-compose.dev.extensions.yaml'
 ) -join ' '
 
-Invoke-RemoteCommand -InstanceId $idB -Command "cd $Script:RemoteRepo/extensions && docker compose $composeArgs up -d"
+Invoke-RemoteCommand -InstanceId $idB -Command "bash -l -c 'cd $Script:RemoteRepo/extensions && docker compose $composeArgs up -d'"
 
 Write-Host ''
 Write-Host '[Server B] tazama-extensions is up.' -ForegroundColor Green

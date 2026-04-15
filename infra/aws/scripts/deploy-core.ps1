@@ -31,7 +31,14 @@ Write-Host "[Server A] Instance ID: $idA"
 # -- 1. Wait for first-boot bootstrap -----------------------------------------
 Wait-Bootstrap -InstanceId $idA -ServerName 'Server A'
 
-# -- 2. Start the core stack ---------------------------------------------------
+# -- 2. Copy .env files to Server A -------------------------------------------
+# .env files are gitignored and never committed; they must be pushed to the
+# instance before docker compose can resolve image tags and port numbers.
+Write-Host '[Server A] Copying core/.env...'
+$localEnv = Join-Path $PSScriptRoot '..\..\..\core\.env'
+Copy-ToRemote -InstanceId $idA -LocalPath $localEnv -RemotePath "$Script:RemoteRepo/core/.env"
+
+# -- 3. Start the core stack ---------------------------------------------------
 # Full compose chain: DockerHub-pulled images, all rule processors, pgAdmin, Hasura.
 # docker-compose.base.override.yaml must always be position 2 - it publishes
 # the three exterior ports that Server B and Server C depend on:

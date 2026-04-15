@@ -14,3 +14,14 @@ key_name = "tazama-aws"
 
 # Override the AWS CLI named profile if yours is not called "tazama".
 # aws_profile = "tazama"
+
+# ALB and custom domain are enabled via separate var-files (no editing required):
+#   Phase E (ALB):           tofu apply -var-file terraform.tfvars -var-file alb.tfvars
+#   Phase G (custom domain): tofu apply -var-file terraform.tfvars -var-file alb.tfvars -var-file domain.tfvars
+# See aws-deployment-instructions.md § Phase E and § Phase G for full instructions.
+# See aws-deployment-instructions.md § Phase G for full instructions.
+# Prerequisite: NS delegation for your subdomain zone must exist at your
+# registrar before enabling this, otherwise ACM validation will time out.
+# ---------------------------------------------------------------------------
+# enable_custom_domain = true
+# domain_zone          = "env.your-domain.com"
