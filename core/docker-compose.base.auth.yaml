@@ -9,7 +9,7 @@ services:
       - env/keycloak.env
     restart: always
     environment:
-      - KC_HOSTNAME=localhost
+      - KC_HOSTNAME=${KEYCLOAK_HOSTNAME:-localhost}
       - KC_HOSTNAME_STRICT_BACKCHANNEL=false
       - KC_HTTP_ENABLED=true
       - KC_HOSTNAME_STRICT_HTTPS=false

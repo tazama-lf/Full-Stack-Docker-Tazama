@@ -49,6 +49,19 @@ Write-Host '[Server A] Copying core/.env...'
 $localEnv = Join-Path $PSScriptRoot '..\..\..\core\.env'
 Copy-ToRemote -InstanceId $idA -LocalPath $localEnv -RemotePath "$Script:RemoteRepo/core/.env"
 
+# If an ALB is active, inject KEYCLOAK_HOSTNAME into the remote .env so
+# Keycloak generates redirect URLs using the ALB hostname instead of localhost.
+if ($out.AlbDnsName) {
+    Write-Host "[Server A] Injecting KEYCLOAK_HOSTNAME=$($out.AlbDnsName) into core/.env..."
+    $albHost = $out.AlbDnsName
+    Invoke-RemoteCommand -InstanceId $idA -Command @"
+grep -q '^KEYCLOAK_HOSTNAME=' $Script:RemoteRepo/core/.env \
+  && sed -i 's|^KEYCLOAK_HOSTNAME=.*|KEYCLOAK_HOSTNAME=$albHost|' $Script:RemoteRepo/core/.env \
+  || echo 'KEYCLOAK_HOSTNAME=$albHost' >> $Script:RemoteRepo/core/.env
+"@
+    Write-Host '[Server A] KEYCLOAK_HOSTNAME set.' -ForegroundColor Green
+}
+
 # -- 4. Copy Keycloak realm config to Server A --------------------------------
 # The realm JSON is gitignored-friendly but must be present on the server
 # before the stack starts so the volume mount is satisfied and Keycloak
