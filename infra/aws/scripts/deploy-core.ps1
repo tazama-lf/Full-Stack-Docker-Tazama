@@ -11,13 +11,19 @@
     Run from infra/aws/scripts/ or anywhere - paths are resolved relative
     to this script's location.
 
+.PARAMETER NoPull
+    Skip pulling latest Docker images (--pull always). Useful when retrying
+    after a failed start where images are already present on the host.
+
 .EXAMPLE
     .\deploy-core.ps1
+    .\deploy-core.ps1 -NoPull
 #>
 
 [CmdletBinding()]
-param()
-
+param(
+    [switch]$NoPull
+)
 . "$PSScriptRoot\helpers.ps1"
 
 Write-Host ''
@@ -82,14 +88,16 @@ $composeArgs = @(
 ) -join ' '
 
 $maxAttempts = 3
+$pullFlag = if ($NoPull) { '' } else { '--pull always' }
 for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
     try {
-        Invoke-RemoteCommand -InstanceId $idA -Command "cd $Script:RemoteRepo/core && docker compose $composeArgs up -d --pull always"
+        Invoke-RemoteCommand -InstanceId $idA -Command "cd $Script:RemoteRepo/core && docker compose $composeArgs up -d $pullFlag".Trim()
         break
     }
     catch {
         if ($attempt -lt $maxAttempts) {
-            Write-Warning "[Server A] Stack start failed (attempt $attempt/$maxAttempts) — Postgres may still be initialising. Retrying in 30s..."
+            Write-Warning "[Server A] Stack start failed (attempt $attempt/$maxAttempts) — Postgres may still be initialising. Retrying in 30s (images already present, skipping pull)..."
+            $pullFlag = ''   # subsequent retries never need to re-pull
             Start-Sleep -Seconds 30
         }
         else {
