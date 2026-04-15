@@ -1,25 +1,97 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # --- Application Load Balancer SG ---
-# Inbound HTTP/HTTPS from the internet; outbound to the EC2 instance SGs.
+# Default mode: port-based HTTP listeners, one per service.
+# Each service is reachable at http://<alb-dns>:<port> — same ports as the
+# local Docker deployment, so Postman works without reconfiguration.
+# When upgrading to the custom-domain HTTPS mode (Phase F), port 443 is used
+# for all services and ports 3005-8088 can be removed from this SG.
 
 resource "aws_security_group" "alb" {
   name        = "${var.prefix}-alb-sg"
   description = "ALB - inbound HTTP/HTTPS from internet"
   vpc_id      = var.vpc_id
 
+  # HTTPS - used when custom domain + ACM cert is configured (Phase F)
   ingress {
-    description = "HTTP"
-    from_port   = 80
-    to_port     = 80
+    description = "HTTPS"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Server A service ports
+  ingress {
+    description = "TMS API"
+    from_port   = 5000
+    to_port     = 5000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    description = "HTTPS"
-    from_port   = 443
-    to_port     = 443
+    description = "Admin API"
+    from_port   = 5100
+    to_port     = 5100
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Auth Service"
+    from_port   = 3020
+    to_port     = 3020
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Keycloak"
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "pgAdmin (Server A)"
+    from_port   = 5050
+    to_port     = 5051
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Hasura"
+    from_port   = 6100
+    to_port     = 6100
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Server B service ports
+  ingress {
+    description = "TRS / TCS / CMS backends"
+    from_port   = 3005
+    to_port     = 3090
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "TCS / TRS / CMS frontends"
+    from_port   = 5173
+    to_port     = 5175
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Server C service ports
+  ingress {
+    description = "NiFi UI"
+    from_port   = 8088
+    to_port     = 8088
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -63,6 +135,30 @@ resource "aws_security_group" "server_a" {
     description     = "Admin API"
     from_port       = 5100
     to_port         = 5100
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+  ingress {
+    description     = "Keycloak"
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+  ingress {
+    description     = "pgAdmin (Server A)"
+    from_port       = 5050
+    to_port         = 5051
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+  ingress {
+    description     = "Hasura"
+    from_port       = 6100
+    to_port         = 6100
     protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
   }

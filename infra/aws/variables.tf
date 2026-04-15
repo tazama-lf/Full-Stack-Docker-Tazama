@@ -40,3 +40,36 @@ variable "instance_type_c" {
   type        = string
   default     = "t3.2xlarge"
 }
+
+# ---------------------------------------------------------------------------
+# Phase E — optional ALB (public sandbox)
+# ---------------------------------------------------------------------------
+variable "enable_alb" {
+  description = <<-EOT
+    Set to true to deploy the Application Load Balancer (Phase E option 2).
+    Creates one internet-facing ALB with port-based HTTP listeners for all
+    services. When false, services are only reachable via SSH tunnelling.
+  EOT
+  type        = bool
+  default     = false
+}
+
+# ---------------------------------------------------------------------------
+# Phase G — optional custom domain upgrade
+# ---------------------------------------------------------------------------
+variable "enable_custom_domain" {
+  description = <<-EOT
+    Set to true to activate Phase F: creates a Route 53 public zone for
+    domain_zone, issues an ACM wildcard cert, and switches the ALB to
+    HTTPS with host-based routing (*.domain_zone).
+    Prerequisite: subdomain NS delegation must be in place at the registrar.
+  EOT
+  type        = bool
+  default     = false
+}
+
+variable "domain_zone" {
+  description = "Public hosted zone name for custom domain (Phase G). Only used when enable_custom_domain = true."
+  type        = string
+  default     = "beta.tazama.org"
+}

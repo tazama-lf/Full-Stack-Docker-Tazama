@@ -37,6 +37,17 @@ curl -fsSL \
 chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 echo "[bootstrap] Docker Compose $${COMPOSE_VER} installed"
 
+# ── Docker Buildx plugin ─────────────────────────────────────────────────────
+echo "[bootstrap] Installing Docker Buildx plugin..."
+BUILDX_VER=$(curl -fsSL https://api.github.com/repos/docker/buildx/releases/latest \
+  | grep '"tag_name"' | sed 's/.*"tag_name": "\(.*\)".*/\1/')
+mkdir -p /usr/local/lib/docker/cli-plugins
+curl -fsSL \
+  "https://github.com/docker/buildx/releases/download/$${BUILDX_VER}/buildx-$${BUILDX_VER}.linux-amd64" \
+  -o /usr/local/lib/docker/cli-plugins/docker-buildx
+chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
+echo "[bootstrap] Docker Buildx $${BUILDX_VER} installed"
+
 # ── Clone repo ───────────────────────────────────────────────────────────────
 echo "[bootstrap] Cloning repo (branch: $${REPO_BRANCH})..."
 git clone --branch "$${REPO_BRANCH}" "$REPO_URL" "$REPO_DIR"

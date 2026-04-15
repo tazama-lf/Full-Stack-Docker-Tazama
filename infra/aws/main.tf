@@ -159,3 +159,41 @@ module "dns" {
     "biar"       = module.server_c.private_ip
   }
 }
+
+# ── ALB: Application Load Balancer (Phase E option 2 — optional) ─────────────
+# Only deployed when enable_alb = true in terraform.tfvars.
+# Port-based HTTP listeners — each service is reachable at:
+#   http://<alb-dns-name>:<port>
+# where <port> matches the Docker container port (e.g. 5000 for TMS).
+# See aws-deployment-instructions.md § Phase E for instructions.
+
+module "alb" {
+  count             = var.enable_alb ? 1 : 0
+  source            = "./modules/alb"
+  prefix            = var.prefix
+  vpc_id            = module.vpc.vpc_id
+  public_subnet_ids = module.vpc.public_subnet_ids
+  alb_sg_id         = module.security_groups.alb_sg_id
+  server_a_id       = module.server_a.instance_id
+  server_b_id       = module.server_b.instance_id
+  server_c_id       = module.server_c.instance_id
+}
+
+# ── DNS Public: Route 53 + ACM + HTTPS (Phase G - optional) ──────────────────
+# Only activated when enable_custom_domain = true in terraform.tfvars.
+# Requires enable_alb = true (ALB must exist before HTTPS listener can attach).
+# Prerequisites: NS delegation for var.domain_zone must already exist at the
+# registrar before running tofu apply with this enabled.
+# See aws-deployment-instructions.md § Phase G for full instructions.
+
+module "dns_public" {
+  count  = var.enable_custom_domain ? 1 : 0
+  source = "./modules/dns-public"
+
+  prefix            = var.prefix
+  zone_name         = var.domain_zone
+  alb_dns_name      = module.alb[0].alb_dns_name
+  alb_zone_id       = module.alb[0].alb_zone_id
+  alb_arn           = module.alb[0].alb_arn
+  target_group_arns = module.alb[0].target_group_arns
+}

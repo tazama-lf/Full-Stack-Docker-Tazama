@@ -6,6 +6,7 @@
 infra/aws/*.pem
 infra/aws/terraform.tfvars
 infra/aws/backend.conf
+infra/aws/domain.tfvars
 infra/aws/tfplan
 
 # OpenTofu/Terraform generated directories - never commit
