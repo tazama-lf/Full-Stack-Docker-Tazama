@@ -1,5 +1,10 @@
 # base infrastructure
 
+# NOTE: When tazamaorg/case-management-system-backend is published to DockerHub,
+# replace the migrate build below with:
+#   image: tazamaorg/case-management-system-backend:${TAZAMA_VERSION}
+#   command: sh /home/app/migrate.sh
+
 services:
   postgres:
     image: postgres:18
