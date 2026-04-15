@@ -1,11 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+
 services:
   connection-studio-backend:
     container_name: tcs-backend
-    image: !reset null
-    build:
-      context: https://github.com/tazama-lf/connection-studio.git#${TCS_BRANCH}:backend
-      args:
-        - GH_TOKEN
+    image: tazamaorg/connection-studio-backend:${TAZAMA_VERSION}
     env_file:
       - env/tcs.env
       - .env
@@ -20,11 +18,7 @@ services:
 
   connection-studio-frontend:
     container_name: tcs-frontend
-    image: !reset null
-    build:
-      context: https://github.com/tazama-lf/connection-studio.git#${TCS_BRANCH}:frontend
-      args:
-        - GH_TOKEN
+    image: tazamaorg/connection-studio-frontend:${TAZAMA_VERSION}
     env_file:
       - env/tcs.env
       - .env
@@ -40,11 +34,7 @@ services:
 
   trs-backend:
     container_name: trs-backend
-    image: !reset null
-    build:
-      context: https://github.com/tazama-lf/rule-studio.git#${TRS_BRANCH_BACKEND}:backend
-      args:
-        - GH_TOKEN
+    image: tazamaorg/rule-studio-backend:${TAZAMA_VERSION}
     env_file:
       - env/trs.env
       - .env
@@ -58,11 +48,7 @@ services:
 
   trs-frontend:
     container_name: trs-frontend
-    image: !reset null
-    build:
-      context: https://github.com/tazama-lf/rule-studio.git#${TRS_BRANCH_FRONTEND}:frontend
-      args:
-        - GH_TOKEN
+    image: tazamaorg/rule-studio-frontend:${TAZAMA_VERSION}
     env_file:
       - env/trs.env
       - .env
@@ -77,7 +63,8 @@ services:
     restart: always
     ports:
       - ${TRS_FRONTEND_PORT}:5174
-    
+
+  # TODO: replace build with image once tazamaorg/case-management-system-backend is published to DockerHub
   cms-backend:
     image: !reset null
     build:
@@ -92,7 +79,7 @@ services:
       - flowable
       - opensearch-node1
     env_file:
-      - ./env/cms.env
+      - env/cms.env
       - .env
     volumes:
       - ./auth/test-public-key.pem:/auth/test-public-key.pem:ro
@@ -100,15 +87,11 @@ services:
       - "${CMS_BACKEND_PORT}:3090"
 
   cms-frontend:
-    image: !reset null
-    build:
-      context: https://github.com/tazama-lf/case-management-system.git#${CMS_BRANCH}:frontend
-      args:
-        - GH_TOKEN
     container_name: tazama-cms-frontend
+    image: tazamaorg/case-management-system-frontend:${TAZAMA_VERSION}
     restart: unless-stopped
     env_file:
-      - ./env/cms.env
+      - env/cms.env
       - .env
     environment:
       - VITE_API_BASE_URL=http://${SERVER_B_HOST}:${CMS_BACKEND_PORT}

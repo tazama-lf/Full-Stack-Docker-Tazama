@@ -53,20 +53,21 @@ Write-Host '[Server A] Buildx installed.' -ForegroundColor Green
 Write-Host ''
 Write-Host '[Server A] Adding DEMS + DEAPI to tazama-core...'
 
-Invoke-RemoteCommand -InstanceId $idA -Command "bash -l -c 'cd $Script:RemoteRepo/extensions && docker compose -p tazama-core -f ./docker-compose.dev.extensions.apis.yaml up -d'"
+Invoke-RemoteCommand -InstanceId $idA -Command "bash -l -c 'cd $Script:RemoteRepo/extensions && docker compose -p tazama-core -f ./docker-compose.dev.extensions.apis.yaml up -d --pull always'"
 
 Write-Host '[Server A] DEMS + DEAPI up.' -ForegroundColor Green
 
 # -- 4. Server B: wait for bootstrap ------------------------------------------
 Wait-Bootstrap -InstanceId $idB -ServerName 'Server B'
 
-# -- 4a. Server B: ensure correct repo branch ----------------------------------
+# -- 4a. Server B: ensure correct repo branch and pull latest -----------------
 # Servers bootstrapped before the bootstrap.sh.tpl branch fix cloned the default
 # 'dev' branch, which has a flat structure (no extensions/ subdirectory).
-# Switch to the correct mono-repo branch so all subdirectories exist.
-Write-Host '[Server B] Ensuring correct repo branch...'
-Invoke-RemoteCommand -InstanceId $idB -Command "cd $Script:RemoteRepo && git fetch origin tazama/feat/mono-repo-phased-deployment && git checkout tazama/feat/mono-repo-phased-deployment"
-Write-Host '[Server B] Repo branch OK.' -ForegroundColor Green
+# Switch to the correct mono-repo branch and pull latest so all compose/config
+# changes are present.
+Write-Host '[Server B] Ensuring correct repo branch and pulling latest...'
+Invoke-RemoteCommand -InstanceId $idB -Command "cd $Script:RemoteRepo && git fetch origin tazama/feat/mono-repo-phased-deployment && git checkout tazama/feat/mono-repo-phased-deployment && git pull origin tazama/feat/mono-repo-phased-deployment"
+Write-Host '[Server B] Repo up to date.' -ForegroundColor Green
 
 # -- 5. Server B: copy .env ---------------------------------------------------
 Write-Host '[Server B] Copying extensions/.env...'
@@ -114,7 +115,7 @@ $composeArgs = @(
     '-f ./docker-compose.dev.extensions.yaml'
 ) -join ' '
 
-Invoke-RemoteCommand -InstanceId $idB -Command "bash -l -c 'cd $Script:RemoteRepo/extensions && docker compose $composeArgs up -d'"
+Invoke-RemoteCommand -InstanceId $idB -Command "bash -l -c 'cd $Script:RemoteRepo/extensions && docker compose $composeArgs up -d --pull always'"
 
 Write-Host ''
 Write-Host '[Server B] tazama-extensions is up.' -ForegroundColor Green

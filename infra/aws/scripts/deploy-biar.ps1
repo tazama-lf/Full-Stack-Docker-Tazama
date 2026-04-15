@@ -34,13 +34,13 @@ Write-Host "[Server C] Instance ID: $idC"
 # -- 1. Wait for bootstrap -----------------------------------------------------
 Wait-Bootstrap -InstanceId $idC -ServerName 'Server C'
 
-# -- 1a. Ensure correct repo branch --------------------------------------------
+# -- 1a. Ensure correct repo branch and pull latest ---------------------------
 # Servers bootstrapped before the bootstrap.sh.tpl branch fix cloned the default
 # 'dev' branch, which has a flat structure (no biar/ subdirectory).
-# Switch to the correct mono-repo branch so all subdirectories exist.
-Write-Host '[Server C] Ensuring correct repo branch...'
-Invoke-RemoteCommand -InstanceId $idC -Command "cd $Script:RemoteRepo && git fetch origin tazama/feat/mono-repo-phased-deployment && git checkout tazama/feat/mono-repo-phased-deployment"
-Write-Host '[Server C] Repo branch OK.' -ForegroundColor Green
+# Switch to the correct mono-repo branch and pull latest.
+Write-Host '[Server C] Ensuring correct repo branch and pulling latest...'
+Invoke-RemoteCommand -InstanceId $idC -Command "cd $Script:RemoteRepo && git fetch origin tazama/feat/mono-repo-phased-deployment && git checkout tazama/feat/mono-repo-phased-deployment && git pull origin tazama/feat/mono-repo-phased-deployment"
+Write-Host '[Server C] Repo up to date.' -ForegroundColor Green
 
 # -- 2. Copy .env --------------------------------------------------------------
 Write-Host '[Server C] Copying biar/.env...'
@@ -61,7 +61,7 @@ Write-Host '[Server C] .env overlay applied.' -ForegroundColor Green
 # -- 4. Start biar stack -------------------------------------------------------
 Write-Host '[Server C] Starting tazama-biar stack...'
 
-Invoke-RemoteCommand -InstanceId $idC -Command "cd $Script:RemoteRepo/biar && docker compose -p tazama-biar -f ./docker-compose.biar.infrastructure.yaml up -d"
+Invoke-RemoteCommand -InstanceId $idC -Command "cd $Script:RemoteRepo/biar && docker compose -p tazama-biar -f ./docker-compose.biar.infrastructure.yaml up -d --pull always"
 
 Write-Host ''
 Write-Host '[Server C] tazama-biar is up.' -ForegroundColor Green

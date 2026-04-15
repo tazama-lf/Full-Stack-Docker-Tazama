@@ -88,6 +88,10 @@ function Invoke-RemoteCommand {
         [string]$Command
     )
 
+    # Strip CR characters so Windows here-strings don't produce \r\n line endings
+    # that bash rejects with "command not found".
+    $Command = $Command -replace "`r", ''
+
     $cfg = New-SshConfig $InstanceId
     try {
         ssh -q -F $cfg $InstanceId $Command
