@@ -58,6 +58,13 @@ Write-Host '[Server A] Keycloak realm config copied.' -ForegroundColor Green
 # docker-compose.base.override.yaml must always be position 2 - it publishes
 # the three exterior ports that Server B and Server C depend on:
 #   NATS :14222 . PostgreSQL :15432 . Valkey :16379
+#
+# NOTE: Hasura depends_on postgres (service_healthy). On a cold first boot,
+# Postgres runs migration scripts and can take >30s to become healthy.
+# We retry the up command up to 3 times to ride out this race condition.
+# The Postgres healthcheck itself has start_period:120s / retries:20 to give
+# the DB enough time; but compose still exits 1 if it times out during the
+# initial `up`, so the retry here is the safety net.
 Write-Host '[Server A] Starting tazama-core stack...'
 
 $composeArgs = @(
@@ -74,7 +81,22 @@ $composeArgs = @(
     '-f ./docker-compose.utils.hasura.yaml'
 ) -join ' '
 
-Invoke-RemoteCommand -InstanceId $idA -Command "cd $Script:RemoteRepo/core && docker compose $composeArgs up -d --pull always"
+$maxAttempts = 3
+for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
+    try {
+        Invoke-RemoteCommand -InstanceId $idA -Command "cd $Script:RemoteRepo/core && docker compose $composeArgs up -d --pull always"
+        break
+    }
+    catch {
+        if ($attempt -lt $maxAttempts) {
+            Write-Warning "[Server A] Stack start failed (attempt $attempt/$maxAttempts) — Postgres may still be initialising. Retrying in 30s..."
+            Start-Sleep -Seconds 30
+        }
+        else {
+            throw
+        }
+    }
+}
 
 Write-Host ''
 Write-Host '[Server A] tazama-core is up.' -ForegroundColor Green
