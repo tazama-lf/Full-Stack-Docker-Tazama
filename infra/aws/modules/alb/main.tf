@@ -45,9 +45,11 @@ locals {
 
   # Keycloak does not respond with 200 on /, use /health/ready instead.
   health_check_paths = {
-    keycloak = "/health/ready"
-    nifi     = "/nifi-api/system-diagnostics"
-    hasura   = "/healthz"
+    keycloak    = "/health/ready"
+    nifi        = "/nifi-api/system-diagnostics"
+    hasura      = "/healthz"
+    pgadmin     = "/"
+    pgadmin-ext = "/"
   }
 }
 
