@@ -109,6 +109,7 @@ $composeArgs = @(
     '-p tazama-extensions'
     '-f ./docker-compose.extensions.infrastructure.yaml'
     '-f ./docker-compose.hub.extensions.yaml'
+    '-f ./docker-compose.utils.pgadmin.yaml'
 ) -join ' '
 
 Invoke-RemoteCommand -InstanceId $idB -Command "cd $Script:RemoteRepo/extensions && docker compose $composeArgs up -d $pullFlag".Trim()
