@@ -70,3 +70,8 @@ output "acm_certificate_arn" {
   description = "ARN of the validated ACM wildcard certificate (Phase G). Empty when enable_custom_domain = false."
   value       = var.enable_custom_domain ? module.dns_public[0].certificate_arn : ""
 }
+
+output "keycloak_hostname" {
+  description = "Hostname for KC_HOSTNAME: keycloak.<domain_zone> when custom domain is active, otherwise the ALB DNS name. Empty when ALB is not enabled."
+  value       = var.enable_custom_domain ? "keycloak.${var.domain_zone}" : (var.enable_alb ? module.alb[0].alb_dns_name : "")
+}
