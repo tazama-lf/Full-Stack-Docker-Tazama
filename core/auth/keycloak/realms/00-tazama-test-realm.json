@@ -1489,6 +1489,21 @@
         "claim.name" : "tenant_id",
         "jsonType.label" : "String"
       }
+    }, {
+      "id" : "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name" : "tenant_details",
+      "protocol" : "openid-connect",
+      "protocolMapper" : "oidc-group-membership-mapper",
+      "consentRequired" : false,
+      "config" : {
+        "full.path" : "true",
+        "introspection.token.claim" : "true",
+        "userinfo.token.claim" : "true",
+        "multivalued" : "true",
+        "id.token.claim" : "true",
+        "access.token.claim" : "true",
+        "claim.name" : "tenant_details"
+      }
     } ],
     "defaultClientScopes" : [ "web-origins", "acr", "roles", "profile", "email" ],
     "optionalClientScopes" : [ "address", "phone", "offline_access", "microprofile-jwt" ],
