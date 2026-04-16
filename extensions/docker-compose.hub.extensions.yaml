@@ -23,8 +23,8 @@ services:
       - env/tcs.env
       - .env
     environment:
-      - VITE_API_BASE_URL=http://${SERVER_B_HOST}:${TCS_PORT}
-      - VITE_DATA_ENRICHMENT_SERVICE_URL=http://${SERVER_B_HOST}:${DEAPI_PORT}
+      - VITE_API_BASE_URL=${TCS_API_URL:-http://${SERVER_B_HOST}:${TCS_PORT}}
+      - VITE_DATA_ENRICHMENT_SERVICE_URL=${DEAPI_URL:-http://${SERVER_B_HOST}:${DEAPI_PORT}}
       - VITE_ALLOWED_HOSTS=all
     restart: always
     ports:
@@ -53,12 +53,12 @@ services:
       - env/trs.env
       - .env
     environment:
-      - VITE_API_URL=http://${SERVER_B_HOST}:${TRS_BACKEND_PORT}
-      - VITE_SANDBOX_API_URL=http://${SERVER_A_HOST}:3050
-      - VITE_NATS_API_URL=http://${SERVER_A_HOST}:4000
-      - VITE_SIMULATION_ENDPOINT=http://${SERVER_A_HOST}:5000/v1/evaluate/iso20022/pacs.002.001.12
-      - VITE_DEMS_ENDPOINT=http://${SERVER_B_HOST}:${DEMS_PORT}
-      - VITE_ADMIN_ENDPOINT=http://${SERVER_A_HOST}:3100
+      - VITE_API_URL=${TRS_API_URL:-http://${SERVER_B_HOST}:${TRS_BACKEND_PORT}}
+      - VITE_SANDBOX_API_URL=${SANDBOX_API_URL:-http://${SERVER_A_HOST}:3050}
+      - VITE_NATS_API_URL=${NATS_API_URL:-http://${SERVER_A_HOST}:4000}
+      - VITE_SIMULATION_ENDPOINT=${SIMULATION_ENDPOINT:-http://${SERVER_A_HOST}:5000/v1/evaluate/iso20022/pacs.002.001.12}
+      - VITE_DEMS_ENDPOINT=${DEMS_ENDPOINT:-http://${SERVER_B_HOST}:${DEMS_PORT}}
+      - VITE_ADMIN_ENDPOINT=${ADMIN_ENDPOINT:-http://${SERVER_A_HOST}:3100}
       - VITE_ALLOWED_HOSTS=all
     restart: always
     ports:
@@ -88,7 +88,7 @@ services:
       - env/cms.env
       - .env
     environment:
-      - VITE_API_BASE_URL=http://${SERVER_B_HOST}:${CMS_BACKEND_PORT}
+      - VITE_API_BASE_URL=${CMS_API_URL:-http://${SERVER_B_HOST}:${CMS_BACKEND_PORT}}
       - VITE_ALLOWED_HOSTS=all
     ports:
       - "${CMS_FRONTEND_PORT}:5175"
