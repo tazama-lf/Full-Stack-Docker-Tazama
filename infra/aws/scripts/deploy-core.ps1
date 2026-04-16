@@ -51,13 +51,13 @@ Copy-ToRemote -InstanceId $idA -LocalPath $localEnv -RemotePath "$Script:RemoteR
 
 # If an ALB is active, inject KEYCLOAK_HOSTNAME into the remote .env so
 # Keycloak generates redirect URLs using the ALB hostname instead of localhost.
-if ($out.AlbDnsName) {
-    Write-Host "[Server A] Injecting KEYCLOAK_HOSTNAME=$($out.AlbDnsName) into core/.env..."
-    $albHost = $out.AlbDnsName
+if ($out.KeycloakHostname) {
+    Write-Host "[Server A] Injecting KEYCLOAK_HOSTNAME=$($out.KeycloakHostname) into core/.env..."
+    $kcHost = $out.KeycloakHostname
     Invoke-RemoteCommand -InstanceId $idA -Command @"
 grep -q '^KEYCLOAK_HOSTNAME=' $Script:RemoteRepo/core/.env \
-  && sed -i 's|^KEYCLOAK_HOSTNAME=.*|KEYCLOAK_HOSTNAME=$albHost|' $Script:RemoteRepo/core/.env \
-  || echo 'KEYCLOAK_HOSTNAME=$albHost' >> $Script:RemoteRepo/core/.env
+  && sed -i 's|^KEYCLOAK_HOSTNAME=.*|KEYCLOAK_HOSTNAME=$kcHost|' $Script:RemoteRepo/core/.env \
+  || echo 'KEYCLOAK_HOSTNAME=$kcHost' >> $Script:RemoteRepo/core/.env
 "@
     Write-Host '[Server A] KEYCLOAK_HOSTNAME set.' -ForegroundColor Green
 }

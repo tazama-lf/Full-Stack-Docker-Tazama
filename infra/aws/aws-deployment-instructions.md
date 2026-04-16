@@ -2210,20 +2210,20 @@ Extracted from `tazama-core.bat`. `docker-compose.base.override.yaml` is always 
 
 | File | hub | dev | full | multi |
 |---|---|---|---|---|
-| `docker-compose.base.infrastructure.yaml` | âœ… | âœ… | âœ… | âœ… |
-| `docker-compose.base.override.yaml` | âœ… | âœ… | âœ… | âœ… |
-| `docker-compose.hub.cfg.yaml` | âœ… | - | - | - |
-| `docker-compose.full.cfg.yaml` | - | - | âœ… | - |
-| `docker-compose.multitenant.cfg.yaml` | - | - | - | âœ… |
-| `docker-compose.dev.cfg.yaml` | - | âœ… | - | - |
-| `docker-compose.hub.core.yaml` | âœ… | - | âœ… | âœ… |
-| `docker-compose.dev.core.yaml` | - | âœ… | - | - |
-| `docker-compose.hub.rules.yaml` | âœ… | - | - | âœ… |
-| `docker-compose.full.rules.yaml` | - | - | âœ… | - |
-| `docker-compose.base.auth.yaml` | +auth | +auth | +auth | âœ… |
+| `docker-compose.base.infrastructure.yaml` | ✅ | ✅ | ✅ | ✅ |
+| `docker-compose.base.override.yaml` | ✅ | ✅ | ✅ | ✅ |
+| `docker-compose.hub.cfg.yaml` | ✅ | - | - | - |
+| `docker-compose.full.cfg.yaml` | - | - | ✅ | - |
+| `docker-compose.multitenant.cfg.yaml` | - | - | - | ✅ |
+| `docker-compose.dev.cfg.yaml` | - | ✅ | - | - |
+| `docker-compose.hub.core.yaml` | ✅ | - | ✅ | ✅ |
+| `docker-compose.dev.core.yaml` | - | ✅ | - | - |
+| `docker-compose.hub.rules.yaml` | ✅ | - | - | ✅ |
+| `docker-compose.full.rules.yaml` | - | - | ✅ | - |
+| `docker-compose.base.auth.yaml` | +auth | +auth | +auth | ✅ |
 | `docker-compose.dev.auth.yaml` | - | +auth | - | - |
 | `docker-compose.hub.relay.yaml` | +relay | - | +relay | - |
-| `docker-compose.multitenant.relay.yaml` | - | - | - | âœ… |
+| `docker-compose.multitenant.relay.yaml` | - | - | - | ✅ |
 | `docker-compose.dev.relay.yaml` | - | +relay | - | - |
 | `docker-compose.hub.logs.base.yaml` | +logs | - | +logs | +logs |
 | `docker-compose.dev.logs.base.yaml` | - | +logs | - | - |
@@ -2268,40 +2268,90 @@ docker compose -p tazama-core \
 
 ### Server A (tazama-core) - exterior ports
 
-| Port | Service | Used by |
-|---|---|---|
-| 5000 | TMS API | ALB, Postman |
-| 3001 | DEAPI | ALB, Server B |
-| 3002 | DEMS | ALB, Server B |
-| 3020 | Auth Service | Server B (JWT validation) |
-| 5100 | Admin API | Internal |
-| 14222 | NATS | Server B relay |
-| 15432 | PostgreSQL | Server C NiFi ETL |
-| 16379 | Valkey | - |
-| 5050 | pgAdmin | Operator (EICE only) |
-| 6100 | Hasura | Operator (EICE only) |
+| Port | Service | Used by | Subdomain (`*.beta.tazama.org`) |
+|---|---|---|---|
+| 5000 | TMS API | ALB, Postman | `tms` |
+| 3001 | DEAPI | ALB, Server B | `deapi` |
+| 3002 | DEMS | ALB, Server B | `dems` |
+| 3020 | Auth Service | Server B (JWT validation) | `auth` |
+| 5100 | Admin API | Internal | `admin` |
+| 8080 | Keycloak | ALB, frontends | `keycloak` |
+| 14222 | NATS | Server B relay | — |
+| 15432 | PostgreSQL | Server C NiFi ETL | — |
+| 16379 | Valkey | — | — |
+| 5050 | pgAdmin | Operator (EICE only) | `pgadmin` |
+| 6100 | Hasura | Operator (EICE only) | `hasura` |
 
 ### Server B (tazama-extensions) - exterior ports
 
-| Port | Service | Used by |
-|---|---|---|
-| 3005 | TRS Backend | ALB |
-| 3010 | TCS Backend | ALB |
-| 3090 | CMS Backend | ALB |
-| 5173 | TCS Frontend | ALB |
-| 5174 | TRS Frontend | ALB |
-| 5175 | CMS Frontend | ALB |
-| 9200 | OpenSearch | (NiFi ETL - pending confirmation) |
-| 12222 | SFTP | File ingest |
-| 15433 | PostgreSQL (CMS) | Server C NiFi ETL |
+| Port | Service | Used by | Subdomain (`*.beta.tazama.org`) |
+|---|---|---|---|
+| 3005 | TRS Backend | ALB | `trs-api` |
+| 3010 | TCS Backend | ALB | `tcs-api` |
+| 3090 | CMS Backend | ALB | `cms-api` |
+| 5173 | TCS Frontend | ALB | `tcs` |
+| 5174 | TRS Frontend | ALB | `trs` |
+| 5175 | CMS Frontend | ALB | `cms` |
+| 9200 | OpenSearch | (NiFi ETL - pending confirmation) | — |
+| 12222 | SFTP | File ingest | — |
+| 15433 | PostgreSQL (CMS) | Server C NiFi ETL | — |
 
 ### Server C (tazama-biar) - exterior ports
 
-| Port | Service | Used by |
-|---|---|---|
-| 8088 | NiFi UI | ALB |
-| 8983 | Solr UI | Operator (EICE only) |
-| 9876 | Ozone SCM | Operator (EICE only) |
-| 9888 | Ozone Recon UI | Operator (EICE only) |
+| Port | Service | Used by | Subdomain (`*.beta.tazama.org`) |
+|---|---|---|---|
+| 8088 | NiFi UI | ALB | `nifi` |
+| 8983 | Solr UI | Operator (EICE only) | — |
+| 9876 | Ozone SCM | Operator (EICE only) | — |
+| 9888 | Ozone Recon UI | Operator (EICE only) | — |
 
 ---
+
+## Frequently Asked Questions
+
+### I've set up some users on Keycloak already — how can I save these if I want to redeploy the system somewhere else or in the future?
+
+Export the live realm (including users) from the running Keycloak container, copy it to your local machine, and commit it to the repo. The next deploy will import it automatically on first boot.
+
+**Step 1 — Export the realm inside the container on Server A:**
+
+```powershell
+cd "full-stack-docker-tazama\infra\aws\scripts"
+. .\helpers.ps1
+$out = Get-TofuOutputs
+
+# Run the Keycloak export tool inside the running container
+Invoke-RemoteCommand -InstanceId $out.ServerA_InstanceId -Command `
+  "docker exec tazama-core-keycloak-1 /opt/keycloak/bin/kc.sh export --realm tazama --dir /tmp --users realm_file"
+
+# Copy the export out of the container onto the EC2 host filesystem
+Invoke-RemoteCommand -InstanceId $out.ServerA_InstanceId -Command `
+  "docker cp tazama-core-keycloak-1:/tmp/tazama-realm.json /home/ec2-user/tazama-realm.json"
+```
+
+**Step 2 — SCP the file from Server A to your local machine:**
+
+```powershell
+$configPath = New-SshConfig -InstanceId $out.ServerA_InstanceId
+scp -F $configPath "$($out.ServerA_InstanceId):/home/ec2-user/tazama-realm.json" `
+    "full-stack-docker-tazama\core\auth\keycloak\realms\00-tazama-test-realm.json"
+Remove-Item $configPath
+```
+
+**Step 3 — Commit and push:**
+
+```powershell
+cd "full-stack-docker-tazama"
+git add core/auth/keycloak/realms/00-tazama-test-realm.json
+git commit -S -s -m "chore: export live Keycloak tazama realm"
+git push origin <your-branch>
+```
+
+The updated realm JSON will be copied to the server by `deploy-core.ps1` and imported by Keycloak on its next fresh start (`--import-realm` only runs when the realm does not already exist in Keycloak's database — see the note below).
+
+> **Important:** Keycloak only imports a realm JSON on first boot if the realm is not already present in its database. If the container is simply restarted without wiping its data, the import is skipped. To force a reimport of an updated realm JSON, the Keycloak container and its embedded H2 database must be removed first:
+>
+> ```powershell
+> Invoke-RemoteCommand -InstanceId $out.ServerA_InstanceId -Command "docker rm -f tazama-core-keycloak-1"
+> .\deploy-core.ps1 -NoPull
+> ```

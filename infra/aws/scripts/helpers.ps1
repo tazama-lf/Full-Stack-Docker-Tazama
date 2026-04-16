@@ -45,7 +45,8 @@ function Get-TofuOutputs {
             ServerB_PrivateIp  = $json.server_b_private_ip.value
             ServerC_PrivateIp  = $json.server_c_private_ip.value
             EiceEndpointId     = $json.eice_endpoint_id.value
-            AlbDnsName         = if ($json.alb_dns_name) { $json.alb_dns_name.value } else { '' }
+            AlbDnsName         = if ($json.PSObject.Properties['alb_dns_name']) { $json.alb_dns_name.value } else { '' }
+            KeycloakHostname   = if ($json.PSObject.Properties['keycloak_hostname']) { $json.keycloak_hostname.value } else { '' }
         }
     }
     finally {

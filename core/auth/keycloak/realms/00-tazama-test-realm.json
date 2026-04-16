@@ -63,6 +63,14 @@
       "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
       "attributes" : { }
     }, {
+      "id" : "08674fff-bd27-4a23-9c94-161ac2c01f0a",
+      "name" : "CMS_COMPLIANCE_OFFICER",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+      "attributes" : { }
+    }, {
       "id" : "9fde74a9-4e38-460a-8c3b-54068e45069b",
       "name" : "LIST_V1_ADMIN_CONFIGURATION_NETWORK_MAP",
       "description" : "",
@@ -87,6 +95,38 @@
       "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
       "attributes" : { }
     }, {
+      "id" : "ad186ca2-8417-44d9-92b6-41bae9a7800a",
+      "name" : "dems:write",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+      "attributes" : { }
+    }, {
+      "id" : "b859f7e4-b868-4cfe-b3b5-d15e397ac584",
+      "name" : "trs_data_engineer_editor",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+      "attributes" : { }
+    }, {
+      "id" : "020cfd90-b559-4d72-ac43-0752eeb36710",
+      "name" : "publisher",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+      "attributes" : { }
+    }, {
+      "id" : "9d2f886a-74cf-4408-b2db-478343ab8476",
+      "name" : "trs_publisher",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+      "attributes" : { }
+    }, {
       "id" : "a874e891-9614-46b4-a46e-99afac1cd694",
       "name" : "GET_V1_EVENT_FLOW_CONTROL_ENTITY",
       "description" : "",
@@ -105,6 +145,14 @@
     }, {
       "id" : "d39bf1bc-6f0d-468c-b566-80b436c96c73",
       "name" : "GET_V1_GETREPORTBYMSGID",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+      "attributes" : { }
+    }, {
+      "id" : "01c46a84-cbb5-4596-9c8a-75eff956b028",
+      "name" : "CMS_INVESTIGATOR",
       "description" : "",
       "composite" : false,
       "clientRole" : false,
@@ -137,6 +185,14 @@
     }, {
       "id" : "434a7a2c-a1ab-475c-b324-62514caddbd3",
       "name" : "PUT_V1_EVENT_FLOW_CONTROL_ACCOUNT",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+      "attributes" : { }
+    }, {
+      "id" : "55fe5b48-b120-42ec-a26f-a46b8d850895",
+      "name" : "CMS_SUPERVISOR",
       "description" : "",
       "composite" : false,
       "clientRole" : false,
@@ -223,8 +279,24 @@
       "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
       "attributes" : { }
     }, {
+      "id" : "cc34677d-ec79-474b-b684-c19c3efb8881",
+      "name" : "CMS_ADMIN",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+      "attributes" : { }
+    }, {
       "id" : "1184d0fc-e305-4429-9c06-04dc2ad1d7a4",
       "name" : "PUT_V1_EVENT_FLOW_CONTROL_ENTITY",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+      "attributes" : { }
+    }, {
+      "id" : "de2c15cf-e3e5-4c80-acf7-222bbe29cbed",
+      "name" : "approver",
       "description" : "",
       "composite" : false,
       "clientRole" : false,
@@ -277,9 +349,49 @@
       "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
       "attributes" : { }
     }, {
+      "id" : "3fc2ce93-adba-47e6-a325-88928283d503",
+      "name" : "exporter",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+      "attributes" : { }
+    }, {
       "id" : "b9b052f9-59e3-4c2d-975b-82fbfe809c76",
       "name" : "uma_authorization",
       "description" : "${role_uma_authorization}",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+      "attributes" : { }
+    }, {
+      "id" : "77b509c2-e246-481e-8898-f12baca89e91",
+      "name" : "trs_approver",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+      "attributes" : { }
+    }, {
+      "id" : "dbeec3a6-1103-41fa-ac6b-dd03b3f9e8c9",
+      "name" : "editor",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+      "attributes" : { }
+    }, {
+      "id" : "c052fe23-5f12-44b7-858c-a269f438852b",
+      "name" : "trs_data_engineer_approver",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+      "attributes" : { }
+    }, {
+      "id" : "23cb23c4-f2c7-4c8e-9a57-fe3ec17e8fda",
+      "name" : "trs_editor",
+      "description" : "",
       "composite" : false,
       "clientRole" : false,
       "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
@@ -560,6 +672,54 @@
     }
   },
   "groups" : [ {
+    "id" : "d8dabf95-de1d-4c73-be0d-8bfab08651eb",
+    "name" : "tazama-cms",
+    "path" : "/tazama-cms",
+    "subGroups" : [ {
+      "id" : "1a86bf2c-a325-473c-b546-891cdfff2d8d",
+      "name" : "CMS_ADMIN",
+      "path" : "/tazama-cms/CMS_ADMIN",
+      "parentId" : "d8dabf95-de1d-4c73-be0d-8bfab08651eb",
+      "subGroups" : [ ],
+      "attributes" : { },
+      "realmRoles" : [ "CMS_ADMIN" ],
+      "clientRoles" : { }
+    }, {
+      "id" : "0d8d6350-d6a2-4141-8b19-8e4609381d69",
+      "name" : "CMS_COMPLIANCE_OFFICER",
+      "path" : "/tazama-cms/CMS_COMPLIANCE_OFFICER",
+      "parentId" : "d8dabf95-de1d-4c73-be0d-8bfab08651eb",
+      "subGroups" : [ ],
+      "attributes" : { },
+      "realmRoles" : [ "CMS_COMPLIANCE_OFFICER" ],
+      "clientRoles" : { }
+    }, {
+      "id" : "e1e137c0-8200-4109-b741-54f5956eff43",
+      "name" : "CMS_INVESTIGATOR",
+      "path" : "/tazama-cms/CMS_INVESTIGATOR",
+      "parentId" : "d8dabf95-de1d-4c73-be0d-8bfab08651eb",
+      "subGroups" : [ ],
+      "attributes" : { },
+      "realmRoles" : [ "CMS_INVESTIGATOR" ],
+      "clientRoles" : { }
+    }, {
+      "id" : "e8a4f193-843f-45fc-aa3e-796b50fbf392",
+      "name" : "CMS_SUPERVISOR",
+      "path" : "/tazama-cms/CMS_SUPERVISOR",
+      "parentId" : "d8dabf95-de1d-4c73-be0d-8bfab08651eb",
+      "subGroups" : [ ],
+      "attributes" : { },
+      "realmRoles" : [ "CMS_SUPERVISOR" ],
+      "clientRoles" : { }
+    } ],
+    "attributes" : {
+      "TENANT_ID" : [ "DEFAULT" ]
+    },
+    "realmRoles" : [ ],
+    "clientRoles" : {
+      "realm-management" : [ "view-users" ]
+    }
+  }, {
     "id" : "a1791a1f-b3ab-4dbd-9bdf-e93aef631bd7",
     "name" : "tazama-conditions",
     "path" : "/tazama-conditions",
@@ -650,6 +810,52 @@
     "realmRoles" : [ "GET_V1_GETREPORTBYMSGID" ],
     "clientRoles" : { }
   }, {
+    "id" : "4efc684c-cd50-4d4b-89f3-31f2204e6c8c",
+    "name" : "tazama-tcs",
+    "path" : "/tazama-tcs",
+    "subGroups" : [ {
+      "id" : "6a046288-87b0-427b-901b-428b8cac58a2",
+      "name" : "approver",
+      "path" : "/tazama-tcs/approver",
+      "parentId" : "4efc684c-cd50-4d4b-89f3-31f2204e6c8c",
+      "subGroups" : [ ],
+      "attributes" : { },
+      "realmRoles" : [ "approver" ],
+      "clientRoles" : { }
+    }, {
+      "id" : "f44c2f59-2e72-42ed-a85a-f513d7eba55f",
+      "name" : "editor",
+      "path" : "/tazama-tcs/editor",
+      "parentId" : "4efc684c-cd50-4d4b-89f3-31f2204e6c8c",
+      "subGroups" : [ ],
+      "attributes" : { },
+      "realmRoles" : [ "editor" ],
+      "clientRoles" : { }
+    }, {
+      "id" : "050f71e1-b3e1-4ca5-a8d7-9b18c8427d5f",
+      "name" : "exporter",
+      "path" : "/tazama-tcs/exporter",
+      "parentId" : "4efc684c-cd50-4d4b-89f3-31f2204e6c8c",
+      "subGroups" : [ ],
+      "attributes" : { },
+      "realmRoles" : [ "exporter" ],
+      "clientRoles" : { }
+    }, {
+      "id" : "cf803369-2677-4391-91bf-b0bc611b337d",
+      "name" : "publisher",
+      "path" : "/tazama-tcs/publisher",
+      "parentId" : "4efc684c-cd50-4d4b-89f3-31f2204e6c8c",
+      "subGroups" : [ ],
+      "attributes" : { },
+      "realmRoles" : [ "publisher" ],
+      "clientRoles" : { }
+    } ],
+    "attributes" : {
+      "TENANT_ID" : [ "DEFAULT" ]
+    },
+    "realmRoles" : [ ],
+    "clientRoles" : { }
+  }, {
     "id" : "8922d510-3e54-45eb-9001-d06241754dab",
     "name" : "tazama-tms",
     "path" : "/tazama-tms",
@@ -678,6 +884,61 @@
     } ],
     "attributes" : { },
     "realmRoles" : [ "POST_V1_EVALUATE_ISO20022_PACS_008_001_10", "POST_V1_EVALUATE_ISO20022_PACS_002_001_12", "POST_V1_EVALUATE_ISO20022_PAIN_013_001_09", "POST_V1_EVALUATE_ISO20022_PAIN_001_001_11" ],
+    "clientRoles" : { }
+  }, {
+    "id" : "b4a37d11-2d79-42c2-bbbe-1952345aa202",
+    "name" : "tazama-trs",
+    "path" : "/tazama-trs",
+    "subGroups" : [ {
+      "id" : "4c5cc7ff-c485-4603-8719-282e30de6156",
+      "name" : "approver",
+      "path" : "/tazama-trs/approver",
+      "parentId" : "b4a37d11-2d79-42c2-bbbe-1952345aa202",
+      "subGroups" : [ ],
+      "attributes" : { },
+      "realmRoles" : [ "trs_approver" ],
+      "clientRoles" : { }
+    }, {
+      "id" : "a6f5ddbe-e5ab-48c4-928d-31f97536147c",
+      "name" : "data-engineer-approver",
+      "path" : "/tazama-trs/data-engineer-approver",
+      "parentId" : "b4a37d11-2d79-42c2-bbbe-1952345aa202",
+      "subGroups" : [ ],
+      "attributes" : { },
+      "realmRoles" : [ ],
+      "clientRoles" : { }
+    }, {
+      "id" : "55bcf246-4419-4fc4-8c67-003c2d7a2900",
+      "name" : "data-engineer-editor",
+      "path" : "/tazama-trs/data-engineer-editor",
+      "parentId" : "b4a37d11-2d79-42c2-bbbe-1952345aa202",
+      "subGroups" : [ ],
+      "attributes" : { },
+      "realmRoles" : [ ],
+      "clientRoles" : { }
+    }, {
+      "id" : "6ee61261-ed44-4227-9054-3442532350b8",
+      "name" : "editor",
+      "path" : "/tazama-trs/editor",
+      "parentId" : "b4a37d11-2d79-42c2-bbbe-1952345aa202",
+      "subGroups" : [ ],
+      "attributes" : { },
+      "realmRoles" : [ "trs_editor" ],
+      "clientRoles" : { }
+    }, {
+      "id" : "88e4753a-f60e-4a29-a432-db28f278a522",
+      "name" : "publisher",
+      "path" : "/tazama-trs/publisher",
+      "parentId" : "b4a37d11-2d79-42c2-bbbe-1952345aa202",
+      "subGroups" : [ ],
+      "attributes" : { },
+      "realmRoles" : [ "trs_publisher" ],
+      "clientRoles" : { }
+    } ],
+    "attributes" : {
+      "TENANT_ID" : [ "DEFAULT" ]
+    },
+    "realmRoles" : [ ],
     "clientRoles" : { }
   } ],
   "defaultRole" : {
@@ -721,6 +982,70 @@
   "webAuthnPolicyPasswordlessAcceptableAaguids" : [ ],
   "webAuthnPolicyPasswordlessExtraOrigins" : [ ],
   "users" : [ {
+    "id" : "40eac1fe-cbae-4e75-8c46-8b64aeb311d2",
+    "createdTimestamp" : 1776329370440,
+    "username" : "cms-administrator@tazama.org",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "cms",
+    "lastName" : "administrator",
+    "email" : "cms-administrator@tazama.org",
+    "credentials" : [ ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-tazama" ],
+    "notBefore" : 0,
+    "groups" : [ "/tazama-cms/CMS_ADMIN" ]
+  }, {
+    "id" : "8958bbd1-655f-4129-9293-87f85c74c273",
+    "createdTimestamp" : 1776329325836,
+    "username" : "cms-compliance-officer@tazama.org",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "cms",
+    "lastName" : "compliance-officer",
+    "email" : "cms-compliance-officer@tazama.org",
+    "credentials" : [ ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-tazama" ],
+    "notBefore" : 0,
+    "groups" : [ "/tazama-cms/CMS_COMPLIANCE_OFFICER" ]
+  }, {
+    "id" : "5fb927ab-d31b-46f7-87c9-0a069b8df9ee",
+    "createdTimestamp" : 1776329223395,
+    "username" : "cms-investigator@tazama.org",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "cms",
+    "lastName" : "investigator",
+    "email" : "cms-investigator@tazama.org",
+    "credentials" : [ ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-tazama" ],
+    "notBefore" : 0,
+    "groups" : [ "/tazama-cms/CMS_INVESTIGATOR" ]
+  }, {
+    "id" : "0a6ffb8a-18fd-485f-a6b3-928510c3afbf",
+    "createdTimestamp" : 1776329298934,
+    "username" : "cms-supervisor@tazama.org",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "cms",
+    "lastName" : "supervisor",
+    "email" : "cms-supervisor@tazama.org",
+    "credentials" : [ ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-tazama" ],
+    "notBefore" : 0,
+    "groups" : [ "/tazama-cms/CMS_SUPERVISOR" ]
+  }, {
     "id" : "1c62ea61-ac86-4a8d-8720-0bf503124ede",
     "createdTimestamp" : 1721648133968,
     "username" : "service-account-auth-lib-client",
@@ -761,6 +1086,98 @@
     "realmRoles" : [ "default-roles-tazama" ],
     "notBefore" : 0,
     "groups" : [ "/tazama-conditions", "/tazama-config", "/tazama-reports", "/tazama-tms" ]
+  }, {
+    "id" : "02643269-6ade-45d8-af20-c4a5d5d8e552",
+    "createdTimestamp" : 1776319928982,
+    "username" : "tcs-approver@tazama.org",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "tcs",
+    "lastName" : "approver",
+    "email" : "tcs-approver@tazama.org",
+    "credentials" : [ {
+      "id" : "37d0b49e-3154-47f3-bf0d-5e2525a9e65b",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1776319960765,
+      "secretData" : "{\"value\":\"o2WV7OFstE065MgOi40OJrwq9EVwCCoHBL25+yEOxrI=\",\"salt\":\"Nj//xCb48EYytYH2a3+m2Q==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-tazama" ],
+    "notBefore" : 0,
+    "groups" : [ "/tazama-tcs/approver" ]
+  }, {
+    "id" : "1b2392fa-01a1-4e85-bfc9-17fbc3da16a5",
+    "createdTimestamp" : 1776319863775,
+    "username" : "tcs-editor@tazama.org",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "tcs",
+    "lastName" : "editor",
+    "email" : "tcs-editor@tazama.org",
+    "credentials" : [ {
+      "id" : "8861c9d6-bf5a-4828-92f1-5dddf05f3c32",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1776319876944,
+      "secretData" : "{\"value\":\"vxOBMHrn8Aug1aYMOHgnw4U/dZOEwGCSlzsqaQ/RMhY=\",\"salt\":\"rmHSUrzHyPRzqomI/fzElQ==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-tazama" ],
+    "notBefore" : 0,
+    "groups" : [ "/tazama-tcs/editor" ]
+  }, {
+    "id" : "ee60f68f-d3bb-4baa-9b6e-65c34d637368",
+    "createdTimestamp" : 1776320058302,
+    "username" : "tcs-exporter@tazama.org",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "tcs",
+    "lastName" : "exporter",
+    "email" : "tcs-exporter@tazama.org",
+    "credentials" : [ {
+      "id" : "d524e208-03d3-4d37-bef4-99582a84c407",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1776320071722,
+      "secretData" : "{\"value\":\"zTnJwk9ket6SHhDUrda2qVI1ZBmgv9xCf1GzlmLyAyo=\",\"salt\":\"YmJEGX8r67ZPL+BXE+IXNQ==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-tazama" ],
+    "notBefore" : 0,
+    "groups" : [ "/tazama-tcs/exporter" ]
+  }, {
+    "id" : "3e1e219c-a985-43a9-a51f-1596599a6215",
+    "createdTimestamp" : 1776319998589,
+    "username" : "tcs-publisher@tazama.org",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "tcs",
+    "lastName" : "publisher",
+    "email" : "tcs-publisher@tazama.org",
+    "credentials" : [ {
+      "id" : "08303482-a7f5-4422-9460-c7afa6bb56c4",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1776320013301,
+      "secretData" : "{\"value\":\"aWKvwEpsqIuut/tyTXNyQOsxBcU+8YUvdU0mAafrA9Y=\",\"salt\":\"+4JF/U0eTacYp5zP2AszEg==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-tazama" ],
+    "notBefore" : 0,
+    "groups" : [ "/tazama-tcs/publisher" ]
   }, {
     "id" : "41959836-1c5a-4c4b-b76c-273aae29007c",
     "createdTimestamp" : 1758793456337,
@@ -803,6 +1220,75 @@
     "realmRoles" : [ "default-roles-tazama" ],
     "notBefore" : 0,
     "groups" : [ "/tazama-conditions/tenant-002", "/tazama-tms/tenant-002", "/tazama-config/tenant-002", "/tazama-reports/tenant-002" ]
+  }, {
+    "id" : "80c36cdf-303a-46a1-94a5-bb09b67014b5",
+    "createdTimestamp" : 1776319728524,
+    "username" : "trs-approver@tazama.org",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "trs",
+    "lastName" : "approver",
+    "email" : "trs-approver@tazama.org",
+    "credentials" : [ {
+      "id" : "4ecd509a-8d17-4bf9-b3d0-0017e1f3dbef",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1776319745415,
+      "secretData" : "{\"value\":\"ci8dJnbTz3woydZ4BuV6koIb6T3J98bQeyCGkfIMeM0=\",\"salt\":\"SRXIRA6BGxaHCkoNNXeHYg==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-tazama" ],
+    "notBefore" : 0,
+    "groups" : [ "/tazama-trs/approver" ]
+  }, {
+    "id" : "b8229220-c1b1-4f88-b6a3-84b4f2dabf91",
+    "createdTimestamp" : 1776315272615,
+    "username" : "trs-editor@tazama.org",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "trs",
+    "lastName" : "editor",
+    "email" : "trs-editor@tazama.org",
+    "credentials" : [ {
+      "id" : "c2b1d226-8eaf-411e-8816-9803af819c33",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1776315313977,
+      "secretData" : "{\"value\":\"hR0qxSnjYkqjjSUc1QZxRnM15nWbM+ve/fUBSVhfJnk=\",\"salt\":\"SqyVXQLGR40z54ChCsxveQ==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-tazama" ],
+    "notBefore" : 0,
+    "groups" : [ "/tazama-trs/editor" ]
+  }, {
+    "id" : "5b9950e7-ba97-45d1-b823-31ccbbc68c13",
+    "createdTimestamp" : 1776319785373,
+    "username" : "trs-publisher@tazama.org",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "trs",
+    "lastName" : "publisher",
+    "email" : "trs-publisher@tazama.org",
+    "credentials" : [ {
+      "id" : "b4430464-f4bb-4add-b14e-713ac88e9eac",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1776319806865,
+      "secretData" : "{\"value\":\"kD/jwOZ2PBzKD35htTt/+IS7l6o3NyIZEKcYt8cQhHM=\",\"salt\":\"On9vbxvR6PvaxOBkcNZigg==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-tazama" ],
+    "notBefore" : 0,
+    "groups" : [ "/tazama-trs/publisher" ]
   } ],
   "scopeMappings" : [ {
     "clientScope" : "offline_access",
@@ -1672,7 +2158,7 @@
       "subType" : "anonymous",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "oidc-full-name-mapper", "saml-user-property-mapper", "saml-role-list-mapper", "oidc-address-mapper", "saml-user-attribute-mapper", "oidc-usermodel-property-mapper", "oidc-usermodel-attribute-mapper", "oidc-sha256-pairwise-sub-mapper" ]
+        "allowed-protocol-mapper-types" : [ "saml-user-attribute-mapper", "oidc-usermodel-property-mapper", "oidc-usermodel-attribute-mapper", "saml-user-property-mapper", "oidc-address-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-full-name-mapper", "saml-role-list-mapper" ]
       }
     }, {
       "id" : "6f334a33-13e2-4874-a21d-6f3d3f17c562",
@@ -1704,7 +2190,7 @@
       "subType" : "authenticated",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "saml-user-property-mapper", "oidc-sha256-pairwise-sub-mapper", "saml-role-list-mapper", "oidc-full-name-mapper", "oidc-usermodel-property-mapper", "oidc-address-mapper", "oidc-usermodel-attribute-mapper", "saml-user-attribute-mapper" ]
+        "allowed-protocol-mapper-types" : [ "oidc-sha256-pairwise-sub-mapper", "oidc-full-name-mapper", "oidc-usermodel-attribute-mapper", "saml-role-list-mapper", "saml-user-property-mapper", "oidc-address-mapper", "oidc-usermodel-property-mapper", "saml-user-attribute-mapper" ]
       }
     } ],
     "org.keycloak.keys.KeyProvider" : [ {
