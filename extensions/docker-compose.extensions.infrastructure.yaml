@@ -51,7 +51,8 @@ services:
     env_file:
       - .env
       - ./env/cms.env
-    command: sh /home/app/migrate.sh
+    entrypoint: ["sh", "/home/app/migrate.sh"]
+    command: []
     restart: "no"
 
   flowable:
