@@ -43,7 +43,7 @@ services:
       - ./couchdb/migration/local.ini:/opt/couchdb/etc/local.d/local.ini
 
   migrate:
-    image: tazamaorg/case-management-system-backend:${TAZAMA_VERSION}
+    image: tazamaorg/case-management-system-migrate:${TAZAMA_VERSION}
     container_name: cms-migrations
     depends_on:
       postgres:
@@ -51,8 +51,7 @@ services:
     env_file:
       - .env
       - ./env/cms.env
-    entrypoint: ["sh", "/home/app/migrate.sh"]
-    command: []
+    command: sh /home/app/migrate.sh
     restart: "no"
 
   flowable:
