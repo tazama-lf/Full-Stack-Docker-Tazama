@@ -896,7 +896,7 @@
       "parentId" : "b4a37d11-2d79-42c2-bbbe-1952345aa202",
       "subGroups" : [ ],
       "attributes" : { },
-      "realmRoles" : [ "trs_approver" ],
+      "realmRoles" : [ "trs_approver", "approver" ],
       "clientRoles" : { }
     }, {
       "id" : "a6f5ddbe-e5ab-48c4-928d-31f97536147c",
@@ -923,16 +923,11 @@
       "parentId" : "b4a37d11-2d79-42c2-bbbe-1952345aa202",
       "subGroups" : [ ],
       "attributes" : { },
-      "realmRoles" : [ "trs_editor" ],
+      "realmRoles" : [ "trs_editor", "editor" ],
       "clientRoles" : { }
     }, {
       "id" : "88e4753a-f60e-4a29-a432-db28f278a522",
-      "name" : "publisher",
-      "path" : "/tazama-trs/publisher",
-      "parentId" : "b4a37d11-2d79-42c2-bbbe-1952345aa202",
-      "subGroups" : [ ],
-      "attributes" : { },
-      "realmRoles" : [ "trs_publisher" ],
+      "realmRoles" : [ "trs_publisher", "publisher" ],
       "clientRoles" : { }
     } ],
     "attributes" : {

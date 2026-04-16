@@ -14,12 +14,19 @@
     Run from infra/aws/scripts/ or anywhere - paths are resolved relative
     to this script's location.
 
+.PARAMETER NoPull
+    Skip pulling latest Docker images (--pull always). Useful when retrying
+    after a failed start where images are already present on the host.
+
 .EXAMPLE
     .\deploy-biar.ps1
+    .\deploy-biar.ps1 -NoPull
 #>
 
 [CmdletBinding()]
-param()
+param(
+    [switch]$NoPull
+)
 
 . "$PSScriptRoot\helpers.ps1"
 
@@ -61,7 +68,8 @@ Write-Host '[Server C] .env overlay applied.' -ForegroundColor Green
 # -- 4. Start biar stack -------------------------------------------------------
 Write-Host '[Server C] Starting tazama-biar stack...'
 
-Invoke-RemoteCommand -InstanceId $idC -Command "cd $Script:RemoteRepo/biar && docker compose -p tazama-biar -f ./docker-compose.biar.infrastructure.yaml up -d --pull always"
+$pullFlag = if ($NoPull) { '' } else { '--pull always' }
+Invoke-RemoteCommand -InstanceId $idC -Command "cd $Script:RemoteRepo/biar && docker compose -p tazama-biar -f ./docker-compose.biar.infrastructure.yaml up -d $pullFlag".Trim()
 
 Write-Host ''
 Write-Host '[Server C] tazama-biar is up.' -ForegroundColor Green
