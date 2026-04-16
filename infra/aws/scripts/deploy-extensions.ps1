@@ -50,7 +50,7 @@ Copy-ToRemote -InstanceId $idA -LocalPath $localExtEnv -RemotePath "$Script:Remo
 # Pull latest so any changes to extensions compose files / env are picked up.
 Write-Host ''
 Write-Host '[Server A] Pulling latest repo...'
-Invoke-RemoteCommand -InstanceId $idA -Command "cd $Script:RemoteRepo && git fetch origin tazama/feat/mono-repo-phased-deployment && git checkout tazama/feat/mono-repo-phased-deployment && git pull origin tazama/feat/mono-repo-phased-deployment"
+Invoke-RemoteCommand -InstanceId $idA -Command "cd $Script:RemoteRepo && git fetch origin tazama/feat/mono-repo-phased-deployment && git checkout tazama/feat/mono-repo-phased-deployment && git reset --hard origin/tazama/feat/mono-repo-phased-deployment"
 Write-Host '[Server A] Repo up to date.' -ForegroundColor Green
 
 Write-Host '[Server A] Adding DEMS + DEAPI to tazama-core...'
@@ -69,7 +69,7 @@ Wait-Bootstrap -InstanceId $idB -ServerName 'Server B'
 # Switch to the correct mono-repo branch and pull latest so all compose/config
 # changes are present.
 Write-Host '[Server B] Ensuring correct repo branch and pulling latest...'
-Invoke-RemoteCommand -InstanceId $idB -Command "cd $Script:RemoteRepo && git fetch origin tazama/feat/mono-repo-phased-deployment && git checkout tazama/feat/mono-repo-phased-deployment && git pull origin tazama/feat/mono-repo-phased-deployment"
+Invoke-RemoteCommand -InstanceId $idB -Command "cd $Script:RemoteRepo && git fetch origin tazama/feat/mono-repo-phased-deployment && git checkout tazama/feat/mono-repo-phased-deployment && git reset --hard origin/tazama/feat/mono-repo-phased-deployment"
 Write-Host '[Server B] Repo up to date.' -ForegroundColor Green
 
 # -- 4. Server B: copy .env ---------------------------------------------------
