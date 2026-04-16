@@ -1,203 +1,188 @@
 #!/bin/bash
-# filepath: ./tazama.sh
+# filepath: ./tazama-extensions.sh
 
-set -e
+cd "$(dirname "$0")"
 
-# Color codes for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+PGADMIN=false
+BUILD_TYPE=""
+API_BUILD=""
 
-# Function to print colored output
-print_color() {
-    local color=$1
-    shift
-    echo -e "${color}$@${NC}"
+menu() {
+    while true; do
+        clear
+        echo ""
+        echo "============================================================"
+        echo " Tazama Extensions Launcher"
+        echo "============================================================"
+        echo ""
+        echo " Server A pre-flight  (run on Server A before Server B):"
+        echo "   1. Deploy DEMS + DEAPI  (GitHub builds)"
+        echo "   2. Deploy DEMS + DEAPI  (DockerHub images)"
+        echo ""
+        echo " Server B extensions stack:"
+        echo "   3. Deploy extensions    (GitHub builds)"
+        echo "   4. Deploy extensions    (DockerHub images)"
+        echo ""
+        echo "   5. Utilities / teardown"
+        echo ""
+        read -rp " Select option (1-5), or (q)uit: " choice
+
+        case "$choice" in
+            q|Q) quit ;;
+            1) API_BUILD="dev"; check_core ;;
+            2) API_BUILD="hub"; check_core ;;
+            3) BUILD_TYPE="dev"; pgadmin_prompt ;;
+            4) BUILD_TYPE="hub"; pgadmin_prompt ;;
+            5) utils ;;
+        esac
+    done
 }
 
-# Initialize variables
-volumes="[ ]"
-auth="[ ]"
-basiclogs="[ ]"
-relay="[ ]"
-ui="[ ]"
-natsutils="[ ]"
-batchppa="[ ]"
-cms="[ ]"
-trs="[ ]"
-tcs="[ ]"
-deapi_dems="[ ]"
-opensearch="[ ]"
-# These options default to enabled
-pgadmin="[X]"
-hasura="[X]"
-
-IS_GITHUB_DEPLOYMENT=0
-IS_FULL_DEPLOYMENT=0
-IS_MULTITENANT_DEPLOYMENT=0
-
-# Extended addons are available in GitHub and Public (DockerHub) deployments.
-is_extended_addons_deployment() {
-    [[ $IS_GITHUB_DEPLOYMENT -eq 1 || ( $IS_FULL_DEPLOYMENT -eq 0 && $IS_MULTITENANT_DEPLOYMENT -eq 0 ) ]]
-}
-
-# Function to toggle addon
-toggle_addon() {
-    local addon_name=$1
-    local current_value="${!addon_name}"
-    
-    if [[ "$current_value" == "[ ]" ]]; then
-        eval "$addon_name='[X]'"
-    else
-        eval "$addon_name='[ ]'"
+# ---------------------------------------------------------------
+# Server A pre-flight: DEMS + DEAPI
+# ---------------------------------------------------------------
+check_core() {
+    if ! docker compose -p tazama-core ps --status running -q 2>/dev/null | grep -q .; then
+        echo ""
+        echo " ERROR: tazama-core is not running."
+        echo "        Start tazama-core.sh on this machine first, then retry."
+        echo ""
+        read -rp " Press Enter to continue..."
+        return
     fi
+
+    if [[ "$API_BUILD" == "dev" ]]; then
+        apicmd="docker compose -p tazama-core -f ./docker-compose.dev.extensions.apis.yaml"
+    else
+        apicmd="docker compose -p tazama-core -f ./docker-compose.hub.extensions.apis.yaml"
+    fi
+
+    echo ""
+    echo " Running: $apicmd up -d"
+    $apicmd up -d
+    done_msg
 }
 
-# Auth is required for selected extended addons
-has_auth_required_addons_enabled() {
-    [[ "$cms" == "[X]" || "$trs" == "[X]" || "$tcs" == "[X]" || "$deapi_dems" == "[X]" || "$opensearch" == "[X]" ]]
-}
-
-# OpenSearch is required for selected extended addons
-has_opensearch_required_addons_enabled() {
-    [[ "$cms" == "[X]" || "$trs" == "[X]" || "$tcs" == "[X]" ]]
-}
-
-# Main menu
-show_main_menu() {
+# ---------------------------------------------------------------
+# Server B extensions stack
+# ---------------------------------------------------------------
+pgadmin_prompt() {
     clear
     echo ""
-    print_color $BLUE "Select docker deployment type:"
+    echo " Optional services:"
     echo ""
-    echo "1. Public (GitHub)"
-    echo "2. Public (DockerHub)"
-    echo "3. Full-service (DockerHub)"
-    echo "4. Multi-Tenant Public (DockerHub)"
-    echo "5. Docker Utilities"
-    echo "6. Database Utilities"
-    echo "7. Consoles"
-    echo ""
-    echo "Select option (1-7), or (q)uit:"
-}
-
-# Addons menu
-show_addons_menu() {
-    clear
-    echo ""
-    print_color $BLUE "Enable optional deployment configuration addons:"
-    echo ""
-    print_color $CYAN "CORE ADDONS:"
-    echo ""
-    echo "1. $auth Authentication"
-    echo "2. $relay Relay services (NATS)"
-    echo "3. $basiclogs Basic Logs"
-    if [[ $IS_MULTITENANT_DEPLOYMENT -ne 1 ]]; then
-        echo "4. $ui Demo UI"
-    fi
-    echo ""
-    print_color $CYAN "UTILITY ADDONS:"
-    echo ""
-    echo "5. $natsutils NATS Utilities"
-    echo "6. $batchppa Batch PPA"
-    echo "7. $pgadmin pgAdmin for PostgreSQL"
-    echo "8. $hasura Hasura GraphQL API for PostgreSQL"
-    if is_extended_addons_deployment; then
-        echo ""
-        print_color $CYAN "EXTENDED ADDONS (AUTH REQUIRED):"
-        echo ""
-        echo "9.  $cms CMS"
-        echo "10. $trs TRS"
-        echo "11. $tcs TCS"
-        echo "12. $deapi_dems DEAPI & DEMS"
-        echo "13. $opensearch OpenSearch"
-    fi
-    echo ""
-    if is_extended_addons_deployment; then
-        echo "Toggle addons (1-13), (a)pply current selection, (r)eturn, or (q)uit"
+    read -rp " Include pgAdmin? [y/N]: " addon
+    if [[ "${addon,,}" == "y" ]]; then
+        PGADMIN=true
     else
-        echo "Toggle addons (1-8), (a)pply current selection, (r)eturn, or (q)uit"
+        PGADMIN=false
     fi
-}
 
-# Build docker compose command
-build_docker_command() {
-    local cmd="docker compose -f docker-compose.base.infrastructure.yaml -f docker-compose.base.override.yaml"
-    
-    # Add core processors and configuration
-    if [[ $IS_GITHUB_DEPLOYMENT -eq 1 ]]; then
-        cmd="$cmd -f docker-compose.dev.cfg.yaml -f docker-compose.dev.core.yaml"
+    # Auto-copy public key for TCS/TRS volume mounts
+    mkdir -p ./auth
+    if [[ ! -f ./auth/test-public-key.pem ]]; then
+        if [[ -f ../core/auth/test-public-key.pem ]]; then
+            cp -f ../core/auth/test-public-key.pem ./auth/test-public-key.pem
+            echo " Copied test-public-key.pem from core."
+        else
+            echo ""
+            echo " ERROR: ../core/auth/test-public-key.pem not found."
+            echo "        Place the public key in ./auth/ and retry."
+            echo ""
+            read -rp " Press Enter to continue..."
+            return
+        fi
+    fi
+
+    cmd="docker compose -p tazama-extensions"
+    cmd="$cmd -f ./docker-compose.extensions.infrastructure.yaml"
+    if [[ "$BUILD_TYPE" == "dev" ]]; then
+        cmd="$cmd -f ./docker-compose.dev.extensions.yaml"
     else
-        if [[ $IS_MULTITENANT_DEPLOYMENT -eq 1 ]]; then
-            cmd="$cmd -f docker-compose.multitenant.cfg.yaml"
-        elif [[ $IS_FULL_DEPLOYMENT -eq 1 ]]; then
-            cmd="$cmd -f docker-compose.full.cfg.yaml"
-        else
-            cmd="$cmd -f docker-compose.hub.cfg.yaml"
-        fi
-        
-        cmd="$cmd -f docker-compose.hub.core.yaml"
-        
-        if [[ $IS_FULL_DEPLOYMENT -eq 1 ]]; then
-            cmd="$cmd -f docker-compose.full.rules.yaml"
-        else
-            cmd="$cmd -f docker-compose.hub.rules.yaml"
-        fi
+        cmd="$cmd -f ./docker-compose.hub.extensions.yaml"
     fi
-    
-    # Add authentication services
-    if [[ "$auth" == "[X]" ]]; then
-        cmd="$cmd -f docker-compose.base.auth.yaml"
-        if [[ $IS_GITHUB_DEPLOYMENT -eq 1 ]]; then
-            cmd="$cmd -f docker-compose.dev.auth.yaml"
-        fi
+    if [[ "$PGADMIN" == "true" ]]; then
+        cmd="$cmd -f ./docker-compose.utils.pgadmin.yaml"
     fi
-    
-    # Add relay services
-    if [[ "$relay" == "[X]" ]]; then
-        if [[ $IS_GITHUB_DEPLOYMENT -eq 1 ]]; then
-            cmd="$cmd -f docker-compose.dev.relay.yaml"
-        elif [[ $IS_MULTITENANT_DEPLOYMENT -eq 1 ]]; then
-            cmd="$cmd -f docker-compose.multitenant.relay.yaml"
-        else
-            cmd="$cmd -f docker-compose.hub.relay.yaml"
-        fi
-    fi
-    
-    # Add basic logging
-    if [[ "$basiclogs" == "[X]" ]]; then
-        if [[ $IS_GITHUB_DEPLOYMENT -eq 1 ]]; then
-            cmd="$cmd -f docker-compose.dev.logs.base.yaml"
-        else
-            cmd="$cmd -f docker-compose.hub.logs.base.yaml"
-        fi
-    fi
-    
-    # Add utility addons
-    [[ "$ui" == "[X]" ]] && cmd="$cmd -f docker-compose.hub.ui.yaml"
-    [[ "$natsutils" == "[X]" ]] && cmd="$cmd -f docker-compose.utils.nats-utils.yaml"
-    [[ "$batchppa" == "[X]" ]] && cmd="$cmd -f docker-compose.utils.batch-ppa.yaml"
-    [[ "$pgadmin" == "[X]" ]] && cmd="$cmd -f docker-compose.utils.pgadmin.yaml"
-    [[ "$hasura" == "[X]" ]] && cmd="$cmd -f docker-compose.utils.hasura.yaml"
 
-    # Extended addons for GitHub and Public (DockerHub)
-    if is_extended_addons_deployment; then
-        [[ "$cms" == "[X]" ]] && cmd="$cmd -f docker-compose.cms.yaml"
-        [[ "$trs" == "[X]" ]] && cmd="$cmd -f docker-compose.trs.yaml"
-        [[ "$tcs" == "[X]" ]] && cmd="$cmd -f docker-compose.tcs.yaml"
-        [[ "$deapi_dems" == "[X]" ]] && cmd="$cmd -f docker-compose-deapi-dems.yaml"
-        [[ "$opensearch" == "[X]" ]] && cmd="$cmd -f docker-compose.opensearch.yaml"
-    fi
-    
-    echo "$cmd"
+    echo ""
+    echo " Running: $cmd up -d"
+    $cmd up -d
+    done_msg
 }
 
-# Apply configuration and deploy
-apply_configuration() {
-    if [[ "$tcs" == "[X]" && "$deapi_dems" != "[X]" ]]; then
-        print_color $YELLOW "TCS requires DEAPI & DEMS. Enabling DEAPI & DEMS automatically."
+# ---------------------------------------------------------------
+# Utilities
+# ---------------------------------------------------------------
+utils() {
+    while true; do
+        clear
+        echo ""
+        echo " Utilities:"
+        echo "   1. Tear down extensions stack  (Server B)"
+        echo "   2. Remove DEMS + DEAPI         (Server A)"
+        echo "   3. Tear down all"
+        echo "   4. Start pgAdmin               (Server B)"
+        echo "   b. Back"
+        echo ""
+        read -rp " Select option: " util
+
+        case "$util" in
+            b|B) return ;;
+            1) down_extensions ;;
+            2) down_apis ;;
+            3) down_all ;;
+            4) start_pgadmin ;;
+        esac
+    done
+}
+
+down_extensions() {
+    docker compose -p tazama-extensions \
+        -f ./docker-compose.extensions.infrastructure.yaml \
+        -f ./docker-compose.dev.extensions.yaml \
+        -f ./docker-compose.utils.pgadmin.yaml \
+        down --volumes
+    done_msg
+}
+
+down_apis() {
+    docker compose -p tazama-core \
+        -f ./docker-compose.dev.extensions.apis.yaml \
+        down --remove-orphans
+    done_msg
+}
+
+down_all() {
+    docker compose -p tazama-extensions \
+        -f ./docker-compose.extensions.infrastructure.yaml \
+        -f ./docker-compose.dev.extensions.yaml \
+        -f ./docker-compose.utils.pgadmin.yaml \
+        down --volumes
+    docker compose -p tazama-core \
+        -f ./docker-compose.dev.extensions.apis.yaml \
+        down --remove-orphans
+    done_msg
+}
+
+start_pgadmin() {
+    docker compose -p tazama-extensions \
+        -f ./docker-compose.utils.pgadmin.yaml \
+        up -d
+    done_msg
+}
+
+done_msg() {
+    echo ""
+    echo " Done."
+    read -rp " Press Enter to continue..."
+}
+
+quit() {
+    exit 0
+}
+
+menu
         deapi_dems="[X]"
     fi
 

@@ -1,19 +1,32 @@
+x-common-config: &ozone-common-config
+  image: apache/ozone:2.0.0
+  env_file:
+    - docker-config
+  networks:
+    - tazama_default
+
+x-replication: &ozone-replication
+  OZONE-SITE.XML_ozone.server.default.replication: ${OZONE_REPLICATION_FACTOR:-1}
+
 services:
+
   tika:
     image: logicalspark/docker-tikaserver:latest
     container_name: biar-tika
     restart: unless-stopped
     ports:
-      - "${TIKA_PORT:-9998}:9998"
+      - "9998:9998"
     environment:
       JAVA_OPTS: "-Xms256m -Xmx512m"
+    networks:
+      - tazama_default
 
   solr:
     image: solr:9
     container_name: biar-solr
     restart: unless-stopped
     ports:
-      - "${SOLR_PORT:-8983}:8983"
+      - "8983:8983"
     environment:
       SOLR_HEAP: 512m
     volumes:
@@ -22,13 +35,19 @@ services:
       - sh
       - -c
       - "solr-precreate biar_docs /opt/solr/server/solr/configsets/sample_techproducts_configs"
+    networks:
+      - tazama_default
 
   nifi:
-    image: apache/nifi:1.24.0
+    build:
+      context: .
+      dockerfile: DOCKERFILE
+    image: custom-nifi:1.24.0
     container_name: biar-nifi
+    hostname: nifi
     restart: unless-stopped
     ports:
-      - "${NIFI_PORT:-8088}:8088"
+      - "8088:8088"
     environment:
       NIFI_WEB_HTTP_PORT: 8088
       NIFI_WEB_HTTP_HOST: 0.0.0.0
@@ -36,6 +55,9 @@ services:
       SINGLE_USER_CREDENTIALS_PASSWORD: admin123456789
       NIFI_JVM_HEAP_INIT: 512m
       NIFI_JVM_HEAP_MAX: 1g
+      PB_BUCKET: tazama
+      PB_SENSITIVE: "false"
+      PB_CONTEXT_NAME: "Parameters"
     volumes:
       - nifi_conf:/opt/nifi/nifi-current/conf
       - nifi_state:/opt/nifi/nifi-current/state
@@ -43,80 +65,90 @@ services:
       - nifi_flowfile:/opt/nifi/nifi-current/flowfile_repository
       - nifi_content:/opt/nifi/nifi-current/content_repository
       - nifi_provenance:/opt/nifi/nifi-current/provenance_repository
+    networks:
+      - tazama_default
 
   scm:
-    image: apache/ozone:2.0.0
-    command: ["ozone","scm"]
+    <<: *ozone-common-config
+    container_name: ozone-scm-1
     ports:
-      - "${OZONE_SCM_PORT:-9876}:9876"
+      - "9876:9876"
+      - "9860:9860"
     environment:
-      OZONE-SITE.XML_hdds.datanode.dir: "/data/hdds"
-      OZONE-SITE.XML_ozone.metadata.dirs: "/data/metadata"
-      OZONE-SITE.XML_ozone.scm.names: "scm"
-      OZONE-SITE.XML_ozone.scm.client.address: "scm"
-      OZONE-SITE.XML_ozone.scm.block.client.address: "scm"
-      OZONE-SITE.XML_ozone.scm.pipeline.owner.container.count: "1"
-      OZONE-SITE.XML_ozone.scm.ratis.pipeline.limit: "1"
       ENSURE_SCM_INITIALIZED: /data/metadata/scm/current/VERSION
-      OZONE-SITE.XML_ozone.om.service.ids: "omServiceIdDefault"
-      OZONE-SITE.XML_ozone.om.nodes.omServiceIdDefault: "om1"
-      OZONE-SITE.XML_ozone.om.node.id: "om1"
-      OZONE-SITE.XML_ozone.om.address.omServiceIdDefault.om1: "om:9862"
+      OZONE-SITE.XML_hdds.scm.safemode.min.datanode: ${OZONE_SAFEMODE_MIN_DATANODES:-1}
+      <<: *ozone-replication
+    command: ["ozone", "scm"]
     volumes:
       - scm_data:/data
 
   om:
-    image: apache/ozone:2.0.0
-    command: ["ozone","om"]
+    <<: *ozone-common-config
+    container_name: ozone-om-1
     ports:
-      - "${OZONE_OM_PORT:-9874}:9874"
+      - "9874:9874"
+      - "9862:9862"
     environment:
-      OZONE-SITE.XML_hdds.datanode.dir: "/data/hdds"
-      OZONE-SITE.XML_ozone.metadata.dirs: "/data/metadata"
-      OZONE-SITE.XML_ozone.om.address: "om"
-      OZONE-SITE.XML_ozone.om.http-address: "om:9874"
-      OZONE-SITE.XML_ozone.scm.names: "scm"
-      OZONE-SITE.XML_ozone.scm.block.client.address: "scm"
-      OZONE-SITE.XML_ozone.scm.client.address: "scm"
       ENSURE_OM_INITIALIZED: /data/metadata/om/current/VERSION
-      OZONE-SITE.XML_ozone.om.service.ids: "omServiceIdDefault"
-      WAITFOR: scm:9876
-      OZONE-SITE.XML_ozone.om.nodes.omServiceIdDefault: "om1"
-      OZONE-SITE.XML_ozone.om.node.id: "om1"
-      OZONE-SITE.XML_ozone.om.address.omServiceIdDefault.om1: "om:9862"
+      <<: *ozone-replication
+    command: ["ozone", "om"]
     volumes:
       - om_data:/data
 
-  datanode:
-    image: apache/ozone:2.0.0
-    command: ["ozone","datanode"]
+  datanode1:
+    <<: *ozone-common-config
+    container_name: ozone-datanode-1
+    hostname: ozone-datanode-1
     environment:
-      OZONE-SITE.XML_hdds.datanode.dir: "/data/hdds"
-      OZONE-SITE.XML_ozone.metadata.dirs: "/data/metadata"
-      OZONE-SITE.XML_ozone.scm.names: "scm"
-      OZONE-SITE.XML_ozone.scm.client.address: "scm"
-      OZONE-SITE.XML_ozone.scm.block.client.address: "scm"
-      OZONE-SITE.XML_ozone.om.address: "om"
+      <<: *ozone-replication
+      OZONE-SITE.XML_hdds.datanode.hostname: ozone-datanode-1
+      OZONE-SITE.XML_hdds.datanode.bind.host: 0.0.0.0
+      OZONE-SITE.XML_hdds.datanode.address: ozone-datanode-1:9864
+      OZONE-SITE.XML_hdds.container.ipc.address: ozone-datanode-1:9859
+      OZONE-SITE.XML_hdds.container.ratis.ipc.address: ozone-datanode-1:9858
+    command: ["ozone", "datanode"]
     volumes:
-      - datanode_data:/data
+      - datanode1_data:/data
+
+  datanode2:
+    <<: *ozone-common-config
+    container_name: ozone-datanode-2
+    hostname: ozone-datanode-2
+    environment:
+      <<: *ozone-replication
+      OZONE-SITE.XML_hdds.datanode.hostname: ozone-datanode-2
+      OZONE-SITE.XML_hdds.datanode.bind.host: 0.0.0.0
+      OZONE-SITE.XML_hdds.datanode.address: ozone-datanode-2:9864
+      OZONE-SITE.XML_hdds.container.ipc.address: ozone-datanode-2:9859
+      OZONE-SITE.XML_hdds.container.ratis.ipc.address: ozone-datanode-2:9858
+    command: ["ozone", "datanode"]
+    volumes:
+      - datanode2_data:/data
+
+  datanode3:
+    <<: *ozone-common-config
+    container_name: ozone-datanode-3
+    hostname: ozone-datanode-3
+    environment:
+      <<: *ozone-replication
+      OZONE-SITE.XML_hdds.datanode.hostname: ozone-datanode-3
+      OZONE-SITE.XML_hdds.datanode.bind.host: 0.0.0.0
+      OZONE-SITE.XML_hdds.datanode.address: ozone-datanode-3:9864
+      OZONE-SITE.XML_hdds.container.ipc.address: ozone-datanode-3:9859
+      OZONE-SITE.XML_hdds.container.ratis.ipc.address: ozone-datanode-3:9858
+    command: ["ozone", "datanode"]
+    volumes:
+      - datanode3_data:/data
 
   recon:
-    image: apache/ozone:2.0.0
-    command: ["ozone","recon"]
+    <<: *ozone-common-config
+    container_name: ozone-recon-1
+    hostname: recon
     ports:
-      - "${OZONE_RECON_PORT:-9888}:9888"
+      - "9888:9888"
     environment:
-      OZONE-SITE.XML_hdds.datanode.dir: "/data/hdds"
-      OZONE-SITE.XML_ozone.metadata.dirs: "/data/metadata"
-      OZONE-SITE.XML_ozone.om.address: "om"
-      OZONE-SITE.XML_ozone.om.http-address: "om:9874"
-      OZONE-SITE.XML_ozone.recon.address: "recon:9891"
-      OZONE-SITE.XML_ozone.recon.db.dir: "/data/metadata/recon"
-      OZONE-SITE.XML_ozone.replication: "1"
-      OZONE-SITE.XML_ozone.scm.block.client.address: "scm"
-      OZONE-SITE.XML_ozone.scm.client.address: "scm"
-      OZONE-SITE.XML_ozone.scm.datanode.id.dir: "/data"
-      OZONE-SITE.XML_ozone.scm.names: "scm"
+      <<: *ozone-replication
+    command: ["ozone", "recon"]
     volumes:
       - recon_data:/data
     depends_on:
@@ -124,26 +156,18 @@ services:
       - om
 
   s3g:
-    image: apache/ozone:2.0.0
-    command: ["ozone","s3g"]
+    <<: *ozone-common-config
+    container_name: ozone-s3g-1
     ports:
-      - "${OZONE_S3G_PORT:-9878}:9878"
+      - "9878:9878"
+      - "19878:19878"
     environment:
-      OZONE-SITE.XML_hdds.datanode.dir: "/data/hdds"
-      OZONE-SITE.XML_ozone.metadata.dirs: "/data/metadata"
-      OZONE-SITE.XML_ozone.om.address: "om"
-      OZONE-SITE.XML_ozone.om.http-address: "om:9874"
-      OZONE-SITE.XML_ozone.scm.names: "scm"
-      OZONE-SITE.XML_ozone.scm.block.client.address: "scm"
-      OZONE-SITE.XML_ozone.scm.client.address: "scm"
-      OZONE-SITE.XML_ozone.s3g.http-address: "0.0.0.0:9878"
-      OZONE-SITE.XML_ozone.s3g.domain.name: "s3g"
-      OZONE-SITE.XML_ozone.s3g.access.key: "admin"
-      OZONE-SITE.XML_ozone.s3g.secret.key: "admin"
+      <<: *ozone-replication
+    command: ["ozone", "s3g"]
     depends_on:
       - scm
       - om
-  
+
   aws-cli:
     image: amazon/aws-cli
     container_name: ozone-aws-cli
@@ -152,12 +176,30 @@ services:
     entrypoint: >
       /bin/sh -c "
       sleep 15;
-      aws configure set aws_access_key_id admin &&
-      aws configure set aws_secret_access_key admin &&
+      aws configure set aws_access_key_id tazama &&
+      aws configure set aws_secret_access_key tazama &&
       aws configure set default.region us-east-1 &&
-      aws --endpoint-url http://s3g:9878 s3 mb s3://biar-bucket || true;
+      aws --endpoint-url http://s3g:9878 s3 mb s3://tazama-bucket || true;
       tail -f /dev/null
       "
+    networks:
+      - tazama_default
+
+  nifi-init:
+    image: curlimages/curl:latest
+    container_name: nifi-init
+    depends_on:
+      - nifi
+    volumes:
+      - ./nifi-init.sh:/nifi-init.sh
+    entrypoint: ["/bin/sh", "/nifi-init.sh"]
+    environment:
+      PB_CONTEXT_NAME: Parameters
+      PB_NAME: pbucket
+      PB_BUCKET: tazama
+      PB_SENSITIVE_FALSE: false
+    networks:
+      - tazama_default
 
 volumes:
   solr_data:
@@ -169,5 +211,10 @@ volumes:
   nifi_provenance:
   scm_data:
   om_data:
-  datanode_data:
+  datanode1_data:
+  datanode2_data:
+  datanode3_data:
   recon_data:
+
+networks:
+  tazama_default:
