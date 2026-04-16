@@ -12,12 +12,19 @@
     Run from infra/aws/scripts/ or anywhere - paths are resolved relative
     to this script's location.
 
+.PARAMETER NoPull
+    Skip pulling latest Docker images (--pull always). Useful when retrying
+    after a failed start where images are already present on the host.
+
 .EXAMPLE
     .\deploy-extensions.ps1
+    .\deploy-extensions.ps1 -NoPull
 #>
 
 [CmdletBinding()]
-param()
+param(
+    [switch]$NoPull
+)
 
 . "$PSScriptRoot\helpers.ps1"
 
@@ -36,14 +43,20 @@ Write-Host '[Server A] Copying extensions/.env...'
 $localExtEnv = Join-Path $PSScriptRoot '..\..\..\extensions\.env'
 Copy-ToRemote -InstanceId $idA -LocalPath $localExtEnv -RemotePath "$Script:RemoteRepo/extensions/.env"
 
-# -- 2. Server A: add DEMS + DEAPI to the tazama-core project -----------------
+# -- 2. Server A: pull latest repo then add DEMS + DEAPI ---------------------
 # DEMS and DEAPI run inside the tazama-core Docker project on Server A.
 # They are not part of the core bat launch chain; they are added here before
 # the extensions stack starts so that Server B services can reach them.
+# Pull latest so any changes to extensions compose files / env are picked up.
 Write-Host ''
+Write-Host '[Server A] Pulling latest repo...'
+Invoke-RemoteCommand -InstanceId $idA -Command "cd $Script:RemoteRepo && git fetch origin tazama/feat/mono-repo-phased-deployment && git checkout tazama/feat/mono-repo-phased-deployment && git pull origin tazama/feat/mono-repo-phased-deployment"
+Write-Host '[Server A] Repo up to date.' -ForegroundColor Green
+
 Write-Host '[Server A] Adding DEMS + DEAPI to tazama-core...'
 
-Invoke-RemoteCommand -InstanceId $idA -Command "cd $Script:RemoteRepo/extensions && docker compose -p tazama-core -f ./docker-compose.hub.extensions.apis.yaml up -d --pull always"
+$pullFlag = if ($NoPull) { '' } else { '--pull always' }
+Invoke-RemoteCommand -InstanceId $idA -Command "cd $Script:RemoteRepo/extensions && docker compose -p tazama-core -f ./docker-compose.hub.extensions.apis.yaml up -d $pullFlag".Trim()
 
 Write-Host '[Server A] DEMS + DEAPI up.' -ForegroundColor Green
 
@@ -98,7 +111,7 @@ $composeArgs = @(
     '-f ./docker-compose.hub.extensions.yaml'
 ) -join ' '
 
-Invoke-RemoteCommand -InstanceId $idB -Command "cd $Script:RemoteRepo/extensions && docker compose $composeArgs up -d --pull always"
+Invoke-RemoteCommand -InstanceId $idB -Command "cd $Script:RemoteRepo/extensions && docker compose $composeArgs up -d $pullFlag".Trim()
 
 Write-Host ''
 Write-Host '[Server B] tazama-extensions is up.' -ForegroundColor Green

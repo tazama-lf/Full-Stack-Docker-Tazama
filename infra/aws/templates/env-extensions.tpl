@@ -10,13 +10,19 @@
 SERVER_A_HOST=core.tazama.internal
 SERVER_B_HOST=extensions.tazama.internal
 
+# Backend service URL: TRS backend (Server B) -> Admin service (Server A)
+# trs.env hardcodes port 3100 (container-internal); ADMIN_PORT on Server A is 5100.
+# Loading .env after trs.env means this override wins (last env_file entry wins).
+ADMIN_SERVICE_URL=http://core.tazama.internal:5100
+
 # Public URLs for browser-facing VITE_ variables
-# (services without an ALB subdomain are left as private-DNS fallbacks until
-#  additional ALB entries are added: SANDBOX_API_URL, NATS_API_URL, DEMS_ENDPOINT, ADMIN_ENDPOINT)
+# (SANDBOX_API_URL, NATS_API_URL, DEMS_ENDPOINT still use private-DNS fallbacks
+#  until additional ALB entries are added)
 TRS_API_URL=https://trs-api.beta.tazama.org
 TCS_API_URL=https://tcs-api.beta.tazama.org
 CMS_API_URL=https://cms-api.beta.tazama.org
 SIMULATION_ENDPOINT=https://tms.beta.tazama.org/v1/evaluate/iso20022/pacs.002.001.12
+ADMIN_ENDPOINT=https://admin.beta.tazama.org
 
 # CORS — allow browser origins from the public subdomains
 # Overrides the private-DNS SERVER_B_HOST fallback in env/trs.env and env/tcs.env
