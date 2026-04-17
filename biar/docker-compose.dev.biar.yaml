@@ -35,3 +35,22 @@ services:
       - ${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Warehouse
     depends_on:
       - s3g
+
+  jupyterlab:
+    build:
+      context: ./JupyterHub
+      dockerfile: Dockerfile
+    container_name: biar-jupyterlab
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/jupyterlab.env
+    ports:
+      - "${JUPYTERLAB_PORT}:8888"
+    volumes:
+      - ./JupyterHub/notebooks:/srv/notebooks
+      - ${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Hudi_warehouse
+    tmpfs:
+      - /tmp/spark
+    depends_on:
+      - s3g
