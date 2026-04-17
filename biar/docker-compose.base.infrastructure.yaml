@@ -1,0 +1,188 @@
+x-ozone-common-config: &ozone-common-config
+  image: apache/ozone:2.0.0
+  env_file:
+    - .env
+    - docker-config
+
+x-ozone-replication: &ozone-replication
+  OZONE-SITE.XML_ozone.server.default.replication: ${OZONE_REPLICATION_FACTOR:-1}
+
+services:
+  tika:
+    image: logicalspark/docker-tikaserver:latest
+    container_name: biar-tika
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/tika.env
+    ports:
+      - "${TIKA_PORT}:9998"
+
+  solr:
+    image: solr:9
+    container_name: biar-solr
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/solr.env
+    ports:
+      - "${SOLR_PORT}:8983"
+    volumes:
+      - solr_data:/var/solr
+    command:
+      - sh
+      - -c
+      - "solr-precreate biar_docs /opt/solr/server/solr/configsets/sample_techproducts_configs"
+
+  nifi:
+    build:
+      context: ./nifi
+      dockerfile: Dockerfile
+    image: custom-nifi:1.24.0
+    container_name: biar-nifi
+    hostname: nifi
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/nifi.env
+    ports:
+      - "${NIFI_PORT}:8088"
+    volumes:
+      - nifi_conf:/opt/nifi/nifi-current/conf
+      - nifi_state:/opt/nifi/nifi-current/state
+      - nifi_db:/opt/nifi/nifi-current/database_repository
+      - nifi_flowfile:/opt/nifi/nifi-current/flowfile_repository
+      - nifi_content:/opt/nifi/nifi-current/content_repository
+      - nifi_provenance:/opt/nifi/nifi-current/provenance_repository
+
+  scm:
+    <<: *ozone-common-config
+    container_name: ozone-scm-1
+    restart: unless-stopped
+    env_file:
+      - .env
+      - docker-config
+      - env/scm.env
+    ports:
+      - "${SCM_UI_PORT}:9876"
+      - "${SCM_CLIENT_PORT}:9860"
+    environment:
+      <<: *ozone-replication
+    command: ["ozone", "scm"]
+    volumes:
+      - scm_data:/data
+
+  om:
+    <<: *ozone-common-config
+    container_name: ozone-om-1
+    restart: unless-stopped
+    env_file:
+      - .env
+      - docker-config
+      - env/om.env
+    ports:
+      - "${OM_UI_PORT}:9874"
+      - "${OM_RPC_PORT}:9862"
+    environment:
+      <<: *ozone-replication
+    command: ["ozone", "om"]
+    volumes:
+      - om_data:/data
+
+  datanode1:
+    <<: *ozone-common-config
+    container_name: ozone-datanode-1
+    hostname: ozone-datanode-1
+    restart: unless-stopped
+    env_file:
+      - .env
+      - docker-config
+      - env/datanode1.env
+    environment:
+      <<: *ozone-replication
+    command: ["ozone", "datanode"]
+    volumes:
+      - datanode1_data:/data
+
+  datanode2:
+    <<: *ozone-common-config
+    container_name: ozone-datanode-2
+    hostname: ozone-datanode-2
+    restart: unless-stopped
+    env_file:
+      - .env
+      - docker-config
+      - env/datanode2.env
+    environment:
+      <<: *ozone-replication
+    command: ["ozone", "datanode"]
+    volumes:
+      - datanode2_data:/data
+
+  datanode3:
+    <<: *ozone-common-config
+    container_name: ozone-datanode-3
+    hostname: ozone-datanode-3
+    restart: unless-stopped
+    env_file:
+      - .env
+      - docker-config
+      - env/datanode3.env
+    environment:
+      <<: *ozone-replication
+    command: ["ozone", "datanode"]
+    volumes:
+      - datanode3_data:/data
+
+  recon:
+    <<: *ozone-common-config
+    container_name: ozone-recon-1
+    hostname: recon
+    restart: unless-stopped
+    env_file:
+      - .env
+      - docker-config
+      - env/recon.env
+    ports:
+      - "${RECON_PORT}:9888"
+    environment:
+      <<: *ozone-replication
+    command: ["ozone", "recon"]
+    volumes:
+      - recon_data:/data
+    depends_on:
+      - scm
+      - om
+
+  s3g:
+    <<: *ozone-common-config
+    container_name: ozone-s3g-1
+    restart: unless-stopped
+    env_file:
+      - .env
+      - docker-config
+      - env/s3g.env
+    ports:
+      - "${S3G_PORT}:9878"
+      - "${S3G_INTERNAL_PORT}:19878"
+    environment:
+      <<: *ozone-replication
+    command: ["ozone", "s3g"]
+    depends_on:
+      - scm
+      - om
+
+volumes:
+  solr_data:
+  nifi_conf:
+  nifi_state:
+  nifi_db:
+  nifi_flowfile:
+  nifi_content:
+  nifi_provenance:
+  scm_data:
+  om_data:
+  datanode1_data:
+  datanode2_data:
+  datanode3_data:
+  recon_data:

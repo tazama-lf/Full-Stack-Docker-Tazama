@@ -1,0 +1,5 @@
+fastapi
+uvicorn[standard]
+pyspark==3.4.2
+findspark
+pydantic

@@ -1,0 +1,37 @@
+services:
+  automation-orchestrator:
+    build:
+      context: ./automation-orchestrator
+      dockerfile: Dockerfile
+    container_name: biar-automation-orchestrator
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/automation-orchestrator.env
+    ports:
+      - "${AUTOMATION_ORCHESTRATOR_PORT}:7619"
+    volumes:
+      - ./automation-orchestrator/out:/app/out
+      - ${TAZAMA_WAREHOUSE_HOST_PATH}:/app/Tazama_Hudi_warehouse
+    tmpfs:
+      - /tmp/spark
+    depends_on:
+      - s3g
+
+  datalakehouse-api:
+    build:
+      context: ./datalakehouse-api
+      dockerfile: Dockerfile
+    container_name: biar-datalakehouse-api
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/datalakehouse-api.env
+    environment:
+      WAREHOUSE_ROOT: /opt/Tazama_Warehouse
+    ports:
+      - "${DATALAKEHOUSE_API_PORT}:8282"
+    volumes:
+      - ${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Warehouse
+    depends_on:
+      - s3g

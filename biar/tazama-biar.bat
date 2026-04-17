@@ -49,9 +49,9 @@ goto :deploy
 :: ---------------------------------------------------------------
 :deploy
 echo.
-echo  Deploying BIAR infrastructure...
+echo  Deploying BIAR stack...
 echo.
-docker compose -p tazama-biar -f ./docker-compose.biar.infrastructure.yaml up -d
+docker compose -p tazama-biar -f ./docker-compose.base.infrastructure.yaml -f ./docker-compose.dev.biar.yaml -f ./docker-compose.utils.init.yaml up -d
 goto :done
 
 :: ---------------------------------------------------------------
@@ -70,7 +70,7 @@ if "%util%"=="1"     goto :down_biar
 goto :utils
 
 :down_biar
-docker compose -p tazama-biar -f ./docker-compose.biar.infrastructure.yaml down --volumes
+docker compose -p tazama-biar -f ./docker-compose.base.infrastructure.yaml -f ./docker-compose.dev.biar.yaml -f ./docker-compose.utils.init.yaml down --volumes
 goto :done
 
 :done
