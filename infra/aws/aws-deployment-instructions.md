@@ -183,11 +183,24 @@ The deploy script patches `SERVER_B_HOST=extensions.tazama.internal` for AWS.
 
 ---
 
-### A.7 - Replace published default credentials with SSM-sourced secrets (pending)
+### A.7 - Replace published default credentials with SSM-sourced secrets (partially implemented)
 
 **Problem:** All three stacks ship with credentials committed in plaintext in the public GitHub repository. These include database passwords (`unused`), admin passwords (`password`, `admin123456789`), API secrets, and service credentials spanning at least 15 variables across `core/`, `extensions/`, and `biar/`. While the VPC private subnet prevents direct internet access to most services, published credentials enable trivial lateral movement after any initial foothold and leave the ALB-accessible NiFi UI directly exposed to credential-stuffing attacks.
 
-**Approach:**
+**What has been implemented:**
+
+The deploy scripts now accept a `-Password` parameter. At deploy time the value is built into an in-memory overlay (never written to a committed file) and applied via `Set-RemoteEnvOverlay` to all PostgreSQL and Keycloak admin credential variables on Server A and Server B:
+
+- `deploy-core.ps1 -Password '<pw>'` patches `core/.env` and all `core/env/` service env files on Server A: `POSTGRES_PASSWORD`, `RAW_HISTORY_DATABASE_PASSWORD`, `CONFIGURATION_DATABASE_PASSWORD`, `EVENT_HISTORY_DATABASE_PASSWORD`, `EVALUATION_DATABASE_PASSWORD`, `NEXT_PUBLIC_PG_PASSWORD`, `KEYCLOAK_ADMIN_PASSWORD`
+- `deploy-extensions.ps1 -Password '<pw>'` patches `extensions/.env` and all `extensions/env/` service env files on Server B: `POSTGRES_PASSWORD`, `DB_PASSWORD`, `SPRING_DATASOURCE_PASSWORD`, `CONFIGURATION_DATABASE_PASSWORD`
+- `deploy.ps1 -Password '<pw>'` passes the value through to both scripts above
+- `env-core.tpl` was deleted (it previously committed only hardcoded credentials); `env-extensions.tpl` had its credential lines removed (DNS/URL overrides remain)
+
+**What is still pending (SSM-sourced secrets for remaining credentials):**
+
+The approach described below covers the remaining 10+ credentials (Redis, CouchDB, TRS crypto key, Hasura, pgAdmin, etc.) that the `-Password` param does not address. These are the eventual target; until then those services continue to use the published defaults.
+
+**Eventual approach:**
 
 SSM Parameter Store is already used for `GH_TOKEN` (B.9). The same pattern extends to all service credentials: secrets are stored in SSM before deployment, fetched by the deploy scripts at deploy time using `aws ssm get-parameter --with-decryption`, and written to the correct env files on each instance via the existing `Set-RemoteEnvOverlay` mechanism. No secret ever touches a committed file.
 
@@ -356,17 +369,15 @@ aws ssm get-parameters-by-path `
   --output table
 ```
 
-**Required changes to deploy scripts and overlay templates:**
+**Required changes to remaining deploy scripts and overlay templates (pending):**
 
-The deploy scripts currently apply static key=value overlay files. To incorporate SSM secrets, each script must be extended to fetch secrets before calling `Set-RemoteEnvOverlay`:
+The deploy scripts now handle PostgreSQL and Keycloak credentials via `-Password`. The remaining credentials listed in the SSM table above still need SSM integration. The pattern is the same as what was implemented:
 
 1. Fetch each secret at deploy time: `aws ssm get-parameter --name /tazama/<param> --with-decryption --query Parameter.Value --output text`
-2. Build a combined overlay that includes both the host-name entries (already present) and the credential entries (new)
-3. Pass the combined overlay to `Set-RemoteEnvOverlay` — the existing `sed`-based patching handles the rest
+2. Build a combined overlay in-memory that includes the credential entries
+3. Pass the combined overlay to `Set-RemoteEnvOverlay` -- the existing `sed`-based patching handles the rest
 
-The overlay template files (`templates/env-core.tpl`, `env-extensions.tpl`, `env-biar.tpl`) must each be expanded to include all the credential variable mappings for that server, taken from the table above. Because some SSM values map to multiple variable names in the same file (e.g. `POSTGRES_PASSWORD` and `DB_PASSWORD` from the same underlying credential), the overlay must include a separate entry for each variable name.
-
-**Status:** Pending - required before this deployment is safe for beta use.
+**Status:** PostgreSQL + Keycloak credentials - implemented. Remaining 10+ credentials - pending. Required before this deployment is safe for beta use.
 
 ---
 
@@ -1185,16 +1196,18 @@ authentication is entirely via the IAM profile on your local AWS CLI session.
 
 ```powershell
 cd full-stack-docker-tazama\infra\aws\scripts
-.\deploy.ps1
+.\deploy.ps1 -Password 'your-strong-password'
 ```
+
+The `-Password` value is applied in-memory to all PostgreSQL and Keycloak admin credential variables on Server A and Server B. It is never written to a committed file.
 
 Or run the three deploy scripts individually if you want to validate each server
 before moving on to the next. The runnable scripts are, in order:
 
 ```powershell
-.\deploy-core.ps1        # Server A: waits for bootstrap, starts tazama-core
-.\deploy-extensions.ps1  # Server A: adds DEMS/DEAPI; Server B: starts tazama-extensions
-.\deploy-biar.ps1        # Server C: waits for bootstrap, starts tazama-biar
+.\deploy-core.ps1        -Password 'your-strong-password'  # Server A: waits for bootstrap, starts tazama-core
+.\deploy-extensions.ps1  -Password 'your-strong-password'  # Server A: adds DEMS/DEAPI; Server B: starts tazama-extensions
+.\deploy-biar.ps1                                           # Server C: waits for bootstrap, starts tazama-biar
 ```
 
 > **Note:** `helpers.ps1` (documented in D.1) is a function library, not a script
@@ -1244,6 +1257,7 @@ port 22 is exposed anywhere.
 | Parameter | Description |
 |---|---|
 | `-NoPull` | Skip `--pull always` on the `docker compose up` command. Use when images are already present on the host (e.g. retrying after a failed start). The first retry attempt within the script automatically drops the pull flag regardless. |
+| `-Password` | PostgreSQL superuser password and Keycloak admin password. Applied in-memory via `Set-RemoteEnvOverlay` to `core/.env` and all `core/env/` service env files on Server A. Sets `POSTGRES_PASSWORD`, `RAW_HISTORY_DATABASE_PASSWORD`, `CONFIGURATION_DATABASE_PASSWORD`, `EVENT_HISTORY_DATABASE_PASSWORD`, `EVALUATION_DATABASE_PASSWORD`, `NEXT_PUBLIC_PG_PASSWORD`, and `KEYCLOAK_ADMIN_PASSWORD`. If omitted, local-dev defaults (`unused` / `password`) are left in place -- do not omit for any non-development deployment. |
 
 **Full compose chain on Server A:**
 ```
@@ -1279,10 +1293,11 @@ docker compose -p tazama-core \
 2. **Server B** - waits for bootstrap (up to 15 min)
 3. **Server B** - applies `templates/env-extensions.tpl` overlay to `extensions/.env`:
    sets `SERVER_A_HOST=core.tazama.internal` and `SERVER_B_HOST=extensions.tazama.internal`
-4. **Server B** - SCP `core/auth/test-public-key.pem` → `extensions/auth/`
+4. **Server B** - if `-Password` is supplied, applies a second in-memory credential overlay to `extensions/.env` and all `extensions/env/` service env files: sets `POSTGRES_PASSWORD`, `DB_PASSWORD`, `SPRING_DATASOURCE_PASSWORD`, and `CONFIGURATION_DATABASE_PASSWORD`
+5. **Server B** - SCP `core/auth/test-public-key.pem` → `extensions/auth/`
    (required by TCS/TRS for JWT validation; on single-machine dev the bat
    script copies it automatically - here we do it from the local repo)
-5. **Server B** - starts the extensions stack:
+6. **Server B** - starts the extensions stack:
    ```
    docker compose -p tazama-extensions \
      -f ./docker-compose.extensions.infrastructure.yaml \
@@ -1290,6 +1305,13 @@ docker compose -p tazama-core \
      up -d
    ```
    TCS (backend + frontend), TRS (backend + frontend), and CMS frontend pull from DockerHub. CMS backend still builds from source until `tazamaorg/case-management-system-backend` is published.
+
+**Parameters:**
+
+| Parameter | Description |
+|---|---|
+| `-NoPull` | Skip `--pull always` on `docker compose up`. |
+| `-Password` | PostgreSQL password for Server B's database and all extension service clients. Applied in-memory -- never written to a committed file. If omitted, local-dev defaults (`unused`) are left in place. |
 
 ---
 
@@ -1320,9 +1342,16 @@ Orchestrator - calls `deploy-core.ps1`, `deploy-extensions.ps1`, and
 `deploy-biar.ps1` in sequence. Safe to run immediately after `tofu apply`;
 each sub-script waits for its server's bootstrap internally.
 
+**Parameters:**
+
+| Parameter | Description |
+|---|---|
+| `-Password` | Passed through to `deploy-core.ps1` and `deploy-extensions.ps1`. Sets PostgreSQL and Keycloak admin passwords on both servers. |
+| `-NoPull` | Passed through to all three sub-scripts. Skips `--pull always` on `docker compose up`. |
+
 ```powershell
 cd full-stack-docker-tazama\infra\aws\scripts
-.\deploy.ps1
+.\deploy.ps1 -Password 'your-strong-password'
 ```
 
 ---
