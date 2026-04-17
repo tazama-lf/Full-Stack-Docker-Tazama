@@ -23,7 +23,11 @@
 
 [CmdletBinding()]
 param(
-    [switch]$NoPull
+    [switch]$NoPull,
+
+    # PostgreSQL password for Server B's database and all extension service clients.
+    # If omitted, the local-dev default 'unused' values are left in place.
+    [string]$Password = ''
 )
 
 . "$PSScriptRoot\helpers.ps1"
@@ -87,6 +91,38 @@ $remoteEnvFile = "$Script:RemoteRepo/extensions/.env"
 Set-RemoteEnvOverlay -InstanceId $idB -OverlayFile $overlayFile -RemoteEnvFile $remoteEnvFile
 
 Write-Host '[Server B] .env overlay applied.' -ForegroundColor Green
+
+# Apply credentials overlay to extensions/.env and all service env files.
+# Built in-memory from the -Password parameter — never written to a committed file.
+# Skipped entirely when -Password is not supplied.
+if ($Password) {
+    Write-Host '[Server B] Applying credentials overlay to extensions env files...'
+    $extCredOverlay = @"
+POSTGRES_PASSWORD=$Password
+DB_PASSWORD=$Password
+SPRING_DATASOURCE_PASSWORD=$Password
+CONFIGURATION_DATABASE_PASSWORD=$Password
+"@
+    $tmpCred = [System.IO.Path]::GetTempFileName()
+    try {
+        Set-Content $tmpCred $extCredOverlay -Encoding ASCII
+        $extEnvFiles = @(
+            "$Script:RemoteRepo/extensions/.env"
+            "$Script:RemoteRepo/extensions/env/cms.env"
+            "$Script:RemoteRepo/extensions/env/tcs.env"
+            "$Script:RemoteRepo/extensions/env/deapi.env"
+            "$Script:RemoteRepo/extensions/env/dems.env"
+        )
+        foreach ($envFile in $extEnvFiles) {
+            Set-RemoteEnvOverlay -InstanceId $idB -OverlayFile $tmpCred -RemoteEnvFile $envFile
+        }
+    } finally {
+        Remove-Item $tmpCred -Force -ErrorAction SilentlyContinue
+    }
+    Write-Host '[Server B] Credentials overlay applied.' -ForegroundColor Green
+} else {
+    Write-Warning '[Server B] -Password not supplied — DB passwords left at local-dev defaults.'
+}
 
 # -- 6. Server B: copy auth public key ----------------------------------------
 # TCS and TRS backends require the auth public key (used for JWT verification).
