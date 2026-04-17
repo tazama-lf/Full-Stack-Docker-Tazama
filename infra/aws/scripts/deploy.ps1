@@ -13,10 +13,18 @@
 
 .EXAMPLE
     .\deploy.ps1
+    .\deploy.ps1 -Password 'your-strong-password'
 #>
 
 [CmdletBinding()]
-param()
+param(
+    [switch]$NoPull,
+
+    # PostgreSQL and Keycloak admin password for the cloud deployment.
+    # Passed through to deploy-core.ps1 and deploy-extensions.ps1.
+    # If omitted, local-dev defaults ('unused' / 'password') are left in place.
+    [string]$Password = ''
+)
 
 $ErrorActionPreference = 'Stop'
 
@@ -25,9 +33,12 @@ Write-Host '=====================================================' -ForegroundCo
 Write-Host '  Tazama Full-Stack Deploy'                            -ForegroundColor Cyan
 Write-Host '=====================================================' -ForegroundColor Cyan
 
-& "$PSScriptRoot\deploy-core.ps1"
-& "$PSScriptRoot\deploy-extensions.ps1"
-& "$PSScriptRoot\deploy-biar.ps1"
+$passArgs = if ($Password) { @('-Password', $Password) } else { @() }
+$pullArgs  = if ($NoPull)  { @('-NoPull') }              else { @() }
+
+& "$PSScriptRoot\deploy-core.ps1"       @passArgs @pullArgs
+& "$PSScriptRoot\deploy-extensions.ps1" @passArgs @pullArgs
+& "$PSScriptRoot\deploy-biar.ps1"       @pullArgs
 
 Write-Host ''
 Write-Host '=====================================================' -ForegroundColor Green

@@ -22,7 +22,12 @@
 
 [CmdletBinding()]
 param(
-    [switch]$NoPull
+    [switch]$NoPull,
+
+    # PostgreSQL superuser password and Keycloak admin password.
+    # Also used for all service-level DB password variables (RAW_HISTORY_DATABASE_PASSWORD etc.).
+    # If omitted, the local-dev default 'unused' / 'password' values are left in place.
+    [string]$Password = ''
 )
 . "$PSScriptRoot\helpers.ps1"
 
@@ -48,6 +53,50 @@ Write-Host '[Server A] Repo up to date.' -ForegroundColor Green
 Write-Host '[Server A] Copying core/.env...'
 $localEnv = Join-Path $PSScriptRoot '..\..\..\core\.env'
 Copy-ToRemote -InstanceId $idA -LocalPath $localEnv -RemotePath "$Script:RemoteRepo/core/.env"
+
+# Apply credentials overlay to core/.env and all service env files.
+# The overlay is built in-memory from the -Password parameter and written to a
+# local temp file that is never committed. Keys already present are replaced;
+# absent keys are appended. Skipped entirely when -Password is not supplied.
+if ($Password) {
+    Write-Host '[Server A] Applying credentials overlay to core env files...'
+    $coreCredOverlay = @"
+POSTGRES_PASSWORD=$Password
+RAW_HISTORY_DATABASE_PASSWORD=$Password
+CONFIGURATION_DATABASE_PASSWORD=$Password
+EVENT_HISTORY_DATABASE_PASSWORD=$Password
+EVALUATION_DATABASE_PASSWORD=$Password
+NEXT_PUBLIC_PG_PASSWORD=$Password
+KEYCLOAK_ADMIN_PASSWORD=$Password
+"@
+    $tmpCred = [System.IO.Path]::GetTempFileName()
+    try {
+        Set-Content $tmpCred $coreCredOverlay -Encoding ASCII
+        $coreEnvFiles = @(
+            "$Script:RemoteRepo/core/.env"
+            "$Script:RemoteRepo/core/env/keycloak.env"
+            "$Script:RemoteRepo/core/env/tms.env"
+            "$Script:RemoteRepo/core/env/admin.env"
+            "$Script:RemoteRepo/core/env/tp.env"
+            "$Script:RemoteRepo/core/env/ed.env"
+            "$Script:RemoteRepo/core/env/tadp.env"
+            "$Script:RemoteRepo/core/env/rule-executer.env"
+            "$Script:RemoteRepo/core/env/rule-901.env"
+            "$Script:RemoteRepo/core/env/rule-902.env"
+            "$Script:RemoteRepo/core/env/event-flow.env"
+            "$Script:RemoteRepo/core/env/batch-ppa.env"
+            "$Script:RemoteRepo/core/env/ui.env"
+        )
+        foreach ($envFile in $coreEnvFiles) {
+            Set-RemoteEnvOverlay -InstanceId $idA -OverlayFile $tmpCred -RemoteEnvFile $envFile
+        }
+    } finally {
+        Remove-Item $tmpCred -Force -ErrorAction SilentlyContinue
+    }
+    Write-Host '[Server A] Credentials overlay applied.' -ForegroundColor Green
+} else {
+    Write-Warning '[Server A] -Password not supplied — DB and Keycloak admin passwords left at local-dev defaults.'
+}
 
 # If an ALB is active, inject KEYCLOAK_HOSTNAME into the remote .env so
 # Keycloak generates redirect URLs using the ALB hostname instead of localhost.
