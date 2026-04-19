@@ -9,8 +9,8 @@
 # "prerelease version detected" message from version-check.yml.
 #
 # Allowed sources for PRs to main:
-#   dev          — the normal integration branch
-#   release/v<N>.* — release-train branches created by release-train.yml (must start with a digit)
+#   dev          - the normal integration branch
+#   release/v<N>.* - release-train branches created by release-train.yml (must start with a digit)
 #
 # Please do not attempt to edit this flow without the direct consent from the DevOps team.
 # This file is managed centrally.
