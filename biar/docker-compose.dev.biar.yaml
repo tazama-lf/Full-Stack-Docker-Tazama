@@ -1,0 +1,59 @@
+services:
+  automation-orchestrator:
+    image: tazamaorg/biar-automation-orchestrator:rc
+    container_name: biar-automation-orchestrator
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/automation-orchestrator.env
+    ports:
+      - "${AUTOMATION_ORCHESTRATOR_PORT}:7619"
+    volumes:
+      - ./automation-orchestrator/out:/app/out
+      - ${TAZAMA_WAREHOUSE_HOST_PATH}:/app/Tazama_Hudi_warehouse
+    tmpfs:
+      - /tmp/spark
+    depends_on:
+      - s3g
+
+  datalakehouse-api:
+    image: tazamaorg/biar-datalakehouse-api:rc
+    container_name: biar-datalakehouse-api
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/datalakehouse-api.env
+    ports:
+      - "${DATALAKEHOUSE_API_PORT}:8282"
+    volumes:
+      - ${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Warehouse
+    depends_on:
+      - s3g
+
+  jupyterlab:
+    image: tazamaorg/biar-jupyterlab:rc
+    container_name: biar-jupyterlab
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/jupyterlab.env
+    ports:
+      - "${JUPYTERLAB_PORT}:8888"
+    volumes:
+      - ./JupyterHub/notebooks:/srv/notebooks
+      - ${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Warehouse
+    tmpfs:
+      - /tmp/spark
+    depends_on:
+      - s3g
+
+  unstructured-pipeline:
+    image: tazamaorg/biar-unstructured-pipeline:rc
+    container_name: biar-unstructured-pipeline
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/unstructured-pipeline.env
+    depends_on:
+      - tika
+      - solr
