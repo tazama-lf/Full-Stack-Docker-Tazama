@@ -1351,7 +1351,38 @@ Server A and Server B must be up before this script is run — NiFi connects to 
 
 ---
 
-### D.5 `deploy.ps1`
+### D.5 `deploy-lakehouse.ps1`
+
+[infra/aws/scripts/deploy-lakehouse.ps1](full-stack-docker-tazama/infra/aws/scripts/deploy-lakehouse.ps1)
+
+Copies the Tazama Lakehouse archive to Server C and unpacks it into `/opt/Tazama_Warehouse`. Run this **after** `deploy-biar.ps1` has completed — the target directory is created by that script and the automation-orchestrator and datalakehouse-api containers must be up before any workflows access the warehouse.
+
+The Lakehouse archive (`Tazama_Lakehouse.zip`) is not committed to the repository. Obtain it from the Tazama dev team and place it anywhere accessible from your local machine.
+
+```powershell
+cd full-stack-docker-tazama\infra\aws
+.\scripts\deploy-lakehouse.ps1 -ZipPath "D:\DevTools\Tazama\Tazama_Lakehouse.zip"
+```
+
+What the script does:
+
+1. Reads `server_c_instance_id` from `tofu output`
+2. SCPs the zip to `~/Tazama_Lakehouse.zip` on Server C via EICE
+3. Installs `unzip` on Server C if not already present
+4. Runs `sudo unzip -o` into `/opt/Tazama_Warehouse`
+5. Deletes the zip from the server
+
+**Parameters:**
+
+| Parameter | Description |
+|---|---|
+| `-ZipPath` | **(Required)** Local path to `Tazama_Lakehouse.zip` |
+
+> **Re-deployment note:** The script is idempotent — re-running with `-ZipPath` will overwrite existing warehouse files (`unzip -o`). Existing files not present in the zip are left in place.
+
+---
+
+### D.7 `deploy.ps1`
 
 [infra/aws/scripts/deploy.ps1](full-stack-docker-tazama/infra/aws/scripts/deploy.ps1)
 
@@ -1373,7 +1404,7 @@ cd full-stack-docker-tazama\infra\aws\scripts
 
 ---
 
-### D.6 `teardown.ps1`
+### D.8 `teardown.ps1`
 
 [infra/aws/scripts/teardown.ps1](full-stack-docker-tazama/infra/aws/scripts/teardown.ps1)
 
@@ -1519,6 +1550,15 @@ tofu apply -var-file terraform.tfvars -var-file alb.tfvars
 OpenTofu plans and applies only the ALB delta. The EC2 instances and all
 running containers are untouched. Expected additions: roughly `+30 resources`
 (1 ALB, 14 target groups, 14 port-based HTTP listeners, security group rules).
+
+> [!WARNING]
+> **Once `domain.tfvars` has been applied (Phase E.3), always include it in every subsequent `tofu apply`.** Omitting it tells OpenTofu to remove `module.dns_public`, which destroys the Route 53 public zone and all its records. If that has already happened, use the full three-file command for all future applies:
+>
+> ```powershell
+> tofu apply -var-file terraform.tfvars -var-file alb.tfvars -var-file domain.tfvars
+> ```
+>
+> Always run `tofu plan` first and verify `0 to destroy` before applying.
 
 > **Already applied without `alb.tfvars`?** No teardown needed. Just add
 > `-var-file alb.tfvars` and re-run `tofu apply` — exactly the same command.
@@ -2141,7 +2181,7 @@ tofu apply -var-file terraform.tfvars -var-file alb.tfvars -var-file domain.tfva
 
 ```powershell
 tofu init
-tofu apply -var-file terraform.tfvars -var-file alb.tfvars
+tofu apply -var-file terraform.tfvars -var-file alb.tfvars -var-file domain.tfvars
 ```
 
 > **Note:** Anyone following the guide from scratch will not hit this. The initial `tofu init` in Phase C picks up all module declarations including `module "alb"` and `module "dns_public"`, even when their `count` is `0`. Re-running `init` is only needed if you added these modules to an already-initialised working directory.
