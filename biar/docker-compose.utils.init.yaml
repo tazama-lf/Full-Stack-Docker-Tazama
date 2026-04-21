@@ -1,0 +1,39 @@
+services:
+  aws-cli:
+    image: amazon/aws-cli
+    container_name: ozone-aws-cli
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - s3g
+    entrypoint: >
+      /bin/sh -c "
+      export AWS_ACCESS_KEY_ID=$$S3A_ACCESS_KEY;
+      export AWS_SECRET_ACCESS_KEY=$$S3A_SECRET_KEY;
+      export AWS_DEFAULT_REGION=us-east-1;
+
+      echo 'Waiting for S3...';
+      until aws --endpoint-url $$S3A_ENDPOINT s3 ls > /dev/null 2>&1; do
+        sleep 3;
+      done;
+
+      echo 'Creating bucket if not exists...';
+      aws --endpoint-url $$S3A_ENDPOINT s3 mb s3://$$AWS_BUCKET_NAME || true;
+
+      tail -f /dev/null
+      "
+      
+  nifi-init:
+    image: curlimages/curl:latest
+    container_name: nifi-init
+    restart: on-failure
+    env_file:
+      - env/nifi.env
+      - .env
+    depends_on:
+      - nifi
+    volumes:
+      - ./nifi:/nifi:ro
+    entrypoint: ["/bin/sh", "/nifi/init.sh"]
+  
