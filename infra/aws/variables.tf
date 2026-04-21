@@ -38,7 +38,7 @@ variable "instance_type_b" {
 variable "instance_type_c" {
   description = "EC2 instance type for Server C (tazama-biar - NiFi + Solr + Ozone)"
   type        = string
-  default     = "t3.2xlarge"
+  default     = "r5.2xlarge"
 }
 
 # ---------------------------------------------------------------------------

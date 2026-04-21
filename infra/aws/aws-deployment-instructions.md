@@ -1,4 +1,4 @@
-﻿# Deploying Tazama on AWS - Step-by-Step Instructions
+# Deploying Tazama on AWS - Step-by-Step Instructions
 
 > **Living document.** This file records every command, output, and decision made during the first successful deployment of the three-stack Tazama system on AWS. It is intended to become a reproducible guide for community contributors who want to stand up the same environment.
 >
@@ -844,7 +844,7 @@ aws ssm get-parameter `
 
 ```powershell
 aws ec2 describe-instance-type-offerings `
-  --filters "Name=instance-type,Values=t3.xlarge,t3.2xlarge" `
+  --filters "Name=instance-type,Values=t3.xlarge,r5.2xlarge" `
   --region ap-south-1 `
   --profile tazama `
   --query "InstanceTypeOfferings[*].{Type:InstanceType,AZ:Location}" `
@@ -892,7 +892,7 @@ anything is created.
 | EICE endpoint | In private subnet - SSH without port 22 open to internet |
 | Server A (core) | `10.0.1.10` Â· `t3.xlarge` Â· 50 GB gp3 |
 | Server B (extensions) | `10.0.1.20` Â· `t3.xlarge` Â· 50 GB gp3 |
-| Server C (biar) | `10.0.1.30` Â· `t3.2xlarge` Â· 100 GB gp3 |
+| Server C (biar) | `10.0.1.30` Â· `r5.2xlarge` Â· 100 GB gp3 |
 | DNS | Route 53 private zone `tazama.internal` |
 | ALB | Optional — see Phase E |
 | AMI | Amazon Linux 2023 (fetched dynamically - always latest) |
@@ -2384,3 +2384,218 @@ The updated realm JSON will be copied to the server by `deploy-core.ps1` and imp
 > Invoke-RemoteCommand -InstanceId $out.ServerA_InstanceId -Command "docker rm -f tazama-core-keycloak-1"
 > .\deploy-core.ps1 -NoPull
 > ```
+
+---
+
+### How do I give another user access to the servers via SSH to allow them to view the docker container logs?
+
+Access to the EC2 instances uses AWS EC2 Instance Connect Endpoint (EICE) — there is no open port 22, and no shared key pair. Each user authenticates with their own AWS IAM identity. To grant another user SSH access you need to give their IAM identity permission to use EICE, and then add their SSH public key to the EC2 instance so the server accepts their connection.
+
+#### Step 1 — Ensure the user has an IAM identity in the Tazama AWS account
+
+The user must have an IAM user in the AWS account. If they do not have one yet, create it as described in Step 2c below.
+
+#### Step 2 — Create an IAM group with the required EICE permissions (one-time setup)
+
+AWS recommends attaching permissions to a group rather than directly to individual users. Create a dedicated group for Tazama server operators and attach the EICE policy to it. This only needs to be done once — future users are onboarded by adding them to the group.
+
+**2a — Create the group:**
+
+In the AWS Console go to **IAM → User groups → Create group**. Name it `tazama-server-operators` (or similar).
+
+**2b — Attach a permissions policy to the group:**
+
+In the group, go to **Permissions → Add permissions → Create inline policy**, paste the following, and name the policy `tazama-server-operators-policy`:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowEICETunnel",
+      "Effect": "Allow",
+      "Action": [
+        "ec2-instance-connect:OpenTunnel",
+        "ec2-instance-connect:SendSSHPublicKey"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "ec2:ResourceTag/Name": ["tazama-server-a", "tazama-server-b", "tazama-server-c"]
+        }
+      }
+    },
+    {
+      "Sid": "AllowDescribeForEICE",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeInstances",
+        "ec2:DescribeInstanceConnectEndpoints"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+`ec2-instance-connect` actions do not support account-scoped ARNs in the resource field — `"*"` is the correct and AWS-documented form. The `Condition` block scopes tunnel access to only the three Tazama servers by their `Name` tag, which the OpenTofu configuration sets automatically.
+
+To restrict a user to a subset of servers, simply remove the unwanted server names from the array. For example, to grant access to Server B and C only, remove `"tazama-server-a"` from the list.
+
+**2c — Create the IAM user:**
+
+In the AWS Console go to **IAM → Users → Create user**.
+
+- **User name**: use something identifiable, e.g. `firstname.lastname`
+- **Provide user access to the AWS Management Console**: leave **unchecked** — they only need CLI access, not console access
+- **Permissions**: do not attach any policies here; permissions will come from the group
+- Once the user is created, open the user and go to **Security credentials → Access keys → Create access key**
+- Select **Command Line Interface (CLI)** as the use case and complete the wizard
+- Download or copy the **Access key ID** and **Secret access key** — these are shown only once
+- Send the credentials to the user securely; they will run `aws configure` on their local machine and enter these values
+
+This creates a user with no console access, no permissions outside the group, and credentials scoped only to CLI use.
+
+**2d — Add the user to the group:**
+
+In the AWS Console go to **IAM → User groups → tazama-server-operators → Users → Add users** and select the user. Their permissions are now inherited from the group. To revoke access later, remove them from the group without touching the policy.
+
+#### Step 3 — User: install and configure the AWS CLI
+
+Send the user their **Access key ID** and **Secret access key** along with the following instructions.
+
+1. **Install the AWS CLI** (if not already installed):
+   - Windows: download and run the installer from <https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html>
+   - Verify: `aws --version`
+
+2. **Configure credentials:**
+
+   ```powershell
+   aws configure
+   ```
+
+   Enter the values when prompted:
+
+   | Prompt | Value |
+   |---|---|
+   | AWS Access Key ID | *(as provided)* |
+   | AWS Secret Access Key | *(as provided)* |
+   | Default region name | `ap-south-1` |
+   | Default output format | `json` |
+
+3. **Verify access:**
+
+   ```powershell
+   aws ec2 describe-instances --query "Reservations[].Instances[].Tags[?Key=='Name'].Value" --output text
+   ```
+
+   This should return the names of the three Tazama servers. If it returns an error, the credentials or region are incorrect.
+
+#### Step 4 — Generate or collect the user's SSH key pair
+
+The user must have an SSH key pair. If they do not have one, they can generate one on their local machine:
+
+```powershell
+# On the user's local Windows machine (PowerShell)
+ssh-keygen -t ed25519 -C "their-name@example.com" -f "$env:USERPROFILE\.ssh\tazama_ed25519"
+```
+
+This creates a private key (`tazama_ed25519`) and a public key (`tazama_ed25519.pub`). They must keep the private key secure and share only the public key with you.
+
+#### Step 4 — Add the user's public key to the EC2 instance(s)
+
+From your own workstation (which already has access), copy their public key into the `~/.ssh/authorized_keys` file on each instance they need to access.
+
+```powershell
+cd "full-stack-docker-tazama\infra\aws\scripts"
+. .\helpers.ps1
+$out = Get-TofuOutputs
+
+# Paste the full contents of the user's tazama_ed25519.pub file here
+# It is a single line starting with "ssh-ed25519 AAAA..."
+$pubKey = "ssh-ed25519 AAAA... their-name@example.com"
+
+# Add to Server A
+Invoke-RemoteCommand -InstanceId $out.ServerA_InstanceId -Command `
+  "echo '$pubKey' >> ~/.ssh/authorized_keys"
+
+# Add to Server B (if needed)
+Invoke-RemoteCommand -InstanceId $out.ServerB_InstanceId -Command `
+  "echo '$pubKey' >> ~/.ssh/authorized_keys"
+
+# Add to Server C (if needed)
+Invoke-RemoteCommand -InstanceId $out.ServerC_InstanceId -Command `
+  "echo '$pubKey' >> ~/.ssh/authorized_keys"
+```
+
+#### Step 5 — User: set up the SSH config shortcut
+
+The easiest way to connect is via an SSH config file. This lets the user run `ssh tazama-a` (or `tazama-b` / `tazama-c`) directly without specifying flags each time.
+
+**1. Get the instance IDs** (run this yourself and share the values with the user):
+
+```powershell
+tofu -chdir=full-stack-docker-tazama/infra/aws output -json | ConvertFrom-Json | Select-Object server_a_instance_id, server_b_instance_id, server_c_instance_id
+```
+
+**2. User: create or open the SSH config file:**
+
+```powershell
+New-Item -ItemType File -Force -Path "$env:USERPROFILE\.ssh\config"
+notepad "$env:USERPROFILE\.ssh\config"
+```
+
+**3. User: add an entry for each server they have access to** (replace instance IDs with the values you provided):
+
+```
+Host tazama-a
+  HostName i-0abc123
+  User ec2-user
+  IdentityFile ~/.ssh/tazama_ed25519
+  ProxyCommand aws ec2-instance-connect open-tunnel --instance-id %h --remote-port 22 --region ap-south-1
+
+Host tazama-b
+  HostName i-0def456
+  User ec2-user
+  IdentityFile ~/.ssh/tazama_ed25519
+  ProxyCommand aws ec2-instance-connect open-tunnel --instance-id %h --remote-port 22 --region ap-south-1
+
+Host tazama-c
+  HostName i-0ghi789
+  User ec2-user
+  IdentityFile ~/.ssh/tazama_ed25519
+  ProxyCommand aws ec2-instance-connect open-tunnel --instance-id %h --remote-port 22 --region ap-south-1
+```
+
+Note there is no `--profile` flag here — the user configured a default profile in Step 3, so AWS CLI picks it up automatically.
+
+**4. User: connect:**
+
+```bash
+ssh tazama-a
+```
+
+#### Step 6 — Viewing Docker container logs
+
+Once connected via SSH, the user can view logs for any running container:
+
+```bash
+# List all running containers
+docker ps
+
+# Follow live logs for a specific container (Ctrl+C to stop)
+docker logs -f <container-name>
+
+# Show the last 100 lines then follow
+docker logs --tail 100 -f <container-name>
+
+# View logs for all containers in the tazama-core stack
+docker compose -p tazama-core logs -f
+
+# View logs for a specific service within the stack
+docker compose -p tazama-core logs -f tms-service
+```
+
+Common container names in the core stack follow the pattern `tazama-core-<service>-1`, e.g. `tazama-core-tms-service-1`, `tazama-core-keycloak-1`, `tazama-core-arango-1`.
+
+> **Note:** The `ec2-user` account on the instances is in the `docker` group, so `sudo` is not required for `docker` commands.
