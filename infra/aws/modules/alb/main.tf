@@ -33,8 +33,11 @@ locals {
     trs-api      = { port = 3005, server = "b" }
     cms-frontend = { port = 5175, server = "b" }
     cms-api      = { port = 3090, server = "b" }
-    pgadmin-ext  = { port = 5051, server = "b" }
-    nifi         = { port = 8088, server = "c" }
+    pgadmin-ext           = { port = 5051, server = "b" }
+    nifi                    = { port = 8088, server = "c" }
+    jupyterhub              = { port = 8000, server = "c" }
+    auto-orchestrator       = { port = 7619, server = "c" }
+    datalakehouse-api       = { port = 8282, server = "c" }
   }
 
   instance_map = {
@@ -50,6 +53,7 @@ locals {
     hasura      = "/healthz"
     pgadmin     = "/"
     pgadmin-ext = "/"
+    jupyterhub  = "/hub/health"
   }
 }
 

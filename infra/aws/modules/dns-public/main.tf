@@ -63,20 +63,46 @@ resource "aws_acm_certificate_validation" "wildcard" {
 # ---------------------------------------------------------------------------
 locals {
   subdomain_map = {
-    tms         = var.target_group_arns["tms"]
-    admin       = var.target_group_arns["admin"]
-    auth        = var.target_group_arns["auth"]
-    keycloak    = var.target_group_arns["keycloak"]
-    pgadmin     = var.target_group_arns["pgadmin"]
-    hasura      = var.target_group_arns["hasura"]
-    tcs         = var.target_group_arns["tcs-frontend"]
-    tcs-api     = var.target_group_arns["tcs-api"]
-    trs         = var.target_group_arns["trs-frontend"]
-    trs-api     = var.target_group_arns["trs-api"]
-    cms         = var.target_group_arns["cms-frontend"]
-    cms-api     = var.target_group_arns["cms-api"]
-    pgadmin-ext = var.target_group_arns["pgadmin-ext"]
-    nifi        = var.target_group_arns["nifi"]
+    tms                     = var.target_group_arns["tms"]
+    admin                   = var.target_group_arns["admin"]
+    auth                    = var.target_group_arns["auth"]
+    keycloak                = var.target_group_arns["keycloak"]
+    pgadmin                 = var.target_group_arns["pgadmin"]
+    hasura                  = var.target_group_arns["hasura"]
+    tcs                     = var.target_group_arns["tcs-frontend"]
+    tcs-api                 = var.target_group_arns["tcs-api"]
+    trs                     = var.target_group_arns["trs-frontend"]
+    trs-api                 = var.target_group_arns["trs-api"]
+    cms                     = var.target_group_arns["cms-frontend"]
+    cms-api                 = var.target_group_arns["cms-api"]
+    pgadmin-ext             = var.target_group_arns["pgadmin-ext"]
+    nifi                    = var.target_group_arns["nifi"]
+    jupyter                 = var.target_group_arns["jupyterhub"]
+    automation-orchestrator = var.target_group_arns["auto-orchestrator"]
+    datalakehouse-api       = var.target_group_arns["datalakehouse-api"]
+  }
+
+  # Explicit priorities — must match the actual AWS state exactly.
+  # Never use index() which shifts every priority when the map changes.
+  # To add new rules, append at the end with the next free integer.
+  priority_map = {
+    admin                   = 1
+    auth                    = 2
+    cms                     = 3
+    cms-api                 = 4
+    hasura                  = 5
+    keycloak                = 6
+    pgadmin                 = 8   # 7 is a gap left by prior partial applies
+    nifi                    = 10  # 9 is a gap left by prior partial applies
+    tcs-api                 = 11
+    pgadmin-ext             = 12
+    tcs                     = 13
+    trs-api                 = 14
+    tms                     = 15
+    trs                     = 16
+    automation-orchestrator = 17
+    datalakehouse-api       = 18
+    jupyter                 = 19
   }
 }
 
@@ -120,12 +146,12 @@ resource "aws_lb_listener" "https" {
   }
 }
 
-# Host-based listener rule per subdomain (priority 1-N)
+# Host-based listener rule per subdomain
 resource "aws_lb_listener_rule" "service" {
   for_each = local.subdomain_map
 
   listener_arn = aws_lb_listener.https.arn
-  priority     = index(keys(local.subdomain_map), each.key) + 1
+  priority     = local.priority_map[each.key]
 
   action {
     type             = "forward"
