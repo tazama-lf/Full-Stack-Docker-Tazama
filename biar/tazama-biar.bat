@@ -12,20 +12,28 @@ echo ============================================================
 echo.
 echo  Pre-requisite: tazama-core must be running on Server A
 echo.
-echo    1. Deploy BIAR infrastructure
-echo    2. Utilities / teardown
+echo    1. Deploy BIAR stack (DockerHub images)
+echo    2. Deploy BIAR stack (GitHub builds)
+echo    3. Utilities / teardown
 echo.
-set /p "choice=Select option (1-2), or (q)uit: "
+set /p "choice=Select option (1-3), or (q)uit: "
 
 if /i "%choice%"=="q" goto :quit
 if /i "%choice%"==""   goto :menu
-if "%choice%"=="1"     goto :check_core
-if "%choice%"=="2"     goto :utils
+if "%choice%"=="1"     goto :check_core_hub
+if "%choice%"=="2"     goto :check_core_dev
+if "%choice%"=="3"     goto :utils
 goto :menu
 
 :: ---------------------------------------------------------------
 :: Pre-flight: verify tazama-core is reachable
 :: ---------------------------------------------------------------
+:check_core_hub
+set "DEPLOY_TARGET=hub"
+goto :check_core
+:check_core_dev
+set "DEPLOY_TARGET=dev"
+goto :check_core
 :check_core
 :: Read SERVER_A_HOST from .env (default: localhost for single-machine; set to private IP for AWS multi-host)
 set "SERVER_A_HOST=localhost"
@@ -48,10 +56,29 @@ goto :deploy
 :: Deploy
 :: ---------------------------------------------------------------
 :deploy
+if "%DEPLOY_TARGET%"=="hub" goto :deploy_hub
+goto :deploy_dev
+
+:deploy_hub
 echo.
-echo  Deploying BIAR infrastructure...
+echo  Deploying BIAR stack (DockerHub images)...
 echo.
-docker compose -p tazama-biar -f ./docker-compose.biar.infrastructure.yaml up -d
+docker compose -p tazama-biar ^
+    -f ./docker-compose.biar.infrastructure.yaml ^
+    -f ./docker-compose.hub.biar.yaml ^
+    -f ./docker-compose.utils.init.yaml ^
+    up -d
+goto :done
+
+:deploy_dev
+echo.
+echo  Deploying BIAR stack (GitHub builds)...
+echo.
+docker compose -p tazama-biar ^
+    -f ./docker-compose.biar.infrastructure.yaml ^
+    -f ./docker-compose.dev.biar.yaml ^
+    -f ./docker-compose.utils.init.yaml ^
+    up -d
 goto :done
 
 :: ---------------------------------------------------------------
@@ -70,7 +97,12 @@ if "%util%"=="1"     goto :down_biar
 goto :utils
 
 :down_biar
-docker compose -p tazama-biar -f ./docker-compose.biar.infrastructure.yaml down --volumes
+docker compose -p tazama-biar ^
+    -f ./docker-compose.biar.infrastructure.yaml ^
+    -f ./docker-compose.hub.biar.yaml ^
+    -f ./docker-compose.dev.biar.yaml ^
+    -f ./docker-compose.utils.init.yaml ^
+    down --volumes
 goto :done
 
 :done

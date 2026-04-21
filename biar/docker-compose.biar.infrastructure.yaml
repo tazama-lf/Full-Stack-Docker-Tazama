@@ -2,7 +2,7 @@ x-ozone-common-config: &ozone-common-config
   image: apache/ozone:2.0.0
   env_file:
     - .env
-    - docker-config
+    - env/ozone-docker-config
 
 x-ozone-replication: &ozone-replication
   OZONE-SITE.XML_ozone.server.default.replication: ${OZONE_REPLICATION_FACTOR:-1}
@@ -35,28 +35,6 @@ services:
       - sh
       - -c
       - "solr-precreate biar_docs /opt/solr/server/solr/configsets/sample_techproducts_configs"
-
-  nifi:
-    image: tazamaorg/biar-nifi:rc
-    container_name: biar-nifi
-    hostname: nifi
-    restart: unless-stopped
-    env_file:
-      - .env
-      - env/nifi.env
-    environment:
-      NIFI_JVM_HEAP_INIT: 512m
-      NIFI_JVM_HEAP_MAX: 1g
-    ports:
-      - "${NIFI_PORT}:8088"
-      - 8081:8081
-    volumes:
-      - nifi_conf:/opt/nifi/nifi-current/conf
-      - nifi_state:/opt/nifi/nifi-current/state
-      - nifi_db:/opt/nifi/nifi-current/database_repository
-      - nifi_flowfile:/opt/nifi/nifi-current/flowfile_repository
-      - nifi_content:/opt/nifi/nifi-current/content_repository
-      - nifi_provenance:/opt/nifi/nifi-current/provenance_repository
 
   scm:
     <<: *ozone-common-config
@@ -200,3 +178,5 @@ volumes:
   datanode2_data:
   datanode3_data:
   recon_data:
+  automation_orchestrator_out:
+  jupyterhub_data:

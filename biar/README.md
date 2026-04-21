@@ -9,15 +9,25 @@
 - [2. PRE-REQUISITES](#2-pre-requisites)
 - [3. DEPLOYMENT ARCHITECTURE](#3-deployment-architecture)
 - [4. INSTALLATION STEPS](#4-installation-steps)
-  - [4.1. Deploy BIAR infrastructure](#41-deploy-biar-infrastructure)
+  - [4.1. Deploy BIAR stack](#41-deploy-biar-stack)
   - [4.2. Utilities and teardown](#42-utilities-and-teardown)
 - [5. OVERVIEW OF SERVICES](#5-overview-of-services)
+  - [5.1. Infrastructure (docker-compose.biar.infrastructure.yaml)](#51-infrastructure-docker-composebiarinfrastructureyaml)
+  - [5.2. Application services (docker-compose.hub.biar.yaml / docker-compose.dev.biar.yaml)](#52-application-services-docker-composehubbiary-aml--docker-composedevbiaryaml)
+  - [5.3. Init containers (docker-compose.utils.init.yaml)](#53-init-containers-docker-composeuttsiinityaml)
 - [6. ACCESSING DEPLOYED COMPONENTS](#6-accessing-deployed-components)
-- [7. TROUBLESHOOTING TIPS](#7-troubleshooting-tips)
-- [8. APPENDIX](#8-appendix)
-  - [8.1. NiFi flow management](#81-nifi-flow-management)
-  - [8.2. Apache Ozone bucket initialisation](#82-apache-ozone-bucket-initialisation)
-  - [8.3. Docker Compose YAML structure](#83-docker-compose-yaml-structure)
+- [7. USING JUPYTERHUB AND THE DATA LAKEHOUSE NOTEBOOKS](#7-using-jupyterhub-and-the-data-lakehouse-notebooks)
+  - [7.1. Create your account](#71-create-your-account)
+  - [7.2. Start your JupyterLab server](#72-start-your-jupyterlab-server)
+  - [7.3. Open a notebook](#73-open-a-notebook)
+  - [7.4. Run a notebook](#74-run-a-notebook)
+  - [7.5. Admin: approve pending users](#75-admin-approve-pending-users)
+  - [7.6. Shut down your server when done](#76-shut-down-your-server-when-done)
+- [8. TROUBLESHOOTING TIPS](#8-troubleshooting-tips)
+- [9. APPENDIX](#9-appendix)
+  - [9.1. NiFi flow management](#91-nifi-flow-management)
+  - [9.2. Apache Ozone bucket initialisation](#92-apache-ozone-bucket-initialisation)
+  - [9.3. Docker Compose YAML structure](#93-docker-compose-yaml-structure)
 
 <h1></h1>
 <h1 style="color: red;">WARNING - THIS TAZAMA REPOSITORY IS TO BE USED FOR DEMONSTRATION, EXPLORATION AND TESTING PURPOSES ONLY.</h1>
@@ -30,7 +40,16 @@ For production deployment instructions:
 
 # 1. INTRODUCTION
 
-The `biar/` stack provides the Business Intelligence, Analytics, and Reporting (BIAR) infrastructure for Tazama. It adds a data ingestion and processing pipeline built on top of Apache NiFi, Apache Ozone (object storage), Apache Solr (search), and Apache Tika (document analysis). NiFi connects to the PostgreSQL databases on both the core server (Server A) and the extensions server (Server B) to ingest transaction and case data for reporting purposes.
+The `biar/` stack provides the Business Intelligence, Analytics, and Reporting (BIAR) infrastructure for Tazama. It adds a data ingestion and processing pipeline built on top of:
+
+- **Apache NiFi** — visual data flow engine that ingests transaction and case data from the core and extensions PostgreSQL databases
+- **Apache Ozone** — distributed object storage (S3-compatible) for data lake storage
+- **Apache Solr** — full-text search and document indexing
+- **Apache Tika** — document parsing and content extraction
+- **Automation Orchestrator** — PySpark-based batch processing and Hudi data lake management
+- **Datalakehouse API** — REST API for querying the Hudi data lakehouse
+- **Unstructured Pipeline** — document ingestion pipeline (Tika + Solr)
+- **JupyterHub** — multi-user analytics environment with pre-loaded PySpark notebooks
 
 This stack is self-contained and does not add to or modify any existing Compose project. It runs under its own `tazama-biar` Compose project. The core stack (and optionally the extensions stack) must be running and accessible before the BIAR stack is started.
 
@@ -101,53 +120,98 @@ The launcher presents the following menu:
 
  Pre-requisite: tazama-core must be running on Server A
 
-   1. Deploy BIAR infrastructure
-   2. Utilities / teardown
+   1. Deploy BIAR stack (DockerHub images)
+   2. Deploy BIAR stack (GitHub builds)
+   3. Utilities / teardown
 
-Select option (1-2), or (q)uit:
+Select option (1-3), or (q)uit:
 ```
 
-## 4.1. Deploy BIAR infrastructure
+## 4.1. Deploy BIAR stack
 
-Option 1 runs a pre-flight connectivity check to verify that `SERVER_A_HOST:14222` (NATS) is reachable. If the check passes, it starts the full BIAR stack:
+Options 1 and 2 run a pre-flight connectivity check to verify that `SERVER_A_HOST:14222` (NATS) is reachable. If the check passes, the launcher starts the full BIAR stack using a three-file compose chain.
+
+| Option | Build source |
+|---|---|
+| 1 | Pre-built DockerHub images (version controlled by `TAZAMA_VERSION` in `.env`) |
+| 2 | GitHub source builds (branch controlled by `BIAR_BRANCH` in `.env`) |
+
+**Compose chain used (DockerHub images):**
 
 ```
-docker compose -p tazama-biar -f ./docker-compose.biar.infrastructure.yaml up -d
+docker compose -p tazama-biar \
+  -f ./docker-compose.biar.infrastructure.yaml \
+  -f ./docker-compose.hub.biar.yaml \
+  -f ./docker-compose.utils.init.yaml \
+  up -d
 ```
 
-The `aws-cli` container runs last. It waits ~15 seconds for the S3G gateway to become available, then creates the `biar-bucket` object-storage bucket in Apache Ozone, and remains running as a utility container for any subsequent S3 operations against Ozone.
+`docker-compose.dev.biar.yaml` replaces `docker-compose.hub.biar.yaml` for GitHub source builds.
+
+> [!NOTE]
+> Apache Ozone requires a strict startup order. The SCM must fully initialise before the OM starts, and both must be healthy before S3G accepts requests. The launcher handles this with a staged delay (SCM → 20 s → OM → 15 s → full stack). On first boot, expect the stack to take 2–3 minutes before all services are ready.
+
+The `nifi-init` container polls the NiFi API after startup and injects the pre-configured parameter context and flow template when NiFi becomes ready (up to 5 minutes). The `aws-cli` container polls S3G and creates the `tazama` Ozone bucket automatically once S3G is healthy.
 
 ## 4.2. Utilities and teardown
 
-Option 2 provides:
+Option 3 provides:
 
 ```text
 Utilities:
   1. Tear down BIAR
 ```
 
-Teardown brings down all containers and removes all volumes (`--volumes`). Data stored in Solr, NiFi, and Ozone will be permanently deleted.
+Teardown brings down all containers and removes all volumes (`--volumes`). Data stored in Solr, NiFi, Ozone, and JupyterHub will be permanently deleted.
 
 <div style="text-align: right"><a href="#top">Top</a></div>
 
 # 5. OVERVIEW OF SERVICES
 
-All services run in the `tazama-biar` Compose project on a single compose file (`docker-compose.biar.infrastructure.yaml`).
+All services run in the `tazama-biar` Compose project across three compose files.
+
+## 5.1. Infrastructure (docker-compose.biar.infrastructure.yaml)
+
+Shared infrastructure that must be running before any application service starts. These services are always deployed regardless of build source.
 
 | Service | Container | Port | Description |
 |---|---|---|---|
 | Apache Tika | `biar-tika` | 9998 | Document parsing and content extraction (PDF, Office formats, etc.) |
 | Apache Solr | `biar-solr` | 8983 | Full-text search and indexing. Initialises with the `biar_docs` core. |
-| Apache NiFi | `biar-nifi` | 8088 | Visual data flow engine. Connects to PostgreSQL on Server A and Server B to ingest transaction and case data. |
-| Ozone SCM | `scm` | 9876 | Storage Container Manager -- Ozone control plane |
-| Ozone OM | `om` | 9874 | Object Manager -- Ozone namespace service |
-| Ozone Datanode | `datanode` | -- | Stores actual object data (no external port) |
-| Ozone Recon | `recon` | 9888 | Ozone monitoring and metrics UI |
-| Ozone S3G | `s3g` | 9878 | S3-compatible gateway for reading and writing Ozone objects |
-| AWS CLI | `ozone-aws-cli` | -- | One-shot utility: creates the `biar-bucket` bucket in Ozone via the S3G endpoint, then stays running for ad-hoc S3 operations |
+| Ozone SCM | `ozone-scm-1` | 9876 | Storage Container Manager — Ozone control plane |
+| Ozone OM | `ozone-om-1` | — | Object Manager — Ozone namespace service |
+| Ozone Datanode 1 | `ozone-datanode-1` | — | Stores object data (no external port) |
+| Ozone Datanode 2 | `ozone-datanode-2` | — | Stores object data (no external port) |
+| Ozone Datanode 3 | `ozone-datanode-3` | — | Stores object data (no external port) |
+| Ozone Recon | `ozone-recon-1` | 9888 | Ozone monitoring and metrics UI |
+| Ozone S3G | `ozone-s3g-1` | 9878 | S3-compatible gateway for reading and writing Ozone objects |
 
 > [!NOTE]
-> Apache Ozone runs as a single-node cluster in this deployment (replication factor 1). This is appropriate for development and testing. A production Ozone deployment requires a minimum of three datanodes.
+> Apache Ozone runs with three datanodes and replication factor 1 in this deployment. This is appropriate for development and testing. A production Ozone deployment should use a minimum of three datanodes with replication factor 3.
+
+## 5.2. Application services (docker-compose.hub.biar.yaml / docker-compose.dev.biar.yaml)
+
+Tazama BIAR application services. The `hub` variant pulls pre-built images from DockerHub; the `dev` variant builds from the `tazama-lf/biar` GitHub repository.
+
+| Service | Container | Port | Description |
+|---|---|---|---|
+| Apache NiFi | `biar-nifi` | 8088 | Visual data flow engine. Connects to PostgreSQL on Server A (`:15432`) and Server B (`:15433`) to ingest transaction and case data. |
+| Automation Orchestrator | `biar-automation-orchestrator` | 7619 | PySpark-based batch processor and Hudi data lake manager. Writes to the shared warehouse at `TAZAMA_WAREHOUSE_HOST_PATH`. |
+| Datalakehouse API | `biar-datalakehouse-api` | 8282 | FastAPI REST interface for querying the Hudi data lakehouse. Reads from `TAZAMA_WAREHOUSE_HOST_PATH`. |
+| Unstructured Pipeline | `biar-unstructured-pipeline` | — | Document ingestion pipeline that submits files to Tika for parsing and indexes results in Solr (no external port). |
+| JupyterHub | `biar-jupyterhub` | 8000 | Multi-user analytics environment. Each user gets an isolated JupyterLab session with pre-loaded PySpark notebooks. Uses `NativeAuthenticator` (sign-up on first visit). |
+
+> [!NOTE]
+> `TAZAMA_WAREHOUSE_HOST_PATH` in `biar/.env` controls where the Hudi warehouse is stored on the host. In the AWS deployment this is `/opt/Tazama_Warehouse` (created by `deploy-biar.ps1`). In a local deployment, set this to any directory you have write access to.
+
+## 5.3. Init containers (docker-compose.utils.init.yaml)
+
+One-shot containers that run at stack startup and remain running for ad-hoc operations.
+
+| Service | Container | Description |
+|---|---|---|
+| AWS CLI | `ozone-aws-cli` | Polls S3G until healthy, then creates the `tazama` Ozone bucket. Remains running for ad-hoc S3 operations against Ozone. |
+| NiFi Init | `nifi-init` | Polls the NiFi API and injects the pre-configured parameter context and flow template when NiFi is ready (up to 5 min). Restarts on failure. |
 
 <div style="text-align: right"><a href="#top">Top</a></div>
 
@@ -175,9 +239,108 @@ After a successful deployment, the following interfaces are accessible from `loc
 - S3-compatible gateway: <http://localhost:9878>
 - Storage Container Manager: <http://localhost:9876>
 
+#### Automation Orchestrator
+- REST API / Swagger UI: <http://localhost:7619/docs>
+
+#### Datalakehouse API
+- REST API / Swagger UI: <http://localhost:8282/docs>
+
+#### JupyterHub
+- JupyterHub UI: <http://localhost:8000>
+- On first visit, use the **Sign up** form to create an account. The first user whose name matches `JUPYTERHUB_ADMIN` in `env/jupyterlab.env` (default: `admin`) is automatically granted admin rights.
+- Each user gets an isolated JupyterLab environment with the shared read-only notebooks pre-loaded from `/srv/notebooks/`.
+
 <div style="text-align: right"><a href="#top">Top</a></div>
 
-# 7. TROUBLESHOOTING TIPS
+# 7. USING JUPYTERHUB AND THE DATA LAKEHOUSE NOTEBOOKS
+
+JupyterHub provides a multi-user analytics environment pre-loaded with PySpark notebooks that query the Tazama Hudi data lakehouse. Each user gets their own isolated JupyterLab process; user accounts and server state persist across container restarts.
+
+## 7.1. Create your account
+
+1. Open JupyterHub at <http://localhost:8000> (or `http://<Server C>:8000` in a multi-server deployment).
+2. Click **Sign up** on the login page.
+3. Enter a username and password, then click **Create User**.
+
+> [!IMPORTANT]
+> **The first account created must use the admin username.** The admin username is set by `JUPYTERHUB_ADMIN` in `biar/env/jupyterlab.env` (default: `admin`). If the first sign-up uses a different name, no account will have admin rights and you will not be able to approve subsequent users. If this happens, stop the stack, delete the `jupyterhub_data` volume, and restart.
+
+Because `open_signup = True`, subsequent users can sign up immediately and are granted access automatically. If you want to require admin approval for new users, set `c.NativeAuthenticator.open_signup = False` in the JupyterHub config and rebuild the image.
+
+## 7.2. Start your JupyterLab server
+
+1. After signing up (or logging in), you will be taken to the JupyterHub home page.
+2. Click **Start My Server**.
+3. JupyterHub will spawn a JupyterLab process for your user. This takes 15–30 seconds on first launch while PySpark initialises.
+4. JupyterLab will open automatically in your browser once the server is ready.
+
+Each user's server runs as a separate Linux process inside the container, using the shared environment variables (`S3A_ENDPOINT`, `S3A_ACCESS_KEY`, `WAREHOUSE_ROOT`, etc.) that are forwarded automatically from the container's env.
+
+## 7.3. Open a notebook
+
+The shared notebooks are at `/srv/notebooks/` and appear in the JupyterLab file browser on the left. They are read-only in that location — to edit a notebook, first copy it to your home directory:
+
+1. Right-click the notebook in the file browser.
+2. Click **Copy**.
+3. Navigate to `/home/<your-username>/` in the file browser.
+4. Click **Paste**.
+
+You can then open and edit the copy freely without affecting other users.
+
+Available notebooks:
+
+| Notebook | Description |
+|---|---|
+| `Dashboard_Metrics.ipynb` | Key BIAR dashboard metrics summary |
+| `Executive_Overview_Dashboard.ipynb` | High-level executive view of transaction monitoring results |
+| `Fraud_Trend_Analysis_Dashboard.ipynb` | Time-series analysis of detected fraud patterns |
+| `Fraud_Typology_Effectiveness_Dashboard.ipynb` | Per-typology rule effectiveness and hit-rate analysis |
+| `Case_Management_Trend_Dashboard.ipynb` | Case volume and resolution trends over time |
+| `Case_Tracking_Analysis_Dashboard.ipynb` | Detailed case lifecycle and escalation analysis |
+| `TMS_Performance_Dashboard.ipynb` | Transaction Monitoring Service throughput and latency metrics |
+
+## 7.4. Run a notebook
+
+1. Open a notebook (from `/srv/notebooks/` or your home copy).
+2. Ensure a kernel is attached — the kernel status indicator appears in the top-right corner of the notebook. If no kernel is running, select **Python 3** from the kernel picker.
+3. Run cells individually with **Shift + Enter**, or run the entire notebook via **Run → Run All Cells**.
+
+All notebooks read Spark configuration from environment variables. The key variables and their defaults are:
+
+| Variable | Default | Description |
+|---|---|---|
+| `S3A_ENDPOINT` | `http://<SERVER_C_HOST>:9878` | Ozone S3G endpoint for Spark S3A reads |
+| `S3A_ACCESS_KEY` | `tazama` | Ozone S3 access key |
+| `S3A_SECRET_KEY` | `tazama` | Ozone S3 secret key |
+| `WAREHOUSE_ROOT` | `/opt/Tazama_Hudi_warehouse` | Path to the Hudi warehouse root inside the container |
+| `SPARK_DRIVER_MEMORY` | `4g` | Heap memory per user Spark session |
+
+These defaults match the values in `biar/env/jupyterlab.env` and the Ozone credentials in `biar/.env`. Override them in `jupyterlab.env` before deploying if your Ozone is configured differently.
+
+> [!NOTE]
+> Each user's Spark session starts a JVM on first notebook execution. Expect a 20–30 second delay before the first cell produces output. Subsequent cells in the same session run much faster.
+
+## 7.5. Admin: approve pending users
+
+If `open_signup` is disabled, new user registrations will be in a **pending** state until an admin approves them.
+
+1. Log in as the admin user.
+2. Navigate to <http://localhost:8000/hub/authorize>.
+3. Click **Authorize** next to each pending username.
+
+An admin can also manage users, stop servers, and view server logs from the JupyterHub Admin panel at <http://localhost:8000/hub/admin>.
+
+## 7.6. Shut down your server when done
+
+Each running JupyterLab server consumes Spark driver memory (`SPARK_DRIVER_MEMORY`, default 4 GB). Shut it down when not in use to free resources for other users.
+
+1. In JupyterLab, go to **File → Hub Control Panel**.
+2. Click **Stop My Server**.
+3. Your work is saved automatically — notebooks you saved to your home directory will still be there when you restart.
+
+<div style="text-align: right"><a href="#top">Top</a></div>
+
+# 8. TROUBLESHOOTING TIPS
 
 ### NiFi fails to start or takes a very long time
 
@@ -215,9 +378,9 @@ The launcher checks that `SERVER_A_HOST:14222` is reachable via TCP. If the chec
 
 <div style="text-align: right"><a href="#top">Top</a></div>
 
-# 8. APPENDIX
+# 9. APPENDIX
 
-## 8.1. NiFi flow management
+## 9.1. NiFi flow management
 
 The BIAR NiFi instance does not ship with a pre-configured flow. After first boot:
 
@@ -229,7 +392,7 @@ NiFi state and flow configuration are persisted in named Docker volumes (`nifi_c
 
 To export a configured flow for reuse, use NiFi's built-in `Download flow definition` option (right-click the process group in the canvas). Store the exported JSON in version control.
 
-## 8.2. Apache Ozone bucket initialisation
+## 9.2. Apache Ozone bucket initialisation
 
 The `ozone-aws-cli` container automatically creates the `biar-bucket` bucket each time the stack is started (the `|| true` in the entrypoint makes the command idempotent if the bucket already exists). To interact with Ozone manually using the S3-compatible API:
 
@@ -239,8 +402,17 @@ docker exec ozone-aws-cli aws --endpoint-url http://s3g:9878 s3 ls
 
 The Ozone S3G access key is `admin` and secret key is `admin` in the default configuration. These are committed defaults appropriate for a local development deployment only.
 
-## 8.3. Docker Compose YAML structure
+## 9.3. Docker Compose YAML structure
 
-View this file for additional detail about the Docker Compose files in this stack: [Docker Compose YAML Structure Overview](./docker-yaml-structure.md)
+The BIAR stack uses three compose files composed together:
+
+| File | Purpose |
+|---|---|
+| `docker-compose.biar.infrastructure.yaml` | Always-on infrastructure: Tika, Solr, Ozone (SCM, OM, 3× datanodes, Recon, S3G) |
+| `docker-compose.hub.biar.yaml` | Application services from DockerHub: NiFi, Automation Orchestrator, Datalakehouse API, Unstructured Pipeline, JupyterHub |
+| `docker-compose.dev.biar.yaml` | Application services built from GitHub source (replaces `hub.biar` for dev deployments) |
+| `docker-compose.utils.init.yaml` | Init containers: `aws-cli` (Ozone bucket creation), `nifi-init` (NiFi flow injection) |
+
+View [docker-yaml-structure.md](./docker-yaml-structure.md) for additional detail about the Docker Compose files in the wider Tazama repository.
 
 <div style="text-align: right"><a href="#top">Top</a></div>

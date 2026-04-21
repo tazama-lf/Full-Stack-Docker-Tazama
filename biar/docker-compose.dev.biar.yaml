@@ -1,6 +1,36 @@
+# SPDX-License-Identifier: Apache-2.0
+
 services:
+  nifi:
+    build:
+      context: https://github.com/tazama-lf/biar.git#${BIAR_BRANCH}:nifi
+      dockerfile: Dockerfile
+    container_name: biar-nifi
+    hostname: nifi
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/nifi.env
+    environment:
+      NIFI_JVM_HEAP_INIT: 512m
+      NIFI_JVM_HEAP_MAX: 1g
+    ports:
+      - "${NIFI_PORT}:8088"
+      - 8081:8081
+    volumes:
+      - nifi_conf:/opt/nifi/nifi-current/conf
+      - nifi_state:/opt/nifi/nifi-current/state
+      - nifi_db:/opt/nifi/nifi-current/database_repository
+      - nifi_flowfile:/opt/nifi/nifi-current/flowfile_repository
+      - nifi_content:/opt/nifi/nifi-current/content_repository
+      - nifi_provenance:/opt/nifi/nifi-current/provenance_repository
+    depends_on:
+      - s3g
+
   automation-orchestrator:
-    image: tazamaorg/biar-automation-orchestrator:rc
+    build:
+      context: https://github.com/tazama-lf/biar.git#${BIAR_BRANCH}:automation-orchestrator
+      dockerfile: Dockerfile
     container_name: biar-automation-orchestrator
     restart: unless-stopped
     env_file:
@@ -9,7 +39,7 @@ services:
     ports:
       - "${AUTOMATION_ORCHESTRATOR_PORT}:7619"
     volumes:
-      - ./automation-orchestrator/out:/app/out
+      - automation_orchestrator_out:/app/out
       - ${TAZAMA_WAREHOUSE_HOST_PATH}:/app/Tazama_Hudi_warehouse
     tmpfs:
       - /tmp/spark
@@ -17,7 +47,9 @@ services:
       - s3g
 
   datalakehouse-api:
-    image: tazamaorg/biar-datalakehouse-api:rc
+    build:
+      context: https://github.com/tazama-lf/biar.git#${BIAR_BRANCH}:datalakehouse-api
+      dockerfile: Dockerfile
     container_name: biar-datalakehouse-api
     restart: unless-stopped
     env_file:
@@ -31,7 +63,9 @@ services:
       - s3g
 
   unstructured-pipeline:
-    image: tazamaorg/biar-unstructured-pipeline:rc
+    build:
+      context: https://github.com/tazama-lf/biar.git#${BIAR_BRANCH}:unstructured-pipeline
+      dockerfile: Dockerfile
     container_name: biar-unstructured-pipeline
     restart: unless-stopped
     env_file:
@@ -40,3 +74,19 @@ services:
     depends_on:
       - tika
       - solr
+
+  jupyterhub:
+    build:
+      context: https://github.com/tazama-lf/biar.git#${BIAR_BRANCH}:JupyterHub
+      dockerfile: Dockerfile
+    container_name: biar-jupyterhub
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/jupyterlab.env
+    ports:
+      - "${JUPYTERLAB_PORT}:8000"
+    volumes:
+      - jupyterhub_data:/data
+    depends_on:
+      - s3g

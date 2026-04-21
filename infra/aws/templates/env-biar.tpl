@@ -9,3 +9,4 @@
 
 SERVER_A_HOST=core.tazama.internal
 SERVER_B_HOST=extensions.tazama.internal
+SERVER_C_HOST=biar.tazama.internal

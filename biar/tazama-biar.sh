@@ -22,9 +22,24 @@ check_core_reachable() {
     return 0
 }
 
-deploy_biar() {
+deploy_biar_hub() {
     echo ""
-    echo " Deploying BIAR stack..."
+    echo " Deploying BIAR stack (DockerHub images)..."
+    echo ""
+    docker compose -p "$BIAR_PROJECT" \
+        -f ./docker-compose.biar.infrastructure.yaml \
+        -f ./docker-compose.hub.biar.yaml \
+        -f ./docker-compose.utils.init.yaml \
+        up -d
+
+    echo ""
+    echo " Done."
+    pause
+}
+
+deploy_biar_dev() {
+    echo ""
+    echo " Deploying BIAR stack (GitHub builds)..."
     echo ""
     docker compose -p "$BIAR_PROJECT" \
         -f ./docker-compose.biar.infrastructure.yaml \
@@ -43,6 +58,7 @@ down_biar() {
     echo ""
     docker compose -p "$BIAR_PROJECT" \
         -f ./docker-compose.biar.infrastructure.yaml \
+        -f ./docker-compose.hub.biar.yaml \
         -f ./docker-compose.dev.biar.yaml \
         -f ./docker-compose.utils.init.yaml \
         down --volumes
@@ -79,15 +95,17 @@ menu() {
         echo ""
         echo " Pre-requisite: tazama-core must be running on Server A"
         echo ""
-        echo "   1. Deploy BIAR stack"
-        echo "   2. Utilities / teardown"
+        echo "   1. Deploy BIAR stack (DockerHub images)"
+        echo "   2. Deploy BIAR stack (GitHub builds)"
+        echo "   3. Utilities / teardown"
         echo ""
-        read -rp " Select option (1-2), or (q)uit: " choice
+        read -rp " Select option (1-3), or (q)uit: " choice
 
         case "$choice" in
             q|Q) exit 0 ;;
-            1) check_core_reachable && deploy_biar ;;
-            2) utils ;;
+            1) check_core_reachable && deploy_biar_hub ;;
+            2) check_core_reachable && deploy_biar_dev ;;
+            3) utils ;;
         esac
     done
 }

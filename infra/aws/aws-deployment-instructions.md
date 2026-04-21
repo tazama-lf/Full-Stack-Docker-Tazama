@@ -1,4 +1,4 @@
-# Deploying Tazama on AWS - Step-by-Step Instructions
+﻿# Deploying Tazama on AWS - Step-by-Step Instructions
 
 > **Living document.** This file records every command, output, and decision made during the first successful deployment of the three-stack Tazama system on AWS. It is intended to become a reproducible guide for community contributors who want to stand up the same environment.
 >
@@ -33,7 +33,7 @@ Three stacks are deployed across three EC2 instances. Each stack maps to a subfo
 full-stack-docker-tazama/
 ├── core/          →  Server A - tazama-core (NATS, PostgreSQL, Valkey, TMS, rules, TP, auth, relay)
 ├── extensions/    →  Server B - tazama-extensions (OpenSearch, CMS, TCS, TRS, SFTP)
-└── biar/          →  Server C - tazama-biar (NiFi, Solr, Tika, Apache Ozone)
+└── biar/          →  Server C - tazama-biar (NiFi, Solr, Tika, Apache Ozone, JupyterHub)
 ```
 
 The IaC and deploy scripts live in a subfolder that must be created as part of Phase C:
@@ -515,7 +515,7 @@ Found OpenTofu [OpenTofu.Tofu] Version 1.11.6
 This application is licensed to you by its owner.
 Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
 Downloading https://github.com/opentofu/opentofu/releases/download/v1.11.6/tofu_1.11.6_windows_amd64.zip
-  â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ  33.0 MB / 33.0 MB
+  ██████████████████████████████  33.0 MB / 33.0 MB
 Successfully verified installer hash
 Extracting archive...
 Successfully extracted archive
@@ -886,13 +886,13 @@ anything is created.
 | Resource | Detail |
 |---|---|
 | VPC | `10.0.0.0/16` |
-| Public subnets | `10.0.0.0/24` (ap-south-1a) Â· `10.0.2.0/24` (ap-south-1b) |
+| Public subnets | `10.0.0.0/24` (ap-south-1a) . `10.0.2.0/24` (ap-south-1b) |
 | Private subnet | `10.0.1.0/24` (ap-south-1a) - all three EC2 instances |
 | NAT Gateway | In public subnet 1 - lets instances reach internet |
 | EICE endpoint | In private subnet - SSH without port 22 open to internet |
-| Server A (core) | `10.0.1.10` Â· `t3.xlarge` Â· 50 GB gp3 |
-| Server B (extensions) | `10.0.1.20` Â· `t3.xlarge` Â· 50 GB gp3 |
-| Server C (biar) | `10.0.1.30` Â· `r5.2xlarge` Â· 100 GB gp3 |
+| Server A (core) | `10.0.1.10` . `t3.xlarge` . 50 GB gp3 |
+| Server B (extensions) | `10.0.1.20` . `t3.xlarge` . 50 GB gp3 |
+| Server C (biar) | `10.0.1.30` . `r5.2xlarge` . 100 GB gp3 |
 | DNS | Route 53 private zone `tazama.internal` |
 | ALB | Optional — see Phase E |
 | AMI | Amazon Linux 2023 (fetched dynamically - always latest) |
@@ -967,7 +967,7 @@ Four security groups:
 | ALB | 0.0.0.0/0: 80, 443 | - | - |
 | Server A | TMS 5000, DEAPI/DEMS/Auth 3001-3020, Admin 5100 | All TCP from `10.0.1.0/24` | EICE SG only |
 | Server B | TRS/TCS/CMS 3005-3090, frontends 5173-5175 | All TCP from `10.0.1.0/24` | EICE SG only |
-| Server C | NiFi 8088 | (outbound only - Server C reaches A and B) | EICE SG only |
+| Server C | NiFi 8088, JupyterHub 8000 | (outbound only - Server C reaches A and B) | EICE SG only |
 
 The cross-server rule (`0-65535 from 10.0.1.0/24`) on Servers A and B covers all
 internal ports without maintaining a per-service list (NATS, PostgreSQL, Valkey,
@@ -1157,7 +1157,7 @@ you reviewed, with no risk of drift between plan and apply.
 Review the plan carefully. Expected resource count for core-only is roughly 40-45 resources
 (VPC, subnets, IGW, NAT GW, EIP, route tables, SGs, EICE endpoint, IAM role +
 attachment + profile, AMI data source, 3 × EC2, Route 53 zone + 3 records).
-Adding `alb.tfvars` adds roughly 30 more (1 ALB, 14 target groups, 14 port-based HTTP listeners, SG rules).
+Adding `alb.tfvars` adds roughly 33 more (1 ALB, 17 target groups, 17 port-based HTTP listeners, SG rules).
 
 > **Record `Plan: X to add, 0 to change, 0 to destroy.` line once C.11 is run.**
 
@@ -1320,17 +1320,34 @@ docker compose -p tazama-core \
 [infra/aws/scripts/deploy-biar.ps1](full-stack-docker-tazama/infra/aws/scripts/deploy-biar.ps1)
 
 1. Waits for bootstrap on Server C (up to 15 min)
-2. Applies `templates/env-biar.tpl` overlay to `biar/.env`:
-   sets `SERVER_A_HOST=core.tazama.internal` and `SERVER_B_HOST=extensions.tazama.internal`
-3. Starts the biar stack:
-   ```
-   docker compose -p tazama-biar \
-     -f ./docker-compose.biar.infrastructure.yaml \
-     up -d
-   ```
+2. Pulls the latest repo on Server C — ensures the server is on the correct branch
+3. Copies `biar/.env` to Server C (gitignored — never committed)
+4. Applies `templates/env-biar.tpl` overlay to `biar/.env` — sets all three host vars:
+   - `SERVER_A_HOST=core.tazama.internal`
+   - `SERVER_B_HOST=extensions.tazama.internal`
+   - `SERVER_C_HOST=biar.tazama.internal`
+5. Creates the Tazama warehouse directory: `sudo mkdir -p /opt/Tazama_Warehouse` — bind-mounted by automation-orchestrator and datalakehouse-api
+6. **Staged Ozone startup** (SCM must fully initialise before OM and datanodes):
+   - Starts `scm` only, waits 20 s for SCM to initialise
+   - Starts `om`, waits 15 s for OM to register
+   - Brings up the full stack:
+     ```
+     docker compose -p tazama-biar \
+       -f ./docker-compose.biar.infrastructure.yaml \
+       -f ./docker-compose.hub.biar.yaml \
+       -f ./docker-compose.utils.init.yaml \
+       up -d [--pull always]
+     ```
 
-Server A and Server B must be up before this script is run - NiFi connects
-to PostgreSQL (`:15432`) on Server A and PostgreSQL (`:15433`) on Server B at startup.
+The `aws-cli` init container creates the `tazama` Ozone bucket automatically once S3G is healthy. The `nifi-init` container polls the NiFi API and injects the parameter context + template when NiFi becomes ready (up to 5 minutes).
+
+**Parameters:**
+
+| Parameter | Description |
+|---|---|
+| `-NoPull` | Skip `--pull always` on `docker compose up`. Use when images are already present on Server C. |
+
+Server A and Server B must be up before this script is run — NiFi connects to PostgreSQL (`:15432`) on Server A and PostgreSQL (`:15433`) on Server B. These connections are made when NiFi flows start, not at container startup, so the containers will start but flows will fail until both database servers are reachable.
 
 ---
 
@@ -1471,10 +1488,14 @@ modification. Proceed to Phase F to validate.
 
 | Local port | Service |
 |---|---|
+| 7619 | Automation Orchestrator API |
+| 8000 | JupyterHub |
 | 8088 | NiFi UI |
+| 8282 | Datalakehouse API |
 | 8983 | Solr admin |
-| 9888 | Ozone Recon UI |
 | 9876 | Ozone SCM |
+| 9878 | Ozone S3G |
+| 9888 | Ozone Recon UI |
 
 ---
 
@@ -1534,6 +1555,7 @@ Update your Postman environment: set the base URL variable to
 | Keycloak | `/health/ready` | 200-399 |
 | Hasura | `/healthz` | 200-399 |
 | NiFi | `/nifi-api/system-diagnostics` | 200-399 |
+| JupyterHub | `/hub/health` | 200-399 |
 | All others | `/health` | 200-399 |
 
 **Key outputs (used by Phase G custom domain upgrade):**
@@ -1755,6 +1777,9 @@ Then redeploy extensions:
 | `cms-api.<your-zone>` | CMS Backend API | Server B :3090 |
 | `pgadmin-ext.<your-zone>` | pgAdmin (extensions DB) | Server B :5051 |
 | `nifi.<your-zone>` | NiFi UI | Server C :8088 |
+| `jupyter.<your-zone>` | JupyterHub (multi-user analytics) | Server C :8000 |
+| `datalakehouse-api.<your-zone>` | Datalakehouse API | Server C :8282 |
+| `automation-orchestrator.<your-zone>` | Automation Orchestrator API | Server C :7619 |
 
 #### E.3.8 Rollback
 
@@ -1879,10 +1904,22 @@ Invoke-RestMethod http://localhost:9200/_cluster/health | ConvertTo-Json
 .\tunnel-server-c.ps1
 ```
 
-**Browser checks:**
+**Browser/API checks:**
 - NiFi UI: http://localhost:8088/nifi — login with `admin` / `admin123456789`
 - Solr admin: http://localhost:8983/solr
 - Ozone Recon: http://localhost:9888
+- JupyterHub: http://localhost:8000 — sign up with the `JUPYTERHUB_ADMIN` username (default: `admin`)
+
+```powershell
+# Automation Orchestrator API (FastAPI)
+Invoke-RestMethod http://localhost:7619/health
+
+# Datalakehouse API (FastAPI)
+Invoke-RestMethod http://localhost:8282/health
+
+# JupyterHub
+Invoke-RestMethod http://localhost:8000/hub/health
+```
 
 **NiFi → Server A PostgreSQL connectivity:** NiFi connects to PostgreSQL on Server A (`:15432`) at startup. In the NiFi UI, check the Controller Services tab. Any DBCPConnectionPool service that targets `core.tazama.internal:15432` should show **Enabled** status. A **Disabled** or **Invalid** service indicates the `SERVER_A_HOST` overlay was not applied — check `env-biar.tpl` and re-run the overlay step manually:
 
@@ -2329,10 +2366,15 @@ docker compose -p tazama-core \
 
 | Port | Service | Used by | Subdomain (`*.beta.tazama.org`) |
 |---|---|---|---|
+| 7619 | Automation Orchestrator API | ALB, Operator | `automation-orchestrator` |
+| 8000 | JupyterHub | ALB | `jupyter` |
 | 8088 | NiFi UI | ALB | `nifi` |
+| 8282 | Datalakehouse API | ALB, Operator | `datalakehouse-api` |
 | 8983 | Solr UI | Operator (EICE only) | — |
 | 9876 | Ozone SCM | Operator (EICE only) | — |
+| 9878 | Ozone S3G | Operator (EICE only) | — |
 | 9888 | Ozone Recon UI | Operator (EICE only) | — |
+| 9998 | Tika | Internal only | — |
 
 ---
 
