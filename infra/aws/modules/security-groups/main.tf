@@ -266,6 +266,30 @@ resource "aws_security_group" "server_c" {
   }
 
   ingress {
+    description     = "JupyterHub"
+    from_port       = 8000
+    to_port         = 8000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+  ingress {
+    description     = "Automation Orchestrator"
+    from_port       = 7619
+    to_port         = 7619
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+  ingress {
+    description     = "Datalakehouse API"
+    from_port       = 8282
+    to_port         = 8282
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+  ingress {
     description     = "SSH from EICE endpoint"
     from_port       = 22
     to_port         = 22

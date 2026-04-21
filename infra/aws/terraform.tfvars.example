@@ -1,8 +1,12 @@
 # Copy this file to terraform.tfvars (gitignored) and fill in your values.
-# Only `key_name` is required - all other variables have sensible defaults.
+# `key_name` and `state_bucket` are required - all other variables have sensible defaults.
 
 # EC2 key pair name created in Phase B step B.7.
 key_name = "tazama-aws"
+
+# S3 bucket name for OpenTofu state - same value as `bucket` in backend.conf.
+# Used to scope the IAM staging policy for large-file transfers (lakehouse-staging/ prefix).
+state_bucket = "tazama-tofu-state-<your-account-id>"
 
 # Override instance types if your workload needs more resources.
 # instance_type_a = "t3.xlarge"   # Server A - tazama-core

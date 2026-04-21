@@ -1355,9 +1355,11 @@ Server A and Server B must be up before this script is run — NiFi connects to 
 
 [infra/aws/scripts/deploy-lakehouse.ps1](full-stack-docker-tazama/infra/aws/scripts/deploy-lakehouse.ps1)
 
-Copies the Tazama Lakehouse archive to Server C and unpacks it into `/opt/Tazama_Warehouse`. Run this **after** `deploy-biar.ps1` has completed — the target directory is created by that script and the automation-orchestrator and datalakehouse-api containers must be up before any workflows access the warehouse.
+Stages the Tazama Lakehouse archive through S3 and unpacks it on Server C into `/opt/Tazama_Warehouse`. Run this **after** `deploy-biar.ps1` has completed — the target directory is created by that script and the automation-orchestrator and datalakehouse-api containers must be up before any workflows access the warehouse.
 
 The Lakehouse archive (`Tazama_Lakehouse.zip`) is not committed to the repository. Obtain it from the Tazama dev team and place it anywhere accessible from your local machine.
+
+> **Why S3 and not SCP?** The archive is typically 3-4 GB. EICE tunnels are stdio-based and throttled — SCP over EICE at that size would take hours or time out. Uploading to S3 from your workstation and then pulling it down on Server C (same AWS region, internal network) is dramatically faster and more reliable.
 
 ```powershell
 cd full-stack-docker-tazama\infra\aws
@@ -1366,11 +1368,14 @@ cd full-stack-docker-tazama\infra\aws
 
 What the script does:
 
-1. Reads `server_c_instance_id` from `tofu output`
-2. SCPs the zip to `~/Tazama_Lakehouse.zip` on Server C via EICE
-3. Installs `unzip` on Server C if not already present
-4. Runs `sudo unzip -o` into `/opt/Tazama_Warehouse`
-5. Deletes the zip from the server
+1. Reads `server_c_instance_id` and `state_bucket` from `tofu output`
+2. Uploads the zip to `s3://<state_bucket>/lakehouse-staging/Tazama_Lakehouse.zip` from your local machine
+3. On Server C: downloads the zip from S3 using the instance IAM role (no credentials needed)
+4. Installs `unzip` on Server C if not already present
+5. Runs `sudo unzip -o` into `/opt/Tazama_Warehouse`
+6. Deletes the zip from Server C and removes the staging object from S3
+
+The instance IAM role has a scoped read policy on the `lakehouse-staging/` prefix of the state bucket — added to `main.tf` as `aws_iam_role_policy.s3_staging_read`. Your local AWS profile requires `s3:PutObject` on the same bucket (already granted when you created the bucket in Phase B).
 
 **Parameters:**
 

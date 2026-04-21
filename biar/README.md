@@ -260,12 +260,16 @@ JupyterHub provides a multi-user analytics environment pre-loaded with PySpark n
 
 1. Open JupyterHub at <http://localhost:8000> (or `http://<Server C>:8000` in a multi-server deployment).
 2. Click **Sign up** on the login page.
-3. Enter a username and password, then click **Create User**.
+3. Enter username `admin` and a strong password, then click **Create User**. You will be redirected back to the login page.
+4. Log in with the same `admin` username and password.
 
 > [!IMPORTANT]
 > **The first account created must use the admin username.** The admin username is set by `JUPYTERHUB_ADMIN` in `biar/env/jupyterlab.env` (default: `admin`). If the first sign-up uses a different name, no account will have admin rights and you will not be able to approve subsequent users. If this happens, stop the stack, delete the `jupyterhub_data` volume, and restart.
 
-Because `open_signup = True`, subsequent users can sign up immediately and are granted access automatically. If you want to require admin approval for new users, set `c.NativeAuthenticator.open_signup = False` in the JupyterHub config and rebuild the image.
+> [!NOTE]
+> There is no pre-seeded password. The password you choose during sign-up is hashed and stored in the SQLite database on the `jupyterhub_data` volume. It persists across container restarts.
+
+Because `open_signup = True`, subsequent users can sign up immediately and are granted access automatically. To manage or revoke users, use the Admin panel at <http://localhost:8000/hub/admin>. If you want to require admin approval for new users, set `c.NativeAuthenticator.open_signup = False` in the JupyterHub config and rebuild the image.
 
 ## 7.2. Start your JupyterLab server
 

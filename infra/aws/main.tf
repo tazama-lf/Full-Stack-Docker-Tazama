@@ -47,6 +47,38 @@ resource "aws_iam_role_policy_attachment" "ssm_readonly" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess"
 }
 
+# Scoped S3 access for large-file staging (e.g. Lakehouse archive).
+# Instances may read/delete from the lakehouse-staging/ prefix of the state
+# bucket only — no write access and no access to any other prefix.
+data "aws_iam_policy_document" "s3_staging_read" {
+  statement {
+    sid    = "LakehouseStagingRead"
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+      "s3:DeleteObject",
+    ]
+    resources = ["arn:aws:s3:::${var.state_bucket}/lakehouse-staging/*"]
+  }
+  statement {
+    sid     = "LakehouseStagingList"
+    effect  = "Allow"
+    actions = ["s3:ListBucket"]
+    resources = ["arn:aws:s3:::${var.state_bucket}"]
+    condition {
+      test     = "StringLike"
+      variable = "s3:prefix"
+      values   = ["lakehouse-staging/*"]
+    }
+  }
+}
+
+resource "aws_iam_role_policy" "s3_staging_read" {
+  name   = "${var.prefix}-s3-staging-read"
+  role   = aws_iam_role.ec2_ssm.id
+  policy = data.aws_iam_policy_document.s3_staging_read.json
+}
+
 resource "aws_iam_instance_profile" "ec2_ssm" {
   name = "${var.prefix}-ec2-ssm-profile"
   role = aws_iam_role.ec2_ssm.name

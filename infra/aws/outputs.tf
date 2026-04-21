@@ -1,5 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
+output "state_bucket" {
+  description = "S3 bucket name used for OpenTofu state and large-file staging (lakehouse-staging/ prefix)"
+  value       = var.state_bucket
+}
+
 output "vpc_id" {
   description = "VPC ID"
   value       = module.vpc.vpc_id

@@ -73,3 +73,8 @@ variable "domain_zone" {
   type        = string
   default     = "beta.tazama.org"
 }
+
+variable "state_bucket" {
+  description = "Name of the S3 bucket used for OpenTofu state (e.g. tazama-tofu-state-<account-id>). Also used as the staging bucket for large-file transfers (lakehouse-staging/ prefix)."
+  type        = string
+}
