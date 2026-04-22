@@ -6,6 +6,12 @@ variable "prefix" {
   default     = "tazama"
 }
 
+variable "repo_branch" {
+  description = "Git branch cloned on EC2 instances at bootstrap"
+  type        = string
+  default     = "dev"
+}
+
 variable "region" {
   description = "AWS region to deploy into"
   type        = string

@@ -124,7 +124,8 @@ data "aws_ami" "al2023" {
 
 locals {
   bootstrap = templatefile("${path.module}/templates/bootstrap.sh.tpl", {
-    region = var.region
+    region      = var.region
+    repo_branch = var.repo_branch
   })
 }
 

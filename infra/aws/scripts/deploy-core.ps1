@@ -44,7 +44,7 @@ Wait-Bootstrap -InstanceId $idA -ServerName 'Server A'
 
 # -- 2. Pull latest repo changes on Server A ----------------------------------
 Write-Host '[Server A] Pulling latest repo changes...'
-Invoke-RemoteCommand -InstanceId $idA -Command "cd $Script:RemoteRepo && git fetch origin tazama/feat/mono-repo-phased-deployment && git checkout tazama/feat/mono-repo-phased-deployment && git reset --hard origin/tazama/feat/mono-repo-phased-deployment"
+Invoke-RemoteCommand -InstanceId $idA -Command "cd $Script:RemoteRepo && git fetch origin $Script:RepoBranch && git checkout $Script:RepoBranch && git reset --hard origin/$Script:RepoBranch"
 Write-Host '[Server A] Repo up to date.' -ForegroundColor Green
 
 # -- 3. Copy .env files to Server A -------------------------------------------

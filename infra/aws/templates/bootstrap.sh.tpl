@@ -13,7 +13,7 @@ exec > >(tee /var/log/tazama-bootstrap.log | logger -t tazama-bootstrap) 2>&1
 
 REGION="${region}"
 REPO_URL="https://github.com/tazama-lf/full-stack-docker-tazama.git"
-REPO_BRANCH="tazama/feat/mono-repo-phased-deployment"
+REPO_BRANCH="${repo_branch}"
 REPO_DIR="/home/ec2-user/full-stack-docker-tazama"
 EC2_USER="ec2-user"
 
