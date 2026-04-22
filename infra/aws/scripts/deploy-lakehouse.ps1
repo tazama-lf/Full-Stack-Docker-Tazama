@@ -61,6 +61,12 @@ $profile   = "tazama"
 Write-Host ""
 Write-Host "Uploading $(Split-Path $ZipPath -Leaf) to $s3Uri ..."
 Write-Host "(This may take several minutes for a large file)"
+# Use 256 MB chunks (≈15 parts for a 3-4 GB file) instead of the default
+# 8 MB chunks (≈475 parts). Fewer parts means fewer TCP handshakes and far
+# less exposure to mid-transfer connection drops.
+# multipart_chunksize is a config setting, not a CLI flag.
+aws configure set s3.multipart_chunksize 256MB --profile $profile
+aws configure set s3.multipart_threshold 256MB --profile $profile
 aws s3 cp $ZipPath $s3Uri --region $region --profile $profile
 if ($LASTEXITCODE -ne 0) { throw "S3 upload failed" }
 Write-Host "Upload complete."
@@ -79,9 +85,11 @@ sudo mkdir -p $warehouseDir
 # Download from S3 — uses the instance IAM role, no credentials needed
 echo "Downloading from S3..."
 aws s3 cp $s3Uri /home/ec2-user/Tazama_Lakehouse.zip --region $region
-# Unpack; -o overwrites existing files
+# Unpack to / — the zip already contains the full path (opt/Tazama_Warehouse/...)
+# so extracting to -d / lands files at /opt/Tazama_Warehouse/ directly.
+# Using -d $warehouseDir would double-nest the path.
 echo "Unpacking..."
-sudo unzip -o /home/ec2-user/Tazama_Lakehouse.zip -d $warehouseDir
+sudo unzip -o /home/ec2-user/Tazama_Lakehouse.zip -d /
 sudo chown -R root:root $warehouseDir
 # Remove local copy
 rm -f /home/ec2-user/Tazama_Lakehouse.zip

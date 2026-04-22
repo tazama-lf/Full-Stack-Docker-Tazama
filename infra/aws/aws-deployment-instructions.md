@@ -1369,11 +1369,12 @@ cd full-stack-docker-tazama\infra\aws
 What the script does:
 
 1. Reads `server_c_instance_id` and `state_bucket` from `tofu output`
-2. Uploads the zip to `s3://<state_bucket>/lakehouse-staging/Tazama_Lakehouse.zip` from your local machine
-3. On Server C: downloads the zip from S3 using the instance IAM role (no credentials needed)
-4. Installs `unzip` on Server C if not already present
-5. Runs `sudo unzip -o` into `/opt/Tazama_Warehouse`
-6. Deletes the zip from Server C and removes the staging object from S3
+2. Configures the AWS CLI S3 multipart chunk size to 256 MB (reduces upload to ~15 parts for a 3-4 GB file, avoiding connection-drop failures at the default 8 MB / ~475 parts)
+3. Uploads the zip to `s3://<state_bucket>/lakehouse-staging/Tazama_Lakehouse.zip` from your local machine
+4. On Server C: downloads the zip from S3 using the instance IAM role (no credentials needed)
+5. Installs `unzip` on Server C if not already present
+6. Runs `sudo unzip -o` to `/` — the zip already contains the full path (`opt/Tazama_Warehouse/...`) so the files land at `/opt/Tazama_Warehouse/` directly. Do **not** pass `-d /opt/Tazama_Warehouse` or the path will double-nest.
+7. Deletes the zip from Server C and removes the staging object from S3
 
 The instance IAM role has a scoped read policy on the `lakehouse-staging/` prefix of the state bucket — added to `main.tf` as `aws_iam_role_policy.s3_staging_read`. Your local AWS profile requires `s3:PutObject` on the same bucket (already granted when you created the bucket in Phase B).
 
@@ -1384,6 +1385,17 @@ The instance IAM role has a scoped read policy on the `lakehouse-staging/` prefi
 | `-ZipPath` | **(Required)** Local path to `Tazama_Lakehouse.zip` |
 
 > **Re-deployment note:** The script is idempotent — re-running with `-ZipPath` will overwrite existing warehouse files (`unzip -o`). Existing files not present in the zip are left in place.
+
+> **Upload keeps failing?** If the upload fails repeatedly mid-transfer, run these once before retrying:
+> ```powershell
+> aws configure set s3.multipart_chunksize 256MB --profile tazama
+> aws configure set s3.multipart_threshold 256MB --profile tazama
+> ```
+> The script sets these automatically, but an interrupted previous run may have left a partial multipart upload in progress. Check with:
+> ```powershell
+> aws s3api list-multipart-uploads --bucket <state_bucket> --profile tazama --region ap-south-1
+> ```
+> Abort any stale uploads before retrying.
 
 ---
 
@@ -1953,7 +1965,7 @@ Invoke-RestMethod http://localhost:9200/_cluster/health | ConvertTo-Json
 - NiFi UI: http://localhost:8088/nifi — login with `admin` / `admin123456789`
 - Solr admin: http://localhost:8983/solr
 - Ozone Recon: http://localhost:9888
-- JupyterHub: http://localhost:8000 — sign up with the `JUPYTERHUB_ADMIN` username (default: `admin`)
+- JupyterHub: http://localhost:8000 — see first-time setup note below
 
 ```powershell
 # Automation Orchestrator API (FastAPI)
@@ -1965,6 +1977,33 @@ Invoke-RestMethod http://localhost:8282/health
 # JupyterHub
 Invoke-RestMethod http://localhost:8000/hub/health
 ```
+
+> **JupyterHub first-time setup:** Signup is disabled by default (`open_signup = False`). The first admin account must be created and then authorized manually:
+>
+> 1. Go to `http://localhost:8000/hub/signup` (or `https://jupyter.<your-zone>/hub/signup`)
+> 2. Sign up using the `JUPYTERHUB_ADMIN` username (default: `admin`, overridden by the `JUPYTERHUB_ADMIN` env var in `jupyterlab.env`)
+> 3. Go to `http://localhost:8000/hub/authorize` and click **Authorize** next to the admin account
+> 4. Log in — the admin account is now active
+>
+> **Subsequent users:** Direct them to `/hub/signup`. Their accounts will appear at `/hub/authorize` for admin approval. Once approved they can log in and will appear in the admin panel at `/hub/admin`.
+>
+> **Forgot admin password?** Reset it directly in the SQLite database:
+> ```powershell
+> Invoke-RemoteCommand -InstanceId $out.ServerC_InstanceId -Command @'
+> docker exec biar-jupyterhub python3 -c "
+> import sqlite3, bcrypt
+> new_password = b'NewPassword123!'
+> hashed = bcrypt.hashpw(new_password, bcrypt.gensalt(12))
+> conn = sqlite3.connect('/data/jupyterhub.sqlite')
+> c = conn.cursor()
+> c.execute(\"UPDATE users_info SET is_authorized=1, password=? WHERE username='admin'\", (hashed,))
+> conn.commit()
+> conn.close()
+> print('Done.')
+> "
+> '@
+> ```
+> Then log in with the new password.
 
 **NiFi → Server A PostgreSQL connectivity:** NiFi connects to PostgreSQL on Server A (`:15432`) at startup. In the NiFi UI, check the Controller Services tab. Any DBCPConnectionPool service that targets `core.tazama.internal:15432` should show **Enabled** status. A **Disabled** or **Invalid** service indicates the `SERVER_A_HOST` overlay was not applied — check `env-biar.tpl` and re-run the overlay step manually:
 
@@ -2686,3 +2725,72 @@ docker compose -p tazama-core logs -f tms-service
 Common container names in the core stack follow the pattern `tazama-core-<service>-1`, e.g. `tazama-core-tms-service-1`, `tazama-core-keycloak-1`, `tazama-core-arango-1`.
 
 > **Note:** The `ec2-user` account on the instances is in the `docker` group, so `sudo` is not required for `docker` commands.
+
+---
+
+### How do I test if my Data Lakehouse is properly configured and working via JupyterHub?
+
+Log into JupyterHub and open a new notebook. Run the following cells in order:
+
+**Cell 1 — Check environment variables:**
+
+```python
+import os
+
+print("WAREHOUSE_ROOT:", os.environ.get("WAREHOUSE_ROOT", "NOT SET"))
+print("SPARK_JARS:    ", os.environ.get("SPARK_JARS", "NOT SET"))
+print("SPARK_HOME:    ", os.environ.get("SPARK_HOME", "NOT SET"))
+print("JAVA_HOME:     ", os.environ.get("JAVA_HOME", "NOT SET"))
+```
+
+Expected: all four should show paths, not `NOT SET`. If any paths are missing, check `biar/env/jupyterlab.env` on Server C and confirm it has been updated to `/opt/Tazama_Warehouse`, then restart the container.
+
+**Cell 2 — Check the warehouse directory:**
+
+```python
+import os
+
+warehouse = os.environ.get("WAREHOUSE_ROOT", "/opt/Tazama_Warehouse")
+tables = os.listdir(warehouse)
+print(f"Tables in {warehouse}:")
+for t in sorted(tables):
+    print(" ", t)
+```
+
+Expected: a list of Hudi table directories (e.g. `gold/`, `silver/`, `views/`). If you get a `FileNotFoundError`, the warehouse volume is not mounted — check the `docker-compose.hub.biar.yaml` volume entry and re-run `docker compose up -d jupyterhub`.
+
+**Cell 3 — Start a Spark session with the Hudi JAR:**
+
+```python
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder \
+    .config("spark.jars", os.environ["SPARK_JARS"]) \
+    .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer") \
+    .getOrCreate()
+
+print("Spark version:", spark.version)
+print("Session started OK")
+```
+
+Expected: Spark version printed without errors. A `ClassNotFoundException: hudi.DefaultSource` means the JAR path in `SPARK_JARS` is wrong — verify with `os.listdir("/opt/jars")`.
+
+**Cell 4 — Read a Hudi table:**
+
+```python
+# Replace with an actual table path from Cell 2 output, e.g. "gold/transactions"
+table_path = os.environ["WAREHOUSE_ROOT"] + "/gold/transactions"
+
+df = spark.read.format("hudi").load(table_path)
+print(f"Row count: {df.count()}")
+df.printSchema()
+```
+
+Expected: schema printed, row count > 0. A `FileNotFoundException` means the path doesn't exist — use the exact directory names from Cell 2. A `DataSourceNotFoundException` means the Hudi JAR did not load — re-check Cell 3.
+
+**Cell 5 — Stop the session when done:**
+
+```python
+spark.stop()
+print("Spark stopped.")
+```
