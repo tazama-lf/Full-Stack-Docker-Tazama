@@ -313,10 +313,10 @@ All notebooks read Spark configuration from environment variables. The key varia
 
 | Variable | Default | Description |
 |---|---|---|
-| `S3A_ENDPOINT` | `http://<SERVER_C_HOST>:9878` | Ozone S3G endpoint for Spark S3A reads |
+| `S3A_ENDPOINT` | `http://s3g:9878` | Ozone S3G endpoint for Spark S3A reads |
 | `S3A_ACCESS_KEY` | `tazama` | Ozone S3 access key |
 | `S3A_SECRET_KEY` | `tazama` | Ozone S3 secret key |
-| `WAREHOUSE_ROOT` | `/opt/Tazama_Hudi_warehouse` | Path to the Hudi warehouse root inside the container |
+| `WAREHOUSE_ROOT` | `/opt/Tazama_Warehouse` | Path to the Hudi warehouse root inside the container |
 | `SPARK_DRIVER_MEMORY` | `4g` | Heap memory per user Spark session |
 
 These defaults match the values in `biar/env/jupyterlab.env` and the Ozone credentials in `biar/.env`. Override them in `jupyterlab.env` before deploying if your Ozone is configured differently.
@@ -398,13 +398,13 @@ To export a configured flow for reuse, use NiFi's built-in `Download flow defini
 
 ## 9.2. Apache Ozone bucket initialisation
 
-The `ozone-aws-cli` container automatically creates the `biar-bucket` bucket each time the stack is started (the `|| true` in the entrypoint makes the command idempotent if the bucket already exists). To interact with Ozone manually using the S3-compatible API:
+The `ozone-aws-cli` container automatically creates the `tazama` bucket each time the stack is started (the `|| true` in the entrypoint makes the command idempotent if the bucket already exists). The bucket name is controlled by `AWS_BUCKET_NAME` in `biar/.env`. To interact with Ozone manually using the S3-compatible API:
 
 ```
 docker exec ozone-aws-cli aws --endpoint-url http://s3g:9878 s3 ls
 ```
 
-The Ozone S3G access key is `admin` and secret key is `admin` in the default configuration. These are committed defaults appropriate for a local development deployment only.
+The Ozone S3G access key is `tazama` and secret key is `tazama` in the default configuration (set via `S3A_ACCESS_KEY` and `S3A_SECRET_KEY` in `biar/.env`). These are committed defaults appropriate for a local development deployment only.
 
 ## 9.3. Docker Compose YAML structure
 
