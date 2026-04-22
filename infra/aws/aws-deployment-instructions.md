@@ -48,15 +48,15 @@ full-stack-docker-tazama/
         ├── terraform.tfvars          ← gitignored - operator-set values
         ├── terraform.tfvars.example  ← committed - template for operators
         ├── modules/
-        â”‚   ├── vpc/
-        â”‚   ├── security-groups/
-        â”‚   ├── ec2/
-        â”‚   └── dns/
+        │   ├── vpc/
+        │   ├── security-groups/
+        │   ├── ec2/
+        │   └── dns/
         ├── templates/
-        â”‚   ├── bootstrap.sh.tpl
-        â”‚   ├── env-core.tpl
-        â”‚   ├── env-extensions.tpl
-        â”‚   └── env-biar.tpl
+        │   ├── bootstrap.sh.tpl
+        │   ├── env-core.tpl
+        │   ├── env-extensions.tpl
+        │   └── env-biar.tpl
         └── scripts/
             ├── helpers.ps1
             ├── deploy-core.ps1
@@ -74,15 +74,15 @@ Three private EC2 instances sit behind an Application Load Balancer. No instance
 
 ```
 Local Workstation (Windows)
-â”‚
-├── OpenTofu ──────────────────── provisions VPC, SGs, EC2, ALB, Route 53
+│
+├── OpenTofu ───────────────────── provisions VPC, SGs, EC2, ALB, Route 53
 ├── AWS CLI (EICE) ─────────────── SSH tunnel to private EC2 (no port 22 in any SG)
 └── deploy.ps1 ─────────────────── docker compose commands via EICE tunnel
 
 Internet Users → ALB (public subnet, :80/:443)
-                   â”‚
-         â”Œ─────────â”¼─────────â”
-         â”‚         â”‚         â”‚
+                   │
+         ┌─────────┼─────────┐
+         │         │         │
     server-a   server-b  server-c
     10.0.1.10  10.0.1.20  10.0.1.30
     core       extensions  biar
@@ -912,12 +912,12 @@ infra/aws/
 ├── terraform.tfvars.example       # committed; copy → terraform.tfvars (gitignored)
 ├── backend.conf.example           # committed; copy → backend.conf  (gitignored)
 ├── modules/
-â”‚   ├── vpc/           main.tf  variables.tf  outputs.tf
-â”‚   ├── security-groups/  "
-â”‚   ├── ec2/              "
-â”‚   ├── dns/              "
-â”‚   ├── alb/              "           # Phase E: public sandbox option
-â”‚   └── dns-public/       "           # Phase G: custom domain (optional)
+│   ├── vpc/           main.tf  variables.tf  outputs.tf
+│   ├── security-groups/  "
+│   ├── ec2/              "
+│   ├── dns/              "
+│   ├── alb/              "           # Phase E: public sandbox option
+│   └── dns-public/       "           # Phase G: custom domain (optional)
 └── templates/
     ├── bootstrap.sh.tpl           # user_data - Docker install, repo clone, GH_TOKEN
     ├── env-extensions.tpl         # Phase D sed overlay for extensions/.env
@@ -2378,12 +2378,12 @@ tofu apply -var-file terraform.tfvars -var-file alb.tfvars -var-file domain.tfva
 **Symptom:** Running `tofu apply` (with or without `-var-file alb.tfvars`) fails with:
 
 ```
-â”‚ Error: Module not installed
-â”‚
-â”‚   on main.tf line 170:
-â”‚  170: module "alb" {
-â”‚
-â”‚ This module is not yet installed. Run "tofu init" to install all modules required by this configuration.
+│ Error: Module not installed
+│
+│   on main.tf line 170:
+│  170: module "alb" {
+│
+│ This module is not yet installed. Run "tofu init" to install all modules required by this configuration.
 ```
 
 **Cause:** `tofu init` was run before the `module "alb"` and `module "dns_public"` declarations were added to `main.tf`. OpenTofu caches module metadata at init time and does not re-scan automatically.
