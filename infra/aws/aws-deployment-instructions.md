@@ -73,19 +73,69 @@ full-stack-docker-tazama/
 Three private EC2 instances sit behind an Application Load Balancer. No instance has a public IP or any port 22 open. Operator SSH access uses the AWS EC2 Instance Connect Endpoint (EICE). All user traffic reaches services via the ALB.
 
 ```
-Local Workstation (Windows)
-│
-├── OpenTofu ───────────────────── provisions VPC, SGs, EC2, ALB, Route 53
-├── AWS CLI (EICE) ─────────────── SSH tunnel to private EC2 (no port 22 in any SG)
-└── deploy.ps1 ─────────────────── docker compose commands via EICE tunnel
+                        AWS Account - Tazama VPC (10.0.0.0/16)
+                        Private Subnet (10.0.1.0/24)
 
-Internet Users → ALB (public subnet, :80/:443)
-                   │
-         ┌─────────┼─────────┐
-         │         │         │
-    server-a   server-b  server-c
-    10.0.1.10  10.0.1.20  10.0.1.30
-    core       extensions  biar
+     ┌──────────────────────────┐
+     │  Local Workstation (you) │
+     │  Windows PC              │
+     │                          │
+     │  OpenTofu (IaC)          │──── provisions ────▶  VPC, subnets, SGs, EC2s, IAM, ALB
+     │  AWS CLI (EICE)          │──── SSH tunnel ────▶  EC2 instances (no port 22 open)
+     │  deploy.ps1              │──── docker compose ▶  via EICE SSH tunnel
+     └──────────────────────────┘
+
+     ┌──────────────────────────────────────────────────────────────┐
+     │  Application Load Balancer  (public subnet, ap-south-1)     │
+     │  HTTP — port-based routing (HTTPS + host-based: Phase E.3)  │
+     │  :5000  → Server A  tms-service                             │
+     │  :5100  → Server A  admin-service                           │
+     │  :3020  → Server A  auth-service                            │
+     │  :8080  → Server A  keycloak                                │
+     │  :5050  → Server A  pgAdmin (core)                          │
+     │  :6100  → Server A  hasura                                  │
+     │  :5173  → Server B  tcs-frontend                            │
+     │  :3010  → Server B  tcs-api                                 │
+     │  :5174  → Server B  trs-frontend                            │
+     │  :3005  → Server B  trs-api                                 │
+     │  :5175  → Server B  cms-frontend                            │
+     │  :3090  → Server B  cms-api                                 │
+     │  :5051  → Server B  pgAdmin (extensions)                    │
+     │  :8088  → Server C  nifi                                    │
+     │  :8000  → Server C  jupyterhub                              │
+     │  :7619  → Server C  auto-orchestrator                       │
+     │  :8282  → Server C  datalakehouse-api                       │
+     └──────────────────────────┬───────────────────────────────────┘
+                                │  VPC-internal routing (private IPs)
+              ┌─────────────────┼──────────────────┐
+              │                 │                  │
+    ┌─────────▼──────┐  ┌───────▼──────┐  ┌────────▼────────┐
+    │   server-a     │  │   server-b   │  │   server-c      │
+    │   tazama-core  │  │  extensions  │  │   biar          │
+    │   10.0.1.10    │  │  10.0.1.20   │  │   10.0.1.30     │
+    │                │  │              │  │                  │
+    │  tms     :5000 │  │ tcs    :5173 │  │ nifi       :8088│
+    │  admin   :5100 │  │ tcs-api:3010 │  │ jupyterhub :8000│
+    │  auth    :3020 │  │ trs    :5174 │  │ auto-orch  :7619│
+    │  keycloak:8080 │  │ trs-api:3005 │  │ dlh-api    :8282│
+    │  hasura  :6100 │  │ cms    :5175 │  │ solr       :8983│
+    │  pgadmin :5050 │  │ cms-api:3090 │  │ ozone-scm  :9876│
+    │  nats    :14222│  │ pgadmin:5051 │  │ ozone-s3g  :9878│
+    │  postgres:15432│  │ postgres:15433  │ ozone-recon:9888│
+    │  valkey  :16379│  │ opensrch:9200│  └────────┬────────┘
+    └────────────────┘  └──────┬───────┘           │
+           ▲  ▲  ▲             │    direct :8282    │
+           │  │  │             └────────────────────┘
+           │  │  │    (CMS backend → datalakehouse-api, bypasses ALB)
+           │  │  │
+           │  └── cross-server (NATS :14222, auth :3020, postgres :15432)
+           └───── cross-server (NiFi → postgres :15432)
+
+     ┌─────────────────────────────────────────────────────┐
+     │  EC2 Instance Connect Endpoint (EICE)               │
+     │  Private subnet — operator SSH access only          │
+     │  No port 22 in any Security Group                   │
+     └─────────────────────────────────────────────────────┘
 ```
 
 **Cross-server communication** uses private DNS (Route 53 private hosted zone `tazama.internal`):
@@ -960,19 +1010,68 @@ Files created:
 
 ### C.3 `modules/security-groups/`
 
-Four security groups:
+Four security groups. EC2 instances have **no internet-facing inbound rules** — all user traffic enters via the ALB, all operator SSH enters via EICE.
 
-| SG | Inbound from ALB | Inbound cross-server | SSH |
-|---|---|---|---|
-| ALB | 0.0.0.0/0: 80, 443 | - | - |
-| Server A | TMS 5000, DEAPI/DEMS/Auth 3001-3020, Admin 5100 | All TCP from `10.0.1.0/24` | EICE SG only |
-| Server B | TRS/TCS/CMS 3005-3090, frontends 5173-5175 | All TCP from `10.0.1.0/24` | EICE SG only |
-| Server C | NiFi 8088, JupyterHub 8000 | (outbound only - Server C reaches A and B) | EICE SG only |
+> **ALB routing mode:** The ALB currently uses **port-based HTTP routing** — each service is reachable at `http://<alb-dns>:<port>`. Port 443 is pre-configured in the ALB SG for the future custom-domain HTTPS upgrade (Phase F), at which point all service ports except 443 can be removed from the ALB SG and traffic will route via SNI host header rules.
 
-The cross-server rule (`0-65535 from 10.0.1.0/24`) on Servers A and B covers all
-internal ports without maintaining a per-service list (NATS, PostgreSQL, Valkey,
-OpenSearch, Auth, etc.). Server C only needs outbound since it is a consumer, not
-a provider; its egress `0.0.0.0/0` covers the NAT Gateway path to A and B.
+#### sg-tazama-alb (Application Load Balancer)
+
+| Direction | Port(s) | Protocol | Source | Notes |
+|---|---|---|---|---|
+| Inbound | 443 | TCP | `0.0.0.0/0` | HTTPS — Phase F custom domain (pre-configured) |
+| Inbound | 5000 | TCP | `0.0.0.0/0` | TMS API |
+| Inbound | 5050–5051 | TCP | `0.0.0.0/0` | pgAdmin (Server A + B) |
+| Inbound | 5100 | TCP | `0.0.0.0/0` | Admin API |
+| Inbound | 3020 | TCP | `0.0.0.0/0` | Auth Service |
+| Inbound | 8080 | TCP | `0.0.0.0/0` | Keycloak |
+| Inbound | 6100 | TCP | `0.0.0.0/0` | Hasura |
+| Inbound | 3005–3090 | TCP | `0.0.0.0/0` | TRS / TCS / CMS backends |
+| Inbound | 5173–5175 | TCP | `0.0.0.0/0` | TCS / TRS / CMS frontends |
+| Inbound | 8088 | TCP | `0.0.0.0/0` | NiFi UI |
+| Outbound | All | All | `0.0.0.0/0` | Routing to EC2 target groups |
+
+> JupyterHub (:8000), Automation Orchestrator (:7619), and Datalakehouse API (:8282) have ALB target groups and listeners, but their ports are **not** open in the ALB SG — they are accessed via SSH tunnel (Phase E.1). Add them to the ALB SG when exposing them publicly.
+
+#### sg-tazama-server-a (Server A — tazama-core)
+
+| Direction | Port(s) | Protocol | Source | Notes |
+|---|---|---|---|---|
+| Inbound | 5000 | TCP | sg-tazama-alb | TMS API |
+| Inbound | 3001–3020 | TCP | sg-tazama-alb | DEAPI / DEMS / Auth Service range |
+| Inbound | 5100 | TCP | sg-tazama-alb | Admin API |
+| Inbound | 8080 | TCP | sg-tazama-alb | Keycloak |
+| Inbound | 5050–5051 | TCP | sg-tazama-alb | pgAdmin |
+| Inbound | 6100 | TCP | sg-tazama-alb | Hasura |
+| Inbound | 0–65535 | TCP | `10.0.1.0/24` | Cross-server (NATS :14222, PostgreSQL :15432, Valkey :16379, etc.) |
+| Inbound | 22 | TCP | sg-tazama-eice | SSH via EICE endpoint only |
+| Outbound | All | All | `0.0.0.0/0` | Image pulls, GitHub builds |
+
+#### sg-tazama-server-b (Server B — tazama-extensions)
+
+| Direction | Port(s) | Protocol | Source | Notes |
+|---|---|---|---|---|
+| Inbound | 3005–3090 | TCP | sg-tazama-alb | TRS / TCS / CMS backends |
+| Inbound | 5173–5175 | TCP | sg-tazama-alb | TCS / TRS / CMS frontends |
+| Inbound | 5051 | TCP | sg-tazama-alb | pgAdmin (extensions) |
+| Inbound | 0–65535 | TCP | `10.0.1.0/24` | Cross-server (OpenSearch :9200, PostgreSQL :15433, etc.) |
+| Inbound | 22 | TCP | sg-tazama-eice | SSH via EICE endpoint only |
+| Outbound | All | All | `0.0.0.0/0` | Image pulls, GitHub builds, Server A calls |
+
+#### sg-tazama-server-c (Server C — tazama-biar)
+
+| Direction | Port(s) | Protocol | Source | Notes |
+|---|---|---|---|---|
+| Inbound | 8088 | TCP | sg-tazama-alb | NiFi UI |
+| Inbound | 8000 | TCP | sg-tazama-alb | JupyterHub |
+| Inbound | 7619 | TCP | sg-tazama-alb | Automation Orchestrator |
+| Inbound | 8282 | TCP | sg-tazama-alb | Datalakehouse API (via ALB / tunnel) |
+| Inbound | 8282 | TCP | sg-tazama-server-b | Datalakehouse API (CMS backend direct call — bypasses ALB) |
+| Inbound | 22 | TCP | sg-tazama-eice | SSH via EICE endpoint only |
+| Outbound | All | All | `0.0.0.0/0` | Image pulls, calls to Server A + B |
+
+> Solr (:8983), Ozone SCM (:9876), Ozone S3G (:9878), and Ozone Recon (:9888) are **internal-only** — no SG inbound rules; accessed exclusively via the SSH tunnel (`tunnel-server-c.ps1`).
+
+> `sg-tazama-eice` is a small separate security group attached to the EICE VPC endpoint itself. It has no inbound rules; outbound allows TCP port 22 to `10.0.1.0/24` only. Each instance SG allows port 22 from this EICE SG only — not from the internet.
 
 Files created:
 - [infra/aws/modules/security-groups/variables.tf](full-stack-docker-tazama/infra/aws/modules/security-groups/variables.tf)
@@ -1980,7 +2079,27 @@ Invoke-RestMethod http://localhost:9200/_cluster/health | ConvertTo-Json
 - TRS frontend: http://localhost:5174
 - CMS frontend: http://localhost:5175
 
-**Cross-server connectivity:** TCS/TRS backends contact Server A for JWT validation (port 3020) and NATS relay (port 14222). If the frontend loads but API calls fail with 401/CORS, the `SERVER_A_HOST` overlay in `extensions/.env` was not applied — check the `env-extensions.tpl` template and re-run step 6 of `deploy-extensions.ps1` manually.
+**Cross-server connectivity (Server A):** TCS/TRS backends contact Server A for JWT validation (port 3020) and NATS relay (port 14222). If the frontend loads but API calls fail with 401/CORS, the `SERVER_A_HOST` overlay in `extensions/.env` was not applied — check the `env-extensions.tpl` template and re-run step 6 of `deploy-extensions.ps1` manually.
+
+**Cross-server connectivity (Server C — datalakehouse-api):** The CMS backend calls the datalakehouse-api on Server C directly (not via the ALB). Verify reachability from Server B:
+
+```powershell
+cd full-stack-docker-tazama\infra\aws
+. .\scripts\helpers.ps1
+$out = Get-TofuOutputs
+Invoke-RemoteCommand -InstanceId $out.ServerB_InstanceId -Command 'curl -s -o /dev/null -w "%{http_code} %{time_total}s" --max-time 10 http://biar.tazama.internal:8282/health'
+# Expected: 200 <time>s
+```
+
+If this returns `000` (connection failure), check two things:
+1. Server B's security group — it must be `tazama-server-b-sg`, **not** `tazama-server-a-sg`:
+   ```powershell
+   aws ec2 describe-instances --profile tazama --region ap-south-1 `
+     --instance-ids $out.ServerB_InstanceId `
+     --query "Reservations[0].Instances[0].SecurityGroups[*].GroupName" --output text
+   ```
+   If it shows `tazama-server-a-sg`, correct it: `aws ec2 modify-instance-attribute --profile tazama --region ap-south-1 --instance-id $out.ServerB_InstanceId --groups <server-b-sg-id>`
+2. Server C's SG must have an inbound rule for TCP 8282 from `tazama-server-b-sg`. A `tofu plan` will reveal and a `tofu apply` will correct any such drift.
 
 ---
 
