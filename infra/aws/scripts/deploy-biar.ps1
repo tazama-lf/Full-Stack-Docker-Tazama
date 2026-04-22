@@ -51,7 +51,7 @@ Wait-Bootstrap -InstanceId $idC -ServerName 'Server C'
 
 # -- 1a. Ensure correct repo branch and pull latest ---------------------------
 Write-Host '[Server C] Ensuring correct repo branch and pulling latest...'
-Invoke-RemoteCommand -InstanceId $idC -Command "cd $Script:RemoteRepo && git fetch origin tazama/feat/mono-repo-phased-deployment && git checkout tazama/feat/mono-repo-phased-deployment && git pull origin tazama/feat/mono-repo-phased-deployment"
+Invoke-RemoteCommand -InstanceId $idC -Command "cd $Script:RemoteRepo && git fetch origin $Script:RepoBranch && git checkout $Script:RepoBranch && git reset --hard origin/$Script:RepoBranch"
 Write-Host '[Server C] Repo up to date.' -ForegroundColor Green
 
 # -- 2. Copy .env --------------------------------------------------------------

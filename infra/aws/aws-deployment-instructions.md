@@ -1040,8 +1040,19 @@ It runs once at first boot and:
    `/home/ec2-user/.docker/` so the ec2-user account can pull images
 7. Writes `/home/ec2-user/.bootstrap-complete` marker
 
-**Template variable note:**  
-`${region}` is substituted by OpenTofu.  
+**Template variables:**
+
+| Variable | Source | Default | Purpose |
+|---|---|---|---|
+| `${region}` | `var.region` in `variables.tf` | `ap-south-1` | AWS region passed to `aws configure` |
+| `${repo_branch}` | `var.repo_branch` in `variables.tf` | `dev` | Git branch cloned at first boot |
+
+To deploy instances onto a different branch, set `repo_branch` in
+`terraform.tfvars` before running `tofu apply`:
+```hcl
+repo_branch = "my-feature-branch"
+```
+
 Bash variables in the template use `$${VAR}` (double dollar) which OpenTofu
 renders as `${VAR}` - standard bash parameter expansion in the output script.
 
@@ -1087,7 +1098,15 @@ Files created:
   passes the same rendered string to all three `module "server_*"` calls.
 
 [infra/aws/variables.tf](full-stack-docker-tazama/infra/aws/variables.tf) -
-only `key_name` is required; everything else has a default.
+only `key_name` is required; everything else has a sensible default.
+
+Key optional variables:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `repo_branch` | `dev` | Git branch cloned on EC2 instances at bootstrap. Override in `terraform.tfvars` to target a different branch for fresh deployments. |
+| `instance_type_a` / `_b` | `t3.xlarge` | EC2 size for Server A and B |
+| `instance_type_c` | `r5.2xlarge` | EC2 size for Server C (Ozone needs memory) |
 
 [infra/aws/terraform.tfvars.example](full-stack-docker-tazama/infra/aws/terraform.tfvars.example)
 - copy to `terraform.tfvars` (gitignored) and set at minimum `key_name = "tazama-aws"`.
@@ -2094,7 +2113,11 @@ cd scripts
 .\deploy-biar.ps1
 ```
 
-**Note:** New instances will clone the correct branch automatically via the updated `bootstrap.sh.tpl`. The branch-switch step in the deploy scripts is still present as a safety net but will be a no-op for freshly bootstrapped instances.
+**Note:** New instances clone the branch specified by `var.repo_branch` (default `dev`) via `bootstrap.sh.tpl`. The branch-switch step in the deploy scripts (`deploy-core.ps1`, `deploy-extensions.ps1`, `deploy-biar.ps1`) reads `$Script:RepoBranch` from `helpers.ps1` (also defaults to `dev`) and is a no-op for freshly bootstrapped instances but acts as a safety net if a server was provisioned against an older bootstrap.
+
+To switch the target branch across **all** scripts and the bootstrap template, change two values:
+1. `$Script:RepoBranch` in `infra/aws/scripts/helpers.ps1`
+2. `repo_branch` default (or `terraform.tfvars` override) in `infra/aws/variables.tf`
 
 ---
 

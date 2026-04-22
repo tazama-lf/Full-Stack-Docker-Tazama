@@ -22,8 +22,9 @@ $ErrorActionPreference = 'Stop'
 $Script:AwsRegion  = 'ap-south-1'
 $Script:AwsProfile = 'tazama'
 $Script:KeyFile    = Join-Path $PSScriptRoot '..\tazama-aws.pem'
-$Script:RemoteRepo = '/home/ec2-user/full-stack-docker-tazama'
-$Script:RemoteUser = 'ec2-user'
+$Script:RemoteRepo   = '/home/ec2-user/full-stack-docker-tazama'
+$Script:RemoteUser   = 'ec2-user'
+$Script:RepoBranch   = 'dev'
 # Resolve aws.exe to its full path so OpenSSH can execute it in a ProxyCommand.
 # When OpenSSH spawns ProxyCommand it may not inherit PowerShell's PATH.
 $Script:AwsExe = (Get-Command aws -ErrorAction SilentlyContinue).Source
