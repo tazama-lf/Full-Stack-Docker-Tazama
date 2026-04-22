@@ -1,0 +1,94 @@
+# SPDX-License-Identifier: Apache-2.0
+
+services:
+  connection-studio-backend:
+    container_name: tcs-backend
+    image: tazamaorg/connection-studio-backend:${TAZAMA_VERSION}
+    env_file:
+      - env/tcs.env
+      - .env
+    restart: always
+    ports:
+      - ${TCS_PORT}:3010
+    depends_on:
+      - sftp
+      - opensearch-node1
+    volumes:
+      - ./auth:/auth:ro
+
+  connection-studio-frontend:
+    container_name: tcs-frontend
+    image: tazamaorg/connection-studio-frontend:${TAZAMA_VERSION}
+    env_file:
+      - env/tcs.env
+      - .env
+    environment:
+      - VITE_API_BASE_URL=${TCS_API_URL:-http://${SERVER_B_HOST}:${TCS_PORT}}
+      - VITE_DATA_ENRICHMENT_SERVICE_URL=${DEAPI_URL:-http://${SERVER_B_HOST}:${DEAPI_PORT}}
+      - VITE_ALLOWED_HOSTS=all
+    restart: always
+    ports:
+      - ${TCS_FRONTEND_PORT}:5173
+    depends_on:
+      - sftp
+
+  trs-backend:
+    container_name: trs-backend
+    image: tazamaorg/rule-studio-backend:${TAZAMA_VERSION}
+    env_file:
+      - env/trs.env
+      - .env
+    restart: always
+    depends_on:
+      - opensearch-node1
+    ports:
+      - ${TRS_BACKEND_PORT}:3005
+    volumes:
+      - ./auth:/auth:ro
+
+  trs-frontend:
+    container_name: trs-frontend
+    image: tazamaorg/rule-studio-frontend:${TAZAMA_VERSION}
+    env_file:
+      - env/trs.env
+      - .env
+    environment:
+      - VITE_API_URL=${TRS_API_URL:-http://${SERVER_B_HOST}:${TRS_BACKEND_PORT}}
+      - VITE_SANDBOX_API_URL=${SANDBOX_API_URL:-http://${SERVER_A_HOST}:3050}
+      - VITE_NATS_API_URL=${NATS_API_URL:-http://${SERVER_A_HOST}:4000}
+      - VITE_SIMULATION_ENDPOINT=${SIMULATION_ENDPOINT:-http://${SERVER_A_HOST}:5000/v1/evaluate/iso20022/pacs.002.001.12}
+      - VITE_DEMS_ENDPOINT=${DEMS_ENDPOINT:-http://${SERVER_B_HOST}:${DEMS_PORT}}
+      - VITE_ADMIN_ENDPOINT=${ADMIN_ENDPOINT:-http://${SERVER_A_HOST}:3100}
+      - VITE_ALLOWED_HOSTS=all
+    restart: always
+    ports:
+      - ${TRS_FRONTEND_PORT}:5174
+
+  cms-backend:
+    image: tazamaorg/case-management-system-backend:${TAZAMA_VERSION}
+    container_name: tazama-cms-backend
+    restart: unless-stopped
+    depends_on:
+      - migrate
+      - flowable
+      - opensearch-node1
+    env_file:
+      - env/cms.env
+      - .env
+    volumes:
+      - ./auth/test-public-key.pem:/auth/test-public-key.pem:ro
+    ports:
+      - "${CMS_BACKEND_PORT}:3090"
+
+  cms-frontend:
+    container_name: tazama-cms-frontend
+    image: tazamaorg/case-management-system-frontend:${TAZAMA_VERSION}
+    restart: unless-stopped
+    env_file:
+      - env/cms.env
+      - .env
+    environment:
+      - VITE_API_BASE_URL=${CMS_API_URL:-http://${SERVER_B_HOST}:${CMS_BACKEND_PORT}}
+      - VITE_ALLOWED_HOSTS=all
+    ports:
+      - "${CMS_FRONTEND_PORT}:5175"

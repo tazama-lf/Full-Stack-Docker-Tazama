@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: Apache-2.0
+
+services:
+  dems:
+    image: tazamaorg/event-monitoring-service:${TAZAMA_VERSION}
+    container_name: tazama-dems-1
+    env_file:
+      - env/dems.env
+      - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: always
+    ports:
+      - ${DEMS_PORT}:3002
+
+  deapi:
+    image: tazamaorg/data-enrichment-service:${TAZAMA_VERSION}
+    container_name: tazama-deapi-1
+    env_file:
+      - env/deapi.env
+      - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: always
+    ports:
+      - ${DEAPI_PORT}:3001

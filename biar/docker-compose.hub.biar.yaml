@@ -1,0 +1,83 @@
+# SPDX-License-Identifier: Apache-2.0
+
+services:
+  nifi:
+    image: tazamaorg/biar-nifi:${TAZAMA_VERSION}
+    container_name: biar-nifi
+    hostname: nifi
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/nifi.env
+    environment:
+      NIFI_JVM_HEAP_INIT: 512m
+      NIFI_JVM_HEAP_MAX: 1g
+    ports:
+      - "${NIFI_PORT}:8088"
+      - 8081:8081
+    volumes:
+      - nifi_conf:/opt/nifi/nifi-current/conf
+      - nifi_state:/opt/nifi/nifi-current/state
+      - nifi_db:/opt/nifi/nifi-current/database_repository
+      - nifi_flowfile:/opt/nifi/nifi-current/flowfile_repository
+      - nifi_content:/opt/nifi/nifi-current/content_repository
+      - nifi_provenance:/opt/nifi/nifi-current/provenance_repository
+    depends_on:
+      - s3g
+
+  automation-orchestrator:
+    image: tazamaorg/biar-automation-orchestrator:${TAZAMA_VERSION}
+    container_name: biar-automation-orchestrator
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/automation-orchestrator.env
+    ports:
+      - "${AUTOMATION_ORCHESTRATOR_PORT}:7619"
+    volumes:
+      - automation_orchestrator_out:/app/out
+      - ${TAZAMA_WAREHOUSE_HOST_PATH}:/app/Tazama_Hudi_warehouse
+    tmpfs:
+      - /tmp/spark
+    depends_on:
+      - s3g
+
+  datalakehouse-api:
+    image: tazamaorg/biar-datalakehouse-api:${TAZAMA_VERSION}
+    container_name: biar-datalakehouse-api
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/datalakehouse-api.env
+    ports:
+      - "${DATALAKEHOUSE_API_PORT}:8282"
+    volumes:
+      - ${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Warehouse
+    depends_on:
+      - s3g
+
+  unstructured-pipeline:
+    image: tazamaorg/biar-unstructured-pipeline:${TAZAMA_VERSION}
+    container_name: biar-unstructured-pipeline
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/unstructured-pipeline.env
+    depends_on:
+      - tika
+      - solr
+
+  jupyterhub:
+    image: tazamaorg/biar-jupyterlab:${TAZAMA_VERSION}
+    container_name: biar-jupyterhub
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/jupyterlab.env
+    ports:
+      - "${JUPYTERLAB_PORT}:8000"
+    volumes:
+      - jupyterhub_data:/data
+      - ${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Warehouse:ro
+    depends_on:
+      - s3g

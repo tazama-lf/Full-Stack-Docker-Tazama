@@ -1,3 +1,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 .env
+
+# AWS deployment - private key and operator-specific values; never commit
+infra/aws/*.pem
+infra/aws/terraform.tfvars
+infra/aws/backend.conf
+infra/aws/domain.tfvars
+infra/aws/tfplan
+
+# OpenTofu/Terraform generated directories - never commit
+infra/aws/.terraform/
+infra/aws/.terraform.lock.hcl

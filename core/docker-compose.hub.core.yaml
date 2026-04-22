@@ -1,0 +1,92 @@
+services:
+  # ADMIN SERVICE API
+  admin-service:
+    image: tazamaorg/admin-service:${TAZAMA_VERSION}
+    env_file:
+      - env/admin.env
+      - .env
+    restart: always
+    ports:
+      - ${ADMIN_PORT}:3100
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_started
+
+  # TRANSACTION MONITORING SERVICE API
+  tms:
+    image: tazamaorg/tms-service:${TAZAMA_VERSION}
+    env_file:
+      - env/tms.env
+      - .env
+    restart: always
+    ports:
+      - ${TMS_PORT}:3000
+    depends_on:
+      valkey:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  # EVENT DIRECTOR
+  ed:
+    image: tazamaorg/event-director:${TAZAMA_VERSION}
+    env_file:
+      - env/ed.env
+      - .env
+    restart: always
+    depends_on:
+      valkey:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  # TYPOLOGY PROCESSOR
+  tp:
+    image: tazamaorg/typology-processor:${TAZAMA_VERSION}
+    env_file:
+      - env/tp.env
+      - .env
+    restart: always
+    depends_on:
+      valkey:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  # TRANSACTION AGGREGATION AND DECISIONING PROCESSOR
+  tadp:
+    image: tazamaorg/transaction-aggregation-decisioning-processor:${TAZAMA_VERSION}
+    env_file:
+      - env/tadp.env
+      - .env
+    restart: always
+    depends_on:
+      valkey:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+  
+  # EVENT FLOW RULE PROCESSOR
+  ef:
+    image: tazamaorg/event-flow:${TAZAMA_VERSION}
+    env_file:
+      - env/event-flow.env
+      - .env
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_started
+      nats:
+        condition: service_started
