@@ -9,6 +9,7 @@
 
 SERVER_A_HOST=core.tazama.internal
 SERVER_B_HOST=extensions.tazama.internal
+SERVER_C_HOST=biar.tazama.internal
 
 # Backend service URL: TRS backend (Server B) -> Admin service (Server A)
 # trs.env hardcodes port 3100 (container-internal); ADMIN_PORT on Server A is 5100.
@@ -28,3 +29,8 @@ ADMIN_ENDPOINT=https://admin.beta.tazama.org
 # Overrides the private-DNS SERVER_B_HOST fallback in env/trs.env and env/tcs.env
 ALLOWED_ORIGINS=https://trs.beta.tazama.org
 CORS_ORIGINS=https://tcs.beta.tazama.org,https://cms.beta.tazama.org
+
+# Datalakehouse API — Server C private IP + published port
+# extensions/env/cms.env ships a dev default (10.10.80.20:8001); this overlay
+# replaces it with the correct Server C address for every AWS deployment.
+GOLD_LAKEHOUSE_API_URL=http://biar.tazama.internal:8282

@@ -1059,6 +1059,18 @@ Files created:
 - [infra/aws/templates/env-extensions.tpl](full-stack-docker-tazama/infra/aws/templates/env-extensions.tpl)
 - [infra/aws/templates/env-biar.tpl](full-stack-docker-tazama/infra/aws/templates/env-biar.tpl)
 
+`env-extensions.tpl` overrides include:
+
+| Variable | Committed default | Overlay value | Reason |
+|---|---|---|---|
+| `SERVER_A_HOST` | `10.0.1.10` | `core.tazama.internal` | Private DNS for cross-stack calls |
+| `SERVER_B_HOST` | `10.0.1.20` | `extensions.tazama.internal` | Private DNS |
+| `ADMIN_SERVICE_URL` | container-internal port | `http://core.tazama.internal:5100` | Correct admin port |
+| `TRS_API_URL` / `TCS_API_URL` / `CMS_API_URL` | localhost defaults | Public ALB subdomains | Browser-facing VITE_ vars |
+| `SIMULATION_ENDPOINT` / `ADMIN_ENDPOINT` | localhost defaults | Public ALB subdomains | Browser-facing VITE_ vars |
+| `ALLOWED_ORIGINS` / `CORS_ORIGINS` | localhost | Public ALB subdomains | CORS |
+| `GOLD_LAKEHOUSE_API_URL` | `http://${SERVER_C_HOST}:8282` (placeholder, resolves to dev default at runtime) | `SERVER_C_HOST=biar.tazama.internal` set by this overlay | Server C datalakehouse-api |
+
 ---
 
 ### C.8 Root `main.tf` and `variables.tf`
