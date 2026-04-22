@@ -2086,6 +2086,173 @@ cd scripts
 
 ---
 
+## Phase G: Security Hardening
+
+This section describes the default security posture of the beta deployment and the concrete steps required to raise it to a level appropriate for use beyond an isolated developer sandbox.
+
+### G.1 - Default security posture
+
+The deployment as provisioned out of the box has the following characteristics:
+
+**Network boundary (good)**
+- All services run inside a private VPC subnet (`10.0.1.0/24`) with no inbound internet route
+- Access to EC2 instances requires AWS IAM credentials and EICE — there is no open port 22
+- ALB-exposed services (`nifi`, `jupyter`, `tms`, `keycloak`, etc.) sit behind HTTPS with ACM-managed certificates and Keycloak-enforced authentication at the listener rule level
+
+**Credentials (weak — requires action before beta use)**
+- All three stacks (`core/`, `extensions/`, `biar/`) were originally committed to a public GitHub repository with plaintext default passwords (`unused`, `password`, `admin123456789`, `tazama`)
+- The `-Password` deploy-script parameter covers PostgreSQL and Keycloak on Servers A and B. All other service credentials (Redis, CouchDB, TRS signing key, Hasura, NiFi, Ozone, OpenSearch, SFTP, pgAdmin, OAuth client secret, relay auth, CMS Flowable) remain at their committed defaults unless changed manually
+- On the current beta deployment, the `-Password` parameter was **not passed at deploy time** — PostgreSQL on both servers has password `unused`
+- NiFi is running over plain HTTP; the single-user login is not enforced
+
+**Other open issues**
+- OpenSearch security plugin is disabled (`DISABLE_SECURITY_PLUGIN=true`)
+- NiFi web UI runs over HTTP, bypassing the single-user authenticator
+- Ozone S3G access key and secret are both `tazama`
+
+---
+
+### G.2 - Credential rotation (immediate priority)
+
+These are the credentials that need to be changed before the beta is used with any real or sensitive data. Work through each service in order.
+
+#### PostgreSQL — both servers
+
+The simplest approach for the current deployment is to change the password directly in the running container and patch the env files on disk.
+
+```powershell
+cd "full-stack-docker-tazama\infra\aws\scripts"
+. .\helpers.ps1
+$out = Get-TofuOutputs
+
+$newPgPassword = Read-Host "Enter new PostgreSQL password" -AsSecureString
+$pgPw = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+          [Runtime.InteropServices.Marshal]::SecureStringToBSTR($newPgPassword))
+
+# Server A
+Invoke-RemoteCommand -InstanceId $out.ServerA_InstanceId -Command `
+  "docker exec tazama-core-postgres-1 psql -U postgres -c `"ALTER USER postgres PASSWORD '$pgPw'`""
+
+# Server B
+Invoke-RemoteCommand -InstanceId $out.ServerB_InstanceId -Command `
+  "docker exec tazama-extensions-postgres-1 psql -U postgres -c `"ALTER USER postgres PASSWORD '$pgPw'`""
+```
+
+Then re-run the deploy scripts with the new password so all service env files are updated:
+
+```powershell
+.\deploy-core.ps1       -Password $pgPw -NoPull
+.\deploy-extensions.ps1 -Password $pgPw -NoPull
+```
+
+> `-NoPull` skips the image pull and only patches the env files and restarts services — substantially faster than a full redeploy.
+
+**Long-term:** Store the password in SSM as `/tazama/postgres_core_password` and `/tazama/postgres_extensions_password` (see A.7 SSM commands) and pass `-Password` on every future deploy. The deploy scripts already read from SSM if the `-Password` parameter is not supplied directly.
+
+---
+
+#### NiFi — enable HTTPS and enforce login
+
+NiFi's single-user authenticator only activates when NiFi is serving over HTTPS. With `NIFI_WEB_HTTP_PORT` set, anyone who reaches port 8088 is in without a password.
+
+**Step 1 — Update `biar/env/nifi.env`** on Server C:
+
+```bash
+# On Server C (via Invoke-RemoteCommand or SSH)
+sed -i 's/NIFI_WEB_HTTP_PORT=.*//' ~/full-stack-docker-tazama/biar/env/nifi.env
+sed -i 's/NIFI_WEB_HTTP_HOST=.*//' ~/full-stack-docker-tazama/biar/env/nifi.env
+echo "NIFI_WEB_HTTPS_PORT=8443" >> ~/full-stack-docker-tazama/biar/env/nifi.env
+echo "NIFI_WEB_HTTPS_HOST=0.0.0.0" >> ~/full-stack-docker-tazama/biar/env/nifi.env
+```
+
+**Step 2 — Update the biar compose file** to expose port 8443 instead of 8088, and update the ALB target group to point to 8443. This requires a `tofu apply` to update the ALB listener rule.
+
+**Step 3 — Set strong credentials:**
+
+```powershell
+Invoke-RemoteCommand -InstanceId $out.ServerC_InstanceId -Command `
+  "docker exec biar-nifi /opt/nifi/nifi-current/bin/nifi.sh set-single-user-credentials admin '<strong-password>'"
+```
+
+NiFi requires a minimum of 12 characters. Store the password in SSM as `/tazama/nifi_admin_password`.
+
+**Step 4 — Restart NiFi:**
+
+```powershell
+Invoke-RemoteCommand -InstanceId $out.ServerC_InstanceId -Command `
+  "cd ~/full-stack-docker-tazama/biar && docker compose -p tazama-biar \
+   -f ./docker-compose.biar.infrastructure.yaml \
+   -f ./docker-compose.hub.biar.yaml \
+   -f ./docker-compose.utils.init.yaml \
+   restart nifi"
+```
+
+---
+
+#### Apache Ozone S3G
+
+```bash
+# On Server C
+sed -i 's/OZONE-SITE.XML_ozone.s3g.secret.key=.*/OZONE-SITE.XML_ozone.s3g.secret.key=<strong-secret>/' \
+  ~/full-stack-docker-tazama/biar/env/ozone-docker-config
+
+# Restart s3g
+cd ~/full-stack-docker-tazama/biar
+docker compose -p tazama-biar \
+  -f ./docker-compose.biar.infrastructure.yaml \
+  -f ./docker-compose.hub.biar.yaml \
+  -f ./docker-compose.utils.init.yaml \
+  restart s3g
+```
+
+Also update `S3A_ACCESS_KEY` and `S3A_SECRET_KEY` in any service that connects to Ozone (e.g. `biar/env/jupyterlab.env`) to match.
+
+---
+
+#### Remaining credentials (A.7 full SSM rollout)
+
+The remaining services (Redis, CouchDB, TRS signing key, Hasura, pgAdmin, OAuth client secret, relay auth, CMS Flowable, OpenSearch) are covered by the SSM parameter table in A.7. Once all SSM parameters are populated:
+
+```powershell
+# Populate all SSM parameters (see A.7 for the full command block)
+# Then redeploy with the -Password flag to trigger the overlay across all services
+.\deploy.ps1 -Password $pgPw
+```
+
+---
+
+### G.3 - Re-enable OpenSearch security plugin
+
+See A.6. OpenSearch is currently running with `DISABLE_SECURITY_PLUGIN=true`. This is the highest-risk open item after credential rotation because OpenSearch is reachable from Server C (NiFi) and potentially accessible to any service on the private subnet without authentication.
+
+**To fix:** Remove `DISABLE_SECURITY_PLUGIN=true` from the `opensearch-node1` service in `extensions/docker-compose.extensions.infrastructure.yaml`, set a strong password in SSM as `/tazama/opensearch_password`, and redeploy the extensions stack.
+
+---
+
+### G.4 - Security hardening status summary
+
+| Item | Status | Action required |
+|---|---|---|
+| VPC private subnet isolation | ✅ Done | — |
+| EICE-only SSH access | ✅ Done | — |
+| ALB HTTPS with ACM certificates | ✅ Done | — |
+| ALB Keycloak authentication on listeners | ✅ Done | — |
+| PostgreSQL passwords rotated | ❌ Default (`unused`) | G.2 — rotate and store in SSM |
+| NiFi login enforced | ❌ HTTP, no auth | G.2 — enable HTTPS, set password |
+| Ozone S3G credentials rotated | ❌ Default (`tazama`/`tazama`) | G.2 — rotate key/secret |
+| OpenSearch security plugin enabled | ❌ Disabled | G.3 — re-enable, set password |
+| Keycloak admin password rotated | ❌ Default | A.7 — pass `-Password` at deploy |
+| Redis/Valkey password set | ❌ Default | A.7 SSM rollout |
+| CouchDB password rotated | ❌ Default | A.7 SSM rollout |
+| TRS crypto signing key set | ❌ Default | A.7 SSM rollout |
+| Hasura admin secret set | ❌ Default | A.7 SSM rollout |
+| Auth service OAuth client secret set | ❌ Default | A.7 SSM rollout |
+| NiFi HTTPS port on ALB | ❌ HTTP 8088 | G.2 — compose + tofu update |
+| pgAdmin passwords rotated | ❌ Default | A.7 SSM rollout |
+| SFTP password rotated | ❌ Default | A.7 — requires compose change first |
+
+---
+
 ## Troubleshooting
 
 ### EICE SSH tunnel fails with `AccessDeniedException` / bootstrap never completes
@@ -2794,3 +2961,37 @@ Expected: schema printed, row count > 0. A `FileNotFoundException` means the pat
 spark.stop()
 print("Spark stopped.")
 ```
+
+---
+
+### How can I access the JupyterHub server from VS Code?
+
+VS Code's Jupyter extension supports connecting to remote Jupyter servers directly, so you can run notebooks from VS Code using the kernel running on the JupyterHub instance — no need to upload notebooks to the server UI.
+
+**Steps:**
+
+1. **Generate an API token** on the server  
+   Browse to `https://jupyter.beta.tazama.org/hub/token`, log in as admin, and create a token. Copy it.
+
+2. **Make sure your server is spawned**  
+   Log into `https://jupyter.beta.tazama.org` once so the single-user server starts. VS Code connects to an already-running server — it cannot spawn one for you.
+
+3. **In VS Code, open the notebook and select a kernel**  
+   Click the kernel picker (top-right, shows "Select Kernel") → **Existing Jupyter Server...** → **Enter the URL of the running Jupyter server**.
+
+4. **Enter the server URL**
+
+   ```
+   https://jupyter.beta.tazama.org/user/admin/
+   ```
+
+   When prompted for a password/token, paste the token from step 1.
+
+5. **Select the Python kernel** from the list that appears — it will be the kernel running inside the `biar-jupyterhub` container on Server C.
+
+**Result:** VS Code is the UI; the kernel (Spark, Hudi JARs, warehouse mount) runs on Server C. Cell outputs, variables, and plots come back to VS Code. The notebook file stays local on your machine.
+
+**Caveats:**
+- If JupyterHub idles out and shuts down the single-user server, VS Code will lose the connection. Re-spawn via the browser and reconnect.
+- Tokens have a lifetime — if yours expires, generate a new one from `/hub/token`.
+- The token auth bypasses the browser SSO flow, so the ALB Keycloak listener does not interfere with the `/user/<username>/api` path.
