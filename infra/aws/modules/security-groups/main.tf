@@ -282,11 +282,20 @@ resource "aws_security_group" "server_c" {
   }
 
   ingress {
-    description     = "Datalakehouse API"
+    description     = "Datalakehouse API (via ALB)"
     from_port       = 8282
     to_port         = 8282
     protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
+  }
+
+  # CMS backend on Server B calls the datalakehouse-api directly (not via ALB)
+  ingress {
+    description     = "CMS backend -> Datalakehouse API (direct)"
+    from_port       = 8282
+    to_port         = 8282
+    protocol        = "tcp"
+    security_groups = [aws_security_group.server_b.id]
   }
 
   ingress {

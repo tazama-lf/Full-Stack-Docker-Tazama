@@ -967,12 +967,13 @@ Four security groups:
 | ALB | 0.0.0.0/0: 80, 443 | - | - |
 | Server A | TMS 5000, DEAPI/DEMS/Auth 3001-3020, Admin 5100 | All TCP from `10.0.1.0/24` | EICE SG only |
 | Server B | TRS/TCS/CMS 3005-3090, frontends 5173-5175 | All TCP from `10.0.1.0/24` | EICE SG only |
-| Server C | NiFi 8088, JupyterHub 8000 | (outbound only - Server C reaches A and B) | EICE SG only |
+| Server C | NiFi 8088, JupyterHub 8000, Datalakehouse 8282 | 8282 from Server B SG (CMS direct call) | EICE SG only |
 
 The cross-server rule (`0-65535 from 10.0.1.0/24`) on Servers A and B covers all
 internal ports without maintaining a per-service list (NATS, PostgreSQL, Valkey,
-OpenSearch, Auth, etc.). Server C only needs outbound since it is a consumer, not
-a provider; its egress `0.0.0.0/0` covers the NAT Gateway path to A and B.
+OpenSearch, Auth, etc.). Server C exposes the datalakehouse-api (port 8282) both
+via the ALB (for external/tunnelled access) and directly from Server B's SG (the
+CMS backend calls it directly, not via the ALB).
 
 Files created:
 - [infra/aws/modules/security-groups/variables.tf](full-stack-docker-tazama/infra/aws/modules/security-groups/variables.tf)
@@ -1980,7 +1981,27 @@ Invoke-RestMethod http://localhost:9200/_cluster/health | ConvertTo-Json
 - TRS frontend: http://localhost:5174
 - CMS frontend: http://localhost:5175
 
-**Cross-server connectivity:** TCS/TRS backends contact Server A for JWT validation (port 3020) and NATS relay (port 14222). If the frontend loads but API calls fail with 401/CORS, the `SERVER_A_HOST` overlay in `extensions/.env` was not applied — check the `env-extensions.tpl` template and re-run step 6 of `deploy-extensions.ps1` manually.
+**Cross-server connectivity (Server A):** TCS/TRS backends contact Server A for JWT validation (port 3020) and NATS relay (port 14222). If the frontend loads but API calls fail with 401/CORS, the `SERVER_A_HOST` overlay in `extensions/.env` was not applied — check the `env-extensions.tpl` template and re-run step 6 of `deploy-extensions.ps1` manually.
+
+**Cross-server connectivity (Server C — datalakehouse-api):** The CMS backend calls the datalakehouse-api on Server C directly (not via the ALB). Verify reachability from Server B:
+
+```powershell
+cd full-stack-docker-tazama\infra\aws
+. .\scripts\helpers.ps1
+$out = Get-TofuOutputs
+Invoke-RemoteCommand -InstanceId $out.ServerB_InstanceId -Command 'curl -s -o /dev/null -w "%{http_code} %{time_total}s" --max-time 10 http://biar.tazama.internal:8282/health'
+# Expected: 200 <time>s
+```
+
+If this returns `000` (connection failure), check two things:
+1. Server B's security group — it must be `tazama-server-b-sg`, **not** `tazama-server-a-sg`:
+   ```powershell
+   aws ec2 describe-instances --profile tazama --region ap-south-1 `
+     --instance-ids $out.ServerB_InstanceId `
+     --query "Reservations[0].Instances[0].SecurityGroups[*].GroupName" --output text
+   ```
+   If it shows `tazama-server-a-sg`, correct it: `aws ec2 modify-instance-attribute --profile tazama --region ap-south-1 --instance-id $out.ServerB_InstanceId --groups <server-b-sg-id>`
+2. Server C's SG must have an inbound rule for TCP 8282 from `tazama-server-b-sg`. A `tofu plan` will reveal and a `tofu apply` will correct any such drift.
 
 ---
 
