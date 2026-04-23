@@ -2861,10 +2861,18 @@ In the group, go to **Permissions → Add permissions → Create inline policy**
     {
       "Sid": "AllowEICETunnel",
       "Effect": "Allow",
-      "Action": [
-        "ec2-instance-connect:OpenTunnel",
-        "ec2-instance-connect:SendSSHPublicKey"
-      ],
+      "Action": "ec2-instance-connect:OpenTunnel",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "ec2:ResourceTag/Name": ["tazama-eice"]
+        }
+      }
+    },
+    {
+      "Sid": "AllowSendSSHPublicKey",
+      "Effect": "Allow",
+      "Action": "ec2-instance-connect:SendSSHPublicKey",
       "Resource": "*",
       "Condition": {
         "StringEquals": {
@@ -2885,9 +2893,11 @@ In the group, go to **Permissions → Add permissions → Create inline policy**
 }
 ```
 
-`ec2-instance-connect` actions do not support account-scoped ARNs in the resource field — `"*"` is the correct and AWS-documented form. The `Condition` block scopes tunnel access to only the three Tazama servers by their `Name` tag, which the OpenTofu configuration sets automatically.
+> **Important:** `OpenTunnel` and `SendSSHPublicKey` must be in separate statements with different conditions because they operate on different resource types. `OpenTunnel`'s resource is the EICE endpoint (tagged `tazama-eice`); `SendSSHPublicKey`'s resource is the EC2 instance (tagged with the server name). Combining them in one statement causes `OpenTunnel` to be denied because the endpoint name never matches the server names.
 
-To restrict a user to a subset of servers, simply remove the unwanted server names from the array. For example, to grant access to Server B and C only, remove `"tazama-server-a"` from the list.
+`ec2-instance-connect` actions do not support account-scoped ARNs in the resource field — `"*"` is the correct and AWS-documented form. The `Condition` blocks scope access to the specific EICE endpoint and the named Tazama servers, using `Name` tags that the OpenTofu configuration sets automatically.
+
+To restrict a user to a subset of servers, simply remove the unwanted server names from the `AllowSendSSHPublicKey` condition array. For example, to grant access to Server B and C only, remove `"tazama-server-a"` from the list.
 
 **2c — Create the IAM user:**
 
@@ -2907,6 +2917,15 @@ This creates a user with no console access, no permissions outside the group, an
 
 In the AWS Console go to **IAM → User groups → tazama-server-operators → Users → Add users** and select the user. Their permissions are now inherited from the group. To revoke access later, remove them from the group without touching the policy.
 
+
+> **Important — existing users getting `AccessDeniedException`:** If a user's SSH connection fails with `AccessDeniedException: not authorized to perform ec2-instance-connect:OpenTunnel`, they have not been added to the `tazama-server-operators` group (or the group was not set up yet). This is the only fix — SSH key setup alone is not enough. All of the following steps can be done entirely in the AWS Console:
+>
+> **If the group already exists** - simply add the user to it:
+> 1. Go to **IAM → User groups → tazama-server-operators**
+> 2. Click **Users → Add users** and select the affected user
+>
+> **If the group does not exist yet** - complete Steps 2a-2d above first, then add the user.
+ 
 #### Step 3 — User: install and configure the AWS CLI
 
 Send the user their **Access key ID** and **Secret access key** along with the following instructions.
@@ -2949,7 +2968,7 @@ ssh-keygen -t ed25519 -C "their-name@example.com" -f "$env:USERPROFILE\.ssh\taza
 
 This creates a private key (`tazama_ed25519`) and a public key (`tazama_ed25519.pub`). They must keep the private key secure and share only the public key with you.
 
-#### Step 4 — Add the user's public key to the EC2 instance(s)
+#### Step 5 — Add the user's public key to the EC2 instance(s)
 
 From your own workstation (which already has access), copy their public key into the `~/.ssh/authorized_keys` file on each instance they need to access.
 
@@ -2994,7 +3013,7 @@ Invoke-RemoteCommand -InstanceId $out.ServerC_InstanceId -Command `
   "echo '$pubKey' >> ~/.ssh/authorized_keys"
 ```
 
-#### Step 5 — User: set up the SSH config shortcut
+#### Step 6 — User: set up the SSH config shortcut
 
 The easiest way to connect is via an SSH config file. This lets the user run `ssh tazama-a` (or `tazama-b` / `tazama-c`) directly without specifying flags each time.
 
@@ -3041,7 +3060,7 @@ Note there is no `--profile` flag here — the user configured a default profile
 ssh tazama-a
 ```
 
-#### Step 6 — Viewing Docker container logs
+#### Step 7 — Viewing Docker container logs
 
 Once connected via SSH, the user can view logs for any running container:
 
