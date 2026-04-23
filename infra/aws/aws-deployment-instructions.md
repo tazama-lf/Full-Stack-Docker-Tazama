@@ -1586,6 +1586,385 @@ tofu destroy
 
 ---
 
+## Scripts Catalog
+
+All scripts live in `infra/aws/scripts/`. Run them from that directory or from
+anywhere — every script resolves paths relative to its own location.  All
+scripts dot-source `helpers.ps1` for shared functions and constants.
+
+| Script | Purpose |
+|---|---|
+| [`helpers.ps1`](#helperps1) | Shared functions — dot-sourced by every other script |
+| [`deploy.ps1`](#deployps1) | Full deployment: all three stacks in sequence |
+| [`deploy-core.ps1`](#deploy-coreps1) | Server A — tazama-core stack |
+| [`deploy-extensions.ps1`](#deploy-extensionsps1) | Server A (DEMS/DEAPI) + Server B — tazama-extensions stack |
+| [`deploy-biar.ps1`](#deploy-biarps1) | Server C — tazama-biar stack |
+| [`deploy-lakehouse.ps1`](#deploy-lakehouseps1) | Server C — stage and unpack Lakehouse warehouse data via S3 |
+| [`restart-service.ps1`](#restart-serviceps1) | Pull latest image and recreate a single service on any server |
+| [`teardown.ps1`](#teardownps1) | Stop all stacks across all three servers |
+| [`add-ssh-key.ps1`](#add-ssh-keyps1) | Add an SSH public key to one or more servers |
+| [`tunnel-all.ps1`](#tunnel-allps1) | Open port-forward tunnels to all three servers simultaneously |
+| [`tunnel-server-a.ps1`](#tunnel-server-aps1) | Open port-forward tunnels to Server A only |
+| [`tunnel-server-b.ps1`](#tunnel-server-bps1) | Open port-forward tunnels to Server B only |
+| [`tunnel-server-c.ps1`](#tunnel-server-cps1) | Open port-forward tunnels to Server C only |
+
+---
+
+### `helpers.ps1`
+
+[infra/aws/scripts/helpers.ps1](full-stack-docker-tazama/infra/aws/scripts/helpers.ps1)
+
+Shared library dot-sourced by every other script. Not invoked directly.
+
+Provides the following functions:
+
+| Function | Description |
+|---|---|
+| `Get-TofuOutputs` | Runs `tofu output -json` and returns a hashtable of instance IDs, private IPs, and the EICE endpoint ID |
+| `Invoke-RemoteCommand` | SSH to an EC2 instance via the EICE ProxyCommand and runs a bash command; throws on non-zero exit |
+| `Copy-ToRemote` | SCP a local file to an EC2 instance via EICE |
+| `Set-RemoteEnvOverlay` | Reads a `KEY=VALUE` overlay file and applies each entry to a remote `.env` file using `sed` (replaces existing keys, appends missing ones) |
+| `Wait-Bootstrap` | Polls an instance until the bootstrap script has written its completion marker (up to 15 min) |
+
+Constants defined at script scope (edit here to change region, profile, or branch):
+
+| Constant | Value | Purpose |
+|---|---|---|
+| `$Script:AwsRegion` | `ap-south-1` | AWS region for all CLI calls |
+| `$Script:AwsProfile` | `tazama` | AWS CLI named profile |
+| `$Script:RemoteRepo` | `/home/ec2-user/full-stack-docker-tazama` | Repo path on all three servers |
+| `$Script:RepoBranch` | `dev` | Branch pulled on each server during deploy |
+| `$Script:KeyFile` | `infra/aws/tazama-aws.pem` | EC2 SSH private key (gitignored) |
+
+---
+
+### `deploy.ps1`
+
+[infra/aws/scripts/deploy.ps1](full-stack-docker-tazama/infra/aws/scripts/deploy.ps1)
+
+Deploys all three stacks in sequence by calling `deploy-core.ps1`,
+`deploy-extensions.ps1`, and `deploy-biar.ps1` in order.  Safe to run
+immediately after `tofu apply` — each sub-script waits for its server's
+first-boot bootstrap to complete before proceeding.
+
+```powershell
+# Full deploy with default (dev) credentials
+.\deploy.ps1
+
+# Full deploy with production password
+.\deploy.ps1 -Password 'your-strong-password'
+
+# Redeploy without re-pulling images (e.g. after a failed start)
+.\deploy.ps1 -NoPull
+```
+
+| Parameter | Description |
+|---|---|
+| `-Password` | PostgreSQL superuser and Keycloak admin password. Passed to deploy-core and deploy-extensions. If omitted, local-dev defaults are left in place. |
+| `-NoPull` | Skip `--pull always` on all `docker compose up` calls. |
+
+---
+
+### `deploy-core.ps1`
+
+[infra/aws/scripts/deploy-core.ps1](full-stack-docker-tazama/infra/aws/scripts/deploy-core.ps1)
+
+Deploys the **tazama-core** stack on Server A.  Steps:
+
+1. Waits for Server A bootstrap to complete.
+2. Pulls latest repo on Server A.
+3. Copies `core/.env` to Server A; optionally applies a credentials overlay.
+4. Injects `KEYCLOAK_HOSTNAME` from tofu outputs (if an ALB is active).
+5. Copies the Keycloak realm JSON to Server A.
+6. Starts the full core stack (infrastructure, rules, TP, TMS, auth, relay, logs, pgAdmin, Hasura) with up to 3 retries to handle the Postgres startup race condition.
+
+```powershell
+.\deploy-core.ps1
+.\deploy-core.ps1 -Password 'your-strong-password'
+.\deploy-core.ps1 -NoPull
+```
+
+| Parameter | Description |
+|---|---|
+| `-Password` | Sets `POSTGRES_PASSWORD`, `KEYCLOAK_ADMIN_PASSWORD`, and all service-level DB password variables on Server A. |
+| `-NoPull` | Skip `--pull always`. |
+
+---
+
+### `deploy-extensions.ps1`
+
+[infra/aws/scripts/deploy-extensions.ps1](full-stack-docker-tazama/infra/aws/scripts/deploy-extensions.ps1)
+
+Deploys DEMS + DEAPI on **Server A**, then the **tazama-extensions** stack on
+Server B.  Steps:
+
+1. Copies `extensions/.env` to Server A and applies `env-extensions.tpl` overlay (sets `SERVER_B_HOST=extensions.tazama.internal` so CORS origins resolve correctly for DEMS/DEAPI).
+2. Pulls latest repo on Server A, then starts DEMS and DEAPI.
+3. Waits for Server B bootstrap.
+4. Pulls latest repo on Server B.
+5. Copies `extensions/.env` to Server B and applies the same `env-extensions.tpl` overlay.
+6. Optionally applies a credentials overlay to `extensions/.env` and all `extensions/env/` service files.
+7. Copies `core/auth/test-public-key.pem` to Server B (required by TCS/TRS for JWT verification).
+8. Starts the extensions stack (OpenSearch, CMS, TCS, TRS, pgAdmin).
+
+```powershell
+.\deploy-extensions.ps1
+.\deploy-extensions.ps1 -Password 'your-strong-password'
+.\deploy-extensions.ps1 -NoPull
+```
+
+| Parameter | Description |
+|---|---|
+| `-Password` | Sets `POSTGRES_PASSWORD`, `DB_PASSWORD`, `SPRING_DATASOURCE_PASSWORD`, and `CONFIGURATION_DATABASE_PASSWORD` on Server B. |
+| `-NoPull` | Skip `--pull always`. |
+
+---
+
+### `deploy-biar.ps1`
+
+[infra/aws/scripts/deploy-biar.ps1](full-stack-docker-tazama/infra/aws/scripts/deploy-biar.ps1)
+
+Deploys the **tazama-biar** stack on Server C.  Steps:
+
+1. Waits for Server C bootstrap.
+2. Pulls latest repo on Server C.
+3. Copies `biar/.env` to Server C and applies `env-biar.tpl` overlay (sets all three `SERVER_*_HOST` vars).
+4. Creates `/opt/Tazama_Warehouse` on Server C (bind-mounted by automation-orchestrator and datalakehouse-api).
+5. Starts the stack in stages to respect the Ozone SCM → OM → datanode initialisation order.
+
+```powershell
+.\deploy-biar.ps1
+.\deploy-biar.ps1 -NoPull
+```
+
+| Parameter | Description |
+|---|---|
+| `-NoPull` | Skip `--pull always`. |
+
+---
+
+### `deploy-lakehouse.ps1`
+
+[infra/aws/scripts/deploy-lakehouse.ps1](full-stack-docker-tazama/infra/aws/scripts/deploy-lakehouse.ps1)
+
+Stages a large Lakehouse warehouse archive (typically 3–4 GB) onto Server C
+via S3.  Direct SCP over EICE is too slow for files this size; this script
+uploads to S3 from your workstation and has Server C pull it from S3 over the
+internal AWS network.
+
+Steps:
+
+1. Uploads the local `.zip` to `s3://<state-bucket>/lakehouse-staging/`.
+2. SSH to Server C: downloads from S3, unpacks to `/opt/Tazama_Warehouse`, sets permissions.
+3. Deletes the staging object from S3.
+
+```powershell
+.\deploy-lakehouse.ps1 -ZipPath "D:\DevTools\Tazama\Tazama_Lakehouse.zip"
+```
+
+| Parameter | Description |
+|---|---|
+| `-ZipPath` | **Required.** Local path to the Lakehouse archive zip. |
+
+Prerequisites: your local AWS profile must have `s3:PutObject` + `s3:DeleteObject`
+on the state bucket; the EC2 instance role must have `s3:GetObject` on the
+`lakehouse-staging/` prefix (added to `main.tf`).
+
+---
+
+### `restart-service.ps1`
+
+[infra/aws/scripts/restart-service.ps1](full-stack-docker-tazama/infra/aws/scripts/restart-service.ps1)
+
+Pulls the latest image for a single Docker Compose service and recreates its
+container without touching any other running containers.
+
+The script reads the running container's `com.docker.compose` labels to
+discover the exact working directory and compose file chain used to start it,
+then issues a targeted `docker compose up --no-deps --force-recreate`.  This
+means the command is always reconstructed from live state — no hardcoded file
+chains that can go stale.
+
+Server A's two sub-chains (`tazama-core` main stack and extensions APIs) are
+handled transparently by this label-based approach.
+
+```powershell
+# Update admin-service on Server A
+.\restart-service.ps1 -Server A -Service admin-service
+
+# Update deapi (extensions API running on Server A)
+.\restart-service.ps1 -Server A -Service deapi
+
+# Update tcs-api on Server B
+.\restart-service.ps1 -Server B -Service tcs-api
+
+# Update NiFi on Server C
+.\restart-service.ps1 -Server C -Service nifi
+
+# Force recreate without pulling (e.g. env change only)
+.\restart-service.ps1 -Server C -Service automation-orchestrator -NoPull
+```
+
+| Parameter | Description |
+|---|---|
+| `-Server` | **Required.** `A`, `B`, or `C`. |
+| `-Service` | **Required.** Docker Compose service name (e.g. `rule-001`, `tcs-api`, `nifi`). |
+| `-NoPull` | Skip the image pull; only recreate the container (useful for env/config-only changes). |
+
+After recreating, the script prints a `docker ps` table confirming the
+container name, status, and image digest.
+
+---
+
+### `teardown.ps1`
+
+[infra/aws/scripts/teardown.ps1](full-stack-docker-tazama/infra/aws/scripts/teardown.ps1)
+
+Stops all Docker Compose stacks on all three servers with `docker compose down`.
+Does **not** destroy volumes by default — data is preserved and the stacks can
+be restarted with `deploy.ps1 -NoPull`.
+
+```powershell
+# Stop all stacks, keep data
+.\teardown.ps1
+
+# Stop all stacks AND delete all volumes (databases, indexes, NiFi flows)
+.\teardown.ps1 -RemoveVolumes
+```
+
+| Parameter | Description |
+|---|---|
+| `-RemoveVolumes` | Passes `--volumes` to every `docker compose down`. Prompts for `YES` confirmation before proceeding. **Data loss is permanent.** |
+
+To destroy the EC2 infrastructure entirely after teardown:
+
+```powershell
+cd infra\aws
+tofu destroy
+```
+
+---
+
+### `add-ssh-key.ps1`
+
+[infra/aws/scripts/add-ssh-key.ps1](full-stack-docker-tazama/infra/aws/scripts/add-ssh-key.ps1)
+
+Appends an SSH public key to `~/.ssh/authorized_keys` on one or more servers
+via EICE.  Duplicate-safe — the key is only added if it is not already present.
+Use this to grant a team member direct SSH access to the EC2 instances.
+
+```powershell
+# Add key to all three servers
+.\add-ssh-key.ps1 -PublicKey "ssh-ed25519 AAAA... user@host"
+
+# Add key to Server A and C only
+.\add-ssh-key.ps1 -PublicKey "ssh-ed25519 AAAA... user@host" -Servers A,C
+```
+
+| Parameter | Description |
+|---|---|
+| `-PublicKey` | **Required.** Full SSH public key string (contents of the user's `.pub` file). Must start with a key type prefix (`ssh-ed25519`, `ssh-rsa`, `ecdsa-sha2-*`, etc.). |
+| `-Servers` | Servers to add the key to. Accepts one or more of `A`, `B`, `C`. Defaults to all three. |
+
+---
+
+### `tunnel-all.ps1`
+
+[infra/aws/scripts/tunnel-all.ps1](full-stack-docker-tazama/infra/aws/scripts/tunnel-all.ps1)
+
+Forwards all service ports from all three servers to `localhost` simultaneously
+by launching three background SSH tunnel jobs.  Useful when you need to access
+services across all servers at the same time (e.g. Postman testing that spans
+Server A APIs and Server B frontends).
+
+Press **Ctrl+C** to close all tunnels.
+
+```powershell
+.\tunnel-all.ps1
+```
+
+Ports forwarded — see [`tunnel-server-a.ps1`](#tunnel-server-aps1),
+[`tunnel-server-b.ps1`](#tunnel-server-bps1), and
+[`tunnel-server-c.ps1`](#tunnel-server-cps1) for the full port lists.
+
+---
+
+### `tunnel-server-a.ps1`
+
+[infra/aws/scripts/tunnel-server-a.ps1](full-stack-docker-tazama/infra/aws/scripts/tunnel-server-a.ps1)
+
+Forwards Server A service ports to `localhost`. Press **Ctrl+C** to close.
+
+```powershell
+.\tunnel-server-a.ps1
+```
+
+| Local port | Service |
+|---|---|
+| `5000` | TMS API |
+| `5100` | Admin API |
+| `3020` | Auth Service |
+| `8080` | Keycloak |
+| `6100` | Hasura GraphQL |
+| `5050` | pgAdmin |
+| `14222` | NATS (exterior) |
+| `15432` | PostgreSQL (exterior) |
+| `3001` | DEAPI (Data Enrichment API) |
+| `3002` | DEMS (Data Enrichment Monitoring Service) |
+
+---
+
+### `tunnel-server-b.ps1`
+
+[infra/aws/scripts/tunnel-server-b.ps1](full-stack-docker-tazama/infra/aws/scripts/tunnel-server-b.ps1)
+
+Forwards Server B service ports to `localhost`. Press **Ctrl+C** to close.
+
+```powershell
+.\tunnel-server-b.ps1
+```
+
+| Local port | Service |
+|---|---|
+| `3010` | TCS (Connection Studio) backend |
+| `5173` | TCS (Connection Studio) frontend |
+| `3005` | TRS (Rule Studio) backend |
+| `5174` | TRS (Rule Studio) frontend |
+| `3090` | CMS (Case Management) backend |
+| `5175` | CMS (Case Management) frontend |
+| `8081` | Flowable REST |
+| `5984` | CouchDB |
+| `9200` | OpenSearch |
+| `15433` | PostgreSQL (CMS) |
+| `12222` | SFTP |
+
+---
+
+### `tunnel-server-c.ps1`
+
+[infra/aws/scripts/tunnel-server-c.ps1](full-stack-docker-tazama/infra/aws/scripts/tunnel-server-c.ps1)
+
+Forwards Server C service ports to `localhost`. Press **Ctrl+C** to close.
+
+```powershell
+.\tunnel-server-c.ps1
+```
+
+| Local port | Service |
+|---|---|
+| `7619` | Automation Orchestrator API |
+| `8000` | JupyterHub |
+| `8088` | NiFi |
+| `8282` | Datalakehouse API |
+| `8983` | Solr |
+| `9998` | Apache Tika |
+| `9874` | Ozone OM (Object Manager) |
+| `9876` | Ozone SCM (Storage Container Manager) |
+| `9878` | Ozone S3 Gateway |
+| `9888` | Ozone Recon |
+
+---
+
 ## Phase E: Sandbox Access
 
 After Phase D completes, the services are running and reachable from within
