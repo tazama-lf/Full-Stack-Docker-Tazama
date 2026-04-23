@@ -2953,6 +2953,25 @@ This creates a private key (`tazama_ed25519`) and a public key (`tazama_ed25519.
 
 From your own workstation (which already has access), copy their public key into the `~/.ssh/authorized_keys` file on each instance they need to access.
 
+**Option A — use the helper script (recommended)**
+
+[`infra/aws/scripts/add-ssh-key.ps1`](scripts/add-ssh-key.ps1) handles all three servers in one call and skips duplicates automatically:
+
+```powershell
+cd "full-stack-docker-tazama\infra\aws\scripts"
+
+# Paste the full contents of the user's .pub file as the argument
+.\add-ssh-key.ps1 -PublicKey "ssh-ed25519 AAAA... their-name@example.com"
+```
+
+To grant access to specific servers only, use the `-Servers` parameter:
+
+```powershell
+.\add-ssh-key.ps1 -PublicKey "ssh-ed25519 AAAA... their-name@example.com" -Servers A,C
+```
+
+**Option B — manual**
+
 ```powershell
 cd "full-stack-docker-tazama\infra\aws\scripts"
 . .\helpers.ps1
