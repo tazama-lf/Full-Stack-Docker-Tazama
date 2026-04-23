@@ -48,7 +48,7 @@
   - [C.11 `tofu plan`](#c11-tofu-plan)
   - [C.12 `tofu apply`](#c12-tofu-apply)
 - [Phase D: Deployment Scripts](#phase-d-deployment-scripts)
-  - [D.1 `helpers.ps1`](#d1-helpersp1)
+  - [D.1 `helpers.ps1`](#d1-helpersps1)
   - [D.2 `deploy-core.ps1`](#d2-deploy-coreps1)
   - [D.3 `deploy-extensions.ps1`](#d3-deploy-extensionsps1)
   - [D.4 `deploy-biar.ps1`](#d4-deploy-biarps1)
@@ -56,7 +56,7 @@
   - [D.7 `deploy.ps1`](#d7-deployps1)
   - [D.8 `teardown.ps1`](#d8-teardownps1)
 - [Scripts Catalog](#scripts-catalog)
-  - [`helpers.ps1`](#helpersp1)
+  - [`helpers.ps1`](#helpersps1)
   - [`deploy.ps1`](#deployps1)
   - [`deploy-core.ps1`](#deploy-coreps1)
   - [`deploy-extensions.ps1`](#deploy-extensionsps1)
@@ -1167,7 +1167,7 @@ Four security groups. EC2 instances have **no internet-facing inbound rules** - 
 | Outbound | All | All | `0.0.0.0/0` | Image pulls, calls to Server A + B |
 
 > Solr (:8983), Ozone SCM (:9876), Ozone S3G (:9878), and Ozone Recon (:9888) are **internal-only** - no SG inbound rules; accessed exclusively via the SSH tunnel (`tunnel-server-c.ps1`).
-
+>
 > `sg-tazama-eice` is a small separate security group attached to the EICE VPC endpoint itself. It has no inbound rules; outbound allows TCP port 22 to `10.0.1.0/24` only. Each instance SG allows port 22 from this EICE SG only - not from the internet.
 
 Files created:
@@ -1691,7 +1691,7 @@ scripts dot-source `helpers.ps1` for shared functions and constants.
 
 | Script | Purpose |
 |---|---|
-| [`helpers.ps1`](#helperps1) | Shared functions - dot-sourced by every other script |
+| [`helpers.ps1`](#helpersps1) | Shared functions - dot-sourced by every other script |
 | [`deploy.ps1`](#deployps1) | Full deployment: all three stacks in sequence |
 | [`deploy-core.ps1`](#deploy-coreps1) | Server A - tazama-core stack |
 | [`deploy-extensions.ps1`](#deploy-extensionsps1) | Server A (DEMS/DEAPI) + Server B - tazama-extensions stack |
@@ -2196,7 +2196,7 @@ running containers are untouched. Expected additions: roughly `+30 resources`
 
 > **Already applied without `alb.tfvars`?** No teardown needed. Just add
 > `-var-file alb.tfvars` and re-run `tofu apply` - exactly the same command.
-
+>
 > **Applied ALB after Phase D?** Keycloak is already running with `KC_HOSTNAME=localhost`. Fix it by re-running `deploy-core.ps1 -NoPull` - the script will detect the ALB DNS name, update `core/.env`, and the compose up will recreate the Keycloak container with the correct hostname. Alternatively, SSH to Server A and restart just Keycloak:
 > ```bash
 > cd ~/full-stack-docker-tazama/core
@@ -2414,7 +2414,7 @@ All should return `200 OK`.
 After HTTPS is live, update the following before redeploying extensions:
 
 **Keycloak** - update frontend URL via Admin UI or env override:
-```
+```ini
 KC_HOSTNAME_URL=https://keycloak.<your-zone>
 KC_HOSTNAME_ADMIN_URL=https://keycloak.<your-zone>
 ```

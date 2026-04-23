@@ -58,7 +58,7 @@ param(
 
 $out = Get-TofuOutputs
 
-# ── Per-server: project name and instance ID ──────────────────────────────────
+# -- Per-server: project name and instance ID -------------------------------------------------------
 switch ($Server) {
     'A' { $label = 'Server A'; $instanceId = $out.ServerA_InstanceId; $project = 'tazama-core'       }
     'B' { $label = 'Server B'; $instanceId = $out.ServerB_InstanceId; $project = 'tazama-extensions' }
@@ -74,7 +74,7 @@ Write-Host "[$label] Service : $Service"
 Write-Host "[$label] Pull    : $(-not $NoPull)"
 Write-Host ''
 
-# ── Discover compose context from the running container's labels ──────────────
+# -- Discover compose context from the running container's labels ----------------------------
 # Docker Compose stamps every container with:
 #   com.docker.compose.project.working_dir   - CWD used for 'docker compose up'
 #   com.docker.compose.project.config_files  - comma-separated absolute paths to
@@ -128,7 +128,7 @@ Write-Host "[$label] Working dir: $workingDir"
 # Convert comma-separated absolute paths to '-f <path>' flags
 $fFlags = ($configFiles -split ',' | ForEach-Object { "-f $_" }) -join ' '
 
-# ── Recreate ──────────────────────────────────────────────────────────────────
+# -- Recreate -------------------------------------------------------------------------------
 $composeCmd = (
     "cd $workingDir && docker compose -p $project $fFlags " +
     "up -d --no-deps --force-recreate $pullFlag $Service"
@@ -139,7 +139,7 @@ Invoke-RemoteCommand -InstanceId $instanceId -Command $composeCmd
 Write-Host ''
 Write-Host "[$label] $Service recreated." -ForegroundColor Green
 
-# ── Verify ────────────────────────────────────────────────────────────────────
+# -- Verify ---------------------------------------------------------------------------------
 Write-Host "[$label] Verifying container state..."
 
 Invoke-RemoteCommand -InstanceId $instanceId -Command @"
