@@ -29,8 +29,8 @@ services:
     container_name: nifi-init
     restart: on-failure
     env_file:
-      - env/nifi.env
       - .env
+      - env/nifi.env
     depends_on:
       - nifi
     volumes:

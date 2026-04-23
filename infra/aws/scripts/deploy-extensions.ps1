@@ -42,10 +42,19 @@ $idB = $out.ServerB_InstanceId
 Write-Host "[Server A] Instance ID: $idA"
 Write-Host "[Server B] Instance ID: $idB"
 
-# -- 1. Server A: copy extensions .env ---------------------------------------
-Write-Host '[Server A] Copying extensions/.env...' 
+# -- 1. Server A: copy extensions .env and apply overlay ---------------------
+# DEMS and DEAPI run on Server A inside the tazama-core Docker project.
+# They consume extensions/.env for SERVER_B_HOST (used in CORS_ORIGINS).
+# Copy the repo's local-dev defaults first, then apply the same overlay that
+# Server B receives so SERVER_B_HOST resolves to extensions.tazama.internal.
+Write-Host '[Server A] Copying extensions/.env...'
 $localExtEnv = Join-Path $PSScriptRoot '..\..\..\extensions\.env'
 Copy-ToRemote -InstanceId $idA -LocalPath $localExtEnv -RemotePath "$Script:RemoteRepo/extensions/.env"
+
+Write-Host '[Server A] Applying .env overlay to extensions/.env...'
+$overlayFile = Join-Path $PSScriptRoot '..\templates\env-extensions.tpl'
+Set-RemoteEnvOverlay -InstanceId $idA -OverlayFile $overlayFile -RemoteEnvFile "$Script:RemoteRepo/extensions/.env"
+Write-Host '[Server A] .env overlay applied.' -ForegroundColor Green
 
 # -- 2. Server A: pull latest repo then add DEMS + DEAPI ---------------------
 # DEMS and DEAPI run inside the tazama-core Docker project on Server A.
