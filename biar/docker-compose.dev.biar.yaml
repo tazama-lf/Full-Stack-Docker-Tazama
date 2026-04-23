@@ -40,7 +40,7 @@ services:
       - "${AUTOMATION_ORCHESTRATOR_PORT}:7619"
     volumes:
       - automation_orchestrator_out:/app/out
-      - ${TAZAMA_WAREHOUSE_HOST_PATH}:/app/Tazama_Hudi_warehouse
+      - ${TAZAMA_WAREHOUSE_HOST_PATH}:/app/Tazama_Warehouse
     tmpfs:
       - /tmp/spark
     depends_on:
