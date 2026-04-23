@@ -1165,6 +1165,12 @@ They override the local-dev `SERVER_*_HOST` values in `extensions/.env` and
 
 `core/.env` has no cross-server host variables, so no overlay is needed.
 
+`env-extensions.tpl` is applied to **both** Server A and Server B by
+`deploy-extensions.ps1`. DEMS and DEAPI run on Server A (inside the
+`tazama-core` project) and use `extensions/.env` for their `CORS_ORIGINS`
+value; without the overlay `SERVER_B_HOST` remains at the local-dev default
+`localhost`.
+
 Files created:
 - [infra/aws/templates/env-extensions.tpl](full-stack-docker-tazama/infra/aws/templates/env-extensions.tpl)
 - [infra/aws/templates/env-biar.tpl](full-stack-docker-tazama/infra/aws/templates/env-biar.tpl)
@@ -1173,8 +1179,8 @@ Files created:
 
 | Variable | Committed default | Overlay value | Reason |
 |---|---|---|---|
-| `SERVER_A_HOST` | `10.0.1.10` | `core.tazama.internal` | Private DNS for cross-stack calls |
-| `SERVER_B_HOST` | `10.0.1.20` | `extensions.tazama.internal` | Private DNS |
+| `SERVER_A_HOST` | `host.docker.internal` | `core.tazama.internal` | Private DNS for cross-stack calls |
+| `SERVER_B_HOST` | `localhost` | `extensions.tazama.internal` | Private DNS; also drives `CORS_ORIGINS` in deapi/dems |
 | `ADMIN_SERVICE_URL` | container-internal port | `http://core.tazama.internal:5100` | Correct admin port |
 | `TRS_API_URL` / `TCS_API_URL` / `CMS_API_URL` | localhost defaults | Public ALB subdomains | Browser-facing VITE_ vars |
 | `SIMULATION_ENDPOINT` / `ADMIN_ENDPOINT` | localhost defaults | Public ALB subdomains | Browser-facing VITE_ vars |
@@ -1413,21 +1419,26 @@ docker compose -p tazama-core \
 
 [infra/aws/scripts/deploy-extensions.ps1](full-stack-docker-tazama/infra/aws/scripts/deploy-extensions.ps1)
 
-1. **Server A** - adds DEMS + DEAPI to the running `tazama-core` project:
+1. **Server A** - copies `extensions/.env` and applies `templates/env-extensions.tpl` overlay:
+   sets `SERVER_A_HOST=core.tazama.internal` and `SERVER_B_HOST=extensions.tazama.internal`.
+   DEMS and DEAPI run on Server A and consume `extensions/.env` for their `CORS_ORIGINS`
+   value; without this overlay `SERVER_B_HOST` stays at the local-dev default `localhost`.
+
+2. **Server A** - pulls latest repo then adds DEMS + DEAPI to the running `tazama-core` project:
    ```
    cd extensions/ && docker compose -p tazama-core \
-     -f ./docker-compose.dev.extensions.apis.yaml up -d
+     -f ./docker-compose.hub.extensions.apis.yaml up -d
    ```
    These APIs must be reachable before TCS/TRS backends start on Server B.
 
-2. **Server B** - waits for bootstrap (up to 15 min)
-3. **Server B** - applies `templates/env-extensions.tpl` overlay to `extensions/.env`:
+3. **Server B** - waits for bootstrap (up to 15 min)
+4. **Server B** - applies `templates/env-extensions.tpl` overlay to `extensions/.env`:
    sets `SERVER_A_HOST=core.tazama.internal` and `SERVER_B_HOST=extensions.tazama.internal`
-4. **Server B** - if `-Password` is supplied, applies a second in-memory credential overlay to `extensions/.env` and all `extensions/env/` service env files: sets `POSTGRES_PASSWORD`, `DB_PASSWORD`, `SPRING_DATASOURCE_PASSWORD`, and `CONFIGURATION_DATABASE_PASSWORD`
-5. **Server B** - SCP `core/auth/test-public-key.pem` → `extensions/auth/`
+5. **Server B** - if `-Password` is supplied, applies a second in-memory credential overlay to `extensions/.env` and all `extensions/env/` service env files: sets `POSTGRES_PASSWORD`, `DB_PASSWORD`, `SPRING_DATASOURCE_PASSWORD`, and `CONFIGURATION_DATABASE_PASSWORD`
+6. **Server B** - SCP `core/auth/test-public-key.pem` → `extensions/auth/`
    (required by TCS/TRS for JWT validation; on single-machine dev the bat
    script copies it automatically - here we do it from the local repo)
-6. **Server B** - starts the extensions stack:
+7. **Server B** - starts the extensions stack:
    ```
    docker compose -p tazama-extensions \
      -f ./docker-compose.extensions.infrastructure.yaml \
