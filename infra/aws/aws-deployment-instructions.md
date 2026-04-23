@@ -71,7 +71,7 @@
   - [`tunnel-server-c.ps1`](#tunnel-server-cps1)
 - [Phase E: Sandbox Access](#phase-e-sandbox-access)
   - [E.1 Option 1: SSH Tunnelling (private sandbox)](#e1-option-1-ssh-tunnelling-private-sandbox)
-  - [E.2 Option 2: ALB — public sandbox](#e2-option-2-alb--public-sandbox)
+  - [E.2 Option 2: ALB - public sandbox](#e2-option-2-alb---public-sandbox)
   - [E.3 Option 3: Custom Domain + HTTPS](#e3-option-3-custom-domain--https)
 - [Phase F: Validation](#phase-f-validation)
   - [F.3 Server A smoke test](#f3-server-a-smoke-test)
@@ -100,7 +100,7 @@
   - [Server B (tazama-extensions) - exterior ports](#server-b-tazama-extensions---exterior-ports)
   - [Server C (tazama-biar) - exterior ports](#server-c-tazama-biar---exterior-ports)
 - [Frequently Asked Questions](#frequently-asked-questions)
-  - [I've set up some users on Keycloak already — how can I save these if I want to redeploy the system somewhere else or in the future?](#ive-set-up-some-users-on-keycloak-already--how-can-i-save-these-if-i-want-to-redeploy-the-system-somewhere-else-or-in-the-future)
+  - [I've set up some users on Keycloak already - how can I save these if I want to redeploy the system somewhere else or in the future?](#ive-set-up-some-users-on-keycloak-already---how-can-i-save-these-if-i-want-to-redeploy-the-system-somewhere-else-or-in-the-future)
   - [How do I give another user access to the servers via SSH to allow them to view the docker container logs?](#how-do-i-give-another-user-access-to-the-servers-via-ssh-to-allow-them-to-view-the-docker-container-logs)
   - [How do I test if my Data Lakehouse is properly configured and working via JupyterHub?](#how-do-i-test-if-my-data-lakehouse-is-properly-configured-and-working-via-jupyterhub)
   - [How can I access the JupyterHub server from VS Code?](#how-can-i-access-the-jupyterhub-server-from-vs-code)
@@ -184,7 +184,7 @@ Three private EC2 instances sit behind an Application Load Balancer. No instance
 
      ┌──────────────────────────────────────────────────────────────┐
      │  Application Load Balancer  (public subnet, ap-south-1)     │
-     │  HTTP — port-based routing (HTTPS + host-based: Phase E.3)  │
+     │  HTTP - port-based routing (HTTPS + host-based: Phase E.3)  │
      │  :5000  → Server A  tms-service                             │
      │  :5100  → Server A  admin-service                           │
      │  :3020  → Server A  auth-service                            │
@@ -230,7 +230,7 @@ Three private EC2 instances sit behind an Application Load Balancer. No instance
 
      ┌─────────────────────────────────────────────────────┐
      │  EC2 Instance Connect Endpoint (EICE)               │
-     │  Private subnet — operator SSH access only          │
+     │  Private subnet - operator SSH access only          │
      │  No port 22 in any Security Group                   │
      └─────────────────────────────────────────────────────┘
 ```
@@ -351,32 +351,32 @@ The approach described below covers the remaining 10+ credentials (Redis, CouchD
 
 SSM Parameter Store is already used for `GH_TOKEN` (B.9). The same pattern extends to all service credentials: secrets are stored in SSM before deployment, fetched by the deploy scripts at deploy time using `aws ssm get-parameter --with-decryption`, and written to the correct env files on each instance via the existing `Set-RemoteEnvOverlay` mechanism. No secret ever touches a committed file.
 
-Several services use different variable names for the same underlying credential — for example, the PostgreSQL core password appears as `POSTGRES_PASSWORD` in the server container, `DB_PASSWORD` in some clients, and `RAW_HISTORY_DATABASE_PASSWORD` / `CONFIGURATION_DATABASE_PASSWORD` / `EVENT_HISTORY_DATABASE_PASSWORD` in others. The overlay templates map one SSM value to all of them, so the operator sets one password in SSM and it propagates consistently.
+Several services use different variable names for the same underlying credential - for example, the PostgreSQL core password appears as `POSTGRES_PASSWORD` in the server container, `DB_PASSWORD` in some clients, and `RAW_HISTORY_DATABASE_PASSWORD` / `CONFIGURATION_DATABASE_PASSWORD` / `EVENT_HISTORY_DATABASE_PASSWORD` in others. The overlay templates map one SSM value to all of them, so the operator sets one password in SSM and it propagates consistently.
 
-> **Local dev follow-on:** The same consolidation is worth doing in the repo itself — adding canonical password variables to each stack's root `.env` and changing service env files to reference `${POSTGRES_PASSWORD}` etc., so a developer changes one line rather than hunting through a dozen files. This is a follow-on refactor, not part of the AWS deployment work.
+> **Local dev follow-on:** The same consolidation is worth doing in the repo itself - adding canonical password variables to each stack's root `.env` and changing service env files to reference `${POSTGRES_PASSWORD}` etc., so a developer changes one line rather than hunting through a dozen files. This is a follow-on refactor, not part of the AWS deployment work.
 
 **Canonical SSM parameters:**
 
 | SSM parameter | Protects | Notes |
 |---|---|---|
-| `/tazama/postgres_core_password` | PostgreSQL — Server A | Server container + all `core/env/` clients |
-| `/tazama/postgres_extensions_password` | PostgreSQL — Server B (CMS) | Server container + `extensions/env/` clients |
+| `/tazama/postgres_core_password` | PostgreSQL - Server A | Server container + all `core/env/` clients |
+| `/tazama/postgres_extensions_password` | PostgreSQL - Server B (CMS) | Server container + `extensions/env/` clients |
 | `/tazama/keycloak_admin_password` | Keycloak admin console | `core/env/keycloak.env` |
 | `/tazama/hasura_admin_secret` | Hasura GraphQL admin | `core/docker-compose.utils.hasura.yaml` |
 | `/tazama/pgadmin_password` | pgAdmin web UI | Both `core/env/pgadmin.env` and `extensions/env/pgadmin.env` |
 | `/tazama/redis_password` | Redis/Valkey | `extensions/env/deapi.env`, `dems.env` |
-| `/tazama/couchdb_password` | CouchDB admin | `extensions/env/cms.env` — username `simon` should also be replaced |
+| `/tazama/couchdb_password` | CouchDB admin | `extensions/env/cms.env` - username `simon` should also be replaced |
 | `/tazama/auth_client_secret` | Auth service OAuth client | `core/env/auth-service.env` |
-| `/tazama/trs_crypto_key` | TRS signing key | `extensions/env/trs.env` — use 32+ random characters |
+| `/tazama/trs_crypto_key` | TRS signing key | `extensions/env/trs.env` - use 32+ random characters |
 | `/tazama/relay_auth_password` | REST relay auth | `core/env/rs-rest.env` |
 | `/tazama/cms_auth_admin_password` | CMS Tazama auth admin | `extensions/env/cms.env` |
 | `/tazama/cms_flowable_password` | CMS Flowable engine | `extensions/env/cms.env` |
-| `/tazama/nifi_admin_password` | NiFi single-user admin | `biar/docker-compose.biar.infrastructure.yaml` — NiFi requires min 12 chars |
+| `/tazama/nifi_admin_password` | NiFi single-user admin | `biar/docker-compose.biar.infrastructure.yaml` - NiFi requires min 12 chars |
 | `/tazama/ozone_s3g_secret_key` | Apache Ozone S3G | `biar/docker-compose.biar.infrastructure.yaml` |
-| `/tazama/opensearch_password` | OpenSearch admin | `extensions/env/cms.env`, `tcs.env`, `trs.env` — see also A.6 |
-| `/tazama/sftp_password` | SFTP server user | Special case — see note below |
+| `/tazama/opensearch_password` | OpenSearch admin | `extensions/env/cms.env`, `tcs.env`, `trs.env` - see also A.6 |
+| `/tazama/sftp_password` | SFTP server user | Special case - see note below |
 
-**Mapping — SSM parameter → env variables patched:**
+**Mapping - SSM parameter → env variables patched:**
 
 | SSM parameter | Variable name(s) | Target file(s) |
 |---|---|---|
@@ -398,9 +398,9 @@ Several services use different variable names for the same underlying credential
 | `/tazama/nifi_admin_password` | `SINGLE_USER_CREDENTIALS_PASSWORD` | `biar/docker-compose.biar.infrastructure.yaml` |
 | `/tazama/ozone_s3g_secret_key` | `OZONE-SITE.XML_ozone.s3g.secret.key` | `biar/docker-compose.biar.infrastructure.yaml` |
 | `/tazama/opensearch_password` | `OPENSEARCH_PASSWORD`, `OPENSEARCH_INITIAL_ADMIN_PASSWORD` | `extensions/env/cms.env`, `tcs.env`, `trs.env` |
-| `/tazama/sftp_password` | `SFTP_PASSWORD_CONSUMER`, `SFTP_PASSWORD_PRODUCER` | `extensions/env/tcs.env` — see note below |
+| `/tazama/sftp_password` | `SFTP_PASSWORD_CONSUMER`, `SFTP_PASSWORD_PRODUCER` | `extensions/env/tcs.env` - see note below |
 
-> **SFTP special case:** The SFTP server user is defined in the `command:` line of the `atmoz/sftp` container in `extensions/docker-compose.extensions.infrastructure.yaml` as the literal string `user:password:1001`. This cannot be overridden by env var substitution without first changing the compose file to `${SFTP_USER}:${SFTP_PASSWORD}:1001`. That compose file change is a prerequisite for the overlay. Additionally, the `SFTP_PASSWORD_CONSUMER` and `SFTP_PASSWORD_PRODUCER` values in `tcs.env` use a `hash:salt` format specific to the SFTP server's authentication scheme — replacement values must be generated in that same format.
+> **SFTP special case:** The SFTP server user is defined in the `command:` line of the `atmoz/sftp` container in `extensions/docker-compose.extensions.infrastructure.yaml` as the literal string `user:password:1001`. This cannot be overridden by env var substitution without first changing the compose file to `${SFTP_USER}:${SFTP_PASSWORD}:1001`. That compose file change is a prerequisite for the overlay. Additionally, the `SFTP_PASSWORD_CONSUMER` and `SFTP_PASSWORD_PRODUCER` values in `tcs.env` use a `hash:salt` format specific to the SFTP server's authentication scheme - replacement values must be generated in that same format.
 
 **Commands to store secrets in SSM (run once, before Phase D):**
 
@@ -414,13 +414,13 @@ Add-Type -AssemblyName System.Web
 $region = "ap-south-1"
 $profile = "tazama"
 
-# PostgreSQL — Server A
+# PostgreSQL - Server A
 aws ssm put-parameter --name /tazama/postgres_core_password --type SecureString `
   --value "<generate-strong-password>" `
   --description "PostgreSQL master password - Server A (core)" `
   --region $region --profile $profile
 
-# PostgreSQL — Server B
+# PostgreSQL - Server B
 aws ssm put-parameter --name /tazama/postgres_extensions_password --type SecureString `
   --value "<generate-strong-password>" `
   --description "PostgreSQL master password - Server B (extensions/CMS)" `
@@ -736,7 +736,7 @@ You need an AWS IAM user with programmatic access. If you already have access ke
    | `AmazonDynamoDBFullAccess` | Create the DynamoDB table used for OpenTofu state locking (prevents concurrent applies) |
    | `IAMFullAccess` | Create IAM instance profiles and roles so EC2 instances can read SSM parameters on startup |
 
-   There is no AWS-managed policy for ACM certificate management or EICE tunnel access — these permissions are **not** covered by any AWS-managed policy listed above. Create customer-managed policies and attach them the same way:
+   There is no AWS-managed policy for ACM certificate management or EICE tunnel access - these permissions are **not** covered by any AWS-managed policy listed above. Create customer-managed policies and attach them the same way:
 
    **ACM certificate policy (required for Phase E Option 3 custom domain):**
 
@@ -757,7 +757,7 @@ You need an AWS IAM user with programmatic access. If you already have access ke
 
    **EICE tunnel policy (required for all deploy scripts):**
 
-   There is no AWS-managed policy for EICE tunnel access — `ec2-instance-connect:OpenTunnel` is **not** covered by `AmazonEC2FullAccess` or any AWS-managed policy. Create a customer-managed policy and attach it the same way as the policies above:
+   There is no AWS-managed policy for EICE tunnel access - `ec2-instance-connect:OpenTunnel` is **not** covered by `AmazonEC2FullAccess` or any AWS-managed policy. Create a customer-managed policy and attach it the same way as the policies above:
 
    ```powershell
    # Create the customer-managed policy (once per account)
@@ -1041,7 +1041,7 @@ anything is created.
 | Server B (extensions) | `10.0.1.20` . `t3.xlarge` . 50 GB gp3 |
 | Server C (biar) | `10.0.1.30` . `r5.2xlarge` . 100 GB gp3 |
 | DNS | Route 53 private zone `tazama.internal` |
-| ALB | Optional — see Phase E |
+| ALB | Optional - see Phase E |
 | AMI | Amazon Linux 2023 (fetched dynamically - always latest) |
 
 ---
@@ -1107,15 +1107,15 @@ Files created:
 
 ### C.3 `modules/security-groups/`
 
-Four security groups. EC2 instances have **no internet-facing inbound rules** — all user traffic enters via the ALB, all operator SSH enters via EICE.
+Four security groups. EC2 instances have **no internet-facing inbound rules** - all user traffic enters via the ALB, all operator SSH enters via EICE.
 
-> **ALB routing mode:** The ALB currently uses **port-based HTTP routing** — each service is reachable at `http://<alb-dns>:<port>`. Port 443 is pre-configured in the ALB SG for the future custom-domain HTTPS upgrade (Phase F), at which point all service ports except 443 can be removed from the ALB SG and traffic will route via SNI host header rules.
+> **ALB routing mode:** The ALB currently uses **port-based HTTP routing** - each service is reachable at `http://<alb-dns>:<port>`. Port 443 is pre-configured in the ALB SG for the future custom-domain HTTPS upgrade (Phase F), at which point all service ports except 443 can be removed from the ALB SG and traffic will route via SNI host header rules.
 
 #### sg-tazama-alb (Application Load Balancer)
 
 | Direction | Port(s) | Protocol | Source | Notes |
 |---|---|---|---|---|
-| Inbound | 443 | TCP | `0.0.0.0/0` | HTTPS — Phase F custom domain (pre-configured) |
+| Inbound | 443 | TCP | `0.0.0.0/0` | HTTPS - Phase F custom domain (pre-configured) |
 | Inbound | 5000 | TCP | `0.0.0.0/0` | TMS API |
 | Inbound | 5050–5051 | TCP | `0.0.0.0/0` | pgAdmin (Server A + B) |
 | Inbound | 5100 | TCP | `0.0.0.0/0` | Admin API |
@@ -1127,9 +1127,9 @@ Four security groups. EC2 instances have **no internet-facing inbound rules** �
 | Inbound | 8088 | TCP | `0.0.0.0/0` | NiFi UI |
 | Outbound | All | All | `0.0.0.0/0` | Routing to EC2 target groups |
 
-> JupyterHub (:8000), Automation Orchestrator (:7619), and Datalakehouse API (:8282) have ALB target groups and listeners, but their ports are **not** open in the ALB SG — they are accessed via SSH tunnel (Phase E.1). Add them to the ALB SG when exposing them publicly.
+> JupyterHub (:8000), Automation Orchestrator (:7619), and Datalakehouse API (:8282) have ALB target groups and listeners, but their ports are **not** open in the ALB SG - they are accessed via SSH tunnel (Phase E.1). Add them to the ALB SG when exposing them publicly.
 
-#### sg-tazama-server-a (Server A — tazama-core)
+#### sg-tazama-server-a (Server A - tazama-core)
 
 | Direction | Port(s) | Protocol | Source | Notes |
 |---|---|---|---|---|
@@ -1143,7 +1143,7 @@ Four security groups. EC2 instances have **no internet-facing inbound rules** �
 | Inbound | 22 | TCP | sg-tazama-eice | SSH via EICE endpoint only |
 | Outbound | All | All | `0.0.0.0/0` | Image pulls, GitHub builds |
 
-#### sg-tazama-server-b (Server B — tazama-extensions)
+#### sg-tazama-server-b (Server B - tazama-extensions)
 
 | Direction | Port(s) | Protocol | Source | Notes |
 |---|---|---|---|---|
@@ -1154,7 +1154,7 @@ Four security groups. EC2 instances have **no internet-facing inbound rules** �
 | Inbound | 22 | TCP | sg-tazama-eice | SSH via EICE endpoint only |
 | Outbound | All | All | `0.0.0.0/0` | Image pulls, GitHub builds, Server A calls |
 
-#### sg-tazama-server-c (Server C — tazama-biar)
+#### sg-tazama-server-c (Server C - tazama-biar)
 
 | Direction | Port(s) | Protocol | Source | Notes |
 |---|---|---|---|---|
@@ -1162,13 +1162,13 @@ Four security groups. EC2 instances have **no internet-facing inbound rules** �
 | Inbound | 8000 | TCP | sg-tazama-alb | JupyterHub |
 | Inbound | 7619 | TCP | sg-tazama-alb | Automation Orchestrator |
 | Inbound | 8282 | TCP | sg-tazama-alb | Datalakehouse API (via ALB / tunnel) |
-| Inbound | 8282 | TCP | sg-tazama-server-b | Datalakehouse API (CMS backend direct call — bypasses ALB) |
+| Inbound | 8282 | TCP | sg-tazama-server-b | Datalakehouse API (CMS backend direct call - bypasses ALB) |
 | Inbound | 22 | TCP | sg-tazama-eice | SSH via EICE endpoint only |
 | Outbound | All | All | `0.0.0.0/0` | Image pulls, calls to Server A + B |
 
-> Solr (:8983), Ozone SCM (:9876), Ozone S3G (:9878), and Ozone Recon (:9888) are **internal-only** — no SG inbound rules; accessed exclusively via the SSH tunnel (`tunnel-server-c.ps1`).
+> Solr (:8983), Ozone SCM (:9876), Ozone S3G (:9878), and Ozone Recon (:9888) are **internal-only** - no SG inbound rules; accessed exclusively via the SSH tunnel (`tunnel-server-c.ps1`).
 
-> `sg-tazama-eice` is a small separate security group attached to the EICE VPC endpoint itself. It has no inbound rules; outbound allows TCP port 22 to `10.0.1.0/24` only. Each instance SG allows port 22 from this EICE SG only — not from the internet.
+> `sg-tazama-eice` is a small separate security group attached to the EICE VPC endpoint itself. It has no inbound rules; outbound allows TCP port 22 to `10.0.1.0/24` only. Each instance SG allows port 22 from this EICE SG only - not from the internet.
 
 Files created:
 - [infra/aws/modules/security-groups/variables.tf](full-stack-docker-tazama/infra/aws/modules/security-groups/variables.tf)
@@ -1374,14 +1374,14 @@ OpenTofu has been successfully initialized!
 **If you intend to use ALB access (Phase E.2 or E.3), include `alb.tfvars` in the plan now:**
 
 ```powershell
-# Recommended — ALB included upfront (Phase E.2 / E.3)
+# Recommended - ALB included upfront (Phase E.2 / E.3)
 tofu plan -var-file terraform.tfvars -var-file alb.tfvars -out tfplan
 
-# ALB-free — SSH tunnelling only (Phase E.1)
+# ALB-free - SSH tunnelling only (Phase E.1)
 tofu plan -var-file terraform.tfvars -out tfplan
 ```
 
-> **Why include the ALB at plan time?** Keycloak requires its public hostname (`KC_HOSTNAME`) to be configured before the container first starts. The `deploy-core.ps1` script reads the ALB DNS name from `tofu output` and injects `KEYCLOAK_HOSTNAME` into the remote `core/.env` automatically — but only if the ALB has already been applied. Applying the ALB after deployment requires a manual Keycloak container restart (see E.2.1).
+> **Why include the ALB at plan time?** Keycloak requires its public hostname (`KC_HOSTNAME`) to be configured before the container first starts. The `deploy-core.ps1` script reads the ALB DNS name from `tofu output` and injects `KEYCLOAK_HOSTNAME` into the remote `core/.env` automatically - but only if the ALB has already been applied. Applying the ALB after deployment requires a manual Keycloak container restart (see E.2.1).
 
 The `-out tfplan` flag saves the plan to a file. When you run `tofu apply` in
 C.12 you pass `tfplan` directly - OpenTofu then executes exactly the plan
@@ -1508,7 +1508,7 @@ docker compose -p tazama-core \
   up -d [--pull always]
 ```
 
-> **Hasura / Postgres race condition:** Hasura has a `depends_on: postgres: condition: service_healthy`. On a cold first boot, Postgres runs schema migration scripts before reporting healthy — this can take longer than the default healthcheck grace period. The script automatically retries `docker compose up` up to 3 times with a 30-second gap. The first attempt uses `--pull always`; subsequent retries skip the pull (images are already present). If the stack still fails after all 3 attempts, run `.\deploy-core.ps1 -NoPull` to retry without re-pulling images.
+> **Hasura / Postgres race condition:** Hasura has a `depends_on: postgres: condition: service_healthy`. On a cold first boot, Postgres runs schema migration scripts before reporting healthy - this can take longer than the default healthcheck grace period. The script automatically retries `docker compose up` up to 3 times with a 30-second gap. The first attempt uses `--pull always`; subsequent retries skip the pull (images are already present). If the stack still fails after all 3 attempts, run `.\deploy-core.ps1 -NoPull` to retry without re-pulling images.
 
 ---
 
@@ -1558,13 +1558,13 @@ docker compose -p tazama-core \
 [infra/aws/scripts/deploy-biar.ps1](full-stack-docker-tazama/infra/aws/scripts/deploy-biar.ps1)
 
 1. Waits for bootstrap on Server C (up to 15 min)
-2. Pulls the latest repo on Server C — ensures the server is on the correct branch
-3. Copies `biar/.env` to Server C (gitignored — never committed)
-4. Applies `templates/env-biar.tpl` overlay to `biar/.env` — sets all three host vars:
+2. Pulls the latest repo on Server C - ensures the server is on the correct branch
+3. Copies `biar/.env` to Server C (gitignored - never committed)
+4. Applies `templates/env-biar.tpl` overlay to `biar/.env` - sets all three host vars:
    - `SERVER_A_HOST=core.tazama.internal`
    - `SERVER_B_HOST=extensions.tazama.internal`
    - `SERVER_C_HOST=biar.tazama.internal`
-5. Creates the Tazama warehouse directory: `sudo mkdir -p /opt/Tazama_Warehouse` — bind-mounted by automation-orchestrator and datalakehouse-api
+5. Creates the Tazama warehouse directory: `sudo mkdir -p /opt/Tazama_Warehouse` - bind-mounted by automation-orchestrator and datalakehouse-api
 6. **Staged Ozone startup** (SCM must fully initialise before OM and datanodes):
    - Starts `scm` only, waits 20 s for SCM to initialise
    - Starts `om`, waits 15 s for OM to register
@@ -1585,7 +1585,7 @@ The `aws-cli` init container creates the `tazama` Ozone bucket automatically onc
 |---|---|
 | `-NoPull` | Skip `--pull always` on `docker compose up`. Use when images are already present on Server C. |
 
-Server A and Server B must be up before this script is run — NiFi connects to PostgreSQL (`:15432`) on Server A and PostgreSQL (`:15433`) on Server B. These connections are made when NiFi flows start, not at container startup, so the containers will start but flows will fail until both database servers are reachable.
+Server A and Server B must be up before this script is run - NiFi connects to PostgreSQL (`:15432`) on Server A and PostgreSQL (`:15433`) on Server B. These connections are made when NiFi flows start, not at container startup, so the containers will start but flows will fail until both database servers are reachable.
 
 ---
 
@@ -1593,11 +1593,11 @@ Server A and Server B must be up before this script is run — NiFi connects to 
 
 [infra/aws/scripts/deploy-lakehouse.ps1](full-stack-docker-tazama/infra/aws/scripts/deploy-lakehouse.ps1)
 
-Stages the Tazama Lakehouse archive through S3 and unpacks it on Server C into `/opt/Tazama_Warehouse`. Run this **after** `deploy-biar.ps1` has completed — the target directory is created by that script and the automation-orchestrator and datalakehouse-api containers must be up before any workflows access the warehouse.
+Stages the Tazama Lakehouse archive through S3 and unpacks it on Server C into `/opt/Tazama_Warehouse`. Run this **after** `deploy-biar.ps1` has completed - the target directory is created by that script and the automation-orchestrator and datalakehouse-api containers must be up before any workflows access the warehouse.
 
 The Lakehouse archive (`Tazama_Lakehouse.zip`) is not committed to the repository. Obtain it from the Tazama dev team and place it anywhere accessible from your local machine.
 
-> **Why S3 and not SCP?** The archive is typically 3-4 GB. EICE tunnels are stdio-based and throttled — SCP over EICE at that size would take hours or time out. Uploading to S3 from your workstation and then pulling it down on Server C (same AWS region, internal network) is dramatically faster and more reliable.
+> **Why S3 and not SCP?** The archive is typically 3-4 GB. EICE tunnels are stdio-based and throttled - SCP over EICE at that size would take hours or time out. Uploading to S3 from your workstation and then pulling it down on Server C (same AWS region, internal network) is dramatically faster and more reliable.
 
 ```powershell
 cd full-stack-docker-tazama\infra\aws
@@ -1611,10 +1611,10 @@ What the script does:
 3. Uploads the zip to `s3://<state_bucket>/lakehouse-staging/Tazama_Lakehouse.zip` from your local machine
 4. On Server C: downloads the zip from S3 using the instance IAM role (no credentials needed)
 5. Installs `unzip` on Server C if not already present
-6. Runs `sudo unzip -o` to `/` — the zip already contains the full path (`opt/Tazama_Warehouse/...`) so the files land at `/opt/Tazama_Warehouse/` directly. Do **not** pass `-d /opt/Tazama_Warehouse` or the path will double-nest.
+6. Runs `sudo unzip -o` to `/` - the zip already contains the full path (`opt/Tazama_Warehouse/...`) so the files land at `/opt/Tazama_Warehouse/` directly. Do **not** pass `-d /opt/Tazama_Warehouse` or the path will double-nest.
 7. Deletes the zip from Server C and removes the staging object from S3
 
-The instance IAM role has a scoped read policy on the `lakehouse-staging/` prefix of the state bucket — added to `main.tf` as `aws_iam_role_policy.s3_staging_read`. Your local AWS profile requires `s3:PutObject` on the same bucket (already granted when you created the bucket in Phase B).
+The instance IAM role has a scoped read policy on the `lakehouse-staging/` prefix of the state bucket - added to `main.tf` as `aws_iam_role_policy.s3_staging_read`. Your local AWS profile requires `s3:PutObject` on the same bucket (already granted when you created the bucket in Phase B).
 
 **Parameters:**
 
@@ -1622,7 +1622,7 @@ The instance IAM role has a scoped read policy on the `lakehouse-staging/` prefi
 |---|---|
 | `-ZipPath` | **(Required)** Local path to `Tazama_Lakehouse.zip` |
 
-> **Re-deployment note:** The script is idempotent — re-running with `-ZipPath` will overwrite existing warehouse files (`unzip -o`). Existing files not present in the zip are left in place.
+> **Re-deployment note:** The script is idempotent - re-running with `-ZipPath` will overwrite existing warehouse files (`unzip -o`). Existing files not present in the zip are left in place.
 
 > **Upload keeps failing?** If the upload fails repeatedly mid-transfer, run these once before retrying:
 > ```powershell
@@ -1686,17 +1686,17 @@ tofu destroy
 ## Scripts Catalog
 
 All scripts live in `infra/aws/scripts/`. Run them from that directory or from
-anywhere — every script resolves paths relative to its own location.  All
+anywhere - every script resolves paths relative to its own location.  All
 scripts dot-source `helpers.ps1` for shared functions and constants.
 
 | Script | Purpose |
 |---|---|
-| [`helpers.ps1`](#helperps1) | Shared functions — dot-sourced by every other script |
+| [`helpers.ps1`](#helperps1) | Shared functions - dot-sourced by every other script |
 | [`deploy.ps1`](#deployps1) | Full deployment: all three stacks in sequence |
-| [`deploy-core.ps1`](#deploy-coreps1) | Server A — tazama-core stack |
-| [`deploy-extensions.ps1`](#deploy-extensionsps1) | Server A (DEMS/DEAPI) + Server B — tazama-extensions stack |
-| [`deploy-biar.ps1`](#deploy-biarps1) | Server C — tazama-biar stack |
-| [`deploy-lakehouse.ps1`](#deploy-lakehouseps1) | Server C — stage and unpack Lakehouse warehouse data via S3 |
+| [`deploy-core.ps1`](#deploy-coreps1) | Server A - tazama-core stack |
+| [`deploy-extensions.ps1`](#deploy-extensionsps1) | Server A (DEMS/DEAPI) + Server B - tazama-extensions stack |
+| [`deploy-biar.ps1`](#deploy-biarps1) | Server C - tazama-biar stack |
+| [`deploy-lakehouse.ps1`](#deploy-lakehouseps1) | Server C - stage and unpack Lakehouse warehouse data via S3 |
 | [`restart-service.ps1`](#restart-serviceps1) | Pull latest image and recreate a single service on any server |
 | [`teardown.ps1`](#teardownps1) | Stop all stacks across all three servers |
 | [`add-ssh-key.ps1`](#add-ssh-keyps1) | Add an SSH public key to one or more servers |
@@ -1741,7 +1741,7 @@ Constants defined at script scope (edit here to change region, profile, or branc
 
 Deploys all three stacks in sequence by calling `deploy-core.ps1`,
 `deploy-extensions.ps1`, and `deploy-biar.ps1` in order.  Safe to run
-immediately after `tofu apply` — each sub-script waits for its server's
+immediately after `tofu apply` - each sub-script waits for its server's
 first-boot bootstrap to complete before proceeding.
 
 ```powershell
@@ -1879,7 +1879,7 @@ container without touching any other running containers.
 The script reads the running container's `com.docker.compose` labels to
 discover the exact working directory and compose file chain used to start it,
 then issues a targeted `docker compose up --no-deps --force-recreate`.  This
-means the command is always reconstructed from live state — no hardcoded file
+means the command is always reconstructed from live state - no hardcoded file
 chains that can go stale.
 
 Server A's two sub-chains (`tazama-core` main stack and extensions APIs) are
@@ -1918,7 +1918,7 @@ container name, status, and image digest.
 [infra/aws/scripts/teardown.ps1](full-stack-docker-tazama/infra/aws/scripts/teardown.ps1)
 
 Stops all Docker Compose stacks on all three servers with `docker compose down`.
-Does **not** destroy volumes by default — data is preserved and the stacks can
+Does **not** destroy volumes by default - data is preserved and the stacks can
 be restarted with `deploy.ps1 -NoPull`.
 
 ```powershell
@@ -1947,7 +1947,7 @@ tofu destroy
 [infra/aws/scripts/add-ssh-key.ps1](full-stack-docker-tazama/infra/aws/scripts/add-ssh-key.ps1)
 
 Appends an SSH public key to `~/.ssh/authorized_keys` on one or more servers
-via EICE.  Duplicate-safe — the key is only added if it is not already present.
+via EICE.  Duplicate-safe - the key is only added if it is not already present.
 Use this to grant a team member direct SSH access to the EC2 instances.
 
 ```powershell
@@ -1980,7 +1980,7 @@ Press **Ctrl+C** to close all tunnels.
 .\tunnel-all.ps1
 ```
 
-Ports forwarded — see [`tunnel-server-a.ps1`](#tunnel-server-aps1),
+Ports forwarded - see [`tunnel-server-a.ps1`](#tunnel-server-aps1),
 [`tunnel-server-b.ps1`](#tunnel-server-bps1), and
 [`tunnel-server-c.ps1`](#tunnel-server-cps1) for the full port lists.
 
@@ -2065,7 +2065,7 @@ Forwards Server C service ports to `localhost`. Press **Ctrl+C** to close.
 ## Phase E: Sandbox Access
 
 After Phase D completes, the services are running and reachable from within
-the VPC. The private subnet means there is no public IP on any server — you
+the VPC. The private subnet means there is no public IP on any server - you
 must choose how to expose the sandbox before it can be accessed.
 
 | | Option 1: SSH Tunnelling | Option 2: ALB | Option 3: Custom Domain |
@@ -2077,7 +2077,7 @@ must choose how to expose the sandbox before it can be accessed.
 | **Use for** | Developer/operator access, CI/CD with AWS creds | Sharing with teammates, demos, clients | Persistent shared environments, HTTPS required |
 
 All options use the same port numbers as the local Docker deployment. The
-options are not mutually exclusive — you can run tunnels alongside an active ALB.
+options are not mutually exclusive - you can run tunnels alongside an active ALB.
 Option 3 requires Option 2 (the ALB) and adds a clean HTTPS subdomain layer on top.
 
 ---
@@ -2086,7 +2086,7 @@ Option 3 requires Option 2 (the ALB) and adds a clean HTTPS subdomain layer on t
 
 Each tunnel script opens a blocking SSH connection through the EICE endpoint
 and forwards local ports to the matching container ports on the remote server.
-No port 22, no public IPs — authentication is via your local AWS IAM session.
+No port 22, no public IPs - authentication is via your local AWS IAM session.
 
 There are two ways to run the tunnels:
 
@@ -2102,17 +2102,17 @@ cd full-stack-docker-tazama\infra\aws\scripts
 
 #### Per-server (targeted access)
 
-Each script is blocking — it holds the terminal while the tunnel is open.
+Each script is blocking - it holds the terminal while the tunnel is open.
 Run each in a **separate** terminal window if you want all the tunnels opened, or just run the one for the server you want to access:
 
 ```powershell
-# Terminal 1 — Server A: TMS, Admin, Auth, Keycloak, Hasura, pgAdmin, NATS, PostgreSQL, DEAPI, DEMS
+# Terminal 1 - Server A: TMS, Admin, Auth, Keycloak, Hasura, pgAdmin, NATS, PostgreSQL, DEAPI, DEMS
 .\tunnel-server-a.ps1
 
-# Terminal 2 — Server B: TCS, TRS, CMS frontends + backends, OpenSearch, pgAdmin (ext)
+# Terminal 2 - Server B: TCS, TRS, CMS frontends + backends, OpenSearch, pgAdmin (ext)
 .\tunnel-server-b.ps1
 
-# Terminal 3 — Server C: NiFi, Solr, Ozone
+# Terminal 3 - Server C: NiFi, Solr, Ozone
 .\tunnel-server-c.ps1
 ```
 
@@ -2120,7 +2120,7 @@ Once tunnels are open, every service is reachable at `http://localhost:<port>`.
 Your existing Postman environment (with `localhost:*` base URLs) works without
 modification. Proceed to Phase F to validate.
 
-**Port map — Server A** (`tunnel-server-a.ps1`):
+**Port map - Server A** (`tunnel-server-a.ps1`):
 
 | Local port | Service |
 |---|---|
@@ -2135,7 +2135,7 @@ modification. Proceed to Phase F to validate.
 | 3001 | DEAPI |
 | 3002 | DEMS |
 
-**Port map — Server B** (`tunnel-server-b.ps1`):
+**Port map - Server B** (`tunnel-server-b.ps1`):
 
 | Local port | Service |
 |---|---|
@@ -2149,7 +2149,7 @@ modification. Proceed to Phase F to validate.
 | 15433 | PostgreSQL (extensions) |
 | 5051 | pgAdmin (extensions DB) |
 
-**Port map — Server C** (`tunnel-server-c.ps1`):
+**Port map - Server C** (`tunnel-server-c.ps1`):
 
 | Local port | Service |
 |---|---|
@@ -2164,7 +2164,7 @@ modification. Proceed to Phase F to validate.
 
 ---
 
-### E.2 Option 2: ALB — public sandbox
+### E.2 Option 2: ALB - public sandbox
 
 The ALB module (`modules/alb/`) is already in the Terraform codebase but is
 not deployed by default. Enable it with a single variable and apply:
@@ -2173,7 +2173,7 @@ not deployed by default. Enable it with a single variable and apply:
 
 > **Recommended:** include `alb.tfvars` in the initial Phase C plan/apply (see C.11) so that `deploy-core.ps1` can inject the ALB hostname into Keycloak on first boot. If you are following this section after Phase D has already run, see the Keycloak restart note below.
 
-`alb.tfvars` is already in the repo with `enable_alb = true` — no editing
+`alb.tfvars` is already in the repo with `enable_alb = true` - no editing
 required. Pass it as a second var-file:
 
 ```powershell
@@ -2195,9 +2195,9 @@ running containers are untouched. Expected additions: roughly `+30 resources`
 > Always run `tofu plan` first and verify `0 to destroy` before applying.
 
 > **Already applied without `alb.tfvars`?** No teardown needed. Just add
-> `-var-file alb.tfvars` and re-run `tofu apply` — exactly the same command.
+> `-var-file alb.tfvars` and re-run `tofu apply` - exactly the same command.
 
-> **Applied ALB after Phase D?** Keycloak is already running with `KC_HOSTNAME=localhost`. Fix it by re-running `deploy-core.ps1 -NoPull` — the script will detect the ALB DNS name, update `core/.env`, and the compose up will recreate the Keycloak container with the correct hostname. Alternatively, SSH to Server A and restart just Keycloak:
+> **Applied ALB after Phase D?** Keycloak is already running with `KC_HOSTNAME=localhost`. Fix it by re-running `deploy-core.ps1 -NoPull` - the script will detect the ALB DNS name, update `core/.env`, and the compose up will recreate the Keycloak container with the correct hostname. Alternatively, SSH to Server A and restart just Keycloak:
 > ```bash
 > cd ~/full-stack-docker-tazama/core
 > echo "KEYCLOAK_HOSTNAME=<alb-dns-name>" >> .env
@@ -2218,7 +2218,7 @@ http://tazama-alb-1234567890.ap-south-1.elb.amazonaws.com:5173   ← TCS UI
 ```
 
 Update your Postman environment: set the base URL variable to
-`http://<alb-dns-name>` (no port — port goes in each request URL).
+`http://<alb-dns-name>` (no port - port goes in each request URL).
 
 #### E.2.3 What the ALB module creates
 
@@ -2233,10 +2233,10 @@ Update your Postman environment: set the base URL variable to
 | All others | `/health` | 200-399 |
 
 **Key outputs (used by Phase G custom domain upgrade):**
-- `alb_dns_name` — DNS name for port-based access
-- `alb_zone_id` — ALB Route 53 zone ID, for Phase G alias records
-- `alb_arn` — ALB ARN, for Phase G HTTPS listener
-- `target_group_arns` — map of service name → TG ARN, for Phase G host-based routing
+- `alb_dns_name` - DNS name for port-based access
+- `alb_zone_id` - ALB Route 53 zone ID, for Phase G alias records
+- `alb_arn` - ALB ARN, for Phase G HTTPS listener
+- `target_group_arns` - map of service name → TG ARN, for Phase G host-based routing
 
 Files:
 - [infra/aws/modules/alb/variables.tf](full-stack-docker-tazama/infra/aws/modules/alb/variables.tf)
@@ -2273,7 +2273,7 @@ in place so EICE tunnels and existing Postman environments continue to work.
 | # | Requirement |
 |---|---|
 | 1 | Your domain registered and accessible at your registrar |
-| 2 | Option 2 (ALB) active — `alb.tfvars` applied |
+| 2 | Option 2 (ALB) active - `alb.tfvars` applied |
 | 3 | NS delegation for `<your-zone>` added at your registrar (see E.3.4) |
 
 #### E.3.2 Enable Option 3
@@ -2298,7 +2298,7 @@ OpenTofu will:
 1. Create a Route 53 public hosted zone for `<your-zone>` (e.g. `env.your-domain.com`)
 2. Request an ACM wildcard certificate `*.<your-zone>`
 3. Write the DNS validation CNAME record into the hosted zone
-4. Wait for ACM to validate the certificate (requires NS delegation to be in place — see E.3.4)
+4. Wait for ACM to validate the certificate (requires NS delegation to be in place - see E.3.4)
 5. Create Route 53 alias records: `<service>.<your-zone> → ALB`
 6. Add an HTTPS:443 listener on the ALB with host-based routing rules
 
@@ -2313,7 +2313,7 @@ Changes to Outputs:
   ~ public_zone_nameservers = [] -> (known after apply)
 ```
 
-The outputs were empty strings while Option 3 was inactive — they will now be populated with real values. OpenTofu will prompt for confirmation before proceeding:
+The outputs were empty strings while Option 3 was inactive - they will now be populated with real values. OpenTofu will prompt for confirmation before proceeding:
 
 ```
 Do you want to perform these actions?
@@ -2323,7 +2323,7 @@ Do you want to perform these actions?
   Enter a value: yes
 ```
 
-> **Partial apply note:** If a previous apply failed mid-way (e.g. due to a missing ACM permission — see Troubleshooting), OpenTofu will have already created some resources. On retry, the plan will show fewer additions. This is expected — OpenTofu skips what already exists and only creates what remains. For example, if the Route 53 zone and service records were created but the ACM certificate was not, the retry plan will show:
+> **Partial apply note:** If a previous apply failed mid-way (e.g. due to a missing ACM permission - see Troubleshooting), OpenTofu will have already created some resources. On retry, the plan will show fewer additions. This is expected - OpenTofu skips what already exists and only creates what remains. For example, if the Route 53 zone and service records were created but the ACM certificate was not, the retry plan will show:
 >
 > ```
 > Plan: 19 to add, 0 to change, 0 to destroy.
@@ -2373,7 +2373,7 @@ These are the four values your registrar admin needs.
 >
 > Send the updated values to your registrar and ask them to replace the existing NS records. Until the registrar has the correct current values, ACM validation will time out and `tofu apply` will block indefinitely at `aws_acm_certificate_validation`.
 
-#### E.3.4 Registrar request — NS delegation
+#### E.3.4 Registrar request - NS delegation
 
 Ask your registrar or DNS admin to add 4 NS records to the parent zone
 (e.g. `your-domain.com`) so that `<your-zone>` resolves via your AWS
@@ -2394,7 +2394,7 @@ After your registrar confirms the NS records are in place, DNS propagation
 typically takes 1-5 minutes. Then run:
 
 ```powershell
-# Set your zone once — replace with your domain_zone value
+# Set your zone once - replace with your domain_zone value
 $zone = "env.your-domain.com"
 
 # Check TMS (or your equivalent entry point)
@@ -2413,13 +2413,13 @@ All should return `200 OK`.
 
 After HTTPS is live, update the following before redeploying extensions:
 
-**Keycloak** — update frontend URL via Admin UI or env override:
+**Keycloak** - update frontend URL via Admin UI or env override:
 ```
 KC_HOSTNAME_URL=https://keycloak.<your-zone>
 KC_HOSTNAME_ADMIN_URL=https://keycloak.<your-zone>
 ```
 
-**TCS / TRS / CMS** — update the API base URL in each service's `.env`
+**TCS / TRS / CMS** - update the API base URL in each service's `.env`
 overlay (stored in `infra/aws/config/extensions.env`):
 ```
 TCS_API_BASE_URL=https://tcs-api.<your-zone>
@@ -2466,7 +2466,7 @@ tofu apply -var-file terraform.tfvars -var-file alb.tfvars
 Port-based HTTP listeners on the ALB are unaffected.
 
 > [!WARNING]
-> **Omitting `domain.tfvars` destroys the Route 53 zone.** OpenTofu treats the absence of a var-file as "remove everything that var-file enabled". This means the Route 53 public zone — and all its records — will be destroyed. If you later re-enable Option 3, AWS will create a **new** zone with **different** nameservers, and NS delegation will need to be repeated at your registrar.
+> **Omitting `domain.tfvars` destroys the Route 53 zone.** OpenTofu treats the absence of a var-file as "remove everything that var-file enabled". This means the Route 53 public zone - and all its records - will be destroyed. If you later re-enable Option 3, AWS will create a **new** zone with **different** nameservers, and NS delegation will need to be repeated at your registrar.
 >
 > Only omit `domain.tfvars` if you genuinely want to remove the custom domain. For all other applies (server rebuilds, ALB changes, config updates) always include it:
 >
@@ -2531,7 +2531,7 @@ Invoke-RestMethod http://localhost:3001/health
 Invoke-RestMethod http://localhost:3002/health
 ```
 
-If either is absent, check that `deploy-extensions.ps1` step 3 completed without error. The most common cause is `GH_TOKEN` not being available — re-run the script; the `bash -l` wrapper ensures the token is loaded from `/etc/environment`.
+If either is absent, check that `deploy-extensions.ps1` step 3 completed without error. The most common cause is `GH_TOKEN` not being available - re-run the script; the `bash -l` wrapper ensures the token is loaded from `/etc/environment`.
 
 ---
 
@@ -2539,7 +2539,7 @@ If either is absent, check that `deploy-extensions.ps1` step 3 completed without
 
 **Pre-requisite:** `deploy-extensions.ps1` has completed successfully.
 
-Open a second tunnel (keep Server A tunnel running — TCS/TRS/CMS need to reach Server A):
+Open a second tunnel (keep Server A tunnel running - TCS/TRS/CMS need to reach Server A):
 
 ```powershell
 .\tunnel-server-b.ps1
@@ -2566,9 +2566,9 @@ Invoke-RestMethod http://localhost:9200/_cluster/health | ConvertTo-Json
 - TRS frontend: http://localhost:5174
 - CMS frontend: http://localhost:5175
 
-**Cross-server connectivity (Server A):** TCS/TRS backends contact Server A for JWT validation (port 3020) and NATS relay (port 14222). If the frontend loads but API calls fail with 401/CORS, the `SERVER_A_HOST` overlay in `extensions/.env` was not applied — check the `env-extensions.tpl` template and re-run step 6 of `deploy-extensions.ps1` manually.
+**Cross-server connectivity (Server A):** TCS/TRS backends contact Server A for JWT validation (port 3020) and NATS relay (port 14222). If the frontend loads but API calls fail with 401/CORS, the `SERVER_A_HOST` overlay in `extensions/.env` was not applied - check the `env-extensions.tpl` template and re-run step 6 of `deploy-extensions.ps1` manually.
 
-**Cross-server connectivity (Server C — datalakehouse-api):** The CMS backend calls the datalakehouse-api on Server C directly (not via the ALB). Verify reachability from Server B:
+**Cross-server connectivity (Server C - datalakehouse-api):** The CMS backend calls the datalakehouse-api on Server C directly (not via the ALB). Verify reachability from Server B:
 
 ```powershell
 cd full-stack-docker-tazama\infra\aws
@@ -2579,7 +2579,7 @@ Invoke-RemoteCommand -InstanceId $out.ServerB_InstanceId -Command 'curl -s -o /d
 ```
 
 If this returns `000` (connection failure), check two things:
-1. Server B's security group — it must be `tazama-server-b-sg`, **not** `tazama-server-a-sg`:
+1. Server B's security group - it must be `tazama-server-b-sg`, **not** `tazama-server-a-sg`:
    ```powershell
    aws ec2 describe-instances --profile tazama --region ap-south-1 `
      --instance-ids $out.ServerB_InstanceId `
@@ -2599,10 +2599,10 @@ If this returns `000` (connection failure), check two things:
 ```
 
 **Browser/API checks:**
-- NiFi UI: http://localhost:8088/nifi — login with `admin` / `admin123456789`
+- NiFi UI: http://localhost:8088/nifi - login with `admin` / `admin123456789`
 - Solr admin: http://localhost:8983/solr
 - Ozone Recon: http://localhost:9888
-- JupyterHub: http://localhost:8000 — see first-time setup note below
+- JupyterHub: http://localhost:8000 - see first-time setup note below
 
 ```powershell
 # Automation Orchestrator API (FastAPI)
@@ -2620,7 +2620,7 @@ Invoke-RestMethod http://localhost:8000/hub/health
 > 1. Go to `http://localhost:8000/hub/signup` (or `https://jupyter.<your-zone>/hub/signup`)
 > 2. Sign up using the `JUPYTERHUB_ADMIN` username (default: `admin`, overridden by the `JUPYTERHUB_ADMIN` env var in `jupyterlab.env`)
 > 3. Go to `http://localhost:8000/hub/authorize` and click **Authorize** next to the admin account
-> 4. Log in — the admin account is now active
+> 4. Log in - the admin account is now active
 >
 > **Subsequent users:** Direct them to `/hub/signup`. Their accounts will appear at `/hub/authorize` for admin approval. Once approved they can log in and will appear in the admin panel at `/hub/admin`.
 >
@@ -2642,7 +2642,7 @@ Invoke-RestMethod http://localhost:8000/hub/health
 > ```
 > Then log in with the new password.
 
-**NiFi → Server A PostgreSQL connectivity:** NiFi connects to PostgreSQL on Server A (`:15432`) at startup. In the NiFi UI, check the Controller Services tab. Any DBCPConnectionPool service that targets `core.tazama.internal:15432` should show **Enabled** status. A **Disabled** or **Invalid** service indicates the `SERVER_A_HOST` overlay was not applied — check `env-biar.tpl` and re-run the overlay step manually:
+**NiFi → Server A PostgreSQL connectivity:** NiFi connects to PostgreSQL on Server A (`:15432`) at startup. In the NiFi UI, check the Controller Services tab. Any DBCPConnectionPool service that targets `core.tazama.internal:15432` should show **Enabled** status. A **Disabled** or **Invalid** service indicates the `SERVER_A_HOST` overlay was not applied - check `env-biar.tpl` and re-run the overlay step manually:
 
 ```powershell
 cd full-stack-docker-tazama\infra\aws\scripts
@@ -2684,29 +2684,29 @@ cd full-stack-docker-tazama\infra\aws\scripts
 .\deploy-biar.ps1
 ```
 
-The scripts are idempotent — `docker compose up -d` is a no-op for containers already running.
+The scripts are idempotent - `docker compose up -d` is a no-op for containers already running.
 
 > **Images already present?** If the previous teardown left Docker images on the hosts (i.e. volumes were removed but not images), you can skip the re-pull to speed up the core stack start:
 > ```powershell
 > .\deploy-core.ps1 -NoPull
 > ```
-> `deploy-extensions.ps1` and `deploy-biar.ps1` do not have a `-NoPull` switch — they always pull.
+> `deploy-extensions.ps1` and `deploy-biar.ps1` do not have a `-NoPull` switch - they always pull.
 
 ---
 
 ### F.9 Redeploy from scratch (after `tofu destroy`)
 
-After `tofu destroy`, all EC2 instances, the EICE endpoint, and all associated networking are gone. The S3 state bucket and DynamoDB lock table survive — they are the only resources not managed by the `tofu destroy` scope.
+After `tofu destroy`, all EC2 instances, the EICE endpoint, and all associated networking are gone. The S3 state bucket and DynamoDB lock table survive - they are the only resources not managed by the `tofu destroy` scope.
 
-> **If Option 3 (custom domain) was active:** `tofu destroy` also destroys the Route 53 public zone. AWS will assign new nameservers when the zone is recreated — NS delegation at your registrar will need to be updated. See E.3.3 for how to retrieve the new nameserver values after apply.
+> **If Option 3 (custom domain) was active:** `tofu destroy` also destroys the Route 53 public zone. AWS will assign new nameservers when the zone is recreated - NS delegation at your registrar will need to be updated. See E.3.3 for how to retrieve the new nameserver values after apply.
 >
-> **If you are only rebuilding containers** (F.8 — no `tofu destroy`), the Route 53 zone is untouched and NS delegation does not need to be repeated. The zone and its nameservers are infrastructure-layer resources that survive container-level redeployments.
+> **If you are only rebuilding containers** (F.8 - no `tofu destroy`), the Route 53 zone is untouched and NS delegation does not need to be repeated. The zone and its nameservers are infrastructure-layer resources that survive container-level redeployments.
 
 ```powershell
 cd full-stack-docker-tazama\infra\aws
 
 # Review what will be created
-# Include all active var-files — omitting domain.tfvars here would destroy the Route 53 zone
+# Include all active var-files - omitting domain.tfvars here would destroy the Route 53 zone
 tofu plan -var-file terraform.tfvars -var-file alb.tfvars -var-file domain.tfvars -out tfplan
 
 # Apply (will re-provision all three instances and networking)
@@ -2737,13 +2737,13 @@ The deployment as provisioned out of the box has the following characteristics:
 
 **Network boundary (good)**
 - All services run inside a private VPC subnet (`10.0.1.0/24`) with no inbound internet route
-- Access to EC2 instances requires AWS IAM credentials and EICE — there is no open port 22
+- Access to EC2 instances requires AWS IAM credentials and EICE - there is no open port 22
 - ALB-exposed services (`nifi`, `jupyter`, `tms`, `keycloak`, etc.) sit behind HTTPS with ACM-managed certificates and Keycloak-enforced authentication at the listener rule level
 
-**Credentials (weak — requires action before beta use)**
+**Credentials (weak - requires action before beta use)**
 - All three stacks (`core/`, `extensions/`, `biar/`) were originally committed to a public GitHub repository with plaintext default passwords (`unused`, `password`, `admin123456789`, `tazama`)
 - The `-Password` deploy-script parameter covers PostgreSQL and Keycloak on Servers A and B. All other service credentials (Redis, CouchDB, TRS signing key, Hasura, NiFi, Ozone, OpenSearch, SFTP, pgAdmin, OAuth client secret, relay auth, CMS Flowable) remain at their committed defaults unless changed manually
-- On the current beta deployment, the `-Password` parameter was **not passed at deploy time** — PostgreSQL on both servers has password `unused`
+- On the current beta deployment, the `-Password` parameter was **not passed at deploy time** - PostgreSQL on both servers has password `unused`
 - NiFi is running over plain HTTP; the single-user login is not enforced
 
 **Other open issues**
@@ -2757,7 +2757,7 @@ The deployment as provisioned out of the box has the following characteristics:
 
 These are the credentials that need to be changed before the beta is used with any real or sensitive data. Work through each service in order.
 
-#### PostgreSQL — both servers
+#### PostgreSQL - both servers
 
 The simplest approach for the current deployment is to change the password directly in the running container and patch the env files on disk.
 
@@ -2786,17 +2786,17 @@ Then re-run the deploy scripts with the new password so all service env files ar
 .\deploy-extensions.ps1 -Password $pgPw -NoPull
 ```
 
-> `-NoPull` skips the image pull and only patches the env files and restarts services — substantially faster than a full redeploy.
+> `-NoPull` skips the image pull and only patches the env files and restarts services - substantially faster than a full redeploy.
 
 **Long-term:** Store the password in SSM as `/tazama/postgres_core_password` and `/tazama/postgres_extensions_password` (see A.7 SSM commands) and pass `-Password` on every future deploy. The deploy scripts already read from SSM if the `-Password` parameter is not supplied directly.
 
 ---
 
-#### NiFi — enable HTTPS and enforce login
+#### NiFi - enable HTTPS and enforce login
 
 NiFi's single-user authenticator only activates when NiFi is serving over HTTPS. With `NIFI_WEB_HTTP_PORT` set, anyone who reaches port 8088 is in without a password.
 
-**Step 1 — Update `biar/env/nifi.env`** on Server C:
+**Step 1 - Update `biar/env/nifi.env`** on Server C:
 
 ```bash
 # On Server C (via Invoke-RemoteCommand or SSH)
@@ -2806,9 +2806,9 @@ echo "NIFI_WEB_HTTPS_PORT=8443" >> ~/full-stack-docker-tazama/biar/env/nifi.env
 echo "NIFI_WEB_HTTPS_HOST=0.0.0.0" >> ~/full-stack-docker-tazama/biar/env/nifi.env
 ```
 
-**Step 2 — Update the biar compose file** to expose port 8443 instead of 8088, and update the ALB target group to point to 8443. This requires a `tofu apply` to update the ALB listener rule.
+**Step 2 - Update the biar compose file** to expose port 8443 instead of 8088, and update the ALB target group to point to 8443. This requires a `tofu apply` to update the ALB listener rule.
 
-**Step 3 — Set strong credentials:**
+**Step 3 - Set strong credentials:**
 
 ```powershell
 Invoke-RemoteCommand -InstanceId $out.ServerC_InstanceId -Command `
@@ -2817,7 +2817,7 @@ Invoke-RemoteCommand -InstanceId $out.ServerC_InstanceId -Command `
 
 NiFi requires a minimum of 12 characters. Store the password in SSM as `/tazama/nifi_admin_password`.
 
-**Step 4 — Restart NiFi:**
+**Step 4 - Restart NiFi:**
 
 ```powershell
 Invoke-RemoteCommand -InstanceId $out.ServerC_InstanceId -Command `
@@ -2874,23 +2874,23 @@ See A.6. OpenSearch is currently running with `DISABLE_SECURITY_PLUGIN=true`. Th
 
 | Item | Status | Action required |
 |---|---|---|
-| VPC private subnet isolation | ✅ Done | — |
-| EICE-only SSH access | ✅ Done | — |
-| ALB HTTPS with ACM certificates | ✅ Done | — |
-| ALB Keycloak authentication on listeners | ✅ Done | — |
-| PostgreSQL passwords rotated | ❌ Default (`unused`) | G.2 — rotate and store in SSM |
-| NiFi login enforced | ❌ HTTP, no auth | G.2 — enable HTTPS, set password |
-| Ozone S3G credentials rotated | ❌ Default (`tazama`/`tazama`) | G.2 — rotate key/secret |
-| OpenSearch security plugin enabled | ❌ Disabled | G.3 — re-enable, set password |
-| Keycloak admin password rotated | ❌ Default | A.7 — pass `-Password` at deploy |
+| VPC private subnet isolation | ✅ Done | - |
+| EICE-only SSH access | ✅ Done | - |
+| ALB HTTPS with ACM certificates | ✅ Done | - |
+| ALB Keycloak authentication on listeners | ✅ Done | - |
+| PostgreSQL passwords rotated | ❌ Default (`unused`) | G.2 - rotate and store in SSM |
+| NiFi login enforced | ❌ HTTP, no auth | G.2 - enable HTTPS, set password |
+| Ozone S3G credentials rotated | ❌ Default (`tazama`/`tazama`) | G.2 - rotate key/secret |
+| OpenSearch security plugin enabled | ❌ Disabled | G.3 - re-enable, set password |
+| Keycloak admin password rotated | ❌ Default | A.7 - pass `-Password` at deploy |
 | Redis/Valkey password set | ❌ Default | A.7 SSM rollout |
 | CouchDB password rotated | ❌ Default | A.7 SSM rollout |
 | TRS crypto signing key set | ❌ Default | A.7 SSM rollout |
 | Hasura admin secret set | ❌ Default | A.7 SSM rollout |
 | Auth service OAuth client secret set | ❌ Default | A.7 SSM rollout |
-| NiFi HTTPS port on ALB | ❌ HTTP 8088 | G.2 — compose + tofu update |
+| NiFi HTTPS port on ALB | ❌ HTTP 8088 | G.2 - compose + tofu update |
 | pgAdmin passwords rotated | ❌ Default | A.7 SSM rollout |
-| SFTP password rotated | ❌ Default | A.7 — requires compose change first |
+| SFTP password rotated | ❌ Default | A.7 - requires compose change first |
 
 ---
 
@@ -3029,7 +3029,7 @@ tofu apply -var-file terraform.tfvars -var-file alb.tfvars -var-file domain.tfva
 
 **Cause:** `tofu init` was run before the `module "alb"` and `module "dns_public"` declarations were added to `main.tf`. OpenTofu caches module metadata at init time and does not re-scan automatically.
 
-**Fix:** Re-run `tofu init` — it is always safe to run against an existing deployment and will not modify state:
+**Fix:** Re-run `tofu init` - it is always safe to run against an existing deployment and will not modify state:
 
 ```powershell
 tofu init
@@ -3049,7 +3049,7 @@ Blocked request. This host ("<alb-dns>.elb.amazonaws.com") is not allowed.
 To allow this host, add "<alb-dns>.elb.amazonaws.com" to `server.allowedHosts` in vite.config.js.
 ```
 
-**Cause:** The ALB is routing correctly — this response is coming from the service. The service is a Vite-based frontend, and Vite's built-in host-checking security feature rejects requests where the `Host` header is not an explicitly allowed hostname. When accessed through the ALB, the `Host` header is the ALB DNS name, which Vite does not recognise by default.
+**Cause:** The ALB is routing correctly - this response is coming from the service. The service is a Vite-based frontend, and Vite's built-in host-checking security feature rejects requests where the `Host` header is not an explicitly allowed hostname. When accessed through the ALB, the `Host` header is the ALB DNS name, which Vite does not recognise by default.
 
 **Fix:** In the service's `vite.config.js` (or `vite.config.ts`), add the ALB hostname to `server.allowedHosts`:
 
@@ -3067,7 +3067,7 @@ server: {
 }
 ```
 
-> **Note:** `allowedHosts: 'all'` is acceptable for a private developer sandbox. Do not use it in a production deployment — use the explicit hostname list or switch to the custom-domain HTTPS configuration (Phase G), which serves all services through a single domain that can be permanently whitelisted.
+> **Note:** `allowedHosts: 'all'` is acceptable for a private developer sandbox. Do not use it in a production deployment - use the explicit hostname list or switch to the custom-domain HTTPS configuration (Phase G), which serves all services through a single domain that can be permanently whitelisted.
 
 > **Tip:** Backend services (those exposing a REST API) will not show this error. It only appears for services that embed a Vite dev server. Use a backend health endpoint to confirm ALB routing independently of the Vite issue.
 
@@ -3077,7 +3077,7 @@ server: {
 
 **1. Set up the `.ssh` folder and copy your key**
 
-The `.ssh` folder is not created automatically on Windows — create it and copy the EC2 key into it:
+The `.ssh` folder is not created automatically on Windows - create it and copy the EC2 key into it:
 
 ```powershell
 # Create folder (safe to run even if it already exists)
@@ -3133,7 +3133,7 @@ ssh tazama-a
 
 **3. View container logs**
 
-The Tazama stacks are started with multiple `-f` flags, so `docker compose logs` requires knowing all the compose files used. The simpler approach is to use the container name directly — it works regardless of directory or how the stack was started.
+The Tazama stacks are started with multiple `-f` flags, so `docker compose logs` requires knowing all the compose files used. The simpler approach is to use the container name directly - it works regardless of directory or how the stack was started.
 
 First, list all running containers to find the name:
 
@@ -3234,9 +3234,9 @@ docker compose -p tazama-core \
 | 3020 | Auth Service | Server B (JWT validation) | `auth` |
 | 5100 | Admin API | Internal | `admin` |
 | 8080 | Keycloak | ALB, frontends | `keycloak` |
-| 14222 | NATS | Server B relay | — |
-| 15432 | PostgreSQL | Server C NiFi ETL | — |
-| 16379 | Valkey | — | — |
+| 14222 | NATS | Server B relay | - |
+| 15432 | PostgreSQL | Server C NiFi ETL | - |
+| 16379 | Valkey | - | - |
 | 5050 | pgAdmin | Operator (EICE only) | `pgadmin` |
 | 6100 | Hasura | Operator (EICE only) | `hasura` |
 
@@ -3250,9 +3250,9 @@ docker compose -p tazama-core \
 | 5173 | TCS Frontend | ALB | `tcs` |
 | 5174 | TRS Frontend | ALB | `trs` |
 | 5175 | CMS Frontend | ALB | `cms` |
-| 9200 | OpenSearch | (NiFi ETL - pending confirmation) | — |
-| 12222 | SFTP | File ingest | — |
-| 15433 | PostgreSQL (CMS) | Server C NiFi ETL | — |
+| 9200 | OpenSearch | (NiFi ETL - pending confirmation) | - |
+| 12222 | SFTP | File ingest | - |
+| 15433 | PostgreSQL (CMS) | Server C NiFi ETL | - |
 
 ### Server C (tazama-biar) - exterior ports
 
@@ -3262,21 +3262,21 @@ docker compose -p tazama-core \
 | 8000 | JupyterHub | ALB | `jupyter` |
 | 8088 | NiFi UI | ALB | `nifi` |
 | 8282 | Datalakehouse API | ALB, Operator | `datalakehouse-api` |
-| 8983 | Solr UI | Operator (EICE only) | — |
-| 9876 | Ozone SCM | Operator (EICE only) | — |
-| 9878 | Ozone S3G | Operator (EICE only) | — |
-| 9888 | Ozone Recon UI | Operator (EICE only) | — |
-| 9998 | Tika | Internal only | — |
+| 8983 | Solr UI | Operator (EICE only) | - |
+| 9876 | Ozone SCM | Operator (EICE only) | - |
+| 9878 | Ozone S3G | Operator (EICE only) | - |
+| 9888 | Ozone Recon UI | Operator (EICE only) | - |
+| 9998 | Tika | Internal only | - |
 
 ---
 
 ## Frequently Asked Questions
 
-### I've set up some users on Keycloak already — how can I save these if I want to redeploy the system somewhere else or in the future?
+### I've set up some users on Keycloak already - how can I save these if I want to redeploy the system somewhere else or in the future?
 
 Export the live realm (including users) from the running Keycloak container, copy it to your local machine, and commit it to the repo. The next deploy will import it automatically on first boot.
 
-**Step 1 — Export the realm inside the container on Server A:**
+**Step 1 - Export the realm inside the container on Server A:**
 
 ```powershell
 cd "full-stack-docker-tazama\infra\aws\scripts"
@@ -3292,7 +3292,7 @@ Invoke-RemoteCommand -InstanceId $out.ServerA_InstanceId -Command `
   "docker cp tazama-core-keycloak-1:/tmp/tazama-realm.json /home/ec2-user/tazama-realm.json"
 ```
 
-**Step 2 — SCP the file from Server A to your local machine:**
+**Step 2 - SCP the file from Server A to your local machine:**
 
 ```powershell
 $configPath = New-SshConfig -InstanceId $out.ServerA_InstanceId
@@ -3301,7 +3301,7 @@ scp -F $configPath "$($out.ServerA_InstanceId):/home/ec2-user/tazama-realm.json"
 Remove-Item $configPath
 ```
 
-**Step 3 — Commit and push:**
+**Step 3 - Commit and push:**
 
 ```powershell
 cd "full-stack-docker-tazama"
@@ -3310,7 +3310,7 @@ git commit -S -s -m "chore: export live Keycloak tazama realm"
 git push origin <your-branch>
 ```
 
-The updated realm JSON will be copied to the server by `deploy-core.ps1` and imported by Keycloak on its next fresh start (`--import-realm` only runs when the realm does not already exist in Keycloak's database — see the note below).
+The updated realm JSON will be copied to the server by `deploy-core.ps1` and imported by Keycloak on its next fresh start (`--import-realm` only runs when the realm does not already exist in Keycloak's database - see the note below).
 
 > **Important:** Keycloak only imports a realm JSON on first boot if the realm is not already present in its database. If the container is simply restarted without wiping its data, the import is skipped. To force a reimport of an updated realm JSON, the Keycloak container and its embedded H2 database must be removed first:
 >
@@ -3323,21 +3323,21 @@ The updated realm JSON will be copied to the server by `deploy-core.ps1` and imp
 
 ### How do I give another user access to the servers via SSH to allow them to view the docker container logs?
 
-Access to the EC2 instances uses AWS EC2 Instance Connect Endpoint (EICE) — there is no open port 22, and no shared key pair. Each user authenticates with their own AWS IAM identity. To grant another user SSH access you need to give their IAM identity permission to use EICE, and then add their SSH public key to the EC2 instance so the server accepts their connection.
+Access to the EC2 instances uses AWS EC2 Instance Connect Endpoint (EICE) - there is no open port 22, and no shared key pair. Each user authenticates with their own AWS IAM identity. To grant another user SSH access you need to give their IAM identity permission to use EICE, and then add their SSH public key to the EC2 instance so the server accepts their connection.
 
-#### Step 1 — Ensure the user has an IAM identity in the Tazama AWS account
+#### Step 1 - Ensure the user has an IAM identity in the Tazama AWS account
 
 The user must have an IAM user in the AWS account. If they do not have one yet, create it as described in Step 2c below.
 
-#### Step 2 — Create an IAM group with the required EICE permissions (one-time setup)
+#### Step 2 - Create an IAM group with the required EICE permissions (one-time setup)
 
-AWS recommends attaching permissions to a group rather than directly to individual users. Create a dedicated group for Tazama server operators and attach the EICE policy to it. This only needs to be done once — future users are onboarded by adding them to the group.
+AWS recommends attaching permissions to a group rather than directly to individual users. Create a dedicated group for Tazama server operators and attach the EICE policy to it. This only needs to be done once - future users are onboarded by adding them to the group.
 
-**2a — Create the group:**
+**2a - Create the group:**
 
 In the AWS Console go to **IAM → User groups → Create group**. Name it `tazama-server-operators` (or similar).
 
-**2b — Attach a permissions policy to the group:**
+**2b - Attach a permissions policy to the group:**
 
 In the group, go to **Permissions → Add permissions → Create inline policy**, paste the following, and name the policy `tazama-server-operators-policy`:
 
@@ -3382,30 +3382,30 @@ In the group, go to **Permissions → Add permissions → Create inline policy**
 
 > **Important:** `OpenTunnel` and `SendSSHPublicKey` must be in separate statements with different conditions because they operate on different resource types. `OpenTunnel`'s resource is the EICE endpoint (tagged `tazama-eice`); `SendSSHPublicKey`'s resource is the EC2 instance (tagged with the server name). Combining them in one statement causes `OpenTunnel` to be denied because the endpoint name never matches the server names.
 
-`ec2-instance-connect` actions do not support account-scoped ARNs in the resource field — `"*"` is the correct and AWS-documented form. The `Condition` blocks scope access to the specific EICE endpoint and the named Tazama servers, using `Name` tags that the OpenTofu configuration sets automatically.
+`ec2-instance-connect` actions do not support account-scoped ARNs in the resource field - `"*"` is the correct and AWS-documented form. The `Condition` blocks scope access to the specific EICE endpoint and the named Tazama servers, using `Name` tags that the OpenTofu configuration sets automatically.
 
 To restrict a user to a subset of servers, simply remove the unwanted server names from the `AllowSendSSHPublicKey` condition array. For example, to grant access to Server B and C only, remove `"tazama-server-a"` from the list.
 
-**2c — Create the IAM user:**
+**2c - Create the IAM user:**
 
 In the AWS Console go to **IAM → Users → Create user**.
 
 - **User name**: use something identifiable, e.g. `firstname.lastname`
-- **Provide user access to the AWS Management Console**: leave **unchecked** — they only need CLI access, not console access
+- **Provide user access to the AWS Management Console**: leave **unchecked** - they only need CLI access, not console access
 - **Permissions**: do not attach any policies here; permissions will come from the group
 - Once the user is created, open the user and go to **Security credentials → Access keys → Create access key**
 - Select **Command Line Interface (CLI)** as the use case and complete the wizard
-- Download or copy the **Access key ID** and **Secret access key** — these are shown only once
+- Download or copy the **Access key ID** and **Secret access key** - these are shown only once
 - Send the credentials to the user securely; they will run `aws configure` on their local machine and enter these values
 
 This creates a user with no console access, no permissions outside the group, and credentials scoped only to CLI use.
 
-**2d — Add the user to the group:**
+**2d - Add the user to the group:**
 
 In the AWS Console go to **IAM → User groups → tazama-server-operators → Users → Add users** and select the user. Their permissions are now inherited from the group. To revoke access later, remove them from the group without touching the policy.
 
 
-> **Important — existing users getting `AccessDeniedException`:** If a user's SSH connection fails with `AccessDeniedException: not authorized to perform ec2-instance-connect:OpenTunnel`, they have not been added to the `tazama-server-operators` group (or the group was not set up yet). This is the only fix — SSH key setup alone is not enough. All of the following steps can be done entirely in the AWS Console:
+> **Important - existing users getting `AccessDeniedException`:** If a user's SSH connection fails with `AccessDeniedException: not authorized to perform ec2-instance-connect:OpenTunnel`, they have not been added to the `tazama-server-operators` group (or the group was not set up yet). This is the only fix - SSH key setup alone is not enough. All of the following steps can be done entirely in the AWS Console:
 >
 > **If the group already exists** - simply add the user to it:
 > 1. Go to **IAM → User groups → tazama-server-operators**
@@ -3413,7 +3413,7 @@ In the AWS Console go to **IAM → User groups → tazama-server-operators → U
 >
 > **If the group does not exist yet** - complete Steps 2a-2d above first, then add the user.
  
-#### Step 3 — User: install and configure the AWS CLI
+#### Step 3 - User: install and configure the AWS CLI
 
 Send the user their **Access key ID** and **Secret access key** along with the following instructions.
 
@@ -3444,7 +3444,7 @@ Send the user their **Access key ID** and **Secret access key** along with the f
 
    This should return the names of the three Tazama servers. If it returns an error, the credentials or region are incorrect.
 
-#### Step 4 — Generate or collect the user's SSH key pair
+#### Step 4 - Generate or collect the user's SSH key pair
 
 The user must have an SSH key pair. If they do not have one, they can generate one on their local machine:
 
@@ -3455,11 +3455,11 @@ ssh-keygen -t ed25519 -C "their-name@example.com" -f "$env:USERPROFILE\.ssh\taza
 
 This creates a private key (`tazama_ed25519`) and a public key (`tazama_ed25519.pub`). They must keep the private key secure and share only the public key with you.
 
-#### Step 5 — Add the user's public key to the EC2 instance(s)
+#### Step 5 - Add the user's public key to the EC2 instance(s)
 
 From your own workstation (which already has access), copy their public key into the `~/.ssh/authorized_keys` file on each instance they need to access.
 
-**Option A — use the helper script (recommended)**
+**Option A - use the helper script (recommended)**
 
 [`infra/aws/scripts/add-ssh-key.ps1`](scripts/add-ssh-key.ps1) handles all three servers in one call and skips duplicates automatically:
 
@@ -3476,7 +3476,7 @@ To grant access to specific servers only, use the `-Servers` parameter:
 .\add-ssh-key.ps1 -PublicKey "ssh-ed25519 AAAA... their-name@example.com" -Servers A,C
 ```
 
-**Option B — manual**
+**Option B - manual**
 
 ```powershell
 cd "full-stack-docker-tazama\infra\aws\scripts"
@@ -3500,7 +3500,7 @@ Invoke-RemoteCommand -InstanceId $out.ServerC_InstanceId -Command `
   "echo '$pubKey' >> ~/.ssh/authorized_keys"
 ```
 
-#### Step 6 — User: set up the SSH config shortcut
+#### Step 6 - User: set up the SSH config shortcut
 
 The easiest way to connect is via an SSH config file. This lets the user run `ssh tazama-a` (or `tazama-b` / `tazama-c`) directly without specifying flags each time.
 
@@ -3539,7 +3539,7 @@ Host tazama-c
   ProxyCommand aws ec2-instance-connect open-tunnel --instance-id %h --remote-port 22 --region ap-south-1
 ```
 
-Note there is no `--profile` flag here — the user configured a default profile in Step 3, so AWS CLI picks it up automatically.
+Note there is no `--profile` flag here - the user configured a default profile in Step 3, so AWS CLI picks it up automatically.
 
 **4. User: connect:**
 
@@ -3547,7 +3547,7 @@ Note there is no `--profile` flag here — the user configured a default profile
 ssh tazama-a
 ```
 
-#### Step 7 — Viewing Docker container logs
+#### Step 7 - Viewing Docker container logs
 
 Once connected via SSH, the user can view logs for any running container:
 
@@ -3578,7 +3578,7 @@ Common container names in the core stack follow the pattern `tazama-core-<servic
 
 Log into JupyterHub and open a new notebook. Run the following cells in order:
 
-**Cell 1 — Check environment variables:**
+**Cell 1 - Check environment variables:**
 
 ```python
 import os
@@ -3591,7 +3591,7 @@ print("JAVA_HOME:     ", os.environ.get("JAVA_HOME", "NOT SET"))
 
 Expected: all four should show paths, not `NOT SET`. If any paths are missing, check `biar/env/jupyterlab.env` on Server C and confirm it has been updated to `/opt/Tazama_Warehouse`, then restart the container.
 
-**Cell 2 — Check the warehouse directory:**
+**Cell 2 - Check the warehouse directory:**
 
 ```python
 import os
@@ -3603,9 +3603,9 @@ for t in sorted(tables):
     print(" ", t)
 ```
 
-Expected: a list of Hudi table directories (e.g. `gold/`, `silver/`, `views/`). If you get a `FileNotFoundError`, the warehouse volume is not mounted — check the `docker-compose.hub.biar.yaml` volume entry and re-run `docker compose up -d jupyterhub`.
+Expected: a list of Hudi table directories (e.g. `gold/`, `silver/`, `views/`). If you get a `FileNotFoundError`, the warehouse volume is not mounted - check the `docker-compose.hub.biar.yaml` volume entry and re-run `docker compose up -d jupyterhub`.
 
-**Cell 3 — Start a Spark session with the Hudi JAR:**
+**Cell 3 - Start a Spark session with the Hudi JAR:**
 
 ```python
 from pyspark.sql import SparkSession
@@ -3619,9 +3619,9 @@ print("Spark version:", spark.version)
 print("Session started OK")
 ```
 
-Expected: Spark version printed without errors. A `ClassNotFoundException: hudi.DefaultSource` means the JAR path in `SPARK_JARS` is wrong — verify with `os.listdir("/opt/jars")`.
+Expected: Spark version printed without errors. A `ClassNotFoundException: hudi.DefaultSource` means the JAR path in `SPARK_JARS` is wrong - verify with `os.listdir("/opt/jars")`.
 
-**Cell 4 — Read a Hudi table:**
+**Cell 4 - Read a Hudi table:**
 
 ```python
 # Replace with an actual table path from Cell 2 output, e.g. "gold/transactions"
@@ -3632,9 +3632,9 @@ print(f"Row count: {df.count()}")
 df.printSchema()
 ```
 
-Expected: schema printed, row count > 0. A `FileNotFoundException` means the path doesn't exist — use the exact directory names from Cell 2. A `DataSourceNotFoundException` means the Hudi JAR did not load — re-check Cell 3.
+Expected: schema printed, row count > 0. A `FileNotFoundException` means the path doesn't exist - use the exact directory names from Cell 2. A `DataSourceNotFoundException` means the Hudi JAR did not load - re-check Cell 3.
 
-**Cell 5 — Stop the session when done:**
+**Cell 5 - Stop the session when done:**
 
 ```python
 spark.stop()
@@ -3645,7 +3645,7 @@ print("Spark stopped.")
 
 ### How can I access the JupyterHub server from VS Code?
 
-VS Code's Jupyter extension supports connecting to remote Jupyter servers directly, so you can run notebooks from VS Code using the kernel running on the JupyterHub instance — no need to upload notebooks to the server UI.
+VS Code's Jupyter extension supports connecting to remote Jupyter servers directly, so you can run notebooks from VS Code using the kernel running on the JupyterHub instance - no need to upload notebooks to the server UI.
 
 **Steps:**
 
@@ -3653,7 +3653,7 @@ VS Code's Jupyter extension supports connecting to remote Jupyter servers direct
    Browse to `https://jupyter.beta.tazama.org/hub/token`, log in as admin, and create a token. Copy it.
 
 2. **Make sure your server is spawned**  
-   Log into `https://jupyter.beta.tazama.org` once so the single-user server starts. VS Code connects to an already-running server — it cannot spawn one for you.
+   Log into `https://jupyter.beta.tazama.org` once so the single-user server starts. VS Code connects to an already-running server - it cannot spawn one for you.
 
 3. **In VS Code, open the notebook and select a kernel**  
    Click the kernel picker (top-right, shows "Select Kernel") → **Existing Jupyter Server...** → **Enter the URL of the running Jupyter server**.
@@ -3666,11 +3666,11 @@ VS Code's Jupyter extension supports connecting to remote Jupyter servers direct
 
    When prompted for a password/token, paste the token from step 1.
 
-5. **Select the Python kernel** from the list that appears — it will be the kernel running inside the `biar-jupyterhub` container on Server C.
+5. **Select the Python kernel** from the list that appears - it will be the kernel running inside the `biar-jupyterhub` container on Server C.
 
 **Result:** VS Code is the UI; the kernel (Spark, Hudi JARs, warehouse mount) runs on Server C. Cell outputs, variables, and plots come back to VS Code. The notebook file stays local on your machine.
 
 **Caveats:**
 - If JupyterHub idles out and shuts down the single-user server, VS Code will lose the connection. Re-spawn via the browser and reconnect.
-- Tokens have a lifetime — if yours expires, generate a new one from `/hub/token`.
+- Tokens have a lifetime - if yours expires, generate a new one from `/hub/token`.
 - The token auth bypasses the browser SSO flow, so the ALB Keycloak listener does not interfere with the `/user/<username>/api` path.
