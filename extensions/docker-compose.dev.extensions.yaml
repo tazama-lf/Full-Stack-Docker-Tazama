@@ -120,7 +120,7 @@ services:
     image: !reset null
     build:
       context: https://github.com/tazama-lf/case-management-system.git#${CMS_BRANCH}
-      dockerfile: Dockerfile.viola
+      dockerfile: Dockerfile.voila
       args:
         - GH_TOKEN
     container_name: tazama-cms-voila
