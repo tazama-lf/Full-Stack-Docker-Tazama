@@ -180,3 +180,4 @@ volumes:
   recon_data:
   automation_orchestrator_out:
   jupyterhub_data:
+  jupyterhub_notebooks:

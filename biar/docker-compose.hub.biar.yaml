@@ -78,6 +78,7 @@ services:
       - "${JUPYTERLAB_PORT}:8000"
     volumes:
       - jupyterhub_data:/data
+      - jupyterhub_notebooks:/srv/notebooks
       - ${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Warehouse:ro
     depends_on:
       - s3g
