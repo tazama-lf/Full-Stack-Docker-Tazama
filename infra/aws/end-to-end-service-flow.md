@@ -51,6 +51,7 @@ flowchart TD
         TRSbe["TRS Backend :3005"]
         CMSfe["CMS Frontend :5175"]
         CMSbe["CMS Backend :3090"]
+        Voila["Voila :18866"]
         PGB["pgAdmin-ext :5051"]
         PG_B[("PostgreSQL\n:5432 / ext :15433")]
         OS[("OpenSearch :9200")]
@@ -495,6 +496,7 @@ corresponding Security Group ingress rules to be in place.
 
 | Server | Port | Service |
 |---|---|---|
+| Server B | 18866 | Voila (CMS notebook server) |
 | Server C | 8983 | Solr UI |
 | Server C | 9876 | Ozone SCM |
 | Server C | 9878 | Ozone S3G |

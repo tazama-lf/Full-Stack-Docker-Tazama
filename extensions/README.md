@@ -230,6 +230,7 @@ These infrastructure services are started as part of the `tazama-extensions` Com
 | TRS frontend | `trs-frontend` | 5174 | Transaction Rule Studio web UI |
 | CMS backend | `tazama-cms-backend` | 3090 | Case Management System API |
 | CMS frontend | `tazama-cms-frontend` | 5175 | Case Management System web UI |
+| Voila | `tazama-cms-voila` | 18866 | Voila notebook server - serves CMS visualisation notebooks (account network, alert history, conditions timeline, counterparty network, transaction graphs) embedded in the CMS frontend |
 
 <div style="text-align: right"><a href="#top">Top</a></div>
 
@@ -252,6 +253,7 @@ After a successful deployment, the following web interfaces are accessible from 
 #### Case Management System (CMS)
 - CMS API: <http://localhost:3090>
 - CMS UI: <http://localhost:5175>
+- Voila notebooks: <http://localhost:18866>
 
 #### Infrastructure
 - OpenSearch: <http://localhost:9200>

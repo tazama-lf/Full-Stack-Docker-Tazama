@@ -100,6 +100,7 @@ The extensions stack provides the browser-based configuration studios and case m
 - Transaction Configuration Studio (TCS) -- API port 3010, UI port 5173
 - Transaction Rule Studio (TRS) -- API port 3005, UI port 5174
 - Case Management System (CMS) -- API port 3090, UI port 5175
+- Voila notebook server -- port 18866
 - pgAdmin (optional) -- port 5051
 
 **Launcher:** `extensions/tazama-extensions.bat` (Windows) / `extensions/tazama-extensions.sh` (Unix)

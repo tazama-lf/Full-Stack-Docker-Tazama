@@ -120,7 +120,7 @@ services:
     image: !reset null
     build:
       context: https://github.com/tazama-lf/case-management-system.git#${CMS_BRANCH}
-      dockerfile: Dockerfile.viola
+      dockerfile: Dockerfile.voila
       args:
         - GH_TOKEN
     container_name: tazama-cms-voila
@@ -131,4 +131,4 @@ services:
     environment:
       - CASE_MGMT_BACKEND_URL=http://tazama-cms-backend:3090
     ports:
-      - "${VOILA_PORT}:8866"
+      - "${VOILA_PORT:-18866}:8866"
