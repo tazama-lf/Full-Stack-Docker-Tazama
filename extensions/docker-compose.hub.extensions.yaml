@@ -11,8 +11,10 @@ services:
     ports:
       - ${TCS_PORT}:3010
     depends_on:
-      - sftp
-      - opensearch-node1
+      sftp:
+        condition: service_started
+      opensearch-node1:
+        condition: service_healthy
     volumes:
       - ./auth:/auth:ro
 
@@ -40,7 +42,8 @@ services:
       - .env
     restart: always
     depends_on:
-      - opensearch-node1
+      opensearch-node1:
+        condition: service_healthy
     ports:
       - ${TRS_BACKEND_PORT}:3005
     volumes:
@@ -69,9 +72,12 @@ services:
     container_name: tazama-cms-backend
     restart: unless-stopped
     depends_on:
-      - migrate
-      - flowable
-      - opensearch-node1
+      migrate:
+        condition: service_completed_successfully
+      flowable:
+        condition: service_started
+      opensearch-node1:
+        condition: service_healthy
     env_file:
       - env/cms.env
       - .env
