@@ -24,6 +24,8 @@ locals {
     tms          = { port = 5000, server = "a" }
     admin        = { port = 5100, server = "a" }
     auth         = { port = 3020, server = "a" }
+    deapi        = { port = 3001, server = "a" }
+    dems         = { port = 3002, server = "a" }
     keycloak     = { port = 8080, server = "a" }
     pgadmin      = { port = 5050, server = "a" }
     hasura       = { port = 6100, server = "a" }
@@ -47,6 +49,7 @@ locals {
   }
 
   # Keycloak does not respond with 200 on /, use /health/ready instead.
+  # CMS and TRS/TCS APIs (NestJS) have no /health route; Swagger UI at /api/docs returns 200.
   health_check_paths = {
     keycloak    = "/health/ready"
     nifi        = "/nifi-api/system-diagnostics"
@@ -54,6 +57,9 @@ locals {
     pgadmin     = "/"
     pgadmin-ext = "/"
     jupyterhub  = "/hub/health"
+    cms-api     = "/api/docs"
+    trs-api     = "/api/docs"
+    tcs-api     = "/api/docs"
   }
 }
 

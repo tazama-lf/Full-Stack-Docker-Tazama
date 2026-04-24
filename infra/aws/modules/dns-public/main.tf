@@ -10,6 +10,12 @@ resource "aws_route53_zone" "public" {
   tags = {
     Name = "${var.prefix}-public-zone"
   }
+
+  lifecycle {
+    # Deleting a hosted zone destroys the NS delegation at the registrar.
+    # Never allow Tofu to destroy this resource automatically.
+    prevent_destroy = true
+  }
 }
 
 # ---------------------------------------------------------------------------
@@ -22,6 +28,9 @@ resource "aws_acm_certificate" "wildcard" {
 
   lifecycle {
     create_before_destroy = true
+    # Prevent accidental destruction of the validated certificate.
+    # Re-issuing forces re-validation and breaks HTTPS until DNS propagates.
+    prevent_destroy = true
   }
 
   tags = {
@@ -66,6 +75,8 @@ locals {
     tms                     = var.target_group_arns["tms"]
     admin                   = var.target_group_arns["admin"]
     auth                    = var.target_group_arns["auth"]
+    deapi                   = var.target_group_arns["deapi"]
+    dems                    = var.target_group_arns["dems"]
     keycloak                = var.target_group_arns["keycloak"]
     pgadmin                 = var.target_group_arns["pgadmin"]
     hasura                  = var.target_group_arns["hasura"]
@@ -103,6 +114,8 @@ locals {
     automation-orchestrator = 17
     datalakehouse-api       = 18
     jupyter                 = 19
+    deapi                   = 20
+    dems                    = 21
   }
 }
 

@@ -70,6 +70,14 @@ resource "aws_security_group" "alb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    description = "DEAPI / DEMS (Server A)"
+    from_port   = 3001
+    to_port     = 3002
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   # Server B service ports
   ingress {
     description = "TRS / TCS / CMS backends"
@@ -291,7 +299,7 @@ resource "aws_security_group" "server_c" {
 
   # CMS backend on Server B calls the datalakehouse-api directly (not via ALB)
   ingress {
-    description     = "CMS backend -> Datalakehouse API (direct)"
+    description     = "CMS backend to Datalakehouse API (direct)"
     from_port       = 8282
     to_port         = 8282
     protocol        = "tcp"
