@@ -144,15 +144,21 @@ function Set-RemoteEnvOverlay {
     $lines = Get-Content $OverlayFile |
              Where-Object { $_ -notmatch '^\s*#' -and $_ -match '=' }
 
-    foreach ($line in $lines) {
+    if (-not $lines) { return }
+
+    # Build all sed/append commands as a single bash script and run them in one
+    # SSH connection. Opening one EICE tunnel per key causes rate-limit hangs
+    # when the overlay has many entries.
+    $bashLines = foreach ($line in $lines) {
         $key   = ($line -split '=', 2)[0].Trim()
         $value = ($line -split '=', 2)[1].Trim()
-        # The sed uses | as a delimiter to tolerate dots in values (DNS names).
-        $sedCmd = "grep -q '^${key}=' ${RemoteEnvFile} && " +
-                  "sed -i 's|^${key}=.*|${key}=${value}|' ${RemoteEnvFile} || " +
-                  "echo '${key}=${value}' >> ${RemoteEnvFile}"
-        Invoke-RemoteCommand $InstanceId $sedCmd
+        # Use | as sed delimiter to tolerate dots and slashes in values.
+        "grep -q '^${key}=' ${RemoteEnvFile} && " +
+        "sed -i 's|^${key}=.*|${key}=${value}|' ${RemoteEnvFile} || " +
+        "echo '${key}=${value}' >> ${RemoteEnvFile}"
     }
+    $batchCmd = $bashLines -join '; '
+    Invoke-RemoteCommand $InstanceId $batchCmd
 }
 
 # -- Wait-Bootstrap ------------------------------------------------------------
