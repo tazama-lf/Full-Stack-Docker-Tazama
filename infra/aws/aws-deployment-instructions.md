@@ -217,7 +217,7 @@ Three private EC2 instances sit behind an Application Load Balancer. No instance
     │  keycloak:8080 │  │ trs-api:3005 │  │ dlh-api    :8282│
     │  hasura  :6100 │  │ cms    :5175 │  │ solr       :8983│
     │  pgadmin :5050 │  │ cms-api:3090 │  │ ozone-scm  :9876│
-    │  nats    :14222│  │ pgadmin:5051 │  │ ozone-s3g  :9878│
+    │  nats    :14222│  │ voila :18866 │  │ ozone-s3g  :9878│
     │  postgres:15432│  │ postgres:15433  │ ozone-recon:9888│
     │  valkey  :16379│  │ opensrch:9200│  └────────┬────────┘
     └────────────────┘  └──────┬───────┘           │
@@ -2029,6 +2029,7 @@ Forwards Server B service ports to `localhost`. Press **Ctrl+C** to close.
 | `5174` | TRS (Rule Studio) frontend |
 | `3090` | CMS (Case Management) backend |
 | `5175` | CMS (Case Management) frontend |
+| `18866` | Voila (CMS notebook server) |
 | `8081` | Flowable REST |
 | `5984` | CouchDB |
 | `9200` | OpenSearch |
@@ -2145,6 +2146,7 @@ modification. Proceed to Phase F to validate.
 | 5174 | TRS Frontend |
 | 3090 | CMS Backend |
 | 5175 | CMS Frontend |
+| 18866 | Voila (CMS notebook server) |
 | 9200 | OpenSearch |
 | 15433 | PostgreSQL (extensions) |
 | 5051 | pgAdmin (extensions DB) |
@@ -3250,6 +3252,7 @@ docker compose -p tazama-core \
 | 5173 | TCS Frontend | ALB | `tcs` |
 | 5174 | TRS Frontend | ALB | `trs` |
 | 5175 | CMS Frontend | ALB | `cms` |
+| 18866 | Voila notebook server | Operator (EICE tunnel only) | - |
 | 9200 | OpenSearch | (NiFi ETL - pending confirmation) | - |
 | 12222 | SFTP | File ingest | - |
 | 15433 | PostgreSQL (CMS) | Server C NiFi ETL | - |

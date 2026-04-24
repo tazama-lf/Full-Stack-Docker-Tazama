@@ -33,6 +33,7 @@ Write-Host '  3005  -> TRS (Rule Studio) backend'
 Write-Host '  5174  -> TRS (Rule Studio) frontend'
 Write-Host '  3090  -> CMS (Case Management) backend'
 Write-Host '  5175  -> CMS (Case Management) frontend'
+Write-Host '  18866 -> Voila (CMS notebook server)'
 Write-Host '  8081  -> Flowable REST'
 Write-Host '  5984  -> CouchDB'
 Write-Host '  9200  -> OpenSearch'
@@ -65,6 +66,7 @@ try {
         -L 5174:localhost:5174 `
         -L 3090:localhost:3090 `
         -L 5175:localhost:5175 `
+        -L 18866:localhost:18866 `
         -L 8081:localhost:8081 `
         -L 5984:localhost:5984 `
         -L 9200:localhost:9200 `
