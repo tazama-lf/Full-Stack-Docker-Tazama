@@ -131,4 +131,4 @@ services:
     environment:
       - CASE_MGMT_BACKEND_URL=http://tazama-cms-backend:3090
     ports:
-      - "${VOILA_PORT}:8866"
+      - "${VOILA_PORT:-18866}:8866"

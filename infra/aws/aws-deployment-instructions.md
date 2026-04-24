@@ -217,7 +217,7 @@ Three private EC2 instances sit behind an Application Load Balancer. No instance
     │  keycloak:8080 │  │ trs-api:3005 │  │ dlh-api    :8282│
     │  hasura  :6100 │  │ cms    :5175 │  │ solr       :8983│
     │  pgadmin :5050 │  │ cms-api:3090 │  │ ozone-scm  :9876│
-    │  nats    :14222│  │ voila :18866 │  │ ozone-s3g  :9878│
+    │  nats    :14222│  │ pgadmin:5051 │  │ ozone-s3g  :9878│
     │  postgres:15432│  │ postgres:15433  │ ozone-recon:9888│
     │  valkey  :16379│  │ opensrch:9200│  └────────┬────────┘
     └────────────────┘  └──────┬───────┘           │
