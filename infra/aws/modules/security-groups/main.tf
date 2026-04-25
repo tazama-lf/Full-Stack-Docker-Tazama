@@ -95,6 +95,14 @@ resource "aws_security_group" "alb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    description = "Voila (CMS notebook server)"
+    from_port   = 18866
+    to_port     = 18866
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   # Server C service ports
   ingress {
     description = "NiFi UI"
@@ -218,6 +226,14 @@ resource "aws_security_group" "server_b" {
     description     = "TCS / TRS / CMS frontends (Vite dev ports)"
     from_port       = 5173
     to_port         = 5175
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+  ingress {
+    description     = "Voila (CMS notebook server)"
+    from_port       = 18866
+    to_port         = 18866
     protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
   }
