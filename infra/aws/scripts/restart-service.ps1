@@ -31,8 +31,14 @@
     "tcs-api", "nifi", "automation-orchestrator").
 
 .PARAMETER NoPull
-    Skip the image pull step.  Useful when the latest image is already
+    Skip the DockerHub image pull step.  Useful when the latest image is already
     present on the host and you only want to force a config/env recreate.
+
+.PARAMETER NoRepoPull
+    Skip the 'git pull' of the full-stack-docker-tazama repo on the target
+    server before recreating the container.  Useful when you want to pull a
+    fresh image without applying any pending repo changes, or when the working
+    directory is not a git repo.
 
 .EXAMPLE
     .\restart-service.ps1 -Server A -Service rule-001
@@ -40,6 +46,8 @@
     .\restart-service.ps1 -Server B -Service tcs-api
     .\restart-service.ps1 -Server C -Service nifi
     .\restart-service.ps1 -Server C -Service automation-orchestrator -NoPull
+    .\restart-service.ps1 -Server B -Service cms-frontend -NoRepoPull
+    .\restart-service.ps1 -Server B -Service cms-frontend -NoPull -NoRepoPull
 #>
 
 [CmdletBinding()]
@@ -51,7 +59,9 @@ param(
     [Parameter(Mandatory)]
     [string]$Service,
 
-    [switch]$NoPull
+    [switch]$NoPull,
+
+    [switch]$NoRepoPull
 )
 
 . "$PSScriptRoot\helpers.ps1"
@@ -71,7 +81,8 @@ Write-Host ''
 Write-Host "=== Restart service: $Service on $label ===" -ForegroundColor Cyan
 Write-Host "[$label] Project : $project"
 Write-Host "[$label] Service : $Service"
-Write-Host "[$label] Pull    : $(-not $NoPull)"
+Write-Host "[$label] Pull    : $(-not $NoPull) (DockerHub image)"
+Write-Host "[$label] RepoPull: $(-not $NoRepoPull) (full-stack git pull)"
 Write-Host ''
 
 # -- Discover compose context from the running container's labels ----------------------------
@@ -127,6 +138,12 @@ Write-Host "[$label] Working dir: $workingDir"
 
 # Convert comma-separated absolute paths to '-f <path>' flags
 $fFlags = ($configFiles -split ',' | ForEach-Object { "-f $_" }) -join ' '
+
+# -- Repo pull ------------------------------------------------------------------------------
+if (-not $NoRepoPull) {
+    Write-Host "[$label] Pulling latest full-stack repo in $workingDir..."
+    Invoke-RemoteCommand -InstanceId $instanceId -Command "cd $workingDir && git pull"
+}
 
 # -- Recreate -------------------------------------------------------------------------------
 $composeCmd = (

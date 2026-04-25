@@ -23,6 +23,7 @@ TRS_API_URL=https://trs-api.beta.tazama.org
 TCS_API_URL=https://tcs-api.beta.tazama.org
 CMS_API_URL=https://cms-api.beta.tazama.org
 VOILA_URL=https://voila.beta.tazama.org
+CMS_FRONTEND_ORIGIN=https://cms.beta.tazama.org
 SIMULATION_ENDPOINT=https://tms.beta.tazama.org/v1/evaluate/iso20022/pacs.002.001.12
 ADMIN_ENDPOINT=https://admin.beta.tazama.org
 
