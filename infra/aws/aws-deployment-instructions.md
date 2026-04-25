@@ -2886,6 +2886,7 @@ See A.6. OpenSearch is currently running with `DISABLE_SECURITY_PLUGIN=true`. Th
 | ALB Keycloak authentication on listeners | ✅ Done | - |
 | PostgreSQL passwords rotated | ❌ Default (`unused`) | G.2 - rotate and store in SSM |
 | NiFi login enforced | ❌ HTTP, no auth | G.2 - enable HTTPS, set password |
+| Voila notebook server auth | ❌ Public, no auth | G.4 - place behind Keycloak/OIDC proxy or restrict ALB ingress CIDR to VPN/office IPs |
 | Ozone S3G credentials rotated | ❌ Default (`tazama`/`tazama`) | G.2 - rotate key/secret |
 | OpenSearch security plugin enabled | ❌ Disabled | G.3 - re-enable, set password |
 | Keycloak admin password rotated | ❌ Default | A.7 - pass `-Password` at deploy |

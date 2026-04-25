@@ -149,13 +149,23 @@ function Set-RemoteEnvOverlay {
     # Build all sed/append commands as a single bash script and run them in one
     # SSH connection. Opening one EICE tunnel per key causes rate-limit hangs
     # when the overlay has many entries.
+    #
+    # Security: values may contain single quotes (passwords), pipe characters
+    # (URLs), or other shell metacharacters. Mitigations applied:
+    #   1. POSIX-escape values: replace every ' with '\'' before inlining.
+    #   2. Use a control character (\x01) as the sed delimiter so | in values
+    #      cannot break the sed expression.
+    #   3. Use an explicit if/then/else instead of "&& ... ||" so a sed failure
+    #      does not trigger the append branch and create duplicate KEY= lines.
     $bashLines = foreach ($line in $lines) {
         $key   = ($line -split '=', 2)[0].Trim()
         $value = ($line -split '=', 2)[1].Trim()
-        # Use | as sed delimiter to tolerate dots and slashes in values.
-        "grep -q '^${key}=' ${RemoteEnvFile} && " +
-        "sed -i 's|^${key}=.*|${key}=${value}|' ${RemoteEnvFile} || " +
-        "echo '${key}=${value}' >> ${RemoteEnvFile}"
+        # Escape single quotes for POSIX shell: ' -> '\''.
+        $vEsc  = $value -replace "'", "'\''" 
+        # \x01 is used as the sed delimiter; it cannot appear in env values.
+        "if grep -q '^${key}=' ${RemoteEnvFile}; then " +
+        "sed -i 's`u{1}^${key}=.*`u{1}${key}=${vEsc}`u{1}' ${RemoteEnvFile}; " +
+        "else printf '%s\n' '${key}=${vEsc}' >> ${RemoteEnvFile}; fi"
     }
     $batchCmd = $bashLines -join '; '
     Invoke-RemoteCommand $InstanceId $batchCmd
