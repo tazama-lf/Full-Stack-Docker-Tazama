@@ -1701,7 +1701,7 @@ scripts dot-source `helpers.ps1` for shared functions and constants.
 | [`deploy-extensions.ps1`](#deploy-extensionsps1) | Server A (DEMS/DEAPI) + Server B - tazama-extensions stack |
 | [`deploy-biar.ps1`](#deploy-biarps1) | Server C - tazama-biar stack |
 | [`deploy-lakehouse.ps1`](#deploy-lakehouseps1) | Server C - stage and unpack Lakehouse warehouse data via S3 |
-| [`restart-service.ps1`](#restart-serviceps1) | Pull latest image and recreate a single service on any server |
+| [`restart-service.ps1`](#restart-serviceps1) | Pull latest repo/image and recreate a single service on any server |
 | [`teardown.ps1`](#teardownps1) | Stop all stacks across all three servers |
 | [`add-ssh-key.ps1`](#add-ssh-keyps1) | Add an SSH public key to one or more servers |
 | [`tunnel-all.ps1`](#tunnel-allps1) | Open port-forward tunnels to all three servers simultaneously |
@@ -1877,20 +1877,20 @@ on the state bucket; the EC2 instance role must have `s3:GetObject` on the
 
 [infra/aws/scripts/restart-service.ps1](full-stack-docker-tazama/infra/aws/scripts/restart-service.ps1)
 
-Pulls the latest image for a single Docker Compose service and recreates its
-container without touching any other running containers.
+Pulls the latest repo changes and image for a single Docker Compose service
+and recreates its container without touching any other running containers.
 
 The script reads the running container's `com.docker.compose` labels to
 discover the exact working directory and compose file chain used to start it,
-then issues a targeted `docker compose up --no-deps --force-recreate`.  This
-means the command is always reconstructed from live state - no hardcoded file
-chains that can go stale.
+then runs `git pull` in that directory followed by a targeted
+`docker compose up --no-deps --force-recreate`.  This means the command is
+always reconstructed from live state - no hardcoded file chains that can go stale.
 
 Server A's two sub-chains (`tazama-core` main stack and extensions APIs) are
 handled transparently by this label-based approach.
 
 ```powershell
-# Update admin-service on Server A
+# Update admin-service on Server A (pulls repo + image)
 .\restart-service.ps1 -Server A -Service admin-service
 
 # Update deapi (extensions API running on Server A)
@@ -1902,15 +1902,22 @@ handled transparently by this label-based approach.
 # Update NiFi on Server C
 .\restart-service.ps1 -Server C -Service nifi
 
-# Force recreate without pulling (e.g. env change only)
+# Apply a repo change (e.g. updated env file) without pulling a new image
 .\restart-service.ps1 -Server C -Service automation-orchestrator -NoPull
+
+# Pull a new image without applying pending repo changes
+.\restart-service.ps1 -Server B -Service cms-frontend -NoRepoPull
+
+# Force recreate only - skip both pulls (e.g. restart a crashed container)
+.\restart-service.ps1 -Server B -Service cms-frontend -NoPull -NoRepoPull
 ```
 
 | Parameter | Description |
 |---|---|
 | `-Server` | **Required.** `A`, `B`, or `C`. |
 | `-Service` | **Required.** Docker Compose service name (e.g. `rule-001`, `tcs-api`, `nifi`). |
-| `-NoPull` | Skip the image pull; only recreate the container (useful for env/config-only changes). |
+| `-NoPull` | Skip the DockerHub image pull (`--pull always`). Use when the image is already current. |
+| `-NoRepoPull` | Skip the `git pull` of the full-stack-docker-tazama repo on the target server. Use when you want to apply an image update without pulling pending repo changes. |
 
 After recreating, the script prints a `docker ps` table confirming the
 container name, status, and image digest.
