@@ -1286,6 +1286,8 @@ Files created:
 | `TRS_API_URL` / `TCS_API_URL` / `CMS_API_URL` | localhost defaults | Public ALB subdomains | Browser-facing VITE_ vars |
 | `SIMULATION_ENDPOINT` / `ADMIN_ENDPOINT` | localhost defaults | Public ALB subdomains | Browser-facing VITE_ vars |
 | `ALLOWED_ORIGINS` / `CORS_ORIGINS` | localhost | Public ALB subdomains | CORS |
+| `VOILA_URL` | `http://tazama-cms-voila:8866` (container-internal) | `https://voila.beta.tazama.org` | Prevents mixed-content block when CMS frontend embeds the Voila iframe over HTTPS |
+| `CMS_FRONTEND_ORIGIN` | `http://localhost:5175` | `https://cms.beta.tazama.org` | Sets the Voila `frame-ancestors` CSP to allow the CMS frontend to embed the iframe (requires CMS image with env-var-driven CSP support - see [case-management-system #92](https://github.com/tazama-lf/case-management-system/issues/92)) |
 | `GOLD_LAKEHOUSE_API_URL` | `http://${SERVER_C_HOST}:8282` (placeholder, resolves to dev default at runtime) | `SERVER_C_HOST=biar.tazama.internal` set by this overlay | Server C datalakehouse-api |
 
 ---
@@ -2894,6 +2896,7 @@ See A.6. OpenSearch is currently running with `DISABLE_SECURITY_PLUGIN=true`. Th
 | PostgreSQL passwords rotated | ❌ Default (`unused`) | G.2 - rotate and store in SSM |
 | NiFi login enforced | ❌ HTTP, no auth | G.2 - enable HTTPS, set password |
 | Voila notebook server auth | ❌ Public, no auth | G.4 - place behind Keycloak/OIDC proxy or restrict ALB ingress CIDR to VPN/office IPs |
+| Voila iframe CSP + mixed content | ⏳ Fix in PR #180 | Pending CMS image update ([case-management-system #92](https://github.com/tazama-lf/case-management-system/issues/92)) - env vars staged in `env-extensions.tpl` |
 | Ozone S3G credentials rotated | ❌ Default (`tazama`/`tazama`) | G.2 - rotate key/secret |
 | OpenSearch security plugin enabled | ❌ Disabled | G.3 - re-enable, set password |
 | Keycloak admin password rotated | ❌ Default | A.7 - pass `-Password` at deploy |
