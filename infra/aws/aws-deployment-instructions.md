@@ -183,46 +183,48 @@ Three private EC2 instances sit behind an Application Load Balancer. No instance
      └──────────────────────────┘
 
      ┌──────────────────────────────────────────────────────────────┐
-     │  Application Load Balancer  (public subnet, ap-south-1)     │
-     │  HTTP - port-based routing (HTTPS + host-based: Phase E.3)  │
-     │  :5000  → Server A  tms-service                             │
-     │  :5100  → Server A  admin-service                           │
-     │  :3020  → Server A  auth-service                            │
-     │  :8080  → Server A  keycloak                                │
-     │  :5050  → Server A  pgAdmin (core)                          │
-     │  :6100  → Server A  hasura                                  │
-     │  :5173  → Server B  tcs-frontend                            │
-     │  :3010  → Server B  tcs-api                                 │
-     │  :5174  → Server B  trs-frontend                            │
-     │  :3005  → Server B  trs-api                                 │
-     │  :5175  → Server B  cms-frontend                            │
-     │  :3090  → Server B  cms-api                                 │
-     │  :5051  → Server B  pgAdmin (extensions)                    │
-     │  :8088  → Server C  nifi                                    │
-     │  :8000  → Server C  jupyterhub                              │
-     │  :7619  → Server C  auto-orchestrator                       │
-     │  :8282  → Server C  datalakehouse-api                       │
+     │  Application Load Balancer  (public subnet, ap-south-1)      │
+     │  HTTP - port-based routing (HTTPS + host-based: Phase E.3)   │
+     │  :5000  → Server A  tms-service                              │
+     │  :5100  → Server A  admin-service                            │
+     │  :3020  → Server A  auth-service                             │
+     │  :8080  → Server A  keycloak                                 │
+     │  :5050  → Server A  pgAdmin (core)                           │
+     │  :6100  → Server A  hasura                                   │
+     │  :5173  → Server B  tcs-frontend                             │
+     │  :3010  → Server B  tcs-api                                  │
+     │  :5174  → Server B  trs-frontend                             │
+     │  :3005  → Server B  trs-api                                  │
+     │  :5175  → Server B  cms-frontend                             │
+     │  :3090  → Server B  cms-api                                  │
+     │  :18866 → Server B  voila                                    │
+     │  :5051  → Server B  pgAdmin (extensions)                     │
+     │  :8088  → Server C  nifi                                     │
+     │  :8000  → Server C  jupyterhub                               │
+     │  :7619  → Server C  auto-orchestrator                        │
+     │  :8282  → Server C  datalakehouse-api                        │
      └──────────────────────────┬───────────────────────────────────┘
                                 │  VPC-internal routing (private IPs)
-              ┌─────────────────┼──────────────────┐
-              │                 │                  │
-    ┌─────────▼──────┐  ┌───────▼──────┐  ┌────────▼────────┐
-    │   server-a     │  │   server-b   │  │   server-c      │
-    │   tazama-core  │  │  extensions  │  │   biar          │
-    │   10.0.1.10    │  │  10.0.1.20   │  │   10.0.1.30     │
-    │                │  │              │  │                  │
-    │  tms     :5000 │  │ tcs    :5173 │  │ nifi       :8088│
-    │  admin   :5100 │  │ tcs-api:3010 │  │ jupyterhub :8000│
-    │  auth    :3020 │  │ trs    :5174 │  │ auto-orch  :7619│
-    │  keycloak:8080 │  │ trs-api:3005 │  │ dlh-api    :8282│
-    │  hasura  :6100 │  │ cms    :5175 │  │ solr       :8983│
-    │  pgadmin :5050 │  │ cms-api:3090 │  │ ozone-scm  :9876│
-    │  nats    :14222│  │ pgadmin:5051 │  │ ozone-s3g  :9878│
-    │  postgres:15432│  │ postgres:15433  │ ozone-recon:9888│
-    │  valkey  :16379│  │ opensrch:9200│  └────────┬────────┘
-    └────────────────┘  └──────┬───────┘           │
-           ▲  ▲  ▲             │    direct :8282    │
-           │  │  │             └────────────────────┘
+              ┌─────────────────┼────────────────────┐
+              │                 │                    │
+    ┌─────────▼──────┐  ┌───────▼────────┐  ┌────────▼────────┐
+    │   server-a     │  │   server-b     │  │   server-c      │
+    │   tazama-core  │  │  extensions    │  │   biar          │
+    │   10.0.1.10    │  │  10.0.1.20     │  │   10.0.1.30     │
+    │                │  │                │  │                 │
+    │  tms     :5000 │  │ tcs    :5173   │  │ nifi       :8088│
+    │  admin   :5100 │  │ tcs-api:3010   │  │ jupyterhub :8000│
+    │  auth    :3020 │  │ trs    :5174   │  │ auto-orch  :7619│
+    │  keycloak:8080 │  │ trs-api:3005   │  │ dlh-api    :8282│
+    │  hasura  :6100 │  │ cms    :5175   │  │ solr       :8983│
+    │  pgadmin :5050 │  │ cms-api:3090   │  │ ozone-scm  :9876│
+    │  nats    :14222│  │ pgadmin:5051   │  │ ozone-s3g  :9878│
+    │  postgres:15432│  │ postgres:15433 │  │ ozone-recon:9888│
+    │  valkey  :16379│  │ opensrch:9200  │  └────────┬────────┘
+    └────────────────┘  │ voila  :18866  │           │
+                        └──────┬─────────┘           │
+           ▲  ▲  ▲             │    direct :8282     │
+           │  │  │             └─────────────────────┘
            │  │  │    (CMS backend → datalakehouse-api, bypasses ALB)
            │  │  │
            │  └── cross-server (NATS :14222, auth :3020, postgres :15432)
@@ -1124,6 +1126,7 @@ Four security groups. EC2 instances have **no internet-facing inbound rules** - 
 | Inbound | 6100 | TCP | `0.0.0.0/0` | Hasura |
 | Inbound | 3005–3090 | TCP | `0.0.0.0/0` | TRS / TCS / CMS backends |
 | Inbound | 5173–5175 | TCP | `0.0.0.0/0` | TCS / TRS / CMS frontends |
+| Inbound | 18866 | TCP | `0.0.0.0/0` | Voila (CMS notebook server) |
 | Inbound | 8088 | TCP | `0.0.0.0/0` | NiFi UI |
 | Outbound | All | All | `0.0.0.0/0` | Routing to EC2 target groups |
 
@@ -1149,6 +1152,7 @@ Four security groups. EC2 instances have **no internet-facing inbound rules** - 
 |---|---|---|---|---|
 | Inbound | 3005–3090 | TCP | sg-tazama-alb | TRS / TCS / CMS backends |
 | Inbound | 5173–5175 | TCP | sg-tazama-alb | TCS / TRS / CMS frontends |
+| Inbound | 18866 | TCP | sg-tazama-alb | Voila (CMS notebook server) |
 | Inbound | 5051 | TCP | sg-tazama-alb | pgAdmin (extensions) |
 | Inbound | 0–65535 | TCP | `10.0.1.0/24` | Cross-server (OpenSearch :9200, PostgreSQL :15433, etc.) |
 | Inbound | 22 | TCP | sg-tazama-eice | SSH via EICE endpoint only |
@@ -2185,7 +2189,7 @@ tofu apply -var-file terraform.tfvars -var-file alb.tfvars
 
 OpenTofu plans and applies only the ALB delta. The EC2 instances and all
 running containers are untouched. Expected additions: roughly `+30 resources`
-(1 ALB, 14 target groups, 14 port-based HTTP listeners, security group rules).
+(1 ALB, 15 target groups, 15 port-based HTTP listeners, security group rules).
 
 > [!WARNING]
 > **Once `domain.tfvars` has been applied (Phase E.3), always include it in every subsequent `tofu apply`.** Omitting it tells OpenTofu to remove `module.dns_public`, which destroys the Route 53 public zone and all its records. If that has already happened, use the full three-file command for all future applies:
@@ -3252,7 +3256,7 @@ docker compose -p tazama-core \
 | 5173 | TCS Frontend | ALB | `tcs` |
 | 5174 | TRS Frontend | ALB | `trs` |
 | 5175 | CMS Frontend | ALB | `cms` |
-| 18866 | Voila notebook server | Operator (EICE tunnel only) | - |
+| 18866 | Voila notebook server | ALB | `voila` |
 | 9200 | OpenSearch | (NiFi ETL - pending confirmation) | - |
 | 12222 | SFTP | File ingest | - |
 | 15433 | PostgreSQL (CMS) | Server C NiFi ETL | - |

@@ -95,6 +95,7 @@ services:
       - .env
     environment:
       - VITE_API_BASE_URL=${CMS_API_URL:-http://${SERVER_B_HOST}:${CMS_BACKEND_PORT}}
+      - VITE_VOILA_BASE_URL=${VOILA_URL:-http://${SERVER_B_HOST}:${VOILA_PORT}}
       - VITE_ALLOWED_HOSTS=all
     ports:
       - "${CMS_FRONTEND_PORT}:5175"

@@ -86,6 +86,7 @@ locals {
     trs-api                 = var.target_group_arns["trs-api"]
     cms                     = var.target_group_arns["cms-frontend"]
     cms-api                 = var.target_group_arns["cms-api"]
+    voila                   = var.target_group_arns["voila"]
     pgadmin-ext             = var.target_group_arns["pgadmin-ext"]
     nifi                    = var.target_group_arns["nifi"]
     jupyter                 = var.target_group_arns["jupyterhub"]
@@ -116,6 +117,7 @@ locals {
     jupyter                 = 19
     deapi                   = 20
     dems                    = 21
+    voila                   = 22
   }
 }
 
