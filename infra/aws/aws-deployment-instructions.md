@@ -93,6 +93,7 @@
   - [`tofu apply` fails with `AccessDeniedException: acm:RequestCertificate`](#tofu-apply-fails-with-accessdeniedexception-acmrequestcertificate)
   - [`tofu apply` fails with "Module not installed"](#tofu-apply-fails-with-module-not-installed)
   - [ALB health check returns "Blocked request. This host is not allowed."](#alb-health-check-returns-blocked-request-this-host-is-not-allowed)
+  - [Server B SSH hangs - t3 CPU credit exhaustion](#server-b-ssh-hangs---t3-cpu-credit-exhaustion)
   - [Accessing container logs on an EC2 instance](#accessing-container-logs-on-an-ec2-instance)
 - [Reference: Compose Chain Matrix (Server A)](#reference-compose-chain-matrix-server-a)
 - [Reference: Port Map](#reference-port-map)
@@ -1188,6 +1189,9 @@ A reusable module for one EC2 instance.  All three servers are created from it.
 Notable settings:
 - `private_ip` - fixed address; ensures DNS records are stable across stop/start
 - `root_block_device` - gp3, encrypted, `delete_on_termination = true`
+- `credit_specification { cpu_credits = "unlimited" }` - keeps t3 burst credits unlimited
+  so JVM workloads (OpenSearch, Flowable) never exhaust the credit pool and stall SSH/Docker.
+  Ignored by AWS for fixed-performance families (m5, r5, etc.) that do not use credits.
 - `metadata_options` - IMDSv2 required (`http_tokens = "required"`); prevents
   SSRF-based credential theft via the instance metadata endpoint
 - `iam_instance_profile` - grants the instance SSM read-only access (for the
@@ -1229,16 +1233,20 @@ is rendered by `templatefile()` in `main.tf` and passed as `user_data` to all
 three instances.
 
 It runs once at first boot and:
-1. Installs Docker CE from the Amazon Linux 2023 dnf repo
-2. Installs the Docker Compose v2 plugin from GitHub releases
-3. Clones the `tazama-lf/full-stack-docker-tazama` repo to
+1. Creates a 4 GB swap file (`/swapfile`) and adds it to `/etc/fstab` so the
+   kernel spills to disk before OOM-killing JVM containers (OpenSearch, Flowable)
+2. Writes `/etc/docker/daemon.json` with `json-file` log rotation (`50m × 3 files`)
+   before Docker is installed so all containers inherit the limit from first start
+3. Installs Docker CE from the Amazon Linux 2023 dnf repo
+4. Installs the Docker Compose v2 plugin from GitHub releases
+5. Clones the `tazama-lf/full-stack-docker-tazama` repo to
    `/home/ec2-user/full-stack-docker-tazama`
-4. Fetches `GH_TOKEN` from SSM Parameter Store (`/tazama/gh_token`) using
+6. Fetches `GH_TOKEN` from SSM Parameter Store (`/tazama/gh_token`) using
    the instance's IAM role - no credentials in user_data
-5. Writes `GH_TOKEN` to `/etc/environment` (available to all sessions)
-6. Logs in to `ghcr.io` and copies the Docker credential store to
+7. Writes `GH_TOKEN` to `/etc/environment` (available to all sessions)
+8. Logs in to `ghcr.io` and copies the Docker credential store to
    `/home/ec2-user/.docker/` so the ec2-user account can pull images
-7. Writes `/home/ec2-user/.bootstrap-complete` marker
+9. Writes `/home/ec2-user/.bootstrap-complete` marker
 
 **Template variables:**
 
@@ -1737,7 +1745,7 @@ Constants defined at script scope (edit here to change region, profile, or branc
 | `$Script:AwsProfile` | `tazama` | AWS CLI named profile |
 | `$Script:RemoteRepo` | `/home/ec2-user/full-stack-docker-tazama` | Repo path on all three servers |
 | `$Script:RepoBranch` | `dev` | Branch pulled on each server during deploy |
-| `$Script:KeyFile` | `infra/aws/tazama-aws.pem` | EC2 SSH private key (gitignored) |
+| `$Script:KeyFile` | `$env:USERPROFILE\.ssh\tazama_ed25519` | EC2 SSH private key (ed25519, in user SSH folder) |
 
 ---
 
@@ -3087,6 +3095,36 @@ server: {
 > **Note:** `allowedHosts: 'all'` is acceptable for a private developer sandbox. Do not use it in a production deployment - use the explicit hostname list or switch to the custom-domain HTTPS configuration (Phase G), which serves all services through a single domain that can be permanently whitelisted.
 
 > **Tip:** Backend services (those exposing a REST API) will not show this error. It only appears for services that embed a Vite dev server. Use a backend health endpoint to confirm ALB routing independently of the Vite issue.
+
+---
+
+### Server B SSH hangs - t3 CPU credit exhaustion
+
+**Symptom:** SSH to Server B hangs indefinitely at the banner exchange (`ssh_exchange_identification`) or `Wait-Bootstrap` times out even though the instance is running. `aws ec2 reboot-instances` appears to succeed but the instance never becomes reachable. SSM `start-session` also times out.
+
+**Cause:** t3 instances earn CPU burst credits at a baseline rate and spend them when CPU demand exceeds the baseline. OpenSearch (1 GB JVM with 1-second Lucene index refresh) and Flowable (Spring Boot JVM) run continuously at low-but-sustained CPU above the t3.xlarge baseline of ~40%. After 4 days of continuous operation this exhausts the credit pool entirely. With zero credits, sshd and the SSM agent are starved of CPU and cannot respond to new connections.
+
+**Fix (live instance):**
+1. Hard-stop the instance (a reboot will not work - the OS is too degraded):
+   ```powershell
+   aws ec2 stop-instances --instance-ids i-<id> --force --region ap-south-1 --profile tazama
+   aws ec2 wait instance-stopped --instance-ids i-<id> --region ap-south-1 --profile tazama
+   aws ec2 start-instances --instance-ids i-<id> --region ap-south-1 --profile tazama
+   ```
+2. While the instance is stopped, switch to unlimited credits (one-time, persistent):
+   ```powershell
+   aws ec2 modify-instance-credit-specification --region ap-south-1 --profile tazama \
+     --instance-credit-specifications '[{"InstanceId":"i-<id>","CpuCredits":"unlimited"}]'
+   ```
+3. After restart, add 4 GB swap manually if the instance was provisioned before the bootstrap hardening was added:
+   ```bash
+   sudo fallocate -l 4G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile
+   echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+   ```
+
+**Prevention (new instances):** The EC2 module now sets `credit_specification { cpu_credits = "unlimited" }` and the bootstrap script creates the swap file automatically. New instances provisioned via `tofu apply` will not hit this issue.
+
+**OpenSearch root cause:** The default 1-second index refresh interval causes continuous Lucene segment merges. The `extensions/docker-compose.extensions.infrastructure.yaml` now includes an `opensearch-init` one-shot container that applies a 30-second refresh interval, async translog, and 0 replicas on first start - substantially reducing OpenSearch idle CPU.
 
 ---
 
