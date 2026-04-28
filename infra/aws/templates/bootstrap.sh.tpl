@@ -19,6 +19,27 @@ EC2_USER="ec2-user"
 
 echo "[bootstrap] Starting - $(date)"
 
+# ── Swap ─────────────────────────────────────────────────────────────────────
+# Provides an OOM safety net for JVM services (OpenSearch, Flowable) on
+# burstable instances. Without swap, the kernel OOM-killer terminates
+# containers rather than spilling to disk when memory spikes briefly.
+echo "[bootstrap] Creating 4 GB swap file..."
+fallocate -l 4G /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
+echo "[bootstrap] Swap enabled: $(swapon --show)"
+
+# ── Docker daemon config ──────────────────────────────────────────────────────
+# Limit container log size so long-running JVM services don't fill the
+# root volume. 50 MB * 3 files = 150 MB max per container.
+mkdir -p /etc/docker
+cat > /etc/docker/daemon.json <<'DOCKEREOF'
+{"log-driver":"json-file","log-opts":{"max-size":"50m","max-file":"3"}}
+DOCKEREOF
+echo "[bootstrap] Docker daemon config written"
+
 # ── Docker CE ────────────────────────────────────────────────────────────────
 echo "[bootstrap] Installing Docker CE..."
 dnf install -y docker git

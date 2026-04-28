@@ -213,7 +213,8 @@ These infrastructure services are started as part of the `tazama-extensions` Com
 | SFTP | `tazama-sftp-1` | 12222 | SFTP server for transaction file uploads (used by TCS) |
 | CouchDB | `tazama-cms-couchdb` | 5984 | Document database for CMS audit and case data |
 | Flowable | `tazama-cms-flowable` | 8081 | Workflow engine for CMS case lifecycle management |
-| OpenSearch | `opensearch-node1` | 9200 | Search and indexing for transaction and case data |
+| OpenSearch | `opensearch-node1` | 9200 | Audit log store for TCS, TRS, and CMS (forensic audit trail) |
+| OpenSearch init | `opensearch-init` | -- | One-shot container: applies audit index template (30s refresh, async translog, 0 replicas) on first start |
 | DB Migration | `cms-migrations` | -- | One-shot container: applies CMS schema to PostgreSQL on startup |
 | pgAdmin | `pgadmin` | 5051 | Optional PostgreSQL web UI (included if pgAdmin is selected) |
 
