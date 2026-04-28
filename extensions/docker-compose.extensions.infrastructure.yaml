@@ -68,6 +68,7 @@ services:
   opensearch-node1:
     image: opensearchproject/opensearch:2.13.0
     container_name: opensearch-node1
+    restart: always
     environment:
       - cluster.name=opensearch-cluster
       - node.name=opensearch-node1
@@ -75,6 +76,11 @@ services:
       - bootstrap.memory_lock=true
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
       - DISABLE_SECURITY_PLUGIN=true
+      # Reduce indexing memory buffer (default 10% of heap) - low write volume audit use case
+      - indices.memory.index_buffer_size=5%
+      # Single write thread is sufficient for sequential audit log writes
+      - thread_pool.write.size=1
+      - thread_pool.write.queue_size=500
     ulimits:
       memlock:
         soft: -1
@@ -92,6 +98,32 @@ services:
       timeout: 10s
       retries: 10
       start_period: 60s
+
+  # One-shot init container: applies index template and updates existing indices
+  # to use a slower refresh interval and async translog. Runs once per compose up,
+  # exits immediately after. Uses the already-pulled opensearch image to avoid
+  # pulling an additional image.
+  opensearch-init:
+    image: opensearchproject/opensearch:2.13.0
+    container_name: opensearch-init
+    restart: "no"
+    depends_on:
+      opensearch-node1:
+        condition: service_healthy
+    entrypoint: ["bash", "-c"]
+    command:
+      - |
+        # Apply index template for all future indices
+        curl -sf -X PUT "http://opensearch-node1:9200/_template/tazama-audit-defaults" \
+          -H "Content-Type: application/json" \
+          -d '{"index_patterns":["*"],"settings":{"refresh_interval":"30s","number_of_replicas":0,"translog.sync_interval":"30s","translog.durability":"async"}}' \
+          && echo "[opensearch-init] Index template applied."
+        # Apply to any existing indices (best-effort - may be empty on first run)
+        curl -sf -X PUT "http://opensearch-node1:9200/*/_settings" \
+          -H "Content-Type: application/json" \
+          -d '{"settings":{"refresh_interval":"30s","translog.sync_interval":"30s","translog.durability":"async"}}' \
+          && echo "[opensearch-init] Existing index settings updated." \
+          || echo "[opensearch-init] No user indices yet - template will apply on first write."
 
 volumes:
   sftp_data:

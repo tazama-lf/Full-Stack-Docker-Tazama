@@ -21,7 +21,7 @@ $ErrorActionPreference = 'Stop'
 # Adjust these if you deploy to a different region or use a different profile.
 $Script:AwsRegion  = 'ap-south-1'
 $Script:AwsProfile = 'tazama'
-$Script:KeyFile    = Join-Path $PSScriptRoot '..\tazama-aws.pem'
+$Script:KeyFile    = "$env:USERPROFILE\.ssh\tazama_ed25519"
 $Script:RemoteRepo   = '/home/ec2-user/full-stack-docker-tazama'
 $Script:RemoteUser   = 'ec2-user'
 $Script:RepoBranch   = 'dev'
