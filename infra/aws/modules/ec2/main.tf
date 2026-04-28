@@ -17,6 +17,13 @@ resource "aws_instance" "main" {
     encrypted             = true
   }
 
+  # Keep burst credits unlimited so JVM workloads (OpenSearch, Flowable) never
+  # exhaust the CPU credit pool on t3/t4g instances. Ignored for fixed-
+  # performance families (m5, r5, etc.) that don't have credit specifications.
+  credit_specification {
+    cpu_credits = "unlimited"
+  }
+
   # IMDSv2 required - prevents SSRF-based credential theft via the metadata endpoint.
   metadata_options {
     http_endpoint               = "enabled"
