@@ -1737,7 +1737,14 @@ Provides the following functions:
 | `Set-RemoteEnvOverlay` | Reads a `KEY=VALUE` overlay file and applies each entry to a remote `.env` file using `sed` (replaces existing keys, appends missing ones) |
 | `Wait-Bootstrap` | Polls an instance until the bootstrap script has written its completion marker (up to 15 min) |
 
-Constants defined at script scope (edit here to change region, profile, or branch):
+Constants defined at script scope. Three of them can be overridden without editing the file by setting environment variables before running any script:
+
+```powershell
+# Set once per shell session (or add to your $PROFILE)
+$env:TAZAMA_AWS_REGION  = 'eu-west-1'          # if deploying outside ap-south-1
+$env:TAZAMA_AWS_PROFILE = 'my-aws-profile'      # if your CLI profile is not named 'tazama'
+$env:TAZAMA_SSH_KEY     = "$HOME\.ssh\my_key"   # path to your EC2 SSH private key
+```
 
 | Constant | Default value | Override env var | Purpose |
 |---|---|---|---|
