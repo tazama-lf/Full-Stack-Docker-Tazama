@@ -1739,13 +1739,13 @@ Provides the following functions:
 
 Constants defined at script scope (edit here to change region, profile, or branch):
 
-| Constant | Value | Purpose |
-|---|---|---|
-| `$Script:AwsRegion` | `ap-south-1` | AWS region for all CLI calls |
-| `$Script:AwsProfile` | `tazama` | AWS CLI named profile |
-| `$Script:RemoteRepo` | `/home/ec2-user/full-stack-docker-tazama` | Repo path on all three servers |
-| `$Script:RepoBranch` | `dev` | Branch pulled on each server during deploy |
-| `$Script:KeyFile` | `$env:USERPROFILE\.ssh\tazama_ed25519` | EC2 SSH private key (ed25519, in user SSH folder) |
+| Constant | Default value | Override env var | Purpose |
+|---|---|---|---|
+| `$Script:AwsRegion` | `ap-south-1` | `TAZAMA_AWS_REGION` | AWS region for all CLI calls |
+| `$Script:AwsProfile` | `tazama` | `TAZAMA_AWS_PROFILE` | AWS CLI named profile |
+| `$Script:RemoteRepo` | `/home/ec2-user/full-stack-docker-tazama` | - | Repo path on all three servers |
+| `$Script:RepoBranch` | `dev` | - | Branch pulled on each server during deploy |
+| `$Script:KeyFile` | `$env:USERPROFILE\.ssh\id_ed25519` | `TAZAMA_SSH_KEY` | EC2 SSH private key path |
 
 ---
 

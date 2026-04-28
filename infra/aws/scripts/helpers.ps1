@@ -18,10 +18,13 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 # -- Constants ----------------------------------------------------------------
-# Adjust these if you deploy to a different region or use a different profile.
-$Script:AwsRegion  = 'ap-south-1'
-$Script:AwsProfile = 'tazama'
-$Script:KeyFile    = "$env:USERPROFILE\.ssh\tazama_ed25519"
+# Override any of these via environment variables before dot-sourcing:
+#   $env:TAZAMA_AWS_REGION  - AWS region (default: ap-south-1)
+#   $env:TAZAMA_AWS_PROFILE - AWS CLI profile name (default: tazama)
+#   $env:TAZAMA_SSH_KEY     - Path to your SSH private key (default: ~/.ssh/id_ed25519)
+$Script:AwsRegion  = if ($env:TAZAMA_AWS_REGION)  { $env:TAZAMA_AWS_REGION }  else { 'ap-south-1' }
+$Script:AwsProfile = if ($env:TAZAMA_AWS_PROFILE) { $env:TAZAMA_AWS_PROFILE } else { 'tazama' }
+$Script:KeyFile    = if ($env:TAZAMA_SSH_KEY)      { $env:TAZAMA_SSH_KEY }     else { "$env:USERPROFILE\.ssh\id_ed25519" }
 $Script:RemoteRepo   = '/home/ec2-user/full-stack-docker-tazama'
 $Script:RemoteUser   = 'ec2-user'
 $Script:RepoBranch   = 'dev'
