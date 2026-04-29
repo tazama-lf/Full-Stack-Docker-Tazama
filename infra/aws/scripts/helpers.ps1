@@ -66,6 +66,9 @@ function New-SshConfig {
     param([string]$InstanceId)
 
     # Resolve-Path gives us an absolute path; replace backslashes for OpenSSH.
+    if (-not (Test-Path $Script:KeyFile)) {
+        throw "SSH key not found: '$Script:KeyFile'. Set `$env:TAZAMA_SSH_KEY to your EC2 private key path before running this script."
+    }
     $keyPath = (Resolve-Path $Script:KeyFile).Path -replace '\\', '/'
 
     $content = @"
