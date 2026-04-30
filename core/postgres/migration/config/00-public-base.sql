@@ -7,6 +7,8 @@ values (
   "id": "901@1.0.0",
   "cfg": "1.0.0",
   "tenantId": "DEFAULT",
+  "creDtTm": "2026-04-08T00:00:00.000Z",
+  "updDtTm": "2026-04-08T00:00:00.000Z",
   "desc": "Number of outgoing transactions - debtor",
   "config": {
     "parameters": {
@@ -43,6 +45,8 @@ values (
   "id": "902@1.0.0",
   "cfg": "1.0.0",
   "tenantId": "DEFAULT",
+  "creDtTm": "2026-04-08T00:00:00.000Z",
+  "updDtTm": "2026-04-08T00:00:00.000Z",
   "desc": "Number of incoming transactions - creditor",
   "config": {
     "parameters": {
@@ -84,6 +88,8 @@ values (
   "id": "typology-processor@1.0.0",
   "cfg": "999-901@1.0.0",
   "tenantId": "DEFAULT",
+  "creDtTm": "2026-04-08T00:00:00.000Z",
+  "updDtTm": "2026-04-08T00:00:00.000Z",
   "workflow": {
     "alertThreshold": 200,
     "interdictionThreshold": 400,
@@ -153,6 +159,8 @@ values (
   "id": "typology-processor@1.0.0",
   "cfg": "999@1.0.0",
   "tenantId": "DEFAULT",
+  "creDtTm": "2026-04-08T00:00:00.000Z",
+  "updDtTm": "2026-04-08T00:00:00.000Z",
   "workflow": {
     "alertThreshold": 300,
     "interdictionThreshold": 500,
