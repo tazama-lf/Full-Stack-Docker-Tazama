@@ -3708,32 +3708,31 @@ print("Spark stopped.")
 
 ### How can I access the JupyterHub server from VS Code?
 
-VS Code's Jupyter extension supports connecting to remote Jupyter servers directly, so you can run notebooks from VS Code using the kernel running on the JupyterHub instance - no need to upload notebooks to the server UI.
+The **JupyterHub extension** for VS Code connects directly to the hub via the ALB — no SSH tunnel required. The kernel (Spark, Hudi JARs, warehouse mount) runs on Server C; VS Code is just the UI. The notebook file stays local on your machine and cell outputs, variables, and plots come back to VS Code.
 
-**Steps:**
+**One-time setup:**
 
-1. **Generate an API token** on the server  
-   Browse to `https://jupyter.beta.tazama.org/hub/token`, log in as admin, and create a token. Copy it.
+1. **Install the required VS Code extensions**  
+   Go to Extensions (`Ctrl+Shift+X`) and install both:
+   - **Jupyter** by Microsoft (`ms-toolsai.jupyter`) — core notebook support
+   - **JupyterHub** by Microsoft (`ms-toolsai.jupyter-hub`) — adds the "Existing JupyterHub Server..." option to the kernel picker
 
-2. **Make sure your server is spawned**  
-   Log into `https://jupyter.beta.tazama.org` once so the single-user server starts. VS Code connects to an already-running server - it cannot spawn one for you.
+2. **Generate an API token**  
+   Browse to `https://jupyter.beta.tazama.org/hub/token`, log in as admin, and create a token. Copy it — you will need it in step 4.
 
-3. **In VS Code, open the notebook and select a kernel**  
-   Click the kernel picker (top-right, shows "Select Kernel") → **Existing Jupyter Server...** → **Enter the URL of the running Jupyter server**.
+3. **Spawn your single-user server**  
+   Log into `https://jupyter.beta.tazama.org` once so the single-user server starts. VS Code connects to an already-running server — it cannot spawn one for you.
 
-4. **Enter the server URL**
-
+4. **Connect from the kernel picker**  
+   Open the notebook in VS Code, click the kernel picker (top-right) → **Select Another Kernel...** → **Existing JupyterHub Server...**  
+   Enter the hub URL when prompted:
    ```
-   https://jupyter.beta.tazama.org/user/admin/
+   https://jupyter.beta.tazama.org
    ```
+   Then enter username `admin` and paste the API token from step 2 when prompted.
 
-   When prompted for a password/token, paste the token from step 1.
-
-5. **Select the Python kernel** from the list that appears - it will be the kernel running inside the `biar-jupyterhub` container on Server C.
-
-**Result:** VS Code is the UI; the kernel (Spark, Hudi JARs, warehouse mount) runs on Server C. Cell outputs, variables, and plots come back to VS Code. The notebook file stays local on your machine.
+5. **Select the Python kernel** from the list that appears.
 
 **Caveats:**
-- If JupyterHub idles out and shuts down the single-user server, VS Code will lose the connection. Re-spawn via the browser and reconnect.
-- Tokens have a lifetime - if yours expires, generate a new one from `/hub/token`.
-- The token auth bypasses the browser SSO flow, so the ALB Keycloak listener does not interfere with the `/user/<username>/api` path.
+- If JupyterHub idles out and shuts down the single-user server, VS Code will lose the connection. Re-spawn by logging into the browser UI, then reconnect from the kernel picker.
+- API tokens have a configurable lifetime. If your token expires, generate a new one from `https://jupyter.beta.tazama.org/hub/token` and re-enter it in the kernel picker.
