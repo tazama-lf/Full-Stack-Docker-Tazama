@@ -12,6 +12,8 @@ services:
     restart: always
     ports:
       - ${DEMS_PORT}:3002
+    volumes:
+      - ./auth/test-public-key.pem:/auth/test-public-key.pem:ro
 
   deapi:
     image: tazamaorg/data-enrichment-service:${TAZAMA_VERSION}
@@ -24,3 +26,5 @@ services:
     restart: always
     ports:
       - ${DEAPI_PORT}:3001
+    volumes:
+      - ./auth/test-public-key.pem:/auth/test-public-key.pem:ro

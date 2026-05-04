@@ -56,6 +56,17 @@ $overlayFile = Join-Path $PSScriptRoot '..\templates\env-extensions.tpl'
 Set-RemoteEnvOverlay -InstanceId $idA -OverlayFile $overlayFile -RemoteEnvFile "$Script:RemoteRepo/extensions/.env"
 Write-Host '[Server A] .env overlay applied.' -ForegroundColor Green
 
+# -- 1b. Server A: copy auth public key ---------------------------------------
+# DEMS and DEAPI both set AUTH_PUBLIC_KEY_PATH=/auth/test-public-key.pem.
+# The key must exist on Server A before the containers start.
+Write-Host '[Server A] Copying auth public key...'
+$localKey = Join-Path $PSScriptRoot '..\..\..\core\auth\test-public-key.pem'
+Invoke-RemoteCommand -InstanceId $idA -Command "mkdir -p $Script:RemoteRepo/extensions/auth"
+Copy-ToRemote -InstanceId $idA `
+              -LocalPath  $localKey `
+              -RemotePath "$Script:RemoteRepo/extensions/auth/test-public-key.pem"
+Write-Host '[Server A] Auth key copied.' -ForegroundColor Green
+
 # -- 2. Server A: pull latest repo then add DEMS + DEAPI ---------------------
 # DEMS and DEAPI run inside the tazama-core Docker project on Server A.
 # They are not part of the core bat launch chain; they are added here before
