@@ -36,6 +36,7 @@ services:
     restart: always
     volumes:
       - ./auth/test-private-key.pem:/home/app/test-private-key.pem
+      - ./auth/test-public-key.pem:/home/app/test-public-key.pem
     ports:
       - 3020:3020
     depends_on:
