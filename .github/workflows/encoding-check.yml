@@ -1,0 +1,70 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# This GitHub Actions workflow checks that all files changed in a pull request are encoded as UTF-8 without BOM.
+# It fails the check if any file starts with a UTF-16 LE (FF FE), UTF-16 BE (FE FF), or UTF-8 BOM (EF BB BF) marker.
+
+# Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
+
+name: Encoding Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  encoding-check:
+    permissions:
+      contents: read
+    if: |
+      github.actor != 'dependabot[bot]' &&
+      github.actor != 'dependabot-preview[bot]' &&
+      github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0  # Full history needed to resolve both base and head SHAs
+
+      - name: Check file encodings
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # Get the list of files added or modified in this PR (excludes deleted files)
+          mapfile -t changed_files < <(git diff --name-only --diff-filter=d "$BASE_SHA" "$HEAD_SHA")
+
+          if [ "${#changed_files[@]}" -eq 0 ]; then
+            echo "No files changed in this PR."
+            exit 0
+          fi
+
+          violations=0
+
+          for f in "${changed_files[@]}"; do
+            # Read the first 3 bytes as a lowercase hex string (6 hex chars)
+            bom=$(head -c 3 "$f" | xxd -p | tr -d '\n' | cut -c1-6)
+
+            case "$bom" in
+              fffe* | feff*)
+                echo "::error file=${f}::Non-UTF-8 encoding detected: UTF-16 (BOM: ${bom}). Re-save the file as UTF-8 without BOM."
+                violations=$((violations + 1))
+                ;;
+              efbbbf)
+                echo "::error file=${f}::UTF-8 BOM detected (EF BB BF). Re-save the file as UTF-8 without BOM."
+                violations=$((violations + 1))
+                ;;
+            esac
+          done
+
+          if [ "$violations" -gt 0 ]; then
+            echo ""
+            echo "Found ${violations} file(s) with non-UTF-8-no-BOM encoding."
+            echo "To fix: open each flagged file in your editor and re-save as 'UTF-8' (not 'UTF-8 with BOM', not 'UTF-16')."
+            echo "In VS Code: click the encoding indicator in the status bar → 'Save with Encoding' → 'UTF-8'."
+            exit 1
+          fi
+
+          echo "All ${#changed_files[@]} changed file(s) passed the encoding check."
+        shell: bash
