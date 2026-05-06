@@ -57,6 +57,26 @@ jobs:
           # This will handover control about PR rejection to the GitHub side
           max-allowed-issues: 2147483647
 
+      # Codacy outputs one SARIF run per engine. The CodeQL upload-sarif action rejects
+      # files with multiple runs sharing the same category (enforced since 2025-07-21).
+      # Merge all runs into one before uploading.
+      - name: Merge SARIF runs into single run
+        run: |
+          jq '
+            if (.runs | length) > 1 then
+              .runs = [{
+                "tool": {
+                  "driver": {
+                    "name": "Codacy",
+                    "informationUri": "https://www.codacy.com",
+                    "rules": ([.runs[].tool.driver.rules[]?] | unique_by(.id))
+                  }
+                },
+                "results": [.runs[].results[]?]
+              }]
+            else . end
+          ' results.sarif > merged.sarif && mv merged.sarif results.sarif
+
       # Upload the SARIF file generated in the previous step
       - name: Upload SARIF results file
         uses: github/codeql-action/upload-sarif@5c8a8a642e79153f5d047b10ec1cba1d1cc65699  # v3
