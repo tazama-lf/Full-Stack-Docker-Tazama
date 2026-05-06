@@ -322,3 +322,19 @@ create index idx_pain013_dbtr_acct_id on pain013 (debtorAccountId, tenantId);
 create index idx_pain013_cdtr_acct_id on pain013 (creditorAccountId, tenantId);
 
 create index idx_pain013_credttm on pain013 (creDtTm, tenantId);
+
+\connect raw_history;
+
+CREATE TABLE public.dems_quarantine (
+	id uuid NOT NULL,
+	correlation_id varchar(255) NULL,
+	tenant_id varchar(100) NOT NULL,
+	endpoint_path text NULL,
+	config_id varchar(255) NULL,
+	"version" varchar(50) NULL,
+	"error" text NULL,
+	raw_payload jsonb NULL,
+	status varchar(50) NULL,
+	created_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	CONSTRAINT dems_quarantine_pkey PRIMARY KEY (id)
+);

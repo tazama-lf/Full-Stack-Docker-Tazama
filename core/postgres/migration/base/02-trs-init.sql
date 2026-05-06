@@ -62,6 +62,21 @@ CREATE TABLE public.trs_nodes (
 
 CREATE INDEX idx_nodes_tenant_id ON trs_nodes (tenant_id);
 
+CREATE TABLE public.simulation_logs (
+	id serial4 NOT NULL,
+	rule_id int4 NOT NULL,
+	tenant_id varchar(255) DEFAULT 'DEFAULT'::character varying NOT NULL,
+	created_by varchar(255) NULL,
+	old_data jsonb NULL,
+	new_data jsonb NULL,
+	description text NULL,
+	created_at timestamptz DEFAULT CURRENT_TIMESTAMP NULL,
+	updated_at timestamptz DEFAULT CURRENT_TIMESTAMP NULL,
+	category text NULL,
+	created_by_email text NULL,
+	CONSTRAINT simulation_logs_pkey PRIMARY KEY (id)
+);
+
 
 
 
@@ -223,6 +238,10 @@ INSERT INTO public.trs_nodes
 VALUES(56, '{"name": "Determine Outcome Node", "type": "function", "color": "#FF5722", "label": "Determine Outcome", "inputs": [{"key": "argument1", "type": "text", "label": "Argument 1", "required": true, "placeholder": "First argument (value/count)", "defaultValue": "countOfMatchingAmounts"}, {"key": "argument2", "type": "text", "label": "Argument 2", "required": true, "placeholder": "Second argument (rule config)", "defaultValue": "ruleConfig"}, {"key": "argument3", "type": "text", "label": "Argument 3", "required": true, "placeholder": "Third argument (rule result)", "defaultValue": "ruleRes"}], "handles": {"source": true, "target": true}, "category": "rule_builder", "node_type": "DetermineOutcome", "description": "Returns the result of determineOutcome function", "default_data": {"argument1": "countOfMatchingAmounts", "argument2": "ruleConfig", "argument3": "ruleRes"}, "code_template": "return determineOutcome(${params.argument1 || ''countOfMatchingAmounts''}, ${params.argument2 || ''ruleConfig''}, ${params.argument3 || ''ruleRes''});", "visible_on_canvas": ["nested"]}'::jsonb, 'DEFAULT', '1b7f59dd-8754-48eb-9573-65d106951635', NULL, '2026-02-25', '2026-02-25');
 
 
+
+INSERT INTO public.trs_rules
+(id, rule_name, rule_type, rule_config_id, description, tenant_id, txtp, "version", status, publishing_status, updated_by, updated_at, created_at, rulerequest, txtp_version, "comments", metadata)
+VALUES(21, 'DEFAULT-rule-21', 'AML', '021@1.0.0', 'test', 'DEFAULT', 'hello', '1.0.0', 'STATUS_01_IN_PROGRESS', 'ACTIVE', '1b7f59dd-8754-48eb-9573-65d106951635', '2026-02-26 00:00:00.000', '2026-02-17 00:00:00.000', '{"metaData": {"tenantId": "DEFAULT", "timestamp": "2026-02-09T13:11:53.597Z", "correlationId": "23db9cc5-7498-4e39-b920-a54cd38a13b8", "transactionType": "pacs.002.001.12"}, "DataCache": {"cdtrId": "cbe+42-966969344MSISDN", "dbtrId": "+36-432226947typolog028", "cdtrAcctId": "+42-966969344MSISDNdfsp002", "intrBkSttlmAmt": {"ccy": "+36-432226947MSISDNtypolog028"}}, "networkMap": {"cfg": "1.0.0", "active": true, "messages": [{"id": "004@1.0.0", "cfg": "1.0.0", "txTp": "pacs.002.001.12", "typologies": [{"id": "typology-processor@1.0.0", "cfg": "001@1.0.0", "rules": [{"id": "006@1.0.0", "cfg": "1.0.0"}, {"id": "078@1.0.0", "cfg": "1.0.0"}, {"id": "EFRuP@1.0.0", "cfg": "none"}]}]}], "tenantId": "DEFAULT"}, "transaction": {"TxTp": "pacs.002.001.12", "TenantId": "cbe", "FIToFIPmtSts": {"GrpHdr": {"MsgId": "136a-dbb6-43d8-a565-86b8f322411e", "CreDtTm": "2023-02-03T09:53:58.069Z"}, "TxInfAndSts": {"TxSts": "ACCC", "ChrgsInf": [{"Agt": {"FinInstnId": {"ClrSysMmbId": {"MmbId": "typolog028"}}}, "Amt": {"Amt": 307.14, "Ccy": "USD"}}, {"Agt": {"FinInstnId": {"ClrSysMmbId": {"MmbId": "typolog028"}}}, "Amt": {"Amt": 153.57, "Ccy": "USD"}}, {"Agt": {"FinInstnId": {"ClrSysMmbId": {"MmbId": "dfsp002"}}}, "Amt": {"Amt": 300.71, "Ccy": "USD"}}], "InstdAgt": {"FinInstnId": {"ClrSysMmbId": {"MmbId": "dfsp002"}}}, "InstgAgt": {"FinInstnId": {"ClrSysMmbId": {"MmbId": "typolog028"}}}, "AccptncDtTm": "2023-02-03T09:53:58.069Z", "OrgnlInstrId": "5d158d92f70142a6ac7ffba30ac6c2db", "OrgnlEndToEndId": "701b-ae14-46fd-a2cf-88dda2875fdd"}}}}'::jsonb, '1.0.0', NULL, '{"sync": true, "test": false, "deploy": false, "simulation": false}'::jsonb);
 
 INSERT INTO public.trs_rule_flow
 (id, rule_id, flow_json_rule_builder, ts_file_base64_rule_builder, flow_json_test_case, ts_file_base64_test_case, tenant_id, status_rule_builder, status_test_case, created_at, updated_at)
