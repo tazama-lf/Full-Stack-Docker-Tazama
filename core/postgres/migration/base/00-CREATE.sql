@@ -59,9 +59,10 @@ create index idx_rule_upd_dt_tm on rule (updDtTm, tenantId);
 create table evaluation (
     evaluation jsonb not null,
     creDtTm text generated always as (evaluation -> 'report' ->> 'timestamp') stored,
-    messageId text generated always as (
-        evaluation -> 'transaction' -> 'FIToFIPmtSts' -> 'GrpHdr' ->> 'MsgId'
-    ) stored,
+    messageid text generated always as (coalesce(
+        evaluation -> 'transaction' -> 'FIToFIPmtSts' -> 'GrpHdr' ->> 'MsgId',
+        evaluation -> 'transaction' ->> 'MsgId'
+    )) stored,
     tenantId text generated always as (evaluation -> 'transaction' ->> 'TenantId') stored,
     constraint unique_msgid_evaluation unique (messageId, tenantId)
 );
