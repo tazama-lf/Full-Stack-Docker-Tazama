@@ -58,7 +58,7 @@ create index idx_rule_upd_dt_tm on rule (updDtTm, tenantId);
 
 create table evaluation (
     evaluation jsonb not null,
-    creDtTm text generated always as (evaluation ->> 'timestamp') stored,
+    creDtTm text generated always as (evaluation -> 'report' ->> 'timestamp') stored,
     messageId text generated always as (
         evaluation -> 'transaction' -> 'FIToFIPmtSts' -> 'GrpHdr' ->> 'MsgId'
     ) stored,
