@@ -1,4 +1,4 @@
-﻿# Deploying Tazama on AWS - Step-by-Step Instructions
+# Deploying Tazama on AWS - Step-by-Step Instructions
 
 > **Living document.** This file records every command, output, and decision made during the first successful deployment of the three-stack Tazama system on AWS. It is intended to become a reproducible guide for community contributors who want to stand up the same environment.
 >
