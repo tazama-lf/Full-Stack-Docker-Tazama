@@ -1,4 +1,4 @@
-﻿services:
+services:
   ui:
     image: tazamaorg/demo-ui:v2.2.0
     restart: always

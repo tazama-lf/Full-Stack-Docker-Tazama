@@ -1,4 +1,4 @@
-﻿# For local testing
+# For local testing
 services:
   rule-901:
     image: tazamaorg/rule-901:${TAZAMA_VERSION}
