@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Caller stub: delegates all Node.js CI logic to the centralised reusable workflow.
+# Logic changes belong in node-ci.yml - do not add steps here.
+
+# Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
+
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "dev", "main" ]
+  pull_request:
+    branches: [ "dev", "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  node-ci:
+    uses: tazama-lf/workflows/.github/workflows/node-ci.yml@dev
+    secrets: inherit
