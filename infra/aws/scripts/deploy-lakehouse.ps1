@@ -2,7 +2,7 @@
 #
 # deploy-lakehouse.ps1
 # Stages a large Lakehouse zip archive through S3 and unpacks it on Server C
-# into /opt/Tazama_Warehouse.
+# into /opt/Warehouse.
 #
 # Why S3 and not SCP?  The file is typically 3-4 GB.  EICE tunnels are
 # stdio-based and throttled — SCP over EICE for that size would take hours
@@ -53,7 +53,7 @@ Write-Host "Staging bucket: $stateBucket"
 
 $s3Key     = "lakehouse-staging/Tazama_Lakehouse.zip"
 $s3Uri     = "s3://$stateBucket/$s3Key"
-$warehouseDir = "/opt/Tazama_Warehouse"
+$warehouseDir = "/opt/Warehouse"
 $region    = "ap-south-1"
 $profile   = "tazama"
 
@@ -85,8 +85,8 @@ sudo mkdir -p $warehouseDir
 # Download from S3 — uses the instance IAM role, no credentials needed
 echo "Downloading from S3..."
 aws s3 cp $s3Uri /home/ec2-user/Tazama_Lakehouse.zip --region $region
-# Unpack to / — the zip already contains the full path (opt/Tazama_Warehouse/...)
-# so extracting to -d / lands files at /opt/Tazama_Warehouse/ directly.
+# Unpack to / — the zip already contains the full path (opt/Warehouse/...)
+# so extracting to -d / lands files at /opt/Warehouse/ directly.
 # Using -d $warehouseDir would double-nest the path.
 echo "Unpacking..."
 sudo unzip -o /home/ec2-user/Tazama_Lakehouse.zip -d /
