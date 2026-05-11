@@ -146,10 +146,28 @@ jobs:
             exit 1
           fi
 
-      - name: Install dependencies
+      - name: Regenerate package-lock.json for rule ${{ inputs.rule_number }}
         run: |
           cd "rule-executer-${{ inputs.rule_number }}"
-          npm install
+          # Delete the stale lock file so npm generates a fresh one from the
+          # modified package.json (which now references the correct rule module).
+          # Without this, `npm ci` in the Docker build follows the old lock file
+          # and installs the wrong rule module regardless of package.json.
+          rm -f package-lock.json
+          npm install --package-lock-only --ignore-scripts
+          # Verify the lock file was regenerated with the correct rule module
+          RULE_NUM="${{ inputs.rule_number }}"
+          RULE_ORG="${{ inputs.rule_org }}"
+          case "$RULE_ORG" in
+            frmscoe)   EXPECTED_SCOPE="@frmscoe" ;;
+            tazama-lf) EXPECTED_SCOPE="@tazama-lf" ;;
+          esac
+          if ! grep -q "\"name\": \"${EXPECTED_SCOPE}/rule-${RULE_NUM}\"" package-lock.json; then
+            echo "❌ package-lock.json was not updated to reference ${EXPECTED_SCOPE}/rule-${RULE_NUM}"
+            grep '"name": "@' package-lock.json | grep rule | head -5 || true
+            exit 1
+          fi
+          echo "✅ package-lock.json correctly references ${EXPECTED_SCOPE}/rule-${RULE_NUM}"
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN_LIB }}
 
