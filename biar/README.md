@@ -202,7 +202,7 @@ Tazama BIAR application services. The `hub` variant pulls pre-built images from 
 | JupyterHub | `biar-jupyterhub` | 8000 | Multi-user analytics environment. Each user gets an isolated JupyterLab session with pre-loaded PySpark notebooks. Uses `NativeAuthenticator` (sign-up on first visit). |
 
 > [!NOTE]
-> `TAZAMA_WAREHOUSE_HOST_PATH` in `biar/.env` controls where the Hudi warehouse is stored on the host. In the AWS deployment this is `/opt/Tazama_Warehouse` (created by `deploy-biar.ps1`). In a local deployment, set this to any directory you have write access to.
+> `TAZAMA_WAREHOUSE_HOST_PATH` in `biar/.env` controls where the Hudi warehouse is stored on the host. In the AWS deployment this is `/opt/Warehouse` (created by `deploy-biar.ps1`). In a local deployment, set this to any directory you have write access to.
 
 ## 5.3. Init containers (docker-compose.utils.init.yaml)
 

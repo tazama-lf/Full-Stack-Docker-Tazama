@@ -74,7 +74,7 @@ Write-Host '[Server C] .env overlay applied.' -ForegroundColor Green
 # automation-orchestrator and datalakehouse-api bind-mount this path.
 # Docker will fail to start the containers if the directory does not exist.
 Write-Host '[Server C] Creating Tazama warehouse directory...'
-Invoke-RemoteCommand -InstanceId $idC -Command 'sudo mkdir -p /opt/Tazama_Warehouse && sudo chown ec2-user:ec2-user /opt/Tazama_Warehouse'
+Invoke-RemoteCommand -InstanceId $idC -Command 'sudo mkdir -p /opt/Warehouse && sudo chown ec2-user:ec2-user /opt/Warehouse'
 Write-Host '[Server C] Warehouse directory ready.' -ForegroundColor Green
 
 # -- 5. Start biar stack (staged Ozone startup) --------------------------------
@@ -100,6 +100,16 @@ Invoke-RemoteCommand -InstanceId $idC -Command "cd $Script:RemoteRepo/biar && do
 # Step 5c: Wait for OM, then bring up the full stack
 Write-Host '[Server C] Waiting 15s for OM to initialise...'
 Start-Sleep -Seconds 15
+
+# Prune unused images before pulling to ensure there is enough disk headroom.
+# --pull always downloads the new image before removing the old one, so without
+# this step a full disk will abort the pull mid-stream.
+if (-not $NoPull) {
+    Write-Host '[Server C] Pruning unused Docker images to free disk space...'
+    Invoke-RemoteCommand -InstanceId $idC -Command 'docker image prune -af'
+    Write-Host '[Server C] Image prune complete.' -ForegroundColor Green
+}
+
 Write-Host '[Server C] Starting full biar stack...'
 Invoke-RemoteCommand -InstanceId $idC -Command "cd $Script:RemoteRepo/biar && docker compose -p tazama-biar -f $infraFile -f $hubFile -f $utilsFile up -d $pullFlag".Trim()
 

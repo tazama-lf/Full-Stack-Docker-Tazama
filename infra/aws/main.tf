@@ -175,7 +175,7 @@ module "server_c" {
   security_group_ids   = [module.security_groups.server_c_sg_id]
   key_name             = var.key_name
   ami_id               = data.aws_ami.al2023.id
-  root_volume_size     = 100
+  root_volume_size     = 150
   iam_instance_profile = aws_iam_instance_profile.ec2_ssm.name
   user_data            = local.bootstrap
 }
