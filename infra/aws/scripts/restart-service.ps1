@@ -34,11 +34,18 @@
     Skip the DockerHub image pull step.  Useful when the latest image is already
     present on the host and you only want to force a config/env recreate.
 
-.PARAMETER NoRepoPull
-    Skip the 'git pull' of the full-stack-docker-tazama repo on the target
-    server before recreating the container.  Useful when you want to pull a
-    fresh image without applying any pending repo changes, or when the working
-    directory is not a git repo.
+.PARAMETER RepoPull
+    Controls whether the full-stack-docker-tazama repo is updated on the target
+    server before recreating the container.
+
+      Omitted / 'none'        - skip the repo pull entirely (fastest; use the
+                                code already on the server)
+      '' (empty) or 'dev'     - fetch and reset to origin/dev
+      '<branch>'              - fetch and reset to origin/<branch>
+
+    Using a branch name switches the server to that branch before recreating,
+    which is the recommended way to roll out a committed fix without a full
+    redeploy.
 
 .EXAMPLE
     .\restart-service.ps1 -Server A -Service rule-001
@@ -46,8 +53,10 @@
     .\restart-service.ps1 -Server B -Service tcs-api
     .\restart-service.ps1 -Server C -Service nifi
     .\restart-service.ps1 -Server C -Service automation-orchestrator -NoPull
-    .\restart-service.ps1 -Server B -Service cms-frontend -NoRepoPull
-    .\restart-service.ps1 -Server B -Service cms-frontend -NoPull -NoRepoPull
+    .\restart-service.ps1 -Server B -Service cms-frontend
+    .\restart-service.ps1 -Server B -Service cms-frontend -NoPull
+    .\restart-service.ps1 -Server A -Service deapi -RepoPull fix-biar-data-pipeline
+    .\restart-service.ps1 -Server A -Service deapi -RepoPull dev
 #>
 
 [CmdletBinding()]
@@ -61,7 +70,8 @@ param(
 
     [switch]$NoPull,
 
-    [switch]$NoRepoPull
+    # 'none' (or omitted) = skip pull; '' or 'dev' = pull dev; '<branch>' = pull that branch.
+    [string]$RepoPull = 'none'
 )
 
 . "$PSScriptRoot\helpers.ps1"
@@ -77,12 +87,15 @@ switch ($Server) {
 
 $pullFlag = if ($NoPull) { '' } else { '--pull always' }
 
+# Resolve the effective branch: omitted or 'none' → skip; '' → 'dev'; else use as-is.
+$effectiveBranch = if ($RepoPull -eq 'none') { '' } elseif ($RepoPull -eq '') { 'dev' } else { $RepoPull }
+
 Write-Host ''
 Write-Host "=== Restart service: $Service on $label ===" -ForegroundColor Cyan
-Write-Host "[$label] Project : $project"
-Write-Host "[$label] Service : $Service"
-Write-Host "[$label] Pull    : $(-not $NoPull) (DockerHub image)"
-Write-Host "[$label] RepoPull: $(-not $NoRepoPull) (full-stack git pull)"
+Write-Host "[$label] Project   : $project"
+Write-Host "[$label] Service   : $Service"
+Write-Host "[$label] Pull      : $(-not $NoPull) (DockerHub image)"
+Write-Host "[$label] RepoPull  : $(if ($effectiveBranch) { $effectiveBranch } else { 'none' })"
 Write-Host ''
 
 # -- Discover compose context from the running container's labels ----------------------------
@@ -140,9 +153,10 @@ Write-Host "[$label] Working dir: $workingDir"
 $fFlags = ($configFiles -split ',' | ForEach-Object { "-f $_" }) -join ' '
 
 # -- Repo pull ------------------------------------------------------------------------------
-if (-not $NoRepoPull) {
-    Write-Host "[$label] Pulling latest full-stack repo in $workingDir..."
-    Invoke-RemoteCommand -InstanceId $instanceId -Command "cd $workingDir && git pull"
+if ($effectiveBranch) {
+    Write-Host "[$label] Pulling branch '$effectiveBranch' in $workingDir..."
+    Invoke-RemoteCommand -InstanceId $instanceId -Command `
+        "cd $workingDir && git fetch origin $effectiveBranch && git checkout $effectiveBranch && git reset --hard origin/$effectiveBranch"
 }
 
 # -- Recreate -------------------------------------------------------------------------------
