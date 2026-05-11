@@ -1894,39 +1894,41 @@ on the state bucket; the EC2 instance role must have `s3:GetObject` on the
 
 [infra/aws/scripts/restart-service.ps1](full-stack-docker-tazama/infra/aws/scripts/restart-service.ps1)
 
-Pulls the latest repo changes and image for a single Docker Compose service
-and recreates its container without touching any other running containers.
+Pulls the latest image for a single Docker Compose service and recreates its
+container without touching any other running containers.  Optionally fetches
+a specific branch of the repo on the target server before recreating, which
+is the recommended way to roll out a committed fix without a full redeploy.
 
 The script reads the running container's `com.docker.compose` labels to
 discover the exact working directory and compose file chain used to start it,
-then runs `git pull` in that directory followed by a targeted
-`docker compose up --no-deps --force-recreate`.  This means the command is
-always reconstructed from live state - no hardcoded file chains that can go stale.
+then issues a targeted `docker compose up --no-deps --force-recreate`.  This
+means the command is always reconstructed from live state — no hardcoded file
+chains that can go stale.
 
 Server A's two sub-chains (`tazama-core` main stack and extensions APIs) are
 handled transparently by this label-based approach.
 
 ```powershell
-# Update admin-service on Server A (pulls repo + image)
+# Update admin-service on Server A (pulls image, no repo pull)
 .\restart-service.ps1 -Server A -Service admin-service
 
-# Update deapi (extensions API running on Server A)
-.\restart-service.ps1 -Server A -Service deapi
+# Roll out a committed fix from a branch, then recreate the container
+.\restart-service.ps1 -Server A -Service deapi -RepoPull fix-biar-data-pipeline
 
-# Update tcs-api on Server B
+# Roll out latest dev branch changes and recreate
+.\restart-service.ps1 -Server A -Service deapi -RepoPull dev
+
+# Update tcs-api on Server B (image pull only, no repo pull)
 .\restart-service.ps1 -Server B -Service tcs-api
 
 # Update NiFi on Server C
 .\restart-service.ps1 -Server C -Service nifi
 
 # Apply a repo change (e.g. updated env file) without pulling a new image
-.\restart-service.ps1 -Server C -Service automation-orchestrator -NoPull
-
-# Pull a new image without applying pending repo changes
-.\restart-service.ps1 -Server B -Service cms-frontend -NoRepoPull
+.\restart-service.ps1 -Server C -Service automation-orchestrator -NoPull -RepoPull dev
 
 # Force recreate only - skip both pulls (e.g. restart a crashed container)
-.\restart-service.ps1 -Server B -Service cms-frontend -NoPull -NoRepoPull
+.\restart-service.ps1 -Server B -Service cms-frontend -NoPull
 ```
 
 | Parameter | Description |
@@ -1934,7 +1936,7 @@ handled transparently by this label-based approach.
 | `-Server` | **Required.** `A`, `B`, or `C`. |
 | `-Service` | **Required.** Docker Compose service name (e.g. `rule-001`, `tcs-api`, `nifi`). |
 | `-NoPull` | Skip the DockerHub image pull (`--pull always`). Use when the image is already current. |
-| `-NoRepoPull` | Skip the `git pull` of the full-stack-docker-tazama repo on the target server. Use when you want to apply an image update without pulling pending repo changes. |
+| `-RepoPull` | Controls the repo update on the target server before recreating the container. Omitted or `none` — skip entirely (default); `''` or `dev` — fetch and reset to `origin/dev`; `<branch>` — fetch and reset to that branch. |
 
 After recreating, the script prints a `docker ps` table confirming the
 container name, status, and image digest.
