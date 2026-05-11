@@ -16,7 +16,7 @@
 
     Server A runs two compose sub-chains under the same tazama-core project:
       - the main core stack (rules, TP, TMS, auth, relay, logs, pgAdmin, Hasura)
-      - the extensions APIs (deapi, dems)
+      - the extensions APIs (deapi, dems) — deployed from extensions/ compose files
     Because the working directory and config-file list are read from the live
     container, both sub-chains are handled transparently by the same script.
 
