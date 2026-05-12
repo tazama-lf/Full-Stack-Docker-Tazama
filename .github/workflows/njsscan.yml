@@ -1,12 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-# This workflow integrates njsscan with GitHub's Code Scanning feature
-# nodejsscan is a static security code scanner that finds insecure code patterns in your Node.js applications
+# Caller stub: delegates all njsscan logic to the centralised reusable workflow.
+# Logic changes belong in njsscan-ci.yml - do not add steps here.
 
 # Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
 
@@ -16,35 +11,16 @@ on:
   push:
     branches: [ "dev", "main" ]
   pull_request:
-    # The branches below must be a subset of the branches above
     branches: [ "dev", "main" ]
   schedule:
     - cron: '17 17 * * 1'
 
 permissions:
   contents: read
+  security-events: write
+  actions: read
 
 jobs:
   njsscan:
-    if: github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]'
-    permissions:
-      contents: read # for actions/checkout to fetch code
-      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
-    runs-on: ubuntu-latest
-    name: njsscan code scanning
-    steps:
-    - name: Checkout the code
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-    - name: nodejsscan scan
-      id: njsscan
-      continue-on-error: true
-      uses: ajinabraham/njsscan-action@d58d8b2f26322cd35a9efb8003baac517f226d81
-      with:
-        args: '. --sarif --output results.sarif'
-    - name: Upload njsscan report
-      uses: github/codeql-action/upload-sarif@5c8a8a642e79153f5d047b10ec1cba1d1cc65699  # v3
-      if: steps.njsscan.outcome == 'success'
-      with:
-        sarif_file: results.sarif
-        category: njsscan
+    uses: tazama-lf/workflows/.github/workflows/njsscan-ci.yml@dev
+    secrets: inherit
