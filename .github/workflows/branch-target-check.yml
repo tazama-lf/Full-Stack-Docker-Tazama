@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Caller stub: delegates all branch target check logic to the centralised reusable workflow.
+# Logic changes belong in branch-target-check-ci.yml - do not add steps here.
+
+# Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
+
+name: Branch target check
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  branch-target-check:
+    uses: tazama-lf/workflows/.github/workflows/branch-target-check-ci.yml@dev
+    secrets: inherit
