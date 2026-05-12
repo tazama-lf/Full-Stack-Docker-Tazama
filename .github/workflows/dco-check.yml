@@ -1,59 +1,18 @@
 # SPDX-License-Identifier: Apache-2.0
 
-# This GitHub Actions workflow checks that all commits in a pull request (PR) have a "Signed-off-by" line to ensure Developer Certificate of Origin (DCO) compliance.
+# Caller stub: delegates all DCO check logic to the centralised reusable workflow.
+# Logic changes belong in dco-check-ci.yml - do not add steps here.
 
 # Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
 
 name: DCO
 
-# Trigger the workflow on pull request events
 on: [pull_request]
 
+permissions:
+  contents: read
+
 jobs:
-  dco:
-    if: |
-      github.actor != 'dependabot[bot]' &&
-      github.actor != 'dependabot-preview[bot]' &&
-      github.actor != 'github-actions[bot]'
-    # Define the runner environment
-    runs-on: ubuntu-latest
-    
-    steps:
-    # Step to check out the repository
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-      with:
-        fetch-depth: 0  # Fetch all history for all branches to ensure complete commit history is available
-
-    - name: Set up environment variables
-      env:
-        PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-      run: |
-        printf 'BASE_SHA=%s\n' "$PR_BASE_SHA" >> "$GITHUB_ENV"
-        printf 'HEAD_SHA=%s\n' "$PR_HEAD_SHA" >> "$GITHUB_ENV"
-
-    # Step to check each commit in the pull request for a Signed-off-by line
-    - name: Check for DCO Sign-off
-      run: |
-        # Get the list of commit hashes introduced by this PR (head commits not yet in base)
-        commits=$(git log --pretty=format:%H "$BASE_SHA..$HEAD_SHA")
-        non_compliant_commits=""
-
-        # Loop through each commit and check for the Signed-off-by line
-        for commit in $commits; do
-          # Check if the commit message contains the Signed-off-by line
-          if ! git show --quiet --format=%B "$commit" | grep -q "^Signed-off-by: "; then
-            # If not, add the commit hash to the list of non-compliant commits
-            non_compliant_commits="$non_compliant_commits $commit"
-          fi
-        done
-
-        # If there are any non-compliant commits, output their hashes and fail the job
-        if [ -n "$non_compliant_commits" ]; then
-          echo "The following commits do not have a Signed-off-by line:"
-          for commit in $non_compliant_commits; do
-            echo "- $commit"
-          done
-          exit 1
-        fi
-      shell: bash
+  dco-check:
+    uses: tazama-lf/workflows/.github/workflows/dco-check-ci.yml@dev
+    secrets: inherit
