@@ -1,0 +1,30 @@
+# SPDX-License-Identifier: Apache-2.0
+# This file is managed centrally - do not edit manually.
+# To change Codacy engine configuration, update config-templates/.codacy.yml in tazama-lf/workflows.
+#
+# Restricts Codacy to only the engines that are relevant for TypeScript/Node.js repos.
+# Disabling unused engines reduces analysis time and eliminates false positives from
+# engines that are not configured for this codebase (e.g. Checkov, TSLint, Prettier).
+#
+# Exclude paths are applied globally: engines will not analyse files under these paths.
+# Test files are excluded from all engine runs to avoid false positive security findings.
+#
+# Reference: https://docs.codacy.com/v3.0/repositories-configure/codacy-configuration-file/
+
+engines:
+  eslint:
+    enabled: true
+  semgrep:
+    enabled: true
+
+exclude_paths:
+  - "node_modules/**"
+  - "dist/**"
+  - "coverage/**"
+  - "**/__tests__/**"
+  - "**/*.test.js"
+  - "**/*.spec.js"
+  - "**/*.test.ts"
+  - "**/*.spec.ts"
+  - "**/*.test.tsx"
+  - "**/*.spec.tsx"
