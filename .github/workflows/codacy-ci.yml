@@ -1,0 +1,70 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Reusable Codacy Security Scan workflow.
+# Called by consumer repos via a thin stub (codacy.yml) that uses this workflow.
+# Logic changes belong here - do not add steps to the stub.
+# For more information see: https://docs.github.com/en/actions/sharing-automations/reusing-workflows
+
+# Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
+
+name: Codacy Security Scan (reusable)
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  codacy-security-scan:
+    if: github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]'
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    name: Codacy Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+      - name: Run Codacy Analysis CLI
+        uses: codacy/codacy-analysis-cli-action@562ee3e92b8e92df8b67e0a5ff8aa8e261919c08 # v4.4.7
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          verbose: true
+          output: results.sarif
+          format: sarif
+          # Adjust severity of non-security issues
+          gh-code-scanning-compat: true
+          # Force 0 exit code to allow SARIF file generation
+          # This will handover control about PR rejection to the GitHub side
+          max-allowed-issues: 2147483647
+          # Disable dockerized tools (e.g. Checkov) - not applicable to TypeScript/Node.js repos.
+          # ESLint and Semgrep run natively and are controlled via .codacy.yml.
+          run-docker-tools: 'false'
+
+      # Codacy outputs one SARIF run per engine. The CodeQL upload-sarif action rejects
+      # files with multiple runs sharing the same category (enforced since 2025-07-21).
+      # Merge all runs into one before uploading.
+      - name: Merge SARIF runs into single run
+        run: |
+          jq '
+            if (.runs | length) > 1 then
+              .runs = [{
+                "tool": {
+                  "driver": {
+                    "name": "Codacy",
+                    "informationUri": "https://www.codacy.com",
+                    "rules": ([.runs[].tool.driver.rules[]?] | unique_by(.id))
+                  }
+                },
+                "results": [.runs[].results[]?]
+              }]
+            else . end
+          ' results.sarif > merged.sarif && mv merged.sarif results.sarif
+
+      - name: Upload SARIF results file
+        uses: github/codeql-action/upload-sarif@5c8a8a642e79153f5d047b10ec1cba1d1cc65699  # v3
+        with:
+          sarif_file: results.sarif
+          category: codacy

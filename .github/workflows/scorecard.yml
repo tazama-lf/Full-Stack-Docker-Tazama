@@ -1,0 +1,55 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
+
+name: Scorecard supply-chain security
+
+on:
+  branch_protection_rule:
+  schedule:
+    - cron: '15 16 * * 0'
+  push:
+    branches:
+      - main
+
+# Scorecard workflow restrictions (enforced when publish_results=true):
+#   - No workflow-level env vars or defaults
+#   - No workflow-level write permissions (read-all is fine)
+#   - Only the scorecard job may use id-token: write
+permissions: read-all
+
+jobs:
+  analysis:
+    name: Scorecard analysis
+    runs-on: ubuntu-latest
+    permissions:
+      # Required for uploading SARIF results to the code-scanning dashboard
+      security-events: write
+      # Required for GitHub OIDC token used by publish_results
+      id-token: write
+
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: "Run analysis"
+        uses: ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a # v2.4.3
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          # Publish results (badge + REST API) on main, schedule, and branch_protection_rule events.
+          publish_results: ${{ github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'branch_protection_rule' }}
+
+      - name: "Upload artifact"
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: sarif-file
+          path: results.sarif
+          retention-days: 5
+
+      - name: "Upload to code-scanning"
+        uses: github/codeql-action/upload-sarif@5c8a8a642e79153f5d047b10ec1cba1d1cc65699  # v3
+        with:
+          sarif_file: results.sarif

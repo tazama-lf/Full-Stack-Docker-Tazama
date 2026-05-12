@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Caller stub: delegates all encoding check logic to the centralised reusable workflow.
+# Logic changes belong in encoding-check-ci.yml - do not add steps here.
+
+# Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
+
+name: Encoding Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  encoding-check:
+    uses: tazama-lf/workflows/.github/workflows/encoding-check-ci.yml@dev
+    secrets: inherit
