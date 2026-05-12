@@ -1,12 +1,21 @@
 # SPDX-License-Identifier: Apache-2.0
 
-# This GitHub Actions workflow checks that all commits in a pull request (PR) have a verified cryptographic signature (GPG, SSH, or S/MIME).
+# Caller stub: delegates all signature verification logic to the centralised reusable workflow.
+# Logic changes belong in gpg-verify-ci.yml - do not add steps here.
 
 # Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
 
 name: Signature Verify
 
-on: [pull_request]  # Trigger this workflow on pull request events
+on: [pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  gpg-verify:
+    uses: tazama-lf/workflows/.github/workflows/gpg-verify-ci.yml@dev
+    secrets: inherit
 
 jobs:
   gpg-verify:

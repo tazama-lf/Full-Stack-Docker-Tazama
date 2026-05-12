@@ -1,18 +1,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-# This GitHub Actions workflow validates the title of pull requests (PRs) to ensure they follow conventional commit standards.
+# Caller stub: delegates all PR conventional commit validation logic to the centralised reusable workflow.
+# Logic changes belong in conventional-commits-ci.yml - do not add steps here.
 
 # Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
 
 name: PR Conventional Commit Validation
 
 on:
-  # Trigger this workflow on specific events related to pull requests
   pull_request:
     types: [opened, synchronize, reopened, edited]
 
@@ -22,20 +17,6 @@ permissions:
   issues: write
 
 jobs:
-  validate-pr-title:
-    if: github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]'
-    runs-on: ubuntu-latest  # Use the latest Ubuntu runner for the job
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-
-      - name: PR Conventional Commit Validation
-        uses: ytanikin/PRConventionalCommits@b7be9213c4fa33260646db6c9b905332dc90b310  # 1.1.0
-        with:
-          # Define the task types that are valid for conventional commits
-          task_types: '["build","ci","docs","feat","fix","perf","refactor","style","test","feat!"]'
-          # Map the conventional commit types to corresponding GitHub labels
-          custom_labels: '{"build": "build", "ci": "CI/CD", "docs": "documentation", "feat": "enhancement", "fix": "bug", "perf": "performance", "refactor": "refactor", "style": "style", "test": "test", "feat!": "enhancement breaking change"}'
-          # Use a personal access token (GITHUB_TOKEN) stored in GitHub secrets for authentication
-          token: ${{ secrets.GITHUB_TOKEN }}
-          add_label: 'true'
+  conventional-commits:
+    uses: tazama-lf/workflows/.github/workflows/conventional-commits-ci.yml@dev
+    secrets: inherit

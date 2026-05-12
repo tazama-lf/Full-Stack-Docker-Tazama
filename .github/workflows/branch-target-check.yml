@@ -1,19 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
-# Enforces the feature-branch → dev → main development workflow.
-#
-# When `main` is the default branch, GitHub pre-selects it as the PR base in the
-# UI and in `gh pr create`. This check fails immediately with a clear, actionable
-# message if a PR targets main from any branch other than `dev` or `release/v<N>.*`,
-# saving developers from a confusing "branch is locked" error or a misleading
-# "prerelease version detected" message from version-check.yml.
-#
-# Allowed sources for PRs to main:
-#   dev          - the normal integration branch
-#   release/v<N>.* - release-train branches created by release-train.yml (must start with a digit)
-#
-# Please do not attempt to edit this flow without the direct consent from the DevOps team.
-# This file is managed centrally.
+# Caller stub: delegates all branch target check logic to the centralised reusable workflow.
+# Logic changes belong in branch-target-check-ci.yml - do not add steps here.
+
+# Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
 
 name: Branch target check
 
@@ -24,6 +14,11 @@ on:
   pull_request:
     branches:
       - main
+
+jobs:
+  branch-target-check:
+    uses: tazama-lf/workflows/.github/workflows/branch-target-check-ci.yml@dev
+    secrets: inherit
 
 jobs:
   check-source-branch:
