@@ -1,18 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-# This workflow checks out code, builds an image, performs a container image
-# scan with Anchore's Syft tool, and uploads the results to the GitHub Dependency
-# submission API.
-
-# For more information on the Anchore sbom-action usage
-# and parameters, see https://github.com/anchore/sbom-action. For more
-# information about the Anchore SBOM tool, Syft, see
-# https://github.com/anchore/syft
+# Caller stub: delegates all Anchore Syft SBOM scan logic to the centralised reusable workflow.
+# Logic changes belong in sbom-ci.yml - do not add steps here.
 
 # Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
 
@@ -24,25 +13,9 @@ on:
 
 permissions:
   contents: write
+  actions: read
 
 jobs:
-  Anchore-Build-Scan:
-    if: github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]'
-    permissions:
-      contents: write # required to upload to the Dependency submission API
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout the code
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-    - name: Build the Docker image
-      if: hashFiles('Dockerfile') != ''
-      env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN_LIB }}
-      run: docker build --secret id=GH_TOKEN,env=GH_TOKEN --file Dockerfile --tag localbuild/testimage:latest .
-    - name: Scan the image and upload dependency results
-      if: hashFiles('Dockerfile') != ''
-      uses: anchore/sbom-action@bb716408e75840bbb01e839347cd213767269d4a
-      with:
-        image: "localbuild/testimage:latest"
-        artifact-name: image.spdx.json
-        dependency-snapshot: true
+  sbom:
+    uses: tazama-lf/workflows/.github/workflows/sbom-ci.yml@dev
+    secrets: inherit

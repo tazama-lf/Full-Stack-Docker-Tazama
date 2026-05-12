@@ -1,63 +1,18 @@
 # SPDX-License-Identifier: Apache-2.0
 
-# This GitHub Actions workflow checks that all commits in a pull request (PR) have a verified cryptographic signature (GPG, SSH, or S/MIME).
+# Caller stub: delegates all signature verification logic to the centralised reusable workflow.
+# Logic changes belong in gpg-verify-ci.yml - do not add steps here.
 
 # Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
 
 name: Signature Verify
 
-on: [pull_request]  # Trigger this workflow on pull request events
+on: [pull_request]
+
+permissions:
+  contents: read
 
 jobs:
   gpg-verify:
-    if: |
-      github.actor != 'dependabot[bot]' &&
-      github.actor != 'dependabot-preview[bot]' &&
-      github.actor != 'github-actions[bot]'
-    runs-on: ubuntu-latest  # Use the latest Ubuntu runner for the job
-    steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-      with:
-        fetch-depth: 0  # Fetch all history for all branches to ensure we have the full commit history
-
-    - name: Set up environment variables
-      env:
-        PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GH_REPO: ${{ github.repository }}
-      run: |
-        printf 'PR_HEAD_SHA=%s\n' "$PR_HEAD_SHA" >> "$GITHUB_ENV"
-        printf 'PR_BASE_SHA=%s\n' "$PR_BASE_SHA" >> "$GITHUB_ENV"
-        printf 'GITHUB_TOKEN=%s\n' "$GH_TOKEN" >> "$GITHUB_ENV"
-        printf 'GITHUB_REPOSITORY=%s\n' "$GH_REPO" >> "$GITHUB_ENV"
-
-    - name: Check GPG verification status  # Step to check each commit for GPG signature verification
-      run: |
-        # Get the list of commits in the pull request (head commits not yet in base)
-        commits=$(git log --pretty=format:%H "$PR_BASE_SHA..$PR_HEAD_SHA")
-
-        if [[ -z "$commits" ]]; then
-          echo "No commits to verify."
-          exit 0
-        fi
-
-        # Check the GPG verification status of each commit via the GitHub commit API
-        for commit in $commits; do
-          response=$(curl -sS --max-time 10 --fail \
-            -H "Authorization: token $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/$GITHUB_REPOSITORY/commits/$commit") || {
-            curl_exit=$?
-            echo "GitHub API request failed for commit $commit (curl exit $curl_exit). Check network or API availability."
-            exit "$curl_exit"
-          }
-
-          verified=$(echo "$response" | jq -r '.commit.verification.verified')
-
-          # If the commit is not verified, list it and exit with a non-zero status
-          if [[ "$verified" != "true" ]]; then
-            echo "GPG signature verification failed for commit $commit."
-            exit 1
-          fi
-        done
+    uses: tazama-lf/workflows/.github/workflows/gpg-verify-ci.yml@dev
+    secrets: inherit
