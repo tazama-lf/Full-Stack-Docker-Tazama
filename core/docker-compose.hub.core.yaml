@@ -31,6 +31,21 @@ services:
       nats:
         condition: service_started
 
+  # BATCH PRE-PROCESSING API
+  batch-ppa:
+    image: tazamaorg/batch-ppa:${TAZAMA_VERSION}
+    env_file:
+      - env/batch-ppa.env
+      - .env
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      tms:
+        condition: service_started
+    ports:
+      - 4100:4100
+
   # EVENT DIRECTOR
   ed:
     image: tazamaorg/event-director:${TAZAMA_VERSION}

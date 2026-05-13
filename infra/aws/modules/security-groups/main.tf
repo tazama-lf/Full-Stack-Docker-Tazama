@@ -72,8 +72,8 @@ resource "aws_security_group" "alb" {
 
   ingress {
     description = "batch-ppa"
-    from_port   = 4000
-    to_port     = 4000
+    from_port   = 4100
+    to_port     = 4100
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -189,8 +189,8 @@ resource "aws_security_group" "server_a" {
 
   ingress {
     description     = "batch-ppa"
-    from_port       = 4000
-    to_port         = 4000
+    from_port       = 4100
+    to_port         = 4100
     protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
   }
