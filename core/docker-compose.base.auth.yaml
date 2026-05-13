@@ -10,6 +10,7 @@ services:
     restart: always
     environment:
       - KC_HOSTNAME=${KEYCLOAK_HOSTNAME:-localhost}
+      - KC_HOSTNAME_PORT=${KEYCLOAK_PORT:-8080}
       - KC_HOSTNAME_STRICT_BACKCHANNEL=false
       - KC_HTTP_ENABLED=true
       - KC_HOSTNAME_STRICT_HTTPS=false
@@ -52,6 +53,14 @@ services:
 
   # ADMIN SERVICE API      
   admin-service:
+    environment:
+      - AUTHENTICATED=true
+      - CERT_PATH_PUBLIC=test-public-key.pem
+    volumes:
+      - ./auth/test-public-key.pem:/home/app/test-public-key.pem
+
+  # BATCH PRE-PROCESSING API
+  batch-ppa:
     environment:
       - AUTHENTICATED=true
       - CERT_PATH_PUBLIC=test-public-key.pem

@@ -263,6 +263,14 @@
       "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
       "attributes" : { }
     }, {
+      "id" : "043a9c72-d55a-463c-bacf-4d06bc23ccd4",
+      "name" : "POST_V1_EXECUTEBATCH",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+      "attributes" : { }
+    }, {
       "id" : "c5c7d83a-d9a6-4db0-96de-3a420d47864c",
       "name" : "PUT_V1_EVENT_FLOW_CONTROL_CACHE",
       "description" : "",
@@ -383,6 +391,14 @@
     }, {
       "id" : "c052fe23-5f12-44b7-858c-a269f438852b",
       "name" : "trs_data_engineer_approver",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+      "attributes" : { }
+    }, {
+      "id" : "3163741e-d397-4c88-a5da-c3baed9d3341",
+      "name" : "POST_V1_UPLOADFILE",
       "description" : "",
       "composite" : false,
       "clientRole" : false,
@@ -672,6 +688,16 @@
     }
   },
   "groups" : [ {
+    "id" : "71f0931a-bc7e-4569-a9b3-143c4b6d21f8",
+    "name" : "tazama-batch",
+    "path" : "/tazama-batch",
+    "subGroups" : [ ],
+    "attributes" : {
+      "TENANT_ID" : [ "DEFAULT" ]
+    },
+    "realmRoles" : [ "POST_V1_UPLOADFILE", "POST_V1_EXECUTEBATCH" ],
+    "clientRoles" : { }
+  }, {
     "id" : "d8dabf95-de1d-4c73-be0d-8bfab08651eb",
     "name" : "tazama-cms",
     "path" : "/tazama-cms",
@@ -681,7 +707,9 @@
       "path" : "/tazama-cms/CMS_ADMIN",
       "parentId" : "d8dabf95-de1d-4c73-be0d-8bfab08651eb",
       "subGroups" : [ ],
-      "attributes" : { },
+      "attributes" : {
+        "TENANT_ID" : [ "TAZAMA" ]
+      },
       "realmRoles" : [ "CMS_ADMIN" ],
       "clientRoles" : { }
     }, {
@@ -896,7 +924,7 @@
       "parentId" : "b4a37d11-2d79-42c2-bbbe-1952345aa202",
       "subGroups" : [ ],
       "attributes" : { },
-      "realmRoles" : [ "trs_approver", "approver" ],
+      "realmRoles" : [ "approver", "trs_approver" ],
       "clientRoles" : { }
     }, {
       "id" : "a6f5ddbe-e5ab-48c4-928d-31f97536147c",
@@ -923,7 +951,7 @@
       "parentId" : "b4a37d11-2d79-42c2-bbbe-1952345aa202",
       "subGroups" : [ ],
       "attributes" : { },
-      "realmRoles" : [ "trs_editor", "editor" ],
+      "realmRoles" : [ "editor", "trs_editor" ],
       "clientRoles" : { }
     }, {
       "id" : "88e4753a-f60e-4a29-a432-db28f278a522",
@@ -1085,7 +1113,7 @@
     "requiredActions" : [ ],
     "realmRoles" : [ "default-roles-tazama" ],
     "notBefore" : 0,
-    "groups" : [ "/tazama-conditions", "/tazama-config", "/tazama-reports", "/tazama-tms" ]
+    "groups" : [ "/tazama-batch", "/tazama-conditions", "/tazama-config", "/tazama-reports", "/tazama-tms" ]
   }, {
     "id" : "02643269-6ade-45d8-af20-c4a5d5d8e552",
     "createdTimestamp" : 1776319928982,
@@ -1435,6 +1463,21 @@
     "fullScopeAllowed" : true,
     "nodeReRegistrationTimeout" : -1,
     "protocolMappers" : [ {
+      "id" : "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name" : "tenant_details",
+      "protocol" : "openid-connect",
+      "protocolMapper" : "oidc-group-membership-mapper",
+      "consentRequired" : false,
+      "config" : {
+        "full.path" : "true",
+        "introspection.token.claim" : "true",
+        "userinfo.token.claim" : "true",
+        "multivalued" : "true",
+        "id.token.claim" : "true",
+        "access.token.claim" : "true",
+        "claim.name" : "tenant_details"
+      }
+    }, {
       "id" : "76297f0b-a9e5-4295-9ec0-465b55bc1c36",
       "name" : "Client ID",
       "protocol" : "openid-connect",
@@ -1493,21 +1536,6 @@
         "access.token.claim" : "true",
         "claim.name" : "tenant_id",
         "jsonType.label" : "String"
-      }
-    }, {
-      "id" : "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-      "name" : "tenant_details",
-      "protocol" : "openid-connect",
-      "protocolMapper" : "oidc-group-membership-mapper",
-      "consentRequired" : false,
-      "config" : {
-        "full.path" : "true",
-        "introspection.token.claim" : "true",
-        "userinfo.token.claim" : "true",
-        "multivalued" : "true",
-        "id.token.claim" : "true",
-        "access.token.claim" : "true",
-        "claim.name" : "tenant_details"
       }
     } ],
     "defaultClientScopes" : [ "web-origins", "acr", "roles", "profile", "email" ],
@@ -2173,7 +2201,7 @@
       "subType" : "anonymous",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "saml-user-attribute-mapper", "oidc-usermodel-property-mapper", "oidc-usermodel-attribute-mapper", "saml-user-property-mapper", "oidc-address-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-full-name-mapper", "saml-role-list-mapper" ]
+        "allowed-protocol-mapper-types" : [ "saml-user-property-mapper", "saml-user-attribute-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-full-name-mapper", "oidc-address-mapper", "saml-role-list-mapper", "oidc-usermodel-property-mapper", "oidc-usermodel-attribute-mapper" ]
       }
     }, {
       "id" : "6f334a33-13e2-4874-a21d-6f3d3f17c562",
@@ -2205,7 +2233,7 @@
       "subType" : "authenticated",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "oidc-sha256-pairwise-sub-mapper", "oidc-full-name-mapper", "oidc-usermodel-attribute-mapper", "saml-role-list-mapper", "saml-user-property-mapper", "oidc-address-mapper", "oidc-usermodel-property-mapper", "saml-user-attribute-mapper" ]
+        "allowed-protocol-mapper-types" : [ "oidc-full-name-mapper", "oidc-usermodel-property-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-address-mapper", "oidc-usermodel-attribute-mapper", "saml-role-list-mapper", "saml-user-property-mapper", "saml-user-attribute-mapper" ]
       }
     } ],
     "org.keycloak.keys.KeyProvider" : [ {

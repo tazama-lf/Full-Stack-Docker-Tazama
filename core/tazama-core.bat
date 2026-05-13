@@ -12,7 +12,6 @@ set "basiclogs=[ ]"
 set "relay=[ ]"
 set "ui=[ ]"
 set "natsutils=[ ]"
-set "batchppa=[ ]"
 rem These options default to enabled
 set "pgadmin=[X]"
 set "hasura=[X]"
@@ -98,11 +97,10 @@ echo.
 echo UTILITY ADDONS:
 echo.
 echo 5. %natsutils% NATS Utilities
-echo 6. %batchppa% Batch PPA
-echo 7. %pgadmin% pgAdmin for PostgreSQL
-echo 8. %hasura% Hasura GraphQL API for PostgreSQL
+echo 6. %pgadmin% pgAdmin for PostgreSQL
+echo 7. %hasura% Hasura GraphQL API for PostgreSQL
 echo.
-echo Toggle addons (1-8), (a)pply current selection, (r)eturn, or (q)uit
+echo Toggle addons (1-7), (a)pply current selection, (r)eturn, or (q)uit
 set /p "choice=Enter your choice: "
 
 if /i "%choice%"=="a" goto :apply
@@ -125,9 +123,8 @@ if "%choice%"=="4" if %IS_MULTITENANT_DEPLOYMENT% NEQ 1 if "%ui%" == "[ ]" (
     pause
     ) else (set "ui=[ ]")
 if "%choice%"=="5" if "%natsutils%" == "[ ]" (set "natsutils=[X]") else (set "natsutils=[ ]")
-if "%choice%"=="6" if "%batchppa%" == "[ ]" (set "batchppa=[X]") else (set "batchppa=[ ]")
-if "%choice%"=="7" if "%pgadmin%" == "[ ]" (set "pgadmin=[X]") else (set "pgadmin=[ ]")
-if "%choice%"=="8" if "%hasura%" == "[ ]" (set "hasura=[X]") else (set "hasura=[ ]")
+if "%choice%"=="6" if "%pgadmin%" == "[ ]" (set "pgadmin=[X]") else (set "pgadmin=[ ]")
+if "%choice%"=="7" if "%hasura%" == "[ ]" (set "hasura=[X]") else (set "hasura=[ ]")
 
 goto :addons
 
@@ -188,7 +185,6 @@ if "%basiclogs%" == "[X]" (
 
 if "%ui%" == "[X]" set "cmd=!cmd! -f docker-compose.hub.ui.yaml"
 if "%natsutils%" == "[X]" set "cmd=!cmd! -f docker-compose.utils.nats-utils.yaml"
-if "%batchppa%" == "[X]" set "cmd=!cmd! -f docker-compose.utils.batch-ppa.yaml"
 if "%pgadmin%" == "[X]" set "cmd=!cmd! -f docker-compose.utils.pgadmin.yaml"
 if "%hasura%" == "[X]" set "cmd=!cmd! -f docker-compose.utils.hasura.yaml"
 
