@@ -1905,17 +1905,19 @@ then issues a targeted `docker compose up --no-deps --force-recreate`.  This
 means the command is always reconstructed from live state — no hardcoded file
 chains that can go stale.
 
-Server A's two sub-chains (`tazama-core` main stack and extensions APIs) are
-handled transparently by this label-based approach.
+Server A hosts two compose sub-chains under `tazama-core`: the main core
+services and the extensions APIs (DEMS + DEAPI — these run on Server A from
+the `extensions/` compose files, not on Server B). Server B and C stacks are
+handled the same way via their own project labels.
 
 ```powershell
 # Update admin-service on Server A (pulls image, no repo pull)
 .\restart-service.ps1 -Server A -Service admin-service
 
-# Roll out a committed fix from a branch, then recreate the container
+# Roll out a committed fix from a branch, then recreate DEAPI (Server A - extensions)
 .\restart-service.ps1 -Server A -Service deapi -RepoPull fix-biar-data-pipeline
 
-# Roll out latest dev branch changes and recreate
+# Roll out latest dev branch changes and recreate DEAPI (Server A - extensions)
 .\restart-service.ps1 -Server A -Service deapi -RepoPull dev
 
 # Update tcs-api on Server B (image pull only, no repo pull)
