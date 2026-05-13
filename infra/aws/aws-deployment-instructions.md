@@ -1125,6 +1125,7 @@ Four security groups. EC2 instances have **no internet-facing inbound rules** - 
 | Inbound | 3020 | TCP | `0.0.0.0/0` | Auth Service |
 | Inbound | 8080 | TCP | `0.0.0.0/0` | Keycloak |
 | Inbound | 6100 | TCP | `0.0.0.0/0` | Hasura |
+| Inbound | 4000 | TCP | `0.0.0.0/0` | batch-ppa |
 | Inbound | 3005–3090 | TCP | `0.0.0.0/0` | TRS / TCS / CMS backends |
 | Inbound | 5173–5175 | TCP | `0.0.0.0/0` | TCS / TRS / CMS frontends |
 | Inbound | 18866 | TCP | `0.0.0.0/0` | Voila (CMS notebook server) |
@@ -1143,6 +1144,7 @@ Four security groups. EC2 instances have **no internet-facing inbound rules** - 
 | Inbound | 8080 | TCP | sg-tazama-alb | Keycloak |
 | Inbound | 5050–5051 | TCP | sg-tazama-alb | pgAdmin |
 | Inbound | 6100 | TCP | sg-tazama-alb | Hasura |
+| Inbound | 4000 | TCP | sg-tazama-alb | batch-ppa |
 | Inbound | 0–65535 | TCP | `10.0.1.0/24` | Cross-server (NATS :14222, PostgreSQL :15432, Valkey :16379, etc.) |
 | Inbound | 22 | TCP | sg-tazama-eice | SSH via EICE endpoint only |
 | Outbound | All | All | `0.0.0.0/0` | Image pulls, GitHub builds |
@@ -1519,6 +1521,7 @@ docker compose -p tazama-core \
   -f ./docker-compose.hub.logs.base.yaml \
   -f ./docker-compose.utils.pgadmin.yaml \
   -f ./docker-compose.utils.hasura.yaml \
+  -f ./docker-compose.utils.batch-ppa.yaml \
   up -d [--pull always]
 ```
 
@@ -2035,6 +2038,7 @@ Forwards Server A service ports to `localhost`. Press **Ctrl+C** to close.
 | `3020` | Auth Service |
 | `8080` | Keycloak |
 | `6100` | Hasura GraphQL |
+| `4000` | batch-ppa |
 | `5050` | pgAdmin |
 | `14222` | NATS (exterior) |
 | `15432` | PostgreSQL (exterior) |

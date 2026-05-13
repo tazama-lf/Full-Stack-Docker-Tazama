@@ -71,6 +71,14 @@ resource "aws_security_group" "alb" {
   }
 
   ingress {
+    description = "batch-ppa"
+    from_port   = 4000
+    to_port     = 4000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
     description = "DEAPI / DEMS (Server A)"
     from_port   = 3001
     to_port     = 3002
@@ -175,6 +183,14 @@ resource "aws_security_group" "server_a" {
     description     = "Hasura"
     from_port       = 6100
     to_port         = 6100
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+  ingress {
+    description     = "batch-ppa"
+    from_port       = 4000
+    to_port         = 4000
     protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
   }

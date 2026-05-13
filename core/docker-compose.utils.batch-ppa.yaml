@@ -1,9 +1,6 @@
 ﻿services:
-  nats-utilities:
-    build:
-      context: https://github.com/tazama-lf/batch-ppa.git#${BATCH_PPA_BRANCH}
-      args:
-        - GH_TOKEN
+  batch-ppa:
+    image: tazamaorg/batch-ppa:${TAZAMA_VERSION}
     env_file:
       - env/batch-ppa.env
       - .env
