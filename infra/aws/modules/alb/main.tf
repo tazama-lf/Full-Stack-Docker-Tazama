@@ -29,6 +29,7 @@ locals {
     keycloak     = { port = 8080, server = "a" }
     pgadmin      = { port = 5050, server = "a" }
     hasura       = { port = 6100, server = "a" }
+    batch-ppa    = { port = 4000, server = "a" }
     tcs-frontend = { port = 5173, server = "b" }
     tcs-api      = { port = 3010, server = "b" }
     trs-frontend = { port = 5174, server = "b" }

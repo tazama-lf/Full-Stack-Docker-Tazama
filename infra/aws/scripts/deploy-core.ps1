@@ -147,6 +147,7 @@ $composeArgs = @(
     '-f ./docker-compose.hub.logs.base.yaml'
     '-f ./docker-compose.utils.pgadmin.yaml'
     '-f ./docker-compose.utils.hasura.yaml'
+    '-f ./docker-compose.utils.batch-ppa.yaml'
 ) -join ' '
 
 $maxAttempts = 3
