@@ -58,10 +58,11 @@ create index idx_rule_upd_dt_tm on rule (updDtTm, tenantId);
 
 create table evaluation (
     evaluation jsonb not null,
-    creDtTm text generated always as (evaluation ->> 'timestamp') stored,
-    messageId text generated always as (
-        evaluation -> 'transaction' -> 'FIToFIPmtSts' -> 'GrpHdr' ->> 'MsgId'
-    ) stored,
+    creDtTm text generated always as (evaluation -> 'report' ->> 'timestamp') stored,
+    messageid text generated always as (coalesce(
+        evaluation -> 'transaction' -> 'FIToFIPmtSts' -> 'GrpHdr' ->> 'MsgId',
+        evaluation -> 'transaction' ->> 'MsgId'
+    )) stored,
     tenantId text generated always as (evaluation -> 'transaction' ->> 'TenantId') stored,
     constraint unique_msgid_evaluation unique (messageId, tenantId)
 );
@@ -322,3 +323,19 @@ create index idx_pain013_dbtr_acct_id on pain013 (debtorAccountId, tenantId);
 create index idx_pain013_cdtr_acct_id on pain013 (creditorAccountId, tenantId);
 
 create index idx_pain013_credttm on pain013 (creDtTm, tenantId);
+
+\connect raw_history;
+
+CREATE TABLE public.dems_quarantine (
+	id uuid NOT NULL,
+	correlation_id varchar(255) NULL,
+	tenant_id varchar(100) NOT NULL,
+	endpoint_path text NULL,
+	config_id varchar(255) NULL,
+	"version" varchar(50) NULL,
+	"error" text NULL,
+	raw_payload jsonb NULL,
+	status varchar(50) NULL,
+	created_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	CONSTRAINT dems_quarantine_pkey PRIMARY KEY (id)
+);

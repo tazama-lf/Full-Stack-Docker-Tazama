@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS tazama_data_model_json
 
 
 INSERT INTO tazama_data_model_json(id, tenant_id, data_model_json, created_at, updated_at) VALUES 
-(1, 'DEFAULT', '{"redis": {"name": "", "evtId": "", "cdtrId": "", "dbtrId": "", "creDtTm": "", "currency": "", "instdAmt": {}, "xchgRate": 0, "cdtrAcctId": "", "dbtrAcctId": "", "intrBkSttlmAmt": {}}, "transactionDetails": {"Amt": 0, "Ccy": "", "lat": "", "TxTp": "", "long": "", "MsgId": "", "TxSts": "", "source": "", "CreDtTm": "", "TenantId": "", "EndToEndId": "", "destination": ""}}', NOW(), NOW());
+(1, 'DEFAULT', '{"redis": {"name": "", "evtId": "", "cdtrId": "", "dbtrId": "", "creDtTm": "", "currency": "", "instdAmt": {"Amt": 0, "Ccy": ""}, "xchgRate": 0, "cdtrAcctId": "", "dbtrAcctId": "", "intrBkSttlmAmt": {"Amt": 0, "Ccy": ""}}, "transactionDetails": {"Amt": 0, "Ccy": "", "lat": "", "TxTp": "", "long": "", "MsgId": "", "TxSts": "", "source": "", "CreDtTm": "", "TenantId": "", "EndToEndId": "", "destination": ""}}', NOW(), NOW());
 
 
 CREATE TABLE IF NOT EXISTS tcs_config (
