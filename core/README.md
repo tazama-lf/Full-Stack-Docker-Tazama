@@ -22,6 +22,7 @@
   - [7.1. Manual post-deployment system configuration](#71-manual-post-deployment-system-configuration)
   - [7.2. Exporting the Keycloak Tazama realm](#72-exporting-the-keycloak-tazama-realm)
   - [7.3. Docker Compose YAML structure](#73-docker-compose-yaml-structure)
+  - [7.4. Adding tenants and users to Keycloak](#74-adding-tenants-and-users-to-keycloak)
 
 <h1></h1>
 <h1 style="color: red;">WARNING - THIS TAZAMA REPOSITORY IS TO BE USED FOR DEMONSTRATION, EXPLORATION AND TESTING PURPOSES ONLY.</h1>
@@ -666,5 +667,201 @@ in your `full-stack-docker-tazama` repository folder, or you must update the vol
 ## Docker Compose YAML structure
 
 View this file for additional detail about the various Docker Compose YAML files and how they are structured and related: [Docker Compose YAML Structure Overview](./docker-yaml-structure.md)
+
+<div style="text-align: right"><a href="#top">Top</a></div>
+
+## Adding tenants and users to Keycloak
+
+Two scripts are provided to add a new tenant and its default set of 12 users to a running Keycloak instance via the Admin REST API. No Keycloak restart or realm file edit is required.
+
+The scripts are located in:
+
+```
+core/auth/keycloak/add-tenant.py   (Python 3.8+, no third-party dependencies)
+core/auth/keycloak/add-tenant.js   (Node.js 18+,  no third-party dependencies)
+```
+
+Both scripts are functionally identical. Choose whichever runtime is more convenient.
+
+### What the scripts do
+
+For each new tenant, the scripts:
+
+1. Authenticate against the Keycloak Admin REST API using the `admin-cli` client.
+2. Ensure that the required tenant subgroup node (named after the tenant domain in upper-case, e.g. `NEWTENANT.COM`) exists under every service role group. Missing nodes are created automatically; existing ones are left untouched.
+3. Create 12 standard users with the tenant email domain, set their password, and assign the `TENANT_ID` user attribute:
+
+   | Username prefix | Service | Group path |
+   |---|---|---|
+   | `cms-administrator` | CMS | `/tazama-cms/CMS_ADMIN/<DOMAIN>` |
+   | `cms-compliance-officer` | CMS | `/tazama-cms/CMS_COMPLIANCE_OFFICER/<DOMAIN>` |
+   | `cms-investigator` | CMS | `/tazama-cms/CMS_INVESTIGATOR/<DOMAIN>` |
+   | `cms-supervisor` | CMS | `/tazama-cms/CMS_SUPERVISOR/<DOMAIN>` |
+   | `tcs-approver` | TCS | `/tazama-tcs/approver/<DOMAIN>` |
+   | `tcs-editor` | TCS | `/tazama-tcs/editor/<DOMAIN>` |
+   | `tcs-exporter` | TCS | `/tazama-tcs/exporter/<DOMAIN>` |
+   | `tcs-publisher` | TCS | `/tazama-tcs/publisher/<DOMAIN>` |
+   | `trs-approver` | TRS | `/tazama-trs/approver/<DOMAIN>` |
+   | `trs-editor` | TRS | `/tazama-trs/editor/<DOMAIN>` |
+   | `trs-publisher` | TRS | `/tazama-trs/publisher/<DOMAIN>` |
+   | `tazama-api-client` | API | `/tazama-conditions/<DOMAIN>`, `/tazama-config/<DOMAIN>`, `/tazama-reports/<DOMAIN>`, `/tazama-tms/<DOMAIN>` |
+
+4. Print a shareable tenant onboarding report and a Keycloak group assignment breakdown.
+
+If a user already exists, the script resets the password and re-assigns the group. Running the script a second time for the same tenant is therefore safe.
+
+### Prerequisites
+
+- Keycloak must be running and reachable (default: `https://keycloak.beta.tazama.org`).
+- **Python variant**: Python 3.8 or later. No `pip install` required - uses stdlib only (`urllib`, `argparse`, `json`).
+- **Node variant**: Node.js 18 or later. No `npm install` required - uses stdlib only (`node:https`, `node:url`). The script uses ES module syntax (`import`); run directly with `node add-tenant.js`.
+- The Keycloak admin password must be available. Set it as the `KC_ADMIN_PW` environment variable (recommended) or pass it with `--admin-password`.
+
+### Setting the admin password
+
+**Linux / macOS:**
+```bash
+export KC_ADMIN_PW="your-admin-password"
+```
+
+**Windows PowerShell:**
+```powershell
+$env:KC_ADMIN_PW = 'your-admin-password'
+```
+
+**Windows Command Prompt:**
+```cmd
+set KC_ADMIN_PW=your-admin-password
+```
+
+> [!NOTE]
+> Set the variable in the same shell session you will run the script from. The variable is not persisted across sessions unless you add it to your shell profile or system environment.
+
+### Usage
+
+**Python:**
+```bash
+python add-tenant.py --domain <domain> --tenant-id <TENANT_ID> --password <password>
+```
+
+**Node.js:**
+```bash
+node add-tenant.js --domain <domain> --tenant-id <TENANT_ID> --password <password>
+```
+
+### Arguments
+
+| Argument | Required | Default | Description |
+|---|---|---|---|
+| `--domain` | Yes | - | Tenant email domain, e.g. `newtenant.com` |
+| `--tenant-id` | Yes | - | Tenant identifier in upper-case, e.g. `NEWTENANT` |
+| `--password` | Yes | - | Password assigned to all 12 tenant users |
+| `--keycloak-url` | No | `https://keycloak.beta.tazama.org` | Keycloak base URL |
+| `--admin-user` | No | `admin` | Keycloak admin username |
+| `--admin-password` | No | `$KC_ADMIN_PW` env var | Keycloak admin password |
+| `--realm` | No | `tazama` | Keycloak realm name |
+| `--dry-run` | No | off | Print all actions without making any API calls |
+
+### Examples
+
+**Basic usage (admin password via env var):**
+
+```bash
+# Linux / macOS
+export KC_ADMIN_PW="admin-secret"
+python add-tenant.py --domain acme.com --tenant-id ACME --password "S3cur3P@ss!"
+```
+
+```powershell
+# Windows PowerShell
+$env:KC_ADMIN_PW = 'admin-secret'
+node add-tenant.js --domain acme.com --tenant-id ACME --password 'S3cur3P@ss!'
+```
+
+**Targeting a local Keycloak instance:**
+
+```bash
+python add-tenant.py --domain acme.com --tenant-id ACME --password "S3cur3P@ss!" \
+  --keycloak-url http://localhost:8080 --realm tazama
+```
+
+**Dry run - preview all actions without making changes:**
+
+```bash
+python add-tenant.py --domain acme.com --tenant-id ACME --password "S3cur3P@ss!" --dry-run
+node add-tenant.js  --domain acme.com --tenant-id ACME --password "S3cur3P@ss!" --dry-run
+```
+
+### Password quoting in PowerShell
+
+Passwords containing special characters (`$`, `@`, `^`, `*`, `!`) require careful quoting in PowerShell:
+
+- Use **single quotes** for passwords that contain `$` (prevents variable interpolation): `'P@ss$word'`
+- Use **double quotes** for passwords that start with `@` (prevents splatting): `"@P@ssword"`
+- Passwords that contain both `$` and start with `@` should be passed via the `KC_ADMIN_PW` environment variable and the `--password` argument quoted appropriately, or stored in a variable first:
+
+  ```powershell
+  $pw = '@P@ss$word'
+  node add-tenant.js --domain acme.com --tenant-id ACME --password $pw
+  ```
+
+### Sample output
+
+```text
+=== Add tenant: ACME | domain: acme.com | realm: tazama ===
+
+[1/4] Authenticating as admin...
+      OK
+
+[2/4] Ensuring group subgroups for ACME.COM...
+  Create group 'ACME.COM' under parent <id>
+  ...
+      Done.
+
+[3/4] Creating 12 users...
+  Create user cms-administrator@acme.com
+    Assign user to group <id>
+  ...
+
+[4/4] Done. Tenant ACME (acme.com) provisioned with 12 users.
+      Users can log in at https://cms.beta.tazama.org etc. with their @acme.com email addresses.
+
+==================================================
+TENANT ONBOARDING REPORT
+==================================================
+TenantId: ACME
+
+https://cms.beta.tazama.org
+  cms-administrator@acme.com
+  cms-compliance-officer@acme.com
+  cms-investigator@acme.com
+  cms-supervisor@acme.com
+
+https://tcs.beta.tazama.org
+  tcs-approver@acme.com
+  tcs-editor@acme.com
+  tcs-exporter@acme.com
+  tcs-publisher@acme.com
+
+https://trs.beta.tazama.org
+  trs-approver@acme.com
+  trs-editor@acme.com
+  trs-publisher@acme.com
+
+https://tms.beta.tazama.org
+https://admin.beta.tazama.org
+
+  tazama-api-client@acme.com
+
+password: S3cur3P@ss!
+
+==================================================
+KEYCLOAK GROUP ASSIGNMENTS
+==================================================
+  cms-administrator@acme.com
+    -> /tazama-cms/CMS_ADMIN/ACME.COM
+  ...
+==================================================
+```
 
 <div style="text-align: right"><a href="#top">Top</a></div>
