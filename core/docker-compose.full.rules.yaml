@@ -1,4 +1,4 @@
-﻿# For local testing
+# For local testing
 services:
   # RULE 001
   rule-001:

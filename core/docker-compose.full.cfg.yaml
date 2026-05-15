@@ -1,4 +1,4 @@
-﻿services:
+services:
   postgres:
     command: postgres -N 1000 -c shared_buffers=512MB -c effective_cache_size=2GB
     volumes:
