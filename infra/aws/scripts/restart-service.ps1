@@ -159,6 +159,45 @@ if ($effectiveBranch) {
         "cd $workingDir && git fetch origin $effectiveBranch && git checkout $effectiveBranch && git reset --hard origin/$effectiveBranch"
 }
 
+# After a repo pull, re-apply the same per-server overlays that the deploy
+# scripts apply. git reset --hard restores committed defaults; the overlays
+# below restore the AWS-specific values (private DNS names, public API URLs,
+# KEYCLOAK_HOSTNAME, etc.) that must not be committed.
+if ($effectiveBranch) {
+    switch ($Server) {
+        'A' {
+            # extensions/.env: SERVER_A/B/C_HOST, public API URLs, CORS origins
+            $overlayFile = Join-Path $PSScriptRoot '..\templates\env-extensions.tpl'
+            Write-Host "[$label] Re-applying extensions .env overlay..."
+            Set-RemoteEnvOverlay -InstanceId $instanceId -OverlayFile $overlayFile `
+                -RemoteEnvFile "$Script:RemoteRepo/extensions/.env"
+
+            # core/.env: KEYCLOAK_HOSTNAME (only present when ALB is active)
+            if ($out.KeycloakHostname) {
+                $overlayFile = Join-Path $PSScriptRoot '..\templates\env-core.tpl'
+                Write-Host "[$label] Re-applying core .env overlay..."
+                Set-RemoteEnvOverlay -InstanceId $instanceId -OverlayFile $overlayFile `
+                    -RemoteEnvFile "$Script:RemoteRepo/core/.env"
+            }
+        }
+        'B' {
+            # extensions/.env: SERVER_A/B/C_HOST, public API URLs, CORS origins
+            $overlayFile = Join-Path $PSScriptRoot '..\templates\env-extensions.tpl'
+            Write-Host "[$label] Re-applying extensions .env overlay..."
+            Set-RemoteEnvOverlay -InstanceId $instanceId -OverlayFile $overlayFile `
+                -RemoteEnvFile "$Script:RemoteRepo/extensions/.env"
+        }
+        'C' {
+            # biar/.env: SERVER_A/B/C_HOST, S3A_ENDPOINT, COUCHDB_URL
+            $overlayFile = Join-Path $PSScriptRoot '..\templates\env-biar.tpl'
+            Write-Host "[$label] Re-applying biar .env overlay..."
+            Set-RemoteEnvOverlay -InstanceId $instanceId -OverlayFile $overlayFile `
+                -RemoteEnvFile "$Script:RemoteRepo/biar/.env"
+        }
+    }
+    Write-Host "[$label] Overlays applied." -ForegroundColor Green
+}
+
 # -- Recreate -------------------------------------------------------------------------------
 $composeCmd = (
     "cd $workingDir && docker compose -p $project $fFlags " +

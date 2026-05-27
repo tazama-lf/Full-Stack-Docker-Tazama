@@ -54,12 +54,7 @@ Write-Host '[Server C] Ensuring correct repo branch and pulling latest...'
 Invoke-RemoteCommand -InstanceId $idC -Command "cd $Script:RemoteRepo && git fetch origin $Script:RepoBranch && git checkout $Script:RepoBranch && git reset --hard origin/$Script:RepoBranch"
 Write-Host '[Server C] Repo up to date.' -ForegroundColor Green
 
-# -- 2. Copy .env --------------------------------------------------------------
-Write-Host '[Server C] Copying biar/.env...'
-$localBiarEnv = Join-Path $PSScriptRoot '..\..\..\biar\.env'
-Copy-ToRemote -InstanceId $idC -LocalPath $localBiarEnv -RemotePath "$Script:RemoteRepo/biar/.env"
-
-# -- 3. Apply .env overlay -----------------------------------------------------
+# -- 2. Apply .env overlay -----------------------------------------------------
 # Replaces local-dev SERVER_A_HOST, SERVER_B_HOST, and SERVER_C_HOST defaults
 # in biar/.env with the Route 53 private DNS names.
 Write-Host '[Server C] Applying .env overlay...'

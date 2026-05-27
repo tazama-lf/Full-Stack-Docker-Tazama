@@ -42,21 +42,7 @@ $idB = $out.ServerB_InstanceId
 Write-Host "[Server A] Instance ID: $idA"
 Write-Host "[Server B] Instance ID: $idB"
 
-# -- 1. Server A: copy extensions .env and apply overlay ---------------------
-# DEMS and DEAPI run on Server A inside the tazama-core Docker project.
-# They consume extensions/.env for SERVER_B_HOST (used in CORS_ORIGINS).
-# Copy the repo's local-dev defaults first, then apply the same overlay that
-# Server B receives so SERVER_B_HOST resolves to extensions.tazama.internal.
-Write-Host '[Server A] Copying extensions/.env...'
-$localExtEnv = Join-Path $PSScriptRoot '..\..\..\extensions\.env'
-Copy-ToRemote -InstanceId $idA -LocalPath $localExtEnv -RemotePath "$Script:RemoteRepo/extensions/.env"
-
-Write-Host '[Server A] Applying .env overlay to extensions/.env...'
-$overlayFile = Join-Path $PSScriptRoot '..\templates\env-extensions.tpl'
-Set-RemoteEnvOverlay -InstanceId $idA -OverlayFile $overlayFile -RemoteEnvFile "$Script:RemoteRepo/extensions/.env"
-Write-Host '[Server A] .env overlay applied.' -ForegroundColor Green
-
-# -- 1b. Server A: copy auth public key ---------------------------------------
+# -- 1. Server A: copy auth public key
 # DEMS and DEAPI both set AUTH_PUBLIC_KEY_PATH=/auth/test-public-key.pem.
 # The key must exist on Server A before the containers start.
 Write-Host '[Server A] Copying auth public key...'
@@ -77,6 +63,14 @@ Write-Host '[Server A] Pulling latest repo...'
 Invoke-RemoteCommand -InstanceId $idA -Command "cd $Script:RemoteRepo && git fetch origin $Script:RepoBranch && git checkout $Script:RepoBranch && git reset --hard origin/$Script:RepoBranch"
 Write-Host '[Server A] Repo up to date.' -ForegroundColor Green
 
+# extensions/.env is git-tracked and arrived via git pull above.
+# Apply the overlay so SERVER_B_HOST resolves to extensions.tazama.internal
+# (used in CORS_ORIGINS by DEMS and DEAPI).
+$overlayFile = Join-Path $PSScriptRoot '..\templates\env-extensions.tpl'
+Write-Host '[Server A] Applying .env overlay to extensions/.env...'
+Set-RemoteEnvOverlay -InstanceId $idA -OverlayFile $overlayFile -RemoteEnvFile "$Script:RemoteRepo/extensions/.env"
+Write-Host '[Server A] .env overlay applied.' -ForegroundColor Green
+
 Write-Host '[Server A] Adding DEMS + DEAPI to tazama-core...'
 
 $pullFlag = if ($NoPull) { '' } else { '--pull always' }
@@ -96,12 +90,7 @@ Write-Host '[Server B] Ensuring correct repo branch and pulling latest...'
 Invoke-RemoteCommand -InstanceId $idB -Command "cd $Script:RemoteRepo && git fetch origin $Script:RepoBranch && git checkout $Script:RepoBranch && git reset --hard origin/$Script:RepoBranch"
 Write-Host '[Server B] Repo up to date.' -ForegroundColor Green
 
-# -- 4. Server B: copy .env ---------------------------------------------------
-Write-Host '[Server B] Copying extensions/.env...'
-$localExtEnv = Join-Path $PSScriptRoot '..\..\..\extensions\.env'
-Copy-ToRemote -InstanceId $idB -LocalPath $localExtEnv -RemotePath "$Script:RemoteRepo/extensions/.env"
-
-# -- 5. Server B: apply .env overlay ------------------------------------------
+# -- 4. Server B: apply .env overlay ------------------------------------------
 # Replaces local-dev SERVER_A_HOST and SERVER_B_HOST defaults in extensions/.env
 # with the Route 53 private DNS names (core.tazama.internal etc.).
 Write-Host '[Server B] Applying .env overlay...'
