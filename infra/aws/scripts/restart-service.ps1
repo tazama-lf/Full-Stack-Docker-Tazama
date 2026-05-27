@@ -159,6 +159,52 @@ if ($effectiveBranch) {
         "cd $workingDir && git fetch origin $effectiveBranch && git checkout $effectiveBranch && git reset --hard origin/$effectiveBranch"
 }
 
+# After a repo pull, re-apply the same per-server overlays that the deploy
+# scripts apply. git reset --hard restores committed defaults; the overlays
+# below restore the AWS-specific values (private DNS names, public API URLs,
+# KEYCLOAK_HOSTNAME, etc.) that must not be committed.
+if ($effectiveBranch) {
+    switch ($Server) {
+        'A' {
+            # extensions/.env: SERVER_A/B/C_HOST, public API URLs, CORS origins
+            $overlayFile = Join-Path $PSScriptRoot '..\templates\env-extensions.tpl'
+            Write-Host "[$label] Re-applying extensions .env overlay..."
+            Set-RemoteEnvOverlay -InstanceId $instanceId -OverlayFile $overlayFile `
+                -RemoteEnvFile "$Script:RemoteRepo/extensions/.env"
+
+            # core/.env: KEYCLOAK_HOSTNAME (only present when ALB is active)
+            if ($out.KeycloakHostname) {
+                Write-Host "[$label] Re-applying core .env overlay..."
+                Set-RemoteEnvOverlay -InstanceId $instanceId `
+                    -OverlayContent "KEYCLOAK_HOSTNAME=$($out.KeycloakHostname)" `
+                    -RemoteEnvFile "$Script:RemoteRepo/core/.env"
+            }
+
+            # KC_HOSTNAME_PORT must be absent on AWS - strip it from keycloak.env
+            # which git reset --hard restores to its committed value (KC_HOSTNAME_PORT=8080).
+            # TODO(#221): replace with Set-RemoteEnvOverlay deletion support.
+            Write-Host "[$label] Stripping KC_HOSTNAME_PORT from keycloak.env..."
+            Invoke-RemoteCommand -InstanceId $instanceId -Command `
+                "sed -i '/^KC_HOSTNAME_PORT=/d' $Script:RemoteRepo/core/env/keycloak.env"
+        }
+        'B' {
+            # extensions/.env: SERVER_A/B/C_HOST, public API URLs, CORS origins
+            $overlayFile = Join-Path $PSScriptRoot '..\templates\env-extensions.tpl'
+            Write-Host "[$label] Re-applying extensions .env overlay..."
+            Set-RemoteEnvOverlay -InstanceId $instanceId -OverlayFile $overlayFile `
+                -RemoteEnvFile "$Script:RemoteRepo/extensions/.env"
+        }
+        'C' {
+            # biar/.env: SERVER_A/B/C_HOST, S3A_ENDPOINT, COUCHDB_URL
+            $overlayFile = Join-Path $PSScriptRoot '..\templates\env-biar.tpl'
+            Write-Host "[$label] Re-applying biar .env overlay..."
+            Set-RemoteEnvOverlay -InstanceId $instanceId -OverlayFile $overlayFile `
+                -RemoteEnvFile "$Script:RemoteRepo/biar/.env"
+        }
+    }
+    Write-Host "[$label] Overlays applied." -ForegroundColor Green
+}
+
 # -- Recreate -------------------------------------------------------------------------------
 $composeCmd = (
     "cd $workingDir && docker compose -p $project $fFlags " +

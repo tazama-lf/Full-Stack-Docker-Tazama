@@ -133,19 +133,31 @@ function Copy-ToRemote {
 }
 
 # -- Set-RemoteEnvOverlay -----------------------------------------------------
-# Reads a KEY=VALUE overlay file (lines beginning with # are ignored) and
-# applies each entry to the remote .env file at $RemoteEnvFile using sed:
+# Reads a KEY=VALUE overlay and applies each entry to the remote .env file at
+# $RemoteEnvFile using sed:
 #   - If the key exists: the value is replaced in-place.
 #   - If the key is absent: the key=value line is appended.
+#
+# Supply EITHER -OverlayFile (path to a local .tpl file) OR -OverlayContent
+# (a multi-line string of KEY=VALUE pairs).  Lines beginning with # are ignored.
 function Set-RemoteEnvOverlay {
     param(
         [string]$InstanceId,
         [string]$OverlayFile,
+        [string]$OverlayContent,
         [string]$RemoteEnvFile
     )
 
-    $lines = Get-Content $OverlayFile |
-             Where-Object { $_ -notmatch '^\s*#' -and $_ -match '=' }
+    $hasFile    = -not [string]::IsNullOrWhiteSpace($OverlayFile)
+    $hasContent = -not [string]::IsNullOrWhiteSpace($OverlayContent)
+    if ($hasFile -eq $hasContent) {
+        throw "Set-RemoteEnvOverlay requires exactly one of -OverlayFile or -OverlayContent."
+    }
+
+    $source = if ($OverlayFile) { Get-Content $OverlayFile } `
+              else               { $OverlayContent -split "`n" }
+
+    $lines = $source | Where-Object { $_ -notmatch '^\s*#' -and $_ -match '=' }
 
     if (-not $lines) { return }
 
