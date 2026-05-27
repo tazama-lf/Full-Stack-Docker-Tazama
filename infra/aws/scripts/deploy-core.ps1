@@ -47,6 +47,15 @@ Write-Host '[Server A] Pulling latest repo changes...'
 Invoke-RemoteCommand -InstanceId $idA -Command "cd $Script:RemoteRepo && git fetch origin $Script:RepoBranch && git checkout $Script:RepoBranch && git reset --hard origin/$Script:RepoBranch"
 Write-Host '[Server A] Repo up to date.' -ForegroundColor Green
 
+# KC_HOSTNAME_PORT must be absent on AWS (KC_PROXY=edge derives the port from
+# X-Forwarded-Port: 443 sent by the ALB). The committed keycloak.env contains
+# KC_HOSTNAME_PORT=8080 for local use; strip it here before the stack starts.
+# TODO(#221): replace with Set-RemoteEnvOverlay deletion support.
+Write-Host '[Server A] Stripping KC_HOSTNAME_PORT from keycloak.env (local-only, not used on AWS)...'
+Invoke-RemoteCommand -InstanceId $idA -Command `
+    "sed -i '/^KC_HOSTNAME_PORT=/d' $Script:RemoteRepo/core/env/keycloak.env"
+Write-Host '[Server A] KC_HOSTNAME_PORT stripped.' -ForegroundColor Green
+
 # -- 3. Apply credentials overlay to core/.env and all service env files ------
 # core/.env is git-tracked and arrives on the server via the git pull above.
 # Apply credentials overlay to core/.env and all service env files.

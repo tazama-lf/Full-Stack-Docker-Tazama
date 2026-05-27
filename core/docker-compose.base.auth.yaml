@@ -4,7 +4,7 @@ services:
   # AUTH PROVIDER
   keycloak:
     image: quay.io/keycloak/keycloak:23.0.6
-    command: "start-dev --import-realm"
+    command: "start-dev --import-realm --health-enabled=true"
     env_file:
       - env/keycloak.env
     restart: always

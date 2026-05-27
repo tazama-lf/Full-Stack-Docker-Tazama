@@ -179,6 +179,13 @@ if ($effectiveBranch) {
                 Set-RemoteEnvOverlay -InstanceId $instanceId -OverlayFile $overlayFile `
                     -RemoteEnvFile "$Script:RemoteRepo/core/.env"
             }
+
+            # KC_HOSTNAME_PORT must be absent on AWS - strip it from keycloak.env
+            # which git reset --hard restores to its committed value (KC_HOSTNAME_PORT=8080).
+            # TODO(#221): replace with Set-RemoteEnvOverlay deletion support.
+            Write-Host "[$label] Stripping KC_HOSTNAME_PORT from keycloak.env..."
+            Invoke-RemoteCommand -InstanceId $instanceId -Command `
+                "sed -i '/^KC_HOSTNAME_PORT=/d' $Script:RemoteRepo/core/env/keycloak.env"
         }
         'B' {
             # extensions/.env: SERVER_A/B/C_HOST, public API URLs, CORS origins
