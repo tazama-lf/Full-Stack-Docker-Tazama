@@ -174,9 +174,9 @@ if ($effectiveBranch) {
 
             # core/.env: KEYCLOAK_HOSTNAME (only present when ALB is active)
             if ($out.KeycloakHostname) {
-                $overlayFile = Join-Path $PSScriptRoot '..\templates\env-core.tpl'
                 Write-Host "[$label] Re-applying core .env overlay..."
-                Set-RemoteEnvOverlay -InstanceId $instanceId -OverlayFile $overlayFile `
+                Set-RemoteEnvOverlay -InstanceId $instanceId `
+                    -OverlayContent "KEYCLOAK_HOSTNAME=$($out.KeycloakHostname)" `
                     -RemoteEnvFile "$Script:RemoteRepo/core/.env"
             }
 

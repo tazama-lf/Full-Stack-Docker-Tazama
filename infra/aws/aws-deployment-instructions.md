@@ -152,7 +152,6 @@ full-stack-docker-tazama/
         │   └── dns/
         ├── templates/
         │   ├── bootstrap.sh.tpl
-        │   ├── env-core.tpl
         │   ├── env-extensions.tpl
         │   └── env-biar.tpl
         └── scripts/
@@ -1476,7 +1475,7 @@ before moving on to the next. The runnable scripts are, in order:
 | `Get-TofuOutputs` | Runs `tofu output -json` and returns a hashtable of instance IDs and private IPs |
 | `Invoke-RemoteCommand` | SSH to an EC2 instance via EICE ProxyCommand and run a shell command |
 | `Copy-ToRemote` | SCP a file to an EC2 instance via EICE |
-| `Set-RemoteEnvOverlay` | Reads a KEY=VALUE overlay file and applies each entry to a remote `.env` using `sed` |
+| `Set-RemoteEnvOverlay` | Reads a `KEY=VALUE` overlay (from a local file via `-OverlayFile` or an inline string via `-OverlayContent`) and applies each entry to a remote `.env` using `sed` (replaces existing keys, appends missing ones). Exactly one of the two parameters must be supplied. |
 | `Wait-Bootstrap` | Polls every 30 s until `/home/ec2-user/.bootstrap-complete` exists on the remote instance |
 
 **EICE SSH ProxyCommand used internally:**
@@ -1497,8 +1496,8 @@ port 22 is exposed anywhere.
 
 1. Reads `server_a_instance_id` from `tofu output`
 2. Calls `Wait-Bootstrap` (polls up to 15 min for `.bootstrap-complete`)
-3. Pulls the latest repo changes on Server A (`git pull`)
-4. Copies `core/.env` and the Keycloak realm JSON to Server A
+3. Pulls the latest repo changes on Server A (`git reset --hard` + `git pull`); strips `KC_HOSTNAME_PORT` from `keycloak.env` (local-only variable — `KC_PROXY=edge` on AWS derives the port from `X-Forwarded-Port: 443` sent by the ALB); if an ALB hostname is present in tofu outputs, injects `KEYCLOAK_HOSTNAME` into `core/.env` via `Set-RemoteEnvOverlay -OverlayContent`
+4. Copies the Keycloak realm JSON to Server A
 5. Starts the tazama-core stack on Server A with the full compose chain, retrying up to 3× if Postgres is still initialising (see note below)
 
 **Parameters:**
@@ -1533,7 +1532,7 @@ docker compose -p tazama-core \
 
 [infra/aws/scripts/deploy-extensions.ps1](full-stack-docker-tazama/infra/aws/scripts/deploy-extensions.ps1)
 
-1. **Server A** - copies `extensions/.env` and applies `templates/env-extensions.tpl` overlay:
+1. **Server A** - applies `templates/env-extensions.tpl` overlay to `extensions/.env` (which arrives on the server via git pull):
    sets `SERVER_A_HOST=core.tazama.internal` and `SERVER_B_HOST=extensions.tazama.internal`.
    DEMS and DEAPI run on Server A and consume `extensions/.env` for their `CORS_ORIGINS`
    value; without this overlay `SERVER_B_HOST` stays at the local-dev default `localhost`.
@@ -1576,13 +1575,12 @@ docker compose -p tazama-core \
 
 1. Waits for bootstrap on Server C (up to 15 min)
 2. Pulls the latest repo on Server C - ensures the server is on the correct branch
-3. Copies `biar/.env` to Server C (gitignored - never committed)
-4. Applies `templates/env-biar.tpl` overlay to `biar/.env` - sets all three host vars:
+3. Applies `templates/env-biar.tpl` overlay to `biar/.env` (which arrives via git pull) - sets all three host vars:
    - `SERVER_A_HOST=core.tazama.internal`
    - `SERVER_B_HOST=extensions.tazama.internal`
    - `SERVER_C_HOST=biar.tazama.internal`
-5. Creates the Tazama warehouse directory: `sudo mkdir -p /opt/Tazama_Warehouse` - bind-mounted by automation-orchestrator and datalakehouse-api
-6. **Staged Ozone startup** (SCM must fully initialise before OM and datanodes):
+4. Creates the Tazama warehouse directory: `sudo mkdir -p /opt/Tazama_Warehouse` - bind-mounted by automation-orchestrator and datalakehouse-api
+5. **Staged Ozone startup** (SCM must fully initialise before OM and datanodes):
    - Starts `scm` only, waits 20 s for SCM to initialise
    - Starts `om`, waits 15 s for OM to register
    - Brings up the full stack:
@@ -1737,7 +1735,7 @@ Provides the following functions:
 | `Get-TofuOutputs` | Runs `tofu output -json` and returns a hashtable of instance IDs, private IPs, and the EICE endpoint ID |
 | `Invoke-RemoteCommand` | SSH to an EC2 instance via the EICE ProxyCommand and runs a bash command; throws on non-zero exit |
 | `Copy-ToRemote` | SCP a local file to an EC2 instance via EICE |
-| `Set-RemoteEnvOverlay` | Reads a `KEY=VALUE` overlay file and applies each entry to a remote `.env` file using `sed` (replaces existing keys, appends missing ones) |
+| `Set-RemoteEnvOverlay` | Reads a `KEY=VALUE` overlay (from a local file via `-OverlayFile` or an inline string via `-OverlayContent`) and applies each entry to a remote `.env` file using `sed` (replaces existing keys, appends missing ones). Exactly one of the two parameters must be supplied. |
 | `Wait-Bootstrap` | Polls an instance until the bootstrap script has written its completion marker (up to 15 min) |
 
 Constants defined at script scope. Three of them can be overridden without editing the file by setting environment variables before running any script:
@@ -1941,7 +1939,7 @@ handled the same way via their own project labels.
 | `-Server` | **Required.** `A`, `B`, or `C`. |
 | `-Service` | **Required.** Docker Compose service name (e.g. `rule-001`, `tcs-api`, `nifi`). |
 | `-NoPull` | Skip the DockerHub image pull (`--pull always`). Use when the image is already current. |
-| `-RepoPull` | Controls the repo update on the target server before recreating the container. Omitted or `none` — skip entirely (default); `''` or `dev` — fetch and reset to `origin/dev`; `<branch>` — fetch and reset to that branch. |
+| `-RepoPull` | Controls the repo update on the target server before recreating the container. Omitted or `none` — skip entirely (default); `''` or `dev` — fetch and reset to `origin/dev`; `<branch>` — fetch and reset to that branch. After the reset, per-server env overlays are automatically re-applied (`env-extensions.tpl` on A and B, `env-biar.tpl` on C; `KEYCLOAK_HOSTNAME` injected from tofu outputs on A). |
 
 After recreating, the script prints a `docker ps` table confirming the
 container name, status, and image digest.

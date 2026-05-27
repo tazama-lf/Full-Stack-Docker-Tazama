@@ -107,7 +107,7 @@ KEYCLOAK_ADMIN_PASSWORD=$Password
 if ($out.KeycloakHostname) {
     Write-Host '[Server A] Applying core .env overlay...'
     Set-RemoteEnvOverlay -InstanceId $idA `
-        -OverlayFile (Join-Path $PSScriptRoot '..\templates\env-core.tpl') `
+        -OverlayContent "KEYCLOAK_HOSTNAME=$($out.KeycloakHostname)" `
         -RemoteEnvFile "$Script:RemoteRepo/core/.env"
     Write-Host '[Server A] core .env overlay applied.' -ForegroundColor Green
 }

@@ -148,6 +148,12 @@ function Set-RemoteEnvOverlay {
         [string]$RemoteEnvFile
     )
 
+    $hasFile    = -not [string]::IsNullOrWhiteSpace($OverlayFile)
+    $hasContent = -not [string]::IsNullOrWhiteSpace($OverlayContent)
+    if ($hasFile -eq $hasContent) {
+        throw "Set-RemoteEnvOverlay requires exactly one of -OverlayFile or -OverlayContent."
+    }
+
     $source = if ($OverlayFile) { Get-Content $OverlayFile } `
               else               { $OverlayContent -split "`n" }
 
