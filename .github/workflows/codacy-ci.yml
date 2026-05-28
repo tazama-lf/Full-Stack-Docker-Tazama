@@ -46,8 +46,14 @@ jobs:
       # Codacy outputs one SARIF run per engine. The CodeQL upload-sarif action rejects
       # files with multiple runs sharing the same category (enforced since 2025-07-21).
       # Merge all runs into one before uploading.
+      # Guard: when Codacy runs unauthenticated with no applicable findings it exits 0
+      # but does not write results.sarif. Create a minimal valid SARIF in that case so
+      # the upload step does not error on a missing or empty file.
       - name: Merge SARIF runs into single run
         run: |
+          if [ ! -s results.sarif ]; then
+            echo '{"$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","version":"2.1.0","runs":[{"tool":{"driver":{"name":"Codacy","rules":[]}},"results":[]}]}' > results.sarif
+          fi
           jq '
             if (.runs | length) > 1 then
               .runs = [{
