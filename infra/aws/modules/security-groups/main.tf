@@ -262,6 +262,14 @@ resource "aws_security_group" "server_b" {
     security_groups = [aws_security_group.alb.id]
   }
 
+  ingress {
+    description     = "CouchDB (ALB health check - port not exposed in ALB SG)"
+    from_port       = 5984
+    to_port         = 5984
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
   # Allows Server C to reach OpenSearch (9200) and PostgreSQL (15433) on Server B.
   ingress {
     description = "Cross-server traffic from private subnet"

@@ -1131,7 +1131,7 @@ Four security groups. EC2 instances have **no internet-facing inbound rules** - 
 | Inbound | 8088 | TCP | `0.0.0.0/0` | NiFi UI |
 | Outbound | All | All | `0.0.0.0/0` | Routing to EC2 target groups |
 
-> JupyterHub (:8000), Automation Orchestrator (:7619), and Datalakehouse API (:8282) have ALB target groups and listeners, but their ports are **not** open in the ALB SG - they are accessed via SSH tunnel (Phase E.1). Add them to the ALB SG when exposing them publicly.
+> JupyterHub (:8000), Automation Orchestrator (:7619), Datalakehouse API (:8282), and CouchDB (:5984) have ALB target groups and listeners, but their ports are **not** open in the ALB SG - they are accessed via the HTTPS subdomain (port 443) or SSH tunnel (Phase E.1). Add the plain HTTP port to the ALB SG only if port-based HTTP access is needed.
 
 #### sg-tazama-server-a (Server A - tazama-core)
 
@@ -1156,6 +1156,7 @@ Four security groups. EC2 instances have **no internet-facing inbound rules** - 
 | Inbound | 5173–5175 | TCP | sg-tazama-alb | TCS / TRS / CMS frontends |
 | Inbound | 18866 | TCP | sg-tazama-alb | Voila (CMS notebook server) |
 | Inbound | 5051 | TCP | sg-tazama-alb | pgAdmin (extensions) |
+| Inbound | 5984 | TCP | sg-tazama-alb | CouchDB (health check only - port not in ALB SG) |
 | Inbound | 0–65535 | TCP | `10.0.1.0/24` | Cross-server (OpenSearch :9200, PostgreSQL :15433, etc.) |
 | Inbound | 22 | TCP | sg-tazama-eice | SSH via EICE endpoint only |
 | Outbound | All | All | `0.0.0.0/0` | Image pulls, GitHub builds, Server A calls |
@@ -3319,6 +3320,7 @@ docker compose -p tazama-core \
 | 5174 | TRS Frontend | ALB | `trs` |
 | 5175 | CMS Frontend | ALB | `cms` |
 | 18866 | Voila notebook server | ALB | `voila` |
+| 5984 | CouchDB | ALB | `couchdb` |
 | 9200 | OpenSearch | (NiFi ETL - pending confirmation) | - |
 | 12222 | SFTP | File ingest | - |
 | 15433 | PostgreSQL (CMS) | Server C NiFi ETL | - |
