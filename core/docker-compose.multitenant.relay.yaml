@@ -11,7 +11,7 @@ services:
       INTERDICTION_DESTINATION: tenant
       INTERDICTION_PRODUCER: interdiction-service-tp
 
-  tadp:
+  event-adjudicator:
     environment:
       SUPPRESS_ALERTS: false
       ALERT_DESTINATION: tenant
@@ -74,30 +74,30 @@ services:
     depends_on:
       - tp
 
-  rstadp-tenant-001:
+  rsea-tenant-001:
     image: tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}
     env_file:
       - env/rs-nats.env
       - .env
     restart: always
     environment:
-      FUNCTION_NAME: relay-service-tadp-tenant-001
+      FUNCTION_NAME: relay-service-ea-tenant-001
       CONSUMER_STREAM: investigation-service-tenant-001
-      PRODUCER_STREAM: relay-service-nats-tadp-tenant-001
-      APM_SERVICE_NAME: relay-service-tadp-tenant-001
+      PRODUCER_STREAM: relay-service-nats-ea-tenant-001
+      APM_SERVICE_NAME: relay-service-ea-tenant-001
     depends_on:
-      - tadp
+      - event-adjudicator
 
-  rstadp-tenant-002:
+  rsea-tenant-002:
     image: tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}
     env_file:
       - env/rs-nats.env
       - .env
     restart: always
     environment:
-      FUNCTION_NAME: relay-service-tadp-tenant-002
+      FUNCTION_NAME: relay-service-ea-tenant-002
       CONSUMER_STREAM: investigation-service-tenant-002
-      PRODUCER_STREAM: relay-service-nats-tadp-tenant-002
-      APM_SERVICE_NAME: relay-service-tadp-tenant-002
+      PRODUCER_STREAM: relay-service-nats-ea-tenant-002
+      APM_SERVICE_NAME: relay-service-ea-tenant-002
     depends_on:
-      - tadp
+      - event-adjudicator

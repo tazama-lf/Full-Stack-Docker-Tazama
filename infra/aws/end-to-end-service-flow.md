@@ -39,8 +39,8 @@ flowchart TD
         NATS_A[("NATS\n:4222 / ext :14222")]
         PG_A[("PostgreSQL\n:5432 / ext :15432")]
         VK[("Valkey\n:6379 / ext :16379")]
-        PIPELINE["NATS Pipeline\nED → Rules → TP / EF / TADP"]
-        RS["Relay Services\nrsef · rstp · rstadp"]
+        PIPELINE["NATS Pipeline\nED → Rules → TP / EF / EA"]
+        RS["Relay Services\nrsef · rstp · rsea"]
         Logging["Event Sidecar :15000\n+ Lumberjack"]
     end
 
@@ -172,8 +172,7 @@ flowchart TD
 ## 2. Transaction Processing Pipeline
 
 The core Tazama flow: a financial message is submitted to the TMS, fanned out through the
-NATS-based rule evaluation pipeline, decisioned by TADP, and the resulting investigation alert
-is consumed by the CMS on Server B.
+NATS-based rule evaluation pipeline, decisioned by the Event Adjudicator, and the resulting investigation alert is consumed by the CMS on Server B.
 
 DEAPI and DEMS run inside the `tazama-core` Docker project on **Server A** (launched as a
 pre-flight step for extensions) so they share the internal Docker network with NATS, postgres,
@@ -193,8 +192,8 @@ sequenceDiagram
     participant Rules as Rule Processors<br/>Server A (901, 902 …)
     participant TP as Typology Processor<br/>Server A
     participant EF as Event Flow<br/>Server A
-    participant TADP as TADP<br/>Server A
-    participant RS as Relay Services<br/>Server A (rsef/rstp/rstadp)
+    participant EA as EA<br/>Server A
+    participant RS as Relay Services<br/>Server A (rsef/rstp/rsea)
     participant CMSbe as CMS Backend<br/>Server B :3090
     participant PG_B as PostgreSQL<br/>Server B :5432
     participant OSrch as OpenSearch<br/>Server B :9200
@@ -234,13 +233,13 @@ sequenceDiagram
     NATS-->>RS: rstp consumes ← interdiction-service-tp
     RS->>NATS: republish → relay-service-nats-tp
 
-    NATS-->>TADP: consume ← relay-service-nats-tp + relay-service-nats-ef
-    TADP->>PG_A: read TADP config (configuration DB)
-    TADP->>PG_A: write evaluation result (evaluation DB)
-    TADP->>NATS: publish → stream: investigation-service (alert)
+    NATS-->>EA: consume ← relay-service-nats-tp + relay-service-nats-ef
+    EA->>PG_A: read Event Adjudicator config (configuration DB)
+    EA->>PG_A: write evaluation result (evaluation DB)
+    EA->>NATS: publish → stream: investigation-service (alert)
 
-    NATS-->>RS: rstadp consumes ← investigation-service
-    RS->>NATS: republish → relay-service-nats-tadp
+    NATS-->>RS: rsea consumes ← investigation-service
+    RS->>NATS: republish → relay-service-nats-ea
 
     Note over CMSbe,NATS: CMS Backend (Server B) subscribes to<br/>investigation-service on Server A NATS :14222
     NATS-->>CMSbe: deliver investigation alert (nats://core.tazama.internal:14222)
@@ -522,13 +521,13 @@ flowchart TD
         Rn["rule-N …"]
         TP["Typology Processor"]
         EF["Event Flow"]
-        TADP["TADP"]
+        EA["EA"]
     end
 
     subgraph Relay["Relay Services"]
         RSEF["rsef\n(relay EF)"]
         RSTP["rstp\n(relay TP)"]
-        RSTADP["rstadp\n(relay TADP)"]
+        RSEA["rsea\n(relay EA)"]
     end
 
     subgraph External["External Consumers (cross-server)"]
@@ -545,9 +544,9 @@ flowchart TD
     ED -- "event-flow streams" --> EF
     TP -- "interdiction-service-tp" --> RSTP
     EF -- "interdiction-service-ef" --> RSEF
-    RSTP -- "relay-service-nats-tp" --> TADP
-    RSEF -- "relay-service-nats-ef" --> TADP
-    TADP -- "investigation-service" --> RSTADP
-    TADP -- "investigation-service" --> CMSbe
-    RSTADP -- "relay-service-nats-tadp\n(downstream / monitoring)" --> External
+    RSTP -- "relay-service-nats-tp" --> EA
+    RSEF -- "relay-service-nats-ef" --> EA
+    EA -- "investigation-service" --> RSEA
+    EA -- "investigation-service" --> CMSbe
+    RSEA -- "relay-service-nats-ea\n(downstream / monitoring)" --> External
 ```

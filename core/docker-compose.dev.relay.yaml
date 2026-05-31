@@ -11,7 +11,7 @@ services:
       INTERDICTION_DESTINATION: global
       INTERDICTION_PRODUCER: interdiction-service-tp
 
-  tadp:
+  event-adjudicator:
     environment:
       SUPPRESS_ALERTS: false
       ALERT_DESTINATION: global
@@ -56,7 +56,7 @@ services:
     depends_on:
       - tp
 
-  rstadp:
+  rsea:
     build:
       context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
       args:
@@ -68,9 +68,9 @@ services:
       - .env
     restart: always
     environment:
-      FUNCTION_NAME: relay-service-tadp
+      FUNCTION_NAME: relay-service-ea
       CONSUMER_STREAM: investigation-service
-      PRODUCER_STREAM: relay-service-nats-tadp
-      APM_SERVICE_NAME: relay-service-tadp
+      PRODUCER_STREAM: relay-service-nats-ea
+      APM_SERVICE_NAME: relay-service-ea
     depends_on:
-      - tadp
+      - event-adjudicator

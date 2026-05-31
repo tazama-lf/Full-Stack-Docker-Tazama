@@ -83,7 +83,7 @@ KEYCLOAK_ADMIN_PASSWORD=$Password
             "$Script:RemoteRepo/core/env/admin.env"
             "$Script:RemoteRepo/core/env/tp.env"
             "$Script:RemoteRepo/core/env/ed.env"
-            "$Script:RemoteRepo/core/env/tadp.env"
+            "$Script:RemoteRepo/core/env/event-adjudicator.env"
             "$Script:RemoteRepo/core/env/rule-executer.env"
             "$Script:RemoteRepo/core/env/rule-901.env"
             "$Script:RemoteRepo/core/env/rule-902.env"

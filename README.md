@@ -70,7 +70,7 @@ The core stack is the heart of Tazama. It runs the transaction monitoring pipeli
 - Valkey -- in-memory cache (port 16379)
 - Transaction Monitoring Service (TMS) API -- port 5000
 - Admin Service API -- port 5100
-- Event Director, Typology Processor, TADProcesser, rule processors
+- Event Director, Typology Processor, Event Adjudicator, rule processors
 - Keycloak (Authentication) -- port 8080
 - Authentication Service API -- port 3020
 - NATS Utilities (REST proxy) -- port 4000

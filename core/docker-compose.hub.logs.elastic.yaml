@@ -50,7 +50,7 @@ services:
     environment:
       SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
 
-  tadp:
+  event-adjudicator:
     depends_on:
       - event-sidecar
     environment:

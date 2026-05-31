@@ -384,7 +384,7 @@ Several services use different variable names for the same underlying credential
 |---|---|---|
 | `/tazama/postgres_core_password` | `POSTGRES_PASSWORD` | `core/docker-compose.base.infrastructure.yaml` |
 | | `POSTGRES_PASSWORD`, `DB_PASSWORD` | `core/env/` service env files (deapi, dems) |
-| | `RAW_HISTORY_DATABASE_PASSWORD`, `CONFIGURATION_DATABASE_PASSWORD`, `EVENT_HISTORY_DATABASE_PASSWORD`, `EVALUATION_DATABASE_PASSWORD`, `NEXT_PUBLIC_PG_PASSWORD` | `core/env/` service env files (admin, tms, tp, rules, tadp, etc.) |
+| | `RAW_HISTORY_DATABASE_PASSWORD`, `CONFIGURATION_DATABASE_PASSWORD`, `EVENT_HISTORY_DATABASE_PASSWORD`, `EVALUATION_DATABASE_PASSWORD`, `NEXT_PUBLIC_PG_PASSWORD` | `core/env/` service env files (admin, tms, tp, rules, ea, etc.) |
 | `/tazama/postgres_extensions_password` | `POSTGRES_PASSWORD` | `extensions/docker-compose.extensions.infrastructure.yaml`, `extensions/.env`, `extensions/env/tcs.env` |
 | | `POSTGRES_PASSWORD`, `SPRING_DATASOURCE_PASSWORD` | `extensions/env/cms.env` |
 | `/tazama/keycloak_admin_password` | `KEYCLOAK_ADMIN_PASSWORD` | `core/env/keycloak.env` |
