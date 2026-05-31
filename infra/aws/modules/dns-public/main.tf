@@ -93,6 +93,7 @@ locals {
     automation-orchestrator = var.target_group_arns["auto-orchestrator"]
     datalakehouse-api       = var.target_group_arns["datalakehouse-api"]
     batch-ppa               = var.target_group_arns["batch-ppa"]
+    couchdb                 = var.target_group_arns["couchdb"]
   }
 
   # Explicit priorities — must match the actual AWS state exactly.
@@ -120,6 +121,7 @@ locals {
     dems                    = 21
     voila                   = 22
     batch-ppa               = 23
+    couchdb                 = 24
   }
 }
 

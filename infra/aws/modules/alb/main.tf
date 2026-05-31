@@ -37,7 +37,8 @@ locals {
     cms-frontend = { port = 5175, server = "b" }
     cms-api      = { port = 3090, server = "b" }
     voila        = { port = 18866, server = "b" }
-    pgadmin-ext           = { port = 5051, server = "b" }
+    pgadmin-ext  = { port = 5051,  server = "b" }
+    couchdb      = { port = 5984,  server = "b" }
     nifi                    = { port = 8088, server = "c" }
     jupyterhub              = { port = 8000, server = "c" }
     auto-orchestrator       = { port = 7619, server = "c" }
@@ -63,6 +64,7 @@ locals {
     trs-api     = "/api/docs"
     tcs-api     = "/api/docs"
     voila       = "/voila/"
+    couchdb     = "/"
   }
 }
 
