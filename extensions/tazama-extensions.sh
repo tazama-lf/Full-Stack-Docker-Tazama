@@ -246,7 +246,7 @@ show_utils_menu() {
     echo ""
     print_color $BLUE "Execute some Docker commands:"
     echo ""
-    echo "1. Stop and restart ED, TP and TADP (reload network configuration)"
+    echo "1. Stop and restart ED, TP and EA (reload network configuration)"
     echo "2. Stop and remove Tazama project containers and volumes"
     echo "3. Remove all unused containers, networks, images and volumes"
     echo "4. List all images"
@@ -633,8 +633,8 @@ while true; do
                     r|R) break ;;
                     q|Q) exit 0 ;;
                     1)
-                        print_color $GREEN "Restarting ED, TP and TADP..."
-                        docker restart tazama-tp-1 tazama-tadp-1 tazama-ed-1
+                        print_color $GREEN "Restarting ED, TP and EA..."
+                        docker restart tazama-tp-1 tazama-event-adjudicator-1 tazama-ed-1
                         ;;
                     2)
                         print_color $YELLOW "Stopping and removing Tazama containers and volumes..."

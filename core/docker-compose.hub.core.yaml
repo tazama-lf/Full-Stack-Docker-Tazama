@@ -76,11 +76,11 @@ services:
       nats:
         condition: service_started
 
-  # TRANSACTION AGGREGATION AND DECISIONING PROCESSOR
-  tadp:
-    image: tazamaorg/transaction-aggregation-decisioning-processor:${TAZAMA_VERSION}
+  # EVENT ADJUDICATOR
+  event-adjudicator:
+    image: tazamaorg/event-adjudicator:${TAZAMA_VERSION}
     env_file:
-      - env/tadp.env
+      - env/event-adjudicator.env
       - .env
     restart: always
     depends_on:

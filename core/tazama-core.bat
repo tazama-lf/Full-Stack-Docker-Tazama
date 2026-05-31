@@ -220,7 +220,7 @@ cls
 echo.
 echo Execute some Docker commands:
 echo.
-echo 1. Stop and restart ED, TP and TADP (reload network configuration)
+echo 1. Stop and restart ED, TP and EA (reload network configuration)
 echo 2. Stop and remove Tazama project containers and volumes
 echo 3. Remove all unused containers, networks, images and volumes
 echo 4. List all images
@@ -236,7 +236,7 @@ if /i "%choice%"=="r" goto :menu
 if /i "%choice%"=="" goto :utils
 
 if "%choice%"=="1" (
-    set "cmd=docker restart tazama-core-tp-1 tazama-core-tadp-1 tazama-core-ed-1"
+    set "cmd=docker restart tazama-core-tp-1 tazama-core-event-adjudicator-1 tazama-core-ed-1"
 )
 if "%choice%"=="2" (
     goto :teardown_all

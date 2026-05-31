@@ -58,7 +58,7 @@ services:
       APM_URL: http://apm-server:8200
       APM_SECRET_TOKEN: ""
 
-  tadp:
+  event-adjudicator:
     depends_on:
       elasticsearch:
         condition: service_healthy

@@ -158,7 +158,7 @@ ED_BRANCH=main
 RULE_901_BRANCH=main
 RULE_902_BRANCH=main
 TP_BRANCH=main
-TADP_BRANCH=main
+EA_BRANCH=main
 NATS_UTILITIES_BRANCH=main
 CMS_BRANCH=main
 BATCH_PPA_BRANCH=main
@@ -237,7 +237,7 @@ This option is selected by default and can be deselected for non-multi-tenant de
 This option deploys the Tazama results relay services on top of the selected deployment type, including:
  - a relay service for event-flow processor egress to facilitated blocking based on prevalent account or entity conditions
  - a relay service for typology processor egress to facilitate transaction interdiction based on detected fraud
- - a relay service for transaction aggregation and decisioning processor (TADProc) egress to facilitate the propagation of investigation alerts
+ - a relay service for Event Adjudicator egress to facilitate the propagation of investigation alerts
 
 Only NATS-to-NATS relay services are accommodated in the Tazama full-stack deployment, although other relay services are available for NATS-to-REST, NATS-to-Kafka, and NATS-to-RabbitMQ.
 
@@ -321,7 +321,7 @@ This collection of menu options provide a number of useful Docker commands as sh
 ```text
 Execute some Docker commands:
 
-1. Stop and restart ED, TP and TADP (reload network configuration)
+1. Stop and restart ED, TP and EA (reload network configuration)
 2. Stop and remove Tazama project containers and volumes
 3. Remove all unused containers, networks, images and volumes
 4. List all images
@@ -333,7 +333,7 @@ Select function (1-7), (r)eturn or (q)uit
 Enter your choice:
 ```
 
-The menu options are fairly self-explanatory, but the first menu option, "Stop and restart ED, TP and TADP (reload network configuration)" is worth calling out. When you deploy a new network map to Tazama, you will need to restart the Event Director, Typology, and Transaction Aggregation and Decisioning processors to adopt the new network map 
+The menu options are fairly self-explanatory, but the first menu option, "Stop and restart ED, TP and EA (reload network configuration)" is worth calling out. When you deploy a new network map to Tazama, you will need to restart the Event Director, Typology, and Event Adjudicator processors to adopt the new network map. 
 
 (we're working on a more elegant way to reload a configuration at startup, but until then restarting the processors is the only way to load the updated network map.)
 
@@ -407,7 +407,7 @@ The core processors include:
  - The Transaction Monitoring Service API at `<https://localhost:5000>`, where messages will be sent for evaluation.
  - The Event Director that will handle message routing based on the network map.
  - The Typology Processor that will summarise rule results into scenarios according to individual typology configurations.
- - The Transaction Aggregation and Decisioning Processor that will wrap up the evaluation of a transaction and publish any alerts for breached typologies.
+ - The Event Adjudicator Processor that will wrap up the evaluation of a transaction and publish any alerts for breached typologies.
  - The Admin Services API that will facilitate condition management and configuration management.
  - The Event-Flow Rule Processor that implements account- and entity-specific condition handling.
 
@@ -533,7 +533,7 @@ To easily idetify the name of a service, perform a
 
 `docker container ls` command and use the part of the container name between the `tazama-` and the `-1`, for example:
 
-If the container name is `tazama-rstadp-1`, the service name is `rstadp`.
+If the container name is `tazama-rsea-1`, the service name is `rsea`.
 
 ### If Postman failing to connect to PostgreSQL when performing tests
 
@@ -583,7 +583,7 @@ Run the `tms-config` with the Tazama Docker Compose environment selected and set
 
 The test collection will remove all current configurations and will deploy the private rule and typology configuration as a replacement.
 
-After the deployment, you will have to restart the Event Director, Typology Processor and Transaction Aggregation and Decisioning Processor containers to load the updated network map.
+After the deployment, you will have to restart the Event Director, Typology Processor and Event Adjudicator Processor containers to load the updated network map.
 
 The `tms-config` repository also contains a `tms-config-test` collection in the `/default` folder that you can import and run to ensure that the configuration was properly installed and activated.
 

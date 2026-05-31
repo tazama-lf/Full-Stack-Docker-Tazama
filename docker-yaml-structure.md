@@ -74,7 +74,7 @@ GitHub dev core services (built from source via `GH_TOKEN`):
 - **`ed`**: Event Director
 - **`rule-901`**: Rule 901 (built from `rule-executer` repo)
 - **`tp`**: Typology Processor
-- **`tadp`**: Transaction Aggregation and Decisioning Processor
+- **`event-adjudicator`**: Event Adjudicator
 - **`ef`**: Event Flow rule processor
 
 #### `docker-compose.hub.core.yaml`
@@ -114,19 +114,19 @@ Relay services forward interdiction and alert messages to external NATS streams.
 
 #### `docker-compose.dev.relay.yaml`
 GitHub dev relay services (built from `relay-service` GitHub repo):
-- Configures `ef`, `tp`, `tadp` with `SUPPRESS_ALERTS=false` and `INTERDICTION_DESTINATION=global`
-- **`rsef`**: EF interdiction relay (`interdiction-service-ef` → `relay-service-nats-ef`)
-- **`rstp`**: TP interdiction relay (`interdiction-service-tp` → `relay-service-nats-tp`)
-- **`rstadp`**: TADP alert relay (`investigation-service` → `relay-service-nats-tadp`)
+- Configures `ef`, `tp`, `event-adjudicator` with `SUPPRESS_ALERTS=false` and `INTERDICTION_DESTINATION=global`
+- **`rsef`**: Event Flow interdiction relay (`interdiction-service-ef` → `relay-service-nats-ef`)
+- **`rstp`**: Typology Processor interdiction relay (`interdiction-service-tp` → `relay-service-nats-tp`)
+- **`rsea`**: Event Adjudicator alert relay (`investigation-service` → `relay-service-nats-ea`)
 
 #### `docker-compose.hub.relay.yaml`
 Same relay services using `tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}`.
 
 #### `docker-compose.multitenant.relay.yaml`
 Per-tenant relay services with `INTERDICTION_DESTINATION=tenant`:
-- **`rsef-tenant-001`**, **`rsef-tenant-002`**: EF relays per tenant
-- **`rstp-tenant-001`**, **`rstp-tenant-002`**: TP relays per tenant
-- **`rstadp-tenant-001`**, **`rstadp-tenant-002`**: TADP relays per tenant
+- **`rsef-tenant-001`**, **`rsef-tenant-002`**: Event Flow relays per tenant
+- **`rstp-tenant-001`**, **`rstp-tenant-002`**: Typology Processor relays per tenant
+- **`rsea-tenant-001`**, **`rsea-tenant-002`**: Event Adjudicator relays per tenant
 
 ### Logging Files
 
@@ -141,7 +141,7 @@ Same services using `tazamaorg/event-sidecar` and `tazamaorg/lumberjack` images.
 #### `docker-compose.dev.logs.elastic.yaml` / `docker-compose.hub.logs.elastic.yaml`
 Elasticsearch integration overlay:
 - Configures `lumberjack` to forward to Elasticsearch
-- Adds `SIDECAR_HOST` env var to `tms`, `admin`, `ed`, `ef`, `rule-901`/`rule-902`, `tp`, `tadp`
+- Adds `SIDECAR_HOST` env var to `tms`, `admin`, `ed`, `ef`, `rule-901`/`rule-902`, `tp`, `event-adjudicator`
 
 ### UI Files
 
@@ -180,7 +180,7 @@ Demo web interface:
 #### `docker-compose.utils.apm-elastic.yaml`
 - Includes Elasticsearch/Kibana via `docker-compose.dev.elastic.yaml`
 - **`apm-server`**: Elastic APM Server (port `${APMSERVER_PORT}:8200`) with RUM enabled
-- Injects `APM_ACTIVE=true` and `APM_URL=http://apm-server:8200` into `tms`, `ed`, `rule-901`, `tp`, `tadp`
+- Injects `APM_ACTIVE=true` and `APM_URL=http://apm-server:8200` into `tms`, `ed`, `rule-901`, `tp`, `event-adjudicator`
 
 ## Core Deployment Patterns
 

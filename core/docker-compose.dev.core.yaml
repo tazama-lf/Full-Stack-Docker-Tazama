@@ -112,17 +112,17 @@ services:
       nats:
         condition: service_started
 
-  # TRANSACTION AGGREGATION AND DECISIONING PROCESSOR
-  tadp:
+  # EVENT ADJUDICATOR
+  event-adjudicator:
     image: !reset null
     build:
-      context: https://github.com/tazama-lf/transaction-aggregation-decisioning-processor.git#${TADP_BRANCH}
+      context: https://github.com/tazama-lf/event-adjudicator.git#${EA_BRANCH}
       args:
         - GH_TOKEN
       secrets:
         - GH_TOKEN
     env_file:
-      - env/tadp.env
+      - env/event-adjudicator.env
       - .env
     restart: always
     depends_on:
