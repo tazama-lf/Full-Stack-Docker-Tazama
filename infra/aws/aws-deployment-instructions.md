@@ -1904,7 +1904,7 @@ is the recommended way to roll out a committed fix without a full redeploy.
 The script reads the running container's `com.docker.compose` labels to
 discover the exact working directory and compose file chain used to start it,
 then issues a targeted `docker compose up --no-deps --force-recreate`.  This
-means the command is always reconstructed from live state — no hardcoded file
+means the command is always reconstructed from live state - no hardcoded file
 chains that can go stale.
 
 Server A hosts two compose sub-chains under `tazama-core`: the main core
@@ -1933,14 +1933,22 @@ handled the same way via their own project labels.
 
 # Force recreate only - skip both pulls (e.g. restart a crashed container)
 .\restart-service.ps1 -Server B -Service cms-frontend -NoPull
+
+# Rename a service - drop tadp and start event-adjudicator in its place
+.\restart-service.ps1 -Server A -Service event-adjudicator -DiscoverService tadp -RepoPull dev
+
+# Dry run first to see exactly what would happen before committing
+.\restart-service.ps1 -Server A -Service event-adjudicator -DiscoverService tadp -RepoPull dev -DryRun
 ```
 
 | Parameter | Description |
 |---|---|
 | `-Server` | **Required.** `A`, `B`, or `C`. |
-| `-Service` | **Required.** Docker Compose service name (e.g. `rule-001`, `tcs-api`, `nifi`). |
+| `-Service` | **Required.** Docker Compose service name to start (e.g. `rule-001`, `tcs-api`, `nifi`). |
 | `-NoPull` | Skip the DockerHub image pull (`--pull always`). Use when the image is already current. |
 | `-RepoPull` | Controls the repo update on the target server before recreating the container. Omitted or `none` — skip entirely (default); `''` or `dev` — fetch and reset to `origin/dev`; `<branch>` — fetch and reset to that branch. After the reset, per-server env overlays are automatically re-applied (`env-extensions.tpl` on A and B, `env-biar.tpl` on C; `KEYCLOAK_HOSTNAME` injected from tofu outputs on A). |
+| `-DiscoverService` | Supply the **old** service name when a service has been renamed in the compose files. The running old container is inspected for compose context, the new service (`-Service`) is started, then the old container is stopped and removed. Omit for normal restarts. |
+| `-DryRun` | Print every command that would be sent to the server without executing any of them. Container discovery and the verify step still run (both are read-only) so you can confirm the full resolved compose command and current container state before committing. |
 
 After recreating, the script prints a `docker ps` table confirming the
 container name, status, and image digest.
