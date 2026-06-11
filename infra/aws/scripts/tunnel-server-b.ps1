@@ -37,6 +37,7 @@ Write-Host '  18866 -> Voila (CMS notebook server)'
 Write-Host '  8081  -> Flowable REST'
 Write-Host '  5984  -> CouchDB'
 Write-Host '  9200  -> OpenSearch'
+Write-Host '  5601  -> OpenSearch Dashboards'
 Write-Host '  15433 -> PostgreSQL (CMS)'
 Write-Host '  12222 -> SFTP'
 Write-Host ''
@@ -70,6 +71,7 @@ try {
         -L 8081:localhost:8081 `
         -L 5984:localhost:5984 `
         -L 9200:localhost:9200 `
+        -L 5601:localhost:5601 `
         -L 15433:localhost:15433 `
         -L 12222:localhost:12222 `
         -F $tmp $idB

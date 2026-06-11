@@ -125,6 +125,27 @@ services:
           && echo "[opensearch-init] Existing index settings updated." \
           || echo "[opensearch-init] No user indices yet - template will apply on first write."
 
+  # OpenSearch Dashboards (audit log UI) for opensearch-node1.
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.13.0
+    container_name: opensearch-dashboards
+    restart: unless-stopped
+    ports:
+      - "${OPENSEARCH_DASHBOARDS_PORT:-5601}:5601"
+    environment:
+      OPENSEARCH_HOSTS: '["http://opensearch-node1:9200"]'
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: "true"
+      SERVER_HOST: "0.0.0.0"
+    depends_on:
+      opensearch-node1:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:5601/api/status | grep -v '\"status\":\"red\"'"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
 volumes:
   sftp_data:
   couchdb_data:
