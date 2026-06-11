@@ -19,6 +19,13 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# Disable the AWS CLI v2 pager. On Windows/PowerShell the CLI can launch its
+# pager even when stdout is captured into a variable (e.g. $x = aws ...), which
+# silently blocks the script - worse here because callers redirect stderr with
+# 2>$null, hiding any prompt. An empty AWS_PAGER makes every aws call below
+# non-interactive regardless of the operator's profile/config.
+$env:AWS_PAGER = ''
+
 # -- Constants ----------------------------------------------------------------
 # Override any of these via environment variables before dot-sourcing:
 #   $env:TAZAMA_AWS_REGION  - AWS region (default: ap-south-1)
