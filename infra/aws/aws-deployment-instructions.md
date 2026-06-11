@@ -64,6 +64,7 @@
   - [`deploy-lakehouse.ps1`](#deploy-lakehouseps1)
   - [`restart-service.ps1`](#restart-serviceps1)
   - [`deploy-service.ps1`](#deploy-serviceps1)
+  - [OpenSearch Dashboards (Server B, internal-only)](#opensearch-dashboards-server-b-internal-only)
   - [`teardown.ps1`](#teardownps1)
   - [`add-ssh-key.ps1`](#add-ssh-keyps1)
   - [`tunnel-all.ps1`](#tunnel-allps1)
@@ -1984,7 +1985,9 @@ all subsequent image/config refreshes.
 The new service must be defined in the same compose `-f` chain that the sibling
 uses. For the core stack on Server A, `tms` or `nats` are reliable siblings -
 the `tazama-demo` service lives in the same chain (`docker-compose.hub.core.yaml`
-and `docker-compose.base.auth.yaml`).
+and `docker-compose.base.auth.yaml`). For the extensions stack on Server B,
+`opensearch-node1` is a reliable sibling - the `opensearch-dashboards` service
+lives in the same chain (`docker-compose.extensions.infrastructure.yaml`).
 
 ```powershell
 # First-time bring-up of the demo UI on Server A, pulling its feature branch
@@ -1993,6 +1996,9 @@ and `docker-compose.base.auth.yaml`).
 
 # Same, but the code is already on the server (skip the repo pull)
 .\deploy-service.ps1 -Server A -Service tazama-demo -FromService tms
+
+# First-time bring-up of OpenSearch Dashboards on Server B
+.\deploy-service.ps1 -Server B -Service opensearch-dashboards -FromService opensearch-node1 -RepoPull <branch>
 
 # Dry run first to see the resolved compose command before committing
 .\deploy-service.ps1 -Server A -Service tazama-demo -FromService tms -RepoPull tazama/demo-ui-4-update -DryRun
@@ -2014,6 +2020,49 @@ and `docker-compose.base.auth.yaml`).
 
 After creating the service, the script prints a `docker ps` table confirming
 the container name, status, and image.
+
+---
+
+### OpenSearch Dashboards (Server B, internal-only)
+
+OpenSearch Dashboards is the web UI for browsing the `audit-logs-*` indices
+written to `opensearch-node1` on Server B. It is **deliberately not exposed**
+through the ALB or a public subdomain: the OpenSearch security plugin is
+disabled (see [G.3](#g3---re-enable-opensearch-security-plugin)), so an
+internet-facing dashboard would be unauthenticated. Operator access is via the
+EICE SSH tunnel only.
+
+**Deploy** (additive first-time bring-up - does not recreate other containers):
+
+```powershell
+cd infra\aws\scripts
+# opensearch-node1 shares the extensions compose chain, so it is a reliable sibling
+.\deploy-service.ps1 -Server B -Service opensearch-dashboards -FromService opensearch-node1 -RepoPull <branch>
+```
+
+The container connects to `opensearch-node1` automatically via its
+`OPENSEARCH_HOSTS` environment variable - no extra wiring is required.
+
+**Access:**
+
+```powershell
+.\tunnel-server-b.ps1     # forwards localhost:5601 -> Server B
+```
+
+Then open `http://localhost:5601`.
+
+**First-time setup (one-time):** Dashboards does not auto-create an index
+pattern, so a fresh install shows no data even though the indices already hold
+documents. Create the pattern once:
+
+1. **☰ → Dashboards Management → Index patterns** → **Create index pattern**.
+2. Index pattern name: `audit-logs-*`.
+3. Time field: `timestamp`.
+4. Open **☰ → Discover**, select `audit-logs-*`, and widen the time picker - the
+   default "Last 15 minutes" hides older audit data.
+
+The pattern is saved in the `.kibana_1` index on the `opensearch_data` volume,
+so it persists across container restarts.
 
 ---
 
@@ -2139,6 +2188,7 @@ Forwards Server B service ports to `localhost`. Press **Ctrl+C** to close.
 | `8081` | Flowable REST |
 | `5984` | CouchDB |
 | `9200` | OpenSearch |
+| `5601` | OpenSearch Dashboards |
 | `15433` | PostgreSQL (CMS) |
 | `12222` | SFTP |
 
