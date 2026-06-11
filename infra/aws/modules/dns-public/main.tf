@@ -94,6 +94,7 @@ locals {
     datalakehouse-api       = var.target_group_arns["datalakehouse-api"]
     batch-ppa               = var.target_group_arns["batch-ppa"]
     couchdb                 = var.target_group_arns["couchdb"]
+    demo                    = var.target_group_arns["demo"]
   }
 
   # Explicit priorities — must match the actual AWS state exactly.
@@ -122,6 +123,7 @@ locals {
     voila                   = 22
     batch-ppa               = 23
     couchdb                 = 24
+    demo                    = 25
   }
 }
 

@@ -1093,7 +1093,7 @@
   }, {
     "id" : "ead422ef-27e9-4154-b456-5b48445adf73",
     "createdTimestamp" : 1725551564444,
-    "username" : "tazama-user",
+    "username" : "tazama-user@tazama.org",
     "enabled" : true,
     "totp" : false,
     "emailVerified" : true,

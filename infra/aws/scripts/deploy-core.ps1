@@ -112,6 +112,32 @@ if ($out.KeycloakHostname) {
     Write-Host '[Server A] core .env overlay applied.' -ForegroundColor Green
 }
 
+# When a custom domain is active, point the tazama-demo UI at its public HTTPS
+# URL and source NEXTAUTH_SECRET from SSM. Both are written to core/.env; the
+# demo service (docker-compose.base.auth.yaml) consumes them via
+# ${DEMO_PUBLIC_URL} / ${DEMO_NEXTAUTH_SECRET} interpolation. Without this the
+# committed localhost defaults apply (correct for local dev only).
+if ($out.DemoPublicUrl) {
+    Write-Host '[Server A] Applying demo UI overlay (public URL + NEXTAUTH_SECRET from SSM)...'
+    $demoOverlay = "DEMO_PUBLIC_URL=$($out.DemoPublicUrl)"
+    $demoSecret = aws ssm get-parameter `
+        --name /tazama/nextauth_secret `
+        --with-decryption `
+        --region $Script:AwsRegion `
+        --profile $Script:AwsProfile `
+        --query Parameter.Value `
+        --output text 2>$null
+    if ($LASTEXITCODE -eq 0 -and $demoSecret) {
+        $demoOverlay += "`nDEMO_NEXTAUTH_SECRET=$demoSecret"
+    } else {
+        Write-Warning '[Server A] /tazama/nextauth_secret not found in SSM - demo UI falls back to the committed test secret. Set it with: aws ssm put-parameter --name /tazama/nextauth_secret --type SecureString --value <openssl rand -base64 32>'
+    }
+    Set-RemoteEnvOverlay -InstanceId $idA `
+        -OverlayContent $demoOverlay `
+        -RemoteEnvFile "$Script:RemoteRepo/core/.env"
+    Write-Host '[Server A] Demo UI overlay applied.' -ForegroundColor Green
+}
+
 # -- 4. Copy Keycloak realm config to Server A --------------------------------
 # The realm JSON is gitignored-friendly but must be present on the server
 # before the stack starts so the volume mount is satisfied and Keycloak

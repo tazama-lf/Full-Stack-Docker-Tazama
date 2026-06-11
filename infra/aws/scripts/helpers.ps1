@@ -51,6 +51,7 @@ function Get-TofuOutputs {
             EiceEndpointId     = $json.eice_endpoint_id.value
             AlbDnsName         = if ($json.PSObject.Properties['alb_dns_name']) { $json.alb_dns_name.value } else { '' }
             KeycloakHostname   = if ($json.PSObject.Properties['keycloak_hostname']) { $json.keycloak_hostname.value } else { '' }
+            DemoPublicUrl      = if ($json.PSObject.Properties['demo_public_url']) { $json.demo_public_url.value } else { '' }
         }
     }
     finally {

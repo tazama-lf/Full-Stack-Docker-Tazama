@@ -1,10 +1,13 @@
 services:
   pgadmin:
-    image: dpage/pgadmin4:9
+    image: dpage/pgadmin4:9.15.0
     env_file:
       - env/pgadmin.env
     ports:
       - ${PGADMIN_PORT:-5050}:80
+    environment:
+      - GUNICORN_LIMIT_REQUEST_FIELDS=500
+      - GUNICORN_LIMIT_REQUEST_FIELD_SIZE=16384
     configs:
       - source: servers.json
         target: /pgadmin4/servers.json

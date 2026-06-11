@@ -94,11 +94,11 @@ echo 3. %basiclogs% Basic Logs
 echo.
 echo UTILITY ADDONS:
 echo.
-echo 5. %natsutils% NATS Utilities
-echo 6. %pgadmin% pgAdmin for PostgreSQL
-echo 7. %hasura% Hasura GraphQL API for PostgreSQL
+echo 4. %natsutils% NATS Utilities
+echo 5. %pgadmin% pgAdmin for PostgreSQL
+echo 6. %hasura% Hasura GraphQL API for PostgreSQL
 echo.
-echo Toggle addons (1-7), (a)pply current selection, (r)eturn, or (q)uit
+echo Toggle addons (1-6), (a)pply current selection, (r)eturn, or (q)uit
 set /p "choice=Enter your choice: "
 
 if /i "%choice%"=="a" goto :apply
@@ -109,9 +109,9 @@ rem If multitenant, can't unset auth or relay...
 if "%choice%"=="1" if %IS_MULTITENANT_DEPLOYMENT% NEQ 1 if "%auth%" == "[ ]" (set "auth=[X]") else (set "auth=[ ]")
 if "%choice%"=="2" if %IS_MULTITENANT_DEPLOYMENT% NEQ 1 if "%relay%" == "[ ]" (set "relay=[X]") else (set "relay=[ ]")
 if "%choice%"=="3" if "%basiclogs%" == "[ ]" (set "basiclogs=[X]") else (set "basiclogs=[ ]")
-if "%choice%"=="5" if "%natsutils%" == "[ ]" (set "natsutils=[X]") else (set "natsutils=[ ]")
-if "%choice%"=="6" if "%pgadmin%" == "[ ]" (set "pgadmin=[X]") else (set "pgadmin=[ ]")
-if "%choice%"=="7" if "%hasura%" == "[ ]" (set "hasura=[X]") else (set "hasura=[ ]")
+if "%choice%"=="4" if "%natsutils%" == "[ ]" (set "natsutils=[X]") else (set "natsutils=[ ]")
+if "%choice%"=="5" if "%pgadmin%" == "[ ]" (set "pgadmin=[X]") else (set "pgadmin=[ ]")
+if "%choice%"=="6" if "%hasura%" == "[ ]" (set "hasura=[X]") else (set "hasura=[ ]")
 
 goto :addons
 

@@ -1131,7 +1131,7 @@ Four security groups. EC2 instances have **no internet-facing inbound rules** - 
 | Inbound | 8088 | TCP | `0.0.0.0/0` | NiFi UI |
 | Outbound | All | All | `0.0.0.0/0` | Routing to EC2 target groups |
 
-> JupyterHub (:8000), Automation Orchestrator (:7619), Datalakehouse API (:8282), and CouchDB (:5984) have ALB target groups and listeners, but their ports are **not** open in the ALB SG - they are accessed via the HTTPS subdomain (port 443) or SSH tunnel (Phase E.1). Add the plain HTTP port to the ALB SG only if port-based HTTP access is needed.
+> JupyterHub (:8000), Automation Orchestrator (:7619), Datalakehouse API (:8282), CouchDB (:5984), and the Tazama Demo UI (:3011) have ALB target groups and listeners, but their ports are **not** open in the ALB SG - they are accessed via the HTTPS subdomain (port 443) or SSH tunnel (Phase E.1). Add the plain HTTP port to the ALB SG only if port-based HTTP access is needed.
 
 #### sg-tazama-server-a (Server A - tazama-core)
 
@@ -2051,6 +2051,7 @@ Forwards Server A service ports to `localhost`. Press **Ctrl+C** to close.
 | `15432` | PostgreSQL (exterior) |
 | `3001` | DEAPI (Data Enrichment API) |
 | `3002` | DEMS (Data Enrichment Monitoring Service) |
+| `3011` | Tazama Demo UI |
 
 ---
 
@@ -2178,6 +2179,7 @@ modification. Proceed to Phase F to validate.
 | 15432 | PostgreSQL (core) |
 | 3001 | DEAPI |
 | 3002 | DEMS |
+| 3011 | Tazama Demo UI |
 
 **Port map - Server B** (`tunnel-server-b.ps1`):
 
@@ -2485,6 +2487,7 @@ Then redeploy extensions:
 | `tms.<your-zone>` | Transaction Monitoring Service | Server A :5000 |
 | `admin.<your-zone>` | Admin API | Server A :5100 |
 | `auth.<your-zone>` | Auth Service | Server A :3020 |
+| `demo.<your-zone>` | Tazama Demo UI | Server A :3011 |
 | `keycloak.<your-zone>` | Keycloak | Server A :8080 |
 | `pgadmin.<your-zone>` | pgAdmin (core DB) | Server A :5050 |
 | `hasura.<your-zone>` | Hasura | Server A :6100 |
@@ -2499,6 +2502,17 @@ Then redeploy extensions:
 | `jupyter.<your-zone>` | JupyterHub (multi-user analytics) | Server C :8000 |
 | `datalakehouse-api.<your-zone>` | Datalakehouse API | Server C :8282 |
 | `automation-orchestrator.<your-zone>` | Automation Orchestrator API | Server C :7619 |
+| `demo.<your-zone>` | Tazama Demo UI | Server A :3011 |
+
+> **Tazama Demo UI (`demo.<your-zone>`).** The demo is a backend-for-frontend: the browser only talks to its own origin, while the Next.js server reaches TMS, Admin, and NATS over the container network, so no extra CORS origins are required. Login is handled by the Tazama **auth-service** using Keycloak's direct access (password) grant - the browser is never redirected to Keycloak - so **no Keycloak redirect URI or web-origin change is needed** (the same reason the other frontends work as-is). The only prerequisite when `enable_custom_domain = true` is:
+>
+> - **`NEXTAUTH_SECRET` in SSM.** `deploy-core.ps1` reads `/tazama/nextauth_secret` (SecureString) and writes it to `core/.env` as `DEMO_NEXTAUTH_SECRET`. Create it first:
+>   ```powershell
+>   aws ssm put-parameter --name /tazama/nextauth_secret --type SecureString --value (openssl rand -base64 32)
+>   ```
+>   If absent, the demo falls back to the committed test secret (acceptable only for a throwaway sandbox).
+>
+> `deploy-core.ps1` sets `DEMO_PUBLIC_URL=https://demo.<your-zone>` in `core/.env`; the demo service interpolates it into `AUTH_URL`, `NEXT_PUBLIC_URL`, and `NEXT_PUBLIC_WS_URL`. Locally these default to `http://localhost:3011`.
 
 #### E.3.8 Rollback
 
@@ -3308,6 +3322,7 @@ docker compose -p tazama-core \
 | 5000 | TMS API | ALB, Postman | `tms` |
 | 3001 | DEAPI | ALB, Server B | `deapi` |
 | 3002 | DEMS | ALB, Server B | `dems` |
+| 3011 | Tazama Demo UI | ALB (browser) | `demo` |
 | 3020 | Auth Service | Server B (JWT validation) | `auth` |
 | 5100 | Admin API | Internal | `admin` |
 | 8080 | Keycloak | ALB, frontends | `keycloak` |

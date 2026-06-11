@@ -124,4 +124,4 @@ services:
       nats:
         condition: service_started
     ports:
-      - "3001:3001"
+      - "3011:3011"

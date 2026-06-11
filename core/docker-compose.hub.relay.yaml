@@ -14,9 +14,9 @@ services:
   event-adjudicator:
     environment:
       SUPPRESS_ALERTS: false
+      ALERTS_ONLY: false
       ALERT_DESTINATION: global
       ALERT_PRODUCER: investigation-service
-      ALERTS_ONLY: true
 
   rsef:
     image: tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}

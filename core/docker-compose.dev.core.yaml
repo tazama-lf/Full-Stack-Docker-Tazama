@@ -154,6 +154,28 @@ services:
       nats:
         condition: service_started
 
+  # TAZAMA DEMO UI
+  tazama-demo:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/tazama-demo.git#${TAZAMA_DEMO_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+    restart: always
+    env_file:
+      - env/ui.env
+    depends_on:
+      tms:
+        condition: service_started
+      admin-service:
+        condition: service_started
+      nats:
+        condition: service_started
+    ports:
+      - "3011:3011"
+
 secrets:
   GH_TOKEN:
     environment: GH_TOKEN
