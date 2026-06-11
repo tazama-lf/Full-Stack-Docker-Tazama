@@ -80,3 +80,8 @@ output "keycloak_hostname" {
   description = "Hostname for KC_HOSTNAME: keycloak.<domain_zone> when custom domain is active, otherwise the ALB DNS name. Empty when ALB is not enabled."
   value       = var.enable_custom_domain ? "keycloak.${var.domain_zone}" : (var.enable_alb ? module.alb[0].alb_dns_name : "")
 }
+
+output "demo_public_url" {
+  description = "Browser-facing base URL for the Tazama demo UI: https://demo.<domain_zone> when custom domain is active. Empty otherwise (local-dev defaults apply)."
+  value       = var.enable_custom_domain ? "https://demo.${var.domain_zone}" : ""
+}

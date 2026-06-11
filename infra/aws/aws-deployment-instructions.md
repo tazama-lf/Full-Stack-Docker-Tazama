@@ -63,6 +63,8 @@
   - [`deploy-biar.ps1`](#deploy-biarps1)
   - [`deploy-lakehouse.ps1`](#deploy-lakehouseps1)
   - [`restart-service.ps1`](#restart-serviceps1)
+  - [`deploy-service.ps1`](#deploy-serviceps1)
+  - [OpenSearch Dashboards (Server B, internal-only)](#opensearch-dashboards-server-b-internal-only)
   - [`teardown.ps1`](#teardownps1)
   - [`add-ssh-key.ps1`](#add-ssh-keyps1)
   - [`tunnel-all.ps1`](#tunnel-allps1)
@@ -1131,7 +1133,7 @@ Four security groups. EC2 instances have **no internet-facing inbound rules** - 
 | Inbound | 8088 | TCP | `0.0.0.0/0` | NiFi UI |
 | Outbound | All | All | `0.0.0.0/0` | Routing to EC2 target groups |
 
-> JupyterHub (:8000), Automation Orchestrator (:7619), Datalakehouse API (:8282), and CouchDB (:5984) have ALB target groups and listeners, but their ports are **not** open in the ALB SG - they are accessed via the HTTPS subdomain (port 443) or SSH tunnel (Phase E.1). Add the plain HTTP port to the ALB SG only if port-based HTTP access is needed.
+> JupyterHub (:8000), Automation Orchestrator (:7619), Datalakehouse API (:8282), CouchDB (:5984), and the Tazama Demo UI (:3011) have ALB target groups and listeners, but their ports are **not** open in the ALB SG - they are accessed via the HTTPS subdomain (port 443) or SSH tunnel (Phase E.1). Add the plain HTTP port to the ALB SG only if port-based HTTP access is needed.
 
 #### sg-tazama-server-a (Server A - tazama-core)
 
@@ -1714,6 +1716,7 @@ scripts dot-source `helpers.ps1` for shared functions and constants.
 | [`deploy-biar.ps1`](#deploy-biarps1) | Server C - tazama-biar stack |
 | [`deploy-lakehouse.ps1`](#deploy-lakehouseps1) | Server C - stage and unpack Lakehouse warehouse data via S3 |
 | [`restart-service.ps1`](#restart-serviceps1) | Pull latest repo/image and recreate a single service on any server |
+| [`deploy-service.ps1`](#deploy-serviceps1) | Additively bring up a **new** single service without recreating existing containers |
 | [`teardown.ps1`](#teardownps1) | Stop all stacks across all three servers |
 | [`add-ssh-key.ps1`](#add-ssh-keyps1) | Add an SSH public key to one or more servers |
 | [`tunnel-all.ps1`](#tunnel-allps1) | Open port-forward tunnels to all three servers simultaneously |
@@ -1904,7 +1907,7 @@ is the recommended way to roll out a committed fix without a full redeploy.
 The script reads the running container's `com.docker.compose` labels to
 discover the exact working directory and compose file chain used to start it,
 then issues a targeted `docker compose up --no-deps --force-recreate`.  This
-means the command is always reconstructed from live state — no hardcoded file
+means the command is always reconstructed from live state - no hardcoded file
 chains that can go stale.
 
 Server A hosts two compose sub-chains under `tazama-core`: the main core
@@ -1933,17 +1936,133 @@ handled the same way via their own project labels.
 
 # Force recreate only - skip both pulls (e.g. restart a crashed container)
 .\restart-service.ps1 -Server B -Service cms-frontend -NoPull
+
+# Rename a service - drop tadp and start event-adjudicator in its place
+.\restart-service.ps1 -Server A -Service event-adjudicator -DiscoverService tadp -RepoPull dev
+
+# Dry run first to see exactly what would happen before committing
+.\restart-service.ps1 -Server A -Service event-adjudicator -DiscoverService tadp -RepoPull dev -DryRun
 ```
 
 | Parameter | Description |
 |---|---|
 | `-Server` | **Required.** `A`, `B`, or `C`. |
-| `-Service` | **Required.** Docker Compose service name (e.g. `rule-001`, `tcs-api`, `nifi`). |
+| `-Service` | **Required.** Docker Compose service name to start (e.g. `rule-001`, `tcs-api`, `nifi`). |
 | `-NoPull` | Skip the DockerHub image pull (`--pull always`). Use when the image is already current. |
 | `-RepoPull` | Controls the repo update on the target server before recreating the container. Omitted or `none` — skip entirely (default); `''` or `dev` — fetch and reset to `origin/dev`; `<branch>` — fetch and reset to that branch. After the reset, per-server env overlays are automatically re-applied (`env-extensions.tpl` on A and B, `env-biar.tpl` on C; `KEYCLOAK_HOSTNAME` injected from tofu outputs on A). |
+| `-DiscoverService` | Supply the **old** service name when a service has been renamed in the compose files. The running old container is inspected for compose context, the new service (`-Service`) is started, then the old container is stopped and removed. Omit for normal restarts. |
+| `-DryRun` | Print every command that would be sent to the server without executing any of them. Container discovery and the verify step still run (both are read-only) so you can confirm the full resolved compose command and current container state before committing. |
 
 After recreating, the script prints a `docker ps` table confirming the
 container name, status, and image digest.
+
+---
+
+### `deploy-service.ps1`
+
+[infra/aws/scripts/deploy-service.ps1](full-stack-docker-tazama/infra/aws/scripts/deploy-service.ps1)
+
+Additively brings up a **new** Docker Compose service for the first time,
+without recreating any existing container. Use this when you introduce a new
+component (for example the `tazama-demo` UI) that has never run on the server.
+
+`restart-service.ps1` cannot do this: it discovers the compose context from the
+target service's **running** container, and a brand-new service has none, so
+its discovery step fails. `deploy-service.ps1` instead clones the working
+directory and `-f` file chain from a **sibling** service that is already
+running in the same Compose project (inspected read-only, never touched), then
+issues:
+
+```text
+docker compose -p <project> <-f chain> up -d --no-deps <Service>
+```
+
+`up` with a single named service plus `--no-deps` creates only that one
+container - existing containers are not stopped, recreated, or otherwise
+disturbed. After bringing the component up once, use `restart-service.ps1` for
+all subsequent image/config refreshes.
+
+The new service must be defined in the same compose `-f` chain that the sibling
+uses. For the core stack on Server A, `tms` or `nats` are reliable siblings -
+the `tazama-demo` service lives in the same chain (`docker-compose.hub.core.yaml`
+and `docker-compose.base.auth.yaml`). For the extensions stack on Server B,
+`opensearch-node1` is a reliable sibling - the `opensearch-dashboards` service
+lives in the same chain (`docker-compose.extensions.infrastructure.yaml`).
+
+```powershell
+# First-time bring-up of the demo UI on Server A, pulling its feature branch
+# (no merge to dev required - any branch can be deployed surgically)
+.\deploy-service.ps1 -Server A -Service tazama-demo -FromService tms -RepoPull tazama/demo-ui-4-update
+
+# Same, but the code is already on the server (skip the repo pull)
+.\deploy-service.ps1 -Server A -Service tazama-demo -FromService tms
+
+# First-time bring-up of OpenSearch Dashboards on Server B
+.\deploy-service.ps1 -Server B -Service opensearch-dashboards -FromService opensearch-node1 -RepoPull <branch>
+
+# Dry run first to see the resolved compose command before committing
+.\deploy-service.ps1 -Server A -Service tazama-demo -FromService tms -RepoPull tazama/demo-ui-4-update -DryRun
+```
+
+| Parameter | Description |
+|---|---|
+| `-Server` | **Required.** `A`, `B`, or `C`. |
+| `-Service` | **Required.** The **new** Docker Compose service name to bring up (e.g. `tazama-demo`). Must be defined in the same `-f` chain that `-FromService` uses. |
+| `-FromService` | **Required.** An already-running **sibling** service in the same project, used read-only to discover the working directory and compose file chain. It is never stopped or modified. |
+| `-NoPull` | Skip the DockerHub image pull (`--pull always`). Use when the image is already present on the host. |
+| `-RepoPull` | Controls the repo update on the target server before the service is created. Omitted or `none` — skip (default); `''` or `dev` — fetch and reset to `origin/dev`; `<branch>` — fetch and reset to that branch. A pull is normally required for a new service so its compose definition and env files exist on the server. After the reset, the per-server AWS env overlays are re-applied via the shared `Set-ServerEnvOverlays` helper (`env-extensions.tpl` on A and B, `env-biar.tpl` on C; plus `KEYCLOAK_HOSTNAME` and the demo UI overlay on A). |
+| `-DryRun` | Print every mutating command without executing it. The read-only discovery and verify steps still run, so the resolved compose command and current container state are shown. |
+
+> While the server sits on a feature branch via `-RepoPull <branch>`, a later
+> `restart-service.ps1 ... -RepoPull dev` flips it back to `dev` and drops the
+> new service from the compose chain on the next core `up`. Until the branch is
+> merged to `dev`, pin operations on the new component to the same branch.
+
+After creating the service, the script prints a `docker ps` table confirming
+the container name, status, and image.
+
+---
+
+### OpenSearch Dashboards (Server B, internal-only)
+
+OpenSearch Dashboards is the web UI for browsing the `audit-logs-*` indices
+written to `opensearch-node1` on Server B. It is **deliberately not exposed**
+through the ALB or a public subdomain: the OpenSearch security plugin is
+disabled (see [G.3](#g3---re-enable-opensearch-security-plugin)), so an
+internet-facing dashboard would be unauthenticated. Operator access is via the
+EICE SSH tunnel only.
+
+**Deploy** (additive first-time bring-up - does not recreate other containers):
+
+```powershell
+cd infra\aws\scripts
+# opensearch-node1 shares the extensions compose chain, so it is a reliable sibling
+.\deploy-service.ps1 -Server B -Service opensearch-dashboards -FromService opensearch-node1 -RepoPull <branch>
+```
+
+The container connects to `opensearch-node1` automatically via its
+`OPENSEARCH_HOSTS` environment variable - no extra wiring is required.
+
+**Access:**
+
+```powershell
+.\tunnel-server-b.ps1     # forwards localhost:5601 -> Server B
+```
+
+Then open `http://localhost:5601`.
+
+**First-time setup (one-time):** Dashboards does not auto-create an index
+pattern, so a fresh install shows no data even though the indices already hold
+documents. Create the pattern once:
+
+1. **☰ → Dashboards Management → Index patterns** → **Create index pattern**.
+2. Index pattern name: `audit-logs-*`.
+3. Time field: `timestamp`.
+4. Open **☰ → Discover**, select `audit-logs-*`, and widen the time picker - the
+   default "Last 15 minutes" hides older audit data.
+
+The pattern is saved in the `.kibana_1` index on the `opensearch_data` volume,
+so it persists across container restarts.
 
 ---
 
@@ -2043,6 +2162,7 @@ Forwards Server A service ports to `localhost`. Press **Ctrl+C** to close.
 | `15432` | PostgreSQL (exterior) |
 | `3001` | DEAPI (Data Enrichment API) |
 | `3002` | DEMS (Data Enrichment Monitoring Service) |
+| `3011` | Tazama Demo UI |
 
 ---
 
@@ -2068,6 +2188,7 @@ Forwards Server B service ports to `localhost`. Press **Ctrl+C** to close.
 | `8081` | Flowable REST |
 | `5984` | CouchDB |
 | `9200` | OpenSearch |
+| `5601` | OpenSearch Dashboards |
 | `15433` | PostgreSQL (CMS) |
 | `12222` | SFTP |
 
@@ -2170,6 +2291,7 @@ modification. Proceed to Phase F to validate.
 | 15432 | PostgreSQL (core) |
 | 3001 | DEAPI |
 | 3002 | DEMS |
+| 3011 | Tazama Demo UI |
 
 **Port map - Server B** (`tunnel-server-b.ps1`):
 
@@ -2477,6 +2599,7 @@ Then redeploy extensions:
 | `tms.<your-zone>` | Transaction Monitoring Service | Server A :5000 |
 | `admin.<your-zone>` | Admin API | Server A :5100 |
 | `auth.<your-zone>` | Auth Service | Server A :3020 |
+| `demo.<your-zone>` | Tazama Demo UI | Server A :3011 |
 | `keycloak.<your-zone>` | Keycloak | Server A :8080 |
 | `pgadmin.<your-zone>` | pgAdmin (core DB) | Server A :5050 |
 | `hasura.<your-zone>` | Hasura | Server A :6100 |
@@ -2491,6 +2614,21 @@ Then redeploy extensions:
 | `jupyter.<your-zone>` | JupyterHub (multi-user analytics) | Server C :8000 |
 | `datalakehouse-api.<your-zone>` | Datalakehouse API | Server C :8282 |
 | `automation-orchestrator.<your-zone>` | Automation Orchestrator API | Server C :7619 |
+
+> **Tazama Demo UI (`demo.<your-zone>`).** The demo is a backend-for-frontend: the browser only talks to its own origin, while the Next.js server reaches TMS, Admin, and NATS over the container network, so no extra CORS origins are required. Login is handled by the Tazama **auth-service** using Keycloak's direct access (password) grant - the browser is never redirected to Keycloak - so **no Keycloak redirect URI or web-origin change is needed** (the same reason the other frontends work as-is). The only prerequisite when `enable_custom_domain = true` is:
+>
+> - **`NEXTAUTH_SECRET` in SSM.** `deploy-core.ps1` reads `/tazama/nextauth_secret` (SecureString) and writes it to `core/.env` as `DEMO_NEXTAUTH_SECRET`. Create it first:
+>   ```powershell
+>   aws ssm put-parameter --name /tazama/nextauth_secret --type SecureString --value (openssl rand -base64 32)
+>   ```
+>   If absent, the demo falls back to the committed test secret (acceptable only for a throwaway sandbox).
+>
+> `deploy-core.ps1` sets `DEMO_PUBLIC_URL=https://demo.<your-zone>` in `core/.env`; the demo service interpolates it into `AUTH_URL`, `NEXT_PUBLIC_URL`, and `NEXT_PUBLIC_WS_URL`. Locally these default to `http://localhost:3011`.
+>
+> **First-time bring-up without a full redeploy.** To introduce the demo onto a server whose core stack is already running, use [`deploy-service.ps1`](#deploy-serviceps1) instead of re-running `deploy-core.ps1` (which would recreate the whole stack). It clones the compose chain from a running sibling and starts only the new container - additive and non-destructive. It also re-applies the demo public URL + `NEXTAUTH_SECRET` overlay, so no merge to `dev` is required to deploy the feature branch:
+> ```powershell
+> .\deploy-service.ps1 -Server A -Service tazama-demo -FromService tms -RepoPull <demo-branch>
+> ```
 
 #### E.3.8 Rollback
 
@@ -3300,6 +3438,7 @@ docker compose -p tazama-core \
 | 5000 | TMS API | ALB, Postman | `tms` |
 | 3001 | DEAPI | ALB, Server B | `deapi` |
 | 3002 | DEMS | ALB, Server B | `dems` |
+| 3011 | Tazama Demo UI | ALB (browser) | `demo` |
 | 3020 | Auth Service | Server B (JWT validation) | `auth` |
 | 5100 | Admin API | Internal | `admin` |
 | 8080 | Keycloak | ALB, frontends | `keycloak` |

@@ -13,6 +13,8 @@ services:
         condition: service_healthy
       valkey:
         condition: service_started
+    environment:
+      - CORS_POLICY=demo
 
   # TRANSACTION MONITORING SERVICE API
   tms:
@@ -30,6 +32,8 @@ services:
         condition: service_healthy
       nats:
         condition: service_started
+    environment:
+      - CORS_POLICY=demo
 
   # BATCH PRE-PROCESSING API
   batch-ppa:
@@ -105,3 +109,25 @@ services:
         condition: service_started
       nats:
         condition: service_started
+
+  # TAZAMA DEMO UI
+  tazama-demo:
+    image: tazamaorg/tazama-demo:${TAZAMA_VERSION}
+    restart: always
+    env_file:
+      - env/ui.env
+    depends_on:
+      tms:
+        condition: service_started
+      admin-service:
+        condition: service_started
+      nats:
+        condition: service_started
+    ports:
+      - "${DEMO_PORT:-3011}:3011"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3011/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s

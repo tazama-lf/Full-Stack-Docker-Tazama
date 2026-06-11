@@ -47,15 +47,6 @@ Write-Host '[Server A] Pulling latest repo changes...'
 Invoke-RemoteCommand -InstanceId $idA -Command "cd $Script:RemoteRepo && git fetch origin $Script:RepoBranch && git checkout $Script:RepoBranch && git reset --hard origin/$Script:RepoBranch"
 Write-Host '[Server A] Repo up to date.' -ForegroundColor Green
 
-# KC_HOSTNAME_PORT must be absent on AWS (KC_PROXY=edge derives the port from
-# X-Forwarded-Port: 443 sent by the ALB). The committed keycloak.env contains
-# KC_HOSTNAME_PORT=8080 for local use; strip it here before the stack starts.
-# TODO(#221): replace with Set-RemoteEnvOverlay deletion support.
-Write-Host '[Server A] Stripping KC_HOSTNAME_PORT from keycloak.env (local-only, not used on AWS)...'
-Invoke-RemoteCommand -InstanceId $idA -Command `
-    "sed -i '/^KC_HOSTNAME_PORT=/d' $Script:RemoteRepo/core/env/keycloak.env"
-Write-Host '[Server A] KC_HOSTNAME_PORT stripped.' -ForegroundColor Green
-
 # -- 3. Apply credentials overlay to core/.env and all service env files ------
 # core/.env is git-tracked and arrives on the server via the git pull above.
 # Apply credentials overlay to core/.env and all service env files.
@@ -102,15 +93,11 @@ KEYCLOAK_ADMIN_PASSWORD=$Password
     Write-Warning '[Server A] -Password not supplied — DB and Keycloak admin passwords left at local-dev defaults.'
 }
 
-# If an ALB is active, inject KEYCLOAK_HOSTNAME into core/.env so Keycloak
-# generates redirect URLs using the ALB hostname instead of localhost.
-if ($out.KeycloakHostname) {
-    Write-Host '[Server A] Applying core .env overlay...'
-    Set-RemoteEnvOverlay -InstanceId $idA `
-        -OverlayContent "KEYCLOAK_HOSTNAME=$($out.KeycloakHostname)" `
-        -RemoteEnvFile "$Script:RemoteRepo/core/.env"
-    Write-Host '[Server A] core .env overlay applied.' -ForegroundColor Green
-}
+# Re-apply Server A's AWS env overlays: KEYCLOAK_HOSTNAME (when an ALB is active),
+# strip KC_HOSTNAME_PORT from keycloak.env, and the tazama-demo public URL +
+# NEXTAUTH_SECRET (when a custom domain is active). -SkipExtensionsOverlay because
+# the extensions/.env overlay on Server A is owned by deploy-extensions.ps1.
+Set-ServerEnvOverlays -Server 'A' -InstanceId $idA -TofuOutputs $out -SkipExtensionsOverlay
 
 # -- 4. Copy Keycloak realm config to Server A --------------------------------
 # The realm JSON is gitignored-friendly but must be present on the server

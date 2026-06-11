@@ -26,6 +26,7 @@ locals {
     auth         = { port = 3020, server = "a" }
     deapi        = { port = 3001, server = "a" }
     dems         = { port = 3002, server = "a" }
+    demo         = { port = 3011, server = "a" }
     keycloak     = { port = 8080, server = "a" }
     pgadmin      = { port = 5050, server = "a" }
     hasura       = { port = 6100, server = "a" }
@@ -65,6 +66,8 @@ locals {
     tcs-api     = "/api/docs"
     voila       = "/voila/"
     couchdb     = "/"
+    # tazama-demo (Next.js) exposes a cheap, dependency-free liveness route.
+    demo        = "/api/health"
   }
 }
 

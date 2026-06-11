@@ -65,3 +65,23 @@ services:
       - CERT_PATH_PUBLIC=test-public-key.pem
     volumes:
       - ./auth/test-public-key.pem:/home/app/test-public-key.pem
+
+  # TAZAMA DEMO UI
+  tazama-demo:
+    environment:
+      - AUTHENTICATED=true
+      - AUTH_SERVICE_URL=http://auth:3020
+      # Browser-facing base URL. Defaults to the locally published port; the AWS
+      # deploy script overrides DEMO_PUBLIC_URL with https://demo.<domain_zone>
+      # (set in core/.env) so OIDC redirects and the Socket.IO client resolve to
+      # the public ALB host instead of localhost.
+      - AUTH_URL=${DEMO_PUBLIC_URL:-http://localhost:3011}
+      - NEXT_PUBLIC_URL=${DEMO_PUBLIC_URL:-http://localhost:3011}
+      - NEXT_PUBLIC_WS_URL=${DEMO_PUBLIC_URL:-http://localhost:3011}
+      # Defaults to the committed test secret for local dev; the AWS deploy
+      # script overrides DEMO_NEXTAUTH_SECRET from SSM (/tazama/nextauth_secret).
+      - NEXTAUTH_SECRET=${DEMO_NEXTAUTH_SECRET:-Q1+Ojp/rNjpHVVQDVFxBYdhp4ELCZi/cCzGz2xXsD38=}
+      - CERT_PATH_PUBLIC=test-public-key.pem
+    volumes:
+      - ./auth/test-public-key.pem:/app/test-public-key.pem
+
