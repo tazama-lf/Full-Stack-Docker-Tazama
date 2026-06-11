@@ -11,6 +11,8 @@
       - Invoke-RemoteCommand - SSH to an EC2 instance via EICE ProxyCommand
       - Copy-ToRemote        - SCP a file to an EC2 instance via EICE
       - Set-RemoteEnvOverlay - apply KEY=VALUE overlay to a remote .env file
+      - Set-DemoUiOverlay    - apply tazama-demo public URL + SSM NEXTAUTH_SECRET
+      - Set-ServerEnvOverlays - re-apply a server's full per-server AWS env overlays
       - Wait-Bootstrap       - poll until the bootstrap script has completed
 #>
 
@@ -28,6 +30,7 @@ $Script:KeyFile    = if ($env:TAZAMA_SSH_KEY)      { $env:TAZAMA_SSH_KEY }     e
 $Script:RemoteRepo   = '/home/ec2-user/full-stack-docker-tazama'
 $Script:RemoteUser   = 'ec2-user'
 $Script:RepoBranch   = 'dev'
+$Script:TemplatesDir = Join-Path $PSScriptRoot '..\templates'
 # Resolve aws.exe to its full path so OpenSSH can execute it in a ProxyCommand.
 # When OpenSSH spawns ProxyCommand it may not inherit PowerShell's PATH.
 $Script:AwsExe = (Get-Command aws -ErrorAction SilentlyContinue).Source
@@ -185,6 +188,117 @@ function Set-RemoteEnvOverlay {
     }
     $batchCmd = $bashLines -join '; '
     Invoke-RemoteCommand $InstanceId $batchCmd
+}
+
+# -- Set-DemoUiOverlay --------------------------------------------------------
+# When a custom domain is active, point the tazama-demo UI at its public HTTPS
+# URL and source NEXTAUTH_SECRET from SSM. Both are written to core/.env; the
+# demo service (docker-compose.base.auth.yaml) consumes them via
+# ${DEMO_PUBLIC_URL} / ${DEMO_NEXTAUTH_SECRET} interpolation. Without this the
+# committed localhost defaults apply (correct for local dev only).
+#
+# No-op when $DemoPublicUrl is empty (custom domain not enabled). Shared by
+# deploy-core.ps1, deploy-service.ps1 and restart-service.ps1 so the demo env
+# is re-applied consistently after any git reset --hard that restores defaults.
+function Set-DemoUiOverlay {
+    param(
+        [string]$InstanceId,
+        [string]$DemoPublicUrl,
+        [string]$ServerLabel = 'Server A'
+    )
+
+    if (-not $DemoPublicUrl) { return }
+
+    Write-Host "[$ServerLabel] Applying demo UI overlay (public URL + NEXTAUTH_SECRET from SSM)..."
+    $demoOverlay = "DEMO_PUBLIC_URL=$DemoPublicUrl"
+    $demoSecret = aws ssm get-parameter `
+        --name /tazama/nextauth_secret `
+        --with-decryption `
+        --region $Script:AwsRegion `
+        --profile $Script:AwsProfile `
+        --query Parameter.Value `
+        --output text 2>$null
+    if ($LASTEXITCODE -eq 0 -and $demoSecret) {
+        $demoOverlay += "`nDEMO_NEXTAUTH_SECRET=$demoSecret"
+    } else {
+        Write-Warning "[$ServerLabel] /tazama/nextauth_secret not found in SSM - demo UI falls back to the committed test secret. Set it with: aws ssm put-parameter --name /tazama/nextauth_secret --type SecureString --value <openssl rand -base64 32>"
+    }
+    Set-RemoteEnvOverlay -InstanceId $InstanceId `
+        -OverlayContent $demoOverlay `
+        -RemoteEnvFile "$Script:RemoteRepo/core/.env"
+    Write-Host "[$ServerLabel] Demo UI overlay applied." -ForegroundColor Green
+}
+
+# -- Set-ServerEnvOverlays ----------------------------------------------------
+# Re-apply the per-server AWS env overlays that must not be committed. A
+# 'git reset --hard' on the target server restores the repo's committed
+# (local-dev) defaults; this function restores the AWS-specific values:
+#   Server A : extensions/.env (host names, public API URLs, CORS) unless
+#              -SkipExtensionsOverlay; KEYCLOAK_HOSTNAME in core/.env; strips
+#              KC_HOSTNAME_PORT from keycloak.env; and the tazama-demo public
+#              URL + NEXTAUTH_SECRET (see Set-DemoUiOverlay).
+#   Server B : extensions/.env overlay.
+#   Server C : biar/.env overlay (host names, S3A_ENDPOINT, COUCHDB_URL).
+#
+# Shared by deploy-core.ps1, deploy-service.ps1 and restart-service.ps1 so the
+# overlay set stays identical across initial deploys and post-reset restores.
+# -SkipExtensionsOverlay is used by deploy-core.ps1, whose scope is the core
+# stack only - the extensions/.env overlay on Server A is owned by
+# deploy-extensions.ps1.
+function Set-ServerEnvOverlays {
+    param(
+        [Parameter(Mandatory)][ValidateSet('A', 'B', 'C')][string]$Server,
+        [Parameter(Mandatory)][string]$InstanceId,
+        [Parameter(Mandatory)][hashtable]$TofuOutputs,
+        [switch]$SkipExtensionsOverlay
+    )
+
+    $label = "Server $Server"
+
+    switch ($Server) {
+        'A' {
+            if (-not $SkipExtensionsOverlay) {
+                # extensions/.env: SERVER_A/B/C_HOST, public API URLs, CORS origins
+                Write-Host "[$label] Re-applying extensions .env overlay..."
+                Set-RemoteEnvOverlay -InstanceId $InstanceId `
+                    -OverlayFile (Join-Path $Script:TemplatesDir 'env-extensions.tpl') `
+                    -RemoteEnvFile "$Script:RemoteRepo/extensions/.env"
+            }
+
+            # core/.env: KEYCLOAK_HOSTNAME (only present when an ALB is active)
+            if ($TofuOutputs.KeycloakHostname) {
+                Write-Host "[$label] Applying KEYCLOAK_HOSTNAME to core/.env..."
+                Set-RemoteEnvOverlay -InstanceId $InstanceId `
+                    -OverlayContent "KEYCLOAK_HOSTNAME=$($TofuOutputs.KeycloakHostname)" `
+                    -RemoteEnvFile "$Script:RemoteRepo/core/.env"
+            }
+
+            # KC_HOSTNAME_PORT must be absent on AWS - KC_PROXY=edge derives the
+            # port from the ALB's X-Forwarded-Port: 443. The committed keycloak.env
+            # carries KC_HOSTNAME_PORT=8080 for local use; strip it here.
+            # TODO(#221): replace with Set-RemoteEnvOverlay deletion support.
+            Write-Host "[$label] Stripping KC_HOSTNAME_PORT from keycloak.env..."
+            Invoke-RemoteCommand -InstanceId $InstanceId `
+                -Command "sed -i '/^KC_HOSTNAME_PORT=/d' $Script:RemoteRepo/core/env/keycloak.env"
+
+            # core/.env: tazama-demo public URL + NEXTAUTH_SECRET (custom domain only)
+            Set-DemoUiOverlay -InstanceId $InstanceId -DemoPublicUrl $TofuOutputs.DemoPublicUrl -ServerLabel $label
+        }
+        'B' {
+            # extensions/.env: SERVER_A/B/C_HOST, public API URLs, CORS origins
+            Write-Host "[$label] Re-applying extensions .env overlay..."
+            Set-RemoteEnvOverlay -InstanceId $InstanceId `
+                -OverlayFile (Join-Path $Script:TemplatesDir 'env-extensions.tpl') `
+                -RemoteEnvFile "$Script:RemoteRepo/extensions/.env"
+        }
+        'C' {
+            # biar/.env: SERVER_A/B/C_HOST, S3A_ENDPOINT, COUCHDB_URL
+            Write-Host "[$label] Re-applying biar .env overlay..."
+            Set-RemoteEnvOverlay -InstanceId $InstanceId `
+                -OverlayFile (Join-Path $Script:TemplatesDir 'env-biar.tpl') `
+                -RemoteEnvFile "$Script:RemoteRepo/biar/.env"
+        }
+    }
 }
 
 # -- Wait-Bootstrap ------------------------------------------------------------
