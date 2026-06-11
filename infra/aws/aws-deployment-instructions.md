@@ -1973,7 +1973,7 @@ directory and `-f` file chain from a **sibling** service that is already
 running in the same Compose project (inspected read-only, never touched), then
 issues:
 
-```
+```text
 docker compose -p <project> <-f chain> up -d --no-deps <Service>
 ```
 
@@ -2614,7 +2614,6 @@ Then redeploy extensions:
 | `jupyter.<your-zone>` | JupyterHub (multi-user analytics) | Server C :8000 |
 | `datalakehouse-api.<your-zone>` | Datalakehouse API | Server C :8282 |
 | `automation-orchestrator.<your-zone>` | Automation Orchestrator API | Server C :7619 |
-| `demo.<your-zone>` | Tazama Demo UI | Server A :3011 |
 
 > **Tazama Demo UI (`demo.<your-zone>`).** The demo is a backend-for-frontend: the browser only talks to its own origin, while the Next.js server reaches TMS, Admin, and NATS over the container network, so no extra CORS origins are required. Login is handled by the Tazama **auth-service** using Keycloak's direct access (password) grant - the browser is never redirected to Keycloak - so **no Keycloak redirect URI or web-origin change is needed** (the same reason the other frontends work as-is). The only prerequisite when `enable_custom_domain = true` is:
 >
@@ -2627,9 +2626,9 @@ Then redeploy extensions:
 > `deploy-core.ps1` sets `DEMO_PUBLIC_URL=https://demo.<your-zone>` in `core/.env`; the demo service interpolates it into `AUTH_URL`, `NEXT_PUBLIC_URL`, and `NEXT_PUBLIC_WS_URL`. Locally these default to `http://localhost:3011`.
 >
 > **First-time bring-up without a full redeploy.** To introduce the demo onto a server whose core stack is already running, use [`deploy-service.ps1`](#deploy-serviceps1) instead of re-running `deploy-core.ps1` (which would recreate the whole stack). It clones the compose chain from a running sibling and starts only the new container - additive and non-destructive. It also re-applies the demo public URL + `NEXTAUTH_SECRET` overlay, so no merge to `dev` is required to deploy the feature branch:
->   ```powershell
->   .\deploy-service.ps1 -Server A -Service tazama-demo -FromService tms -RepoPull <demo-branch>
->   ```
+> ```powershell
+> .\deploy-service.ps1 -Server A -Service tazama-demo -FromService tms -RepoPull <demo-branch>
+> ```
 
 #### E.3.8 Rollback
 

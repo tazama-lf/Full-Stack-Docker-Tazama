@@ -124,7 +124,7 @@ services:
       nats:
         condition: service_started
     ports:
-      - "3011:3011"
+      - "${DEMO_PORT:-3011}:3011"
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:3011/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 30s

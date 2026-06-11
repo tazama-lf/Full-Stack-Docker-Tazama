@@ -140,7 +140,7 @@ services:
       opensearch-node1:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl -s http://localhost:5601/api/status | grep -v '\"status\":\"red\"'"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:5601/api/status | grep -qE '\"state\":\"(green|yellow)\"'"]
       interval: 20s
       timeout: 10s
       retries: 10

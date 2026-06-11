@@ -178,7 +178,10 @@ $fFlags = ($configFiles -split ',' | ForEach-Object { "-f $_" }) -join ' '
 # -- Repo pull ----------------------------------------------------------------
 if ($effectiveBranch) {
     Write-Host "[$label] Pulling branch '$effectiveBranch' in $workingDir..."
-    $repoCmd = "cd $workingDir && git fetch origin $effectiveBranch && git checkout $effectiveBranch && git reset --hard origin/$effectiveBranch"
+    # -f forces the switch even when per-server overlays have dirtied tracked
+    # files (e.g. core/.env); reset --hard + the overlay re-apply below restore
+    # the intended state immediately afterwards.
+    $repoCmd = "cd $workingDir && git fetch origin $effectiveBranch && git checkout -f $effectiveBranch && git reset --hard origin/$effectiveBranch"
     if ($DryRun) {
         Write-Host "[$label] [DRY RUN] Would run: $repoCmd" -ForegroundColor Yellow
     } else {
