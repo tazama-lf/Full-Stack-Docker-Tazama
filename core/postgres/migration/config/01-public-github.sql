@@ -17,7 +17,7 @@ values (
       "txTp": "pacs.002.001.12",
       "typologies": [
         {
-          "id": "typology-processor@1.0.0",
+          "id": "typology-processor",
           "cfg": "999-901@1.0.0",
           "tenantId": "DEFAULT",
           "rules": [
