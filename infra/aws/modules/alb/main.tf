@@ -64,7 +64,7 @@ locals {
     cms-api     = "/api/docs"
     trs-api     = "/api/docs"
     tcs-api     = "/api/docs"
-    voila       = "/voila/"
+    voila       = "/"
     couchdb     = "/"
     # tazama-demo (Next.js) exposes a cheap, dependency-free liveness route.
     demo        = "/api/health"

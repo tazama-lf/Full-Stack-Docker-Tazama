@@ -133,3 +133,9 @@ services:
       - CASE_MGMT_BACKEND_URL=http://tazama-cms-backend:3090
     ports:
       - "${VOILA_PORT:-18866}:8866"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8866/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

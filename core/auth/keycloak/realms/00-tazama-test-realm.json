@@ -207,6 +207,14 @@
       "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
       "attributes" : { }
     }, {
+      "id" : "c6f5794c-cae2-4b63-83b4-b0c988a09b56",
+      "name" : "POST_V1_ADMIN_CONFIGURATION_NETWORK_MAP_ACTIVATE",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+      "attributes" : { }
+    }, {
       "id" : "c85fa0b6-52d8-41e7-ac23-6218dea1d4e0",
       "name" : "PUT_V1_ADMIN_CONFIGURATION_TYPOLOGY",
       "description" : "",
@@ -359,6 +367,14 @@
     }, {
       "id" : "3fc2ce93-adba-47e6-a325-88928283d503",
       "name" : "exporter",
+      "description" : "",
+      "composite" : false,
+      "clientRole" : false,
+      "containerId" : "2c88a1ac-0bfb-4d46-9ad9-c8e18c7d8111",
+      "attributes" : { }
+    }, {
+      "id" : "307f744e-b35f-4eea-91a3-d11c783f5982",
+      "name" : "POST_V1_ADMIN_CONFIGURATION_NETWORK_MAP_DEACTIVATE",
       "description" : "",
       "composite" : false,
       "clientRole" : false,
@@ -805,7 +821,7 @@
       "clientRoles" : { }
     } ],
     "attributes" : { },
-    "realmRoles" : [ "POST_V1_ADMIN_CONFIGURATION_TYPOLOGY", "LIST_V1_ADMIN_CONFIGURATION_NETWORK_MAP", "GET_V1_ADMIN_CONFIGURATION_NETWORK_MAP", "LIST_V1_ADMIN_CONFIGURATION_TYPOLOGY", "GET_V1_ADMIN_CONFIGURATION_RULE", "GET_V1_ADMIN_CONFIGURATION_TYPOLOGY", "PUT_V1_ADMIN_CONFIGURATION_RULE", "POST_V1_ADMIN_CONFIGURATION_RULE", "DELETE_V1_ADMIN_CONFIGURATION_RULE", "PUT_V1_ADMIN_CONFIGURATION_TYPOLOGY", "LIST_V1_ADMIN_CONFIGURATION_RULE", "DELETE_V1_ADMIN_CONFIGURATION_NETWORK_MAP", "DELETE_V1_ADMIN_CONFIGURATION_TYPOLOGY", "POST_V1_ADMIN_CONFIGURATION_NETWORK_MAP", "PUT_V1_ADMIN_CONFIGURATION_NETWORK_MAP" ],
+    "realmRoles" : [ "POST_V1_ADMIN_CONFIGURATION_TYPOLOGY", "LIST_V1_ADMIN_CONFIGURATION_NETWORK_MAP", "GET_V1_ADMIN_CONFIGURATION_NETWORK_MAP", "LIST_V1_ADMIN_CONFIGURATION_TYPOLOGY", "GET_V1_ADMIN_CONFIGURATION_RULE", "GET_V1_ADMIN_CONFIGURATION_TYPOLOGY", "PUT_V1_ADMIN_CONFIGURATION_RULE", "POST_V1_ADMIN_CONFIGURATION_RULE", "POST_V1_ADMIN_CONFIGURATION_NETWORK_MAP_DEACTIVATE", "DELETE_V1_ADMIN_CONFIGURATION_RULE", "POST_V1_ADMIN_CONFIGURATION_NETWORK_MAP_ACTIVATE", "PUT_V1_ADMIN_CONFIGURATION_TYPOLOGY", "LIST_V1_ADMIN_CONFIGURATION_RULE", "DELETE_V1_ADMIN_CONFIGURATION_NETWORK_MAP", "DELETE_V1_ADMIN_CONFIGURATION_TYPOLOGY", "POST_V1_ADMIN_CONFIGURATION_NETWORK_MAP", "PUT_V1_ADMIN_CONFIGURATION_NETWORK_MAP" ],
     "clientRoles" : { }
   }, {
     "id" : "70d906a9-8f04-4cfb-9e4f-1235e4fa9131",
@@ -2201,7 +2217,7 @@
       "subType" : "anonymous",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "saml-user-property-mapper", "saml-user-attribute-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-full-name-mapper", "oidc-address-mapper", "saml-role-list-mapper", "oidc-usermodel-property-mapper", "oidc-usermodel-attribute-mapper" ]
+        "allowed-protocol-mapper-types" : [ "saml-user-attribute-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-usermodel-property-mapper", "saml-role-list-mapper", "oidc-usermodel-attribute-mapper", "saml-user-property-mapper", "oidc-full-name-mapper", "oidc-address-mapper" ]
       }
     }, {
       "id" : "6f334a33-13e2-4874-a21d-6f3d3f17c562",
@@ -2233,7 +2249,7 @@
       "subType" : "authenticated",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "oidc-full-name-mapper", "oidc-usermodel-property-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-address-mapper", "oidc-usermodel-attribute-mapper", "saml-role-list-mapper", "saml-user-property-mapper", "saml-user-attribute-mapper" ]
+        "allowed-protocol-mapper-types" : [ "saml-user-attribute-mapper", "oidc-address-mapper", "oidc-sha256-pairwise-sub-mapper", "saml-user-property-mapper", "oidc-usermodel-attribute-mapper", "saml-role-list-mapper", "oidc-full-name-mapper", "oidc-usermodel-property-mapper" ]
       }
     } ],
     "org.keycloak.keys.KeyProvider" : [ {

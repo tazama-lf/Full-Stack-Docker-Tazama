@@ -1167,7 +1167,7 @@ values (
         '
 {
     "desc": "Complete rule coverage",
-    "id": "typology-processor@1.0.0",
+    "id": "typology-processor",
     "cfg": "000@1.0.0",
     "tenantId": "DEFAULT",
     "creDtTm": "2026-04-08T00:00:00.000Z",
@@ -2106,7 +2106,7 @@ values (
       "txTp": "pacs.002.001.12",
       "typologies": [
         {
-          "id": "typology-processor@1.0.0",
+          "id": "typology-processor",
           "cfg": "000@1.0.0",
           "tenantId": "DEFAULT",
     "creDtTm": "2026-04-08T00:00:00.000Z",

@@ -161,7 +161,7 @@ insert into
 values (
         '{
   "typology_name": "Typology-999-Rule-901-and-902",
-  "id": "typology-processor@1.0.0",
+  "id": "typology-processor",
   "cfg": "999@1.0.0",
   "tenantId": "tenant-001",
   "creDtTm": "2026-04-08T00:00:00.000Z",
@@ -259,7 +259,7 @@ values (
     ), (
         '{
   "typology_name": "Typology-999-Rule-901-and-902",
-  "id": "typology-processor@1.0.0",
+  "id": "typology-processor",
   "cfg": "999@1.0.0",
   "tenantId": "tenant-002",
   "creDtTm": "2026-04-08T00:00:00.000Z",
@@ -373,7 +373,7 @@ values (
       "txTp": "pacs.002.001.12",
       "typologies": [
         {
-          "id": "typology-processor@1.0.0",
+          "id": "typology-processor",
           "cfg": "999@1.0.0",
           "tenantId": "tenant-001",
           "creDtTm": "2026-04-08T00:00:00.000Z",
@@ -412,7 +412,7 @@ values (
       "txTp": "pacs.002.001.12",
       "typologies": [
         {
-          "id": "typology-processor@1.0.0",
+          "id": "typology-processor",
           "cfg": "999@1.0.0",
           "tenantId": "tenant-002",
           "creDtTm": "2026-04-08T00:00:00.000Z",
