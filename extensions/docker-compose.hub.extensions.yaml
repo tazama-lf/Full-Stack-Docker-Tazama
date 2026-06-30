@@ -112,7 +112,7 @@ services:
     ports:
       - "${VOILA_PORT}:8866"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8866/"]
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:8866/')\""]
       interval: 30s
       timeout: 10s
       retries: 3
