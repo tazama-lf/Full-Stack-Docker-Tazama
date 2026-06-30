@@ -62,6 +62,9 @@ services:
       - migrate
     env_file:
       - ./env/cms.env
+    environment:
+      - JAVA_TOOL_OPTIONS=-Xms256m -Xmx1536m
+    mem_limit: 2g
     ports:
       - "${FLOWABLE_PORT}:8080"
 
