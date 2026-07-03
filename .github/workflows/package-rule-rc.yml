@@ -56,6 +56,8 @@ jobs:
     steps:
       - name: Checkout rule repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          ref: dev
 
       - name: Set up Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
@@ -177,8 +179,12 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          if [[ "$GITHUB_REF" != "refs/heads/dev" ]]; then
-            echo "::error::RC images must be published from dev. Refusing to push from $GITHUB_REF."
+          # On push, GITHUB_REF is the pushed branch and must be dev. For
+          # repository_dispatch and workflow_dispatch the checkout above is pinned
+          # to ref: dev, so the dev line is always what gets built regardless of the
+          # trigger ref (which resolves to the repository default branch).
+          if [[ "$GITHUB_EVENT_NAME" == "push" && "$GITHUB_REF" != "refs/heads/dev" ]]; then
+            echo "::error::RC images must be published from the dev line. Refusing to push from $GITHUB_REF."
             exit 1
           fi
 
