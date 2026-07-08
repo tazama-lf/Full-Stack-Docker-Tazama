@@ -1,10 +1,10 @@
 include:
   - path:
-    - docker-compose.dev.elastic.yaml
+    - docker-compose.utils.elastic.yaml
 
 services:
   apm-server:
-    image: elastic/apm-server:${ELASTIC_STACK_VERSION}
+    image: docker.elastic.co/apm/apm-server:${ELASTIC_STACK_VERSION}
     container_name: apm-server
     command: > # -e because logs
        apm-server -e

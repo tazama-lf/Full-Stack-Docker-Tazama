@@ -1,10 +1,11 @@
 services:
   lumberjack:
     extends:
-      file: docker-compose.hub.logs-base.yaml
+      file: docker-compose.hub.logs.base.yaml
       service: event-sidecar
+    ports: !reset []
     environment:
-      ELASTIC_SEARCH_VERSION: ${ELASTIC_STACK_VERSION}
+      ELASTIC_SEARCH_VERSION: 8
       ELASTIC_HOST: http://elasticsearch:9200
       ELASTIC: true
 
@@ -14,7 +15,7 @@ services:
     environment:
       SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
 
-  admin:
+  admin-service:
     depends_on:
       - event-sidecar
     environment:

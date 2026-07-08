@@ -1,6 +1,6 @@
 services:
   elasticsearch:
-    image: elasticsearch:${ELASTIC_STACK_VERSION}
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_STACK_VERSION}
     volumes:
       - esdata:/usr/share/elasticsearch/data
     ports:
@@ -30,7 +30,7 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
-    image: kibana:${ELASTIC_STACK_VERSION}
+    image: docker.elastic.co/kibana/kibana:${ELASTIC_STACK_VERSION}
     volumes:
       - kibanadata:/usr/share/kibana/data
     ports:

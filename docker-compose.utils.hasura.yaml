@@ -17,13 +17,13 @@ services:
       - ./hasura:/hasura-metadata
     environment:
       # Metadata database
-      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://postgres:@postgres:5432/hasura
+      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://postgres:unused@postgres:5432/hasura
       
       # Data source connections
-      HASURA_GRAPHQL_DATABASE_URL_EVENT_HISTORY: postgres://postgres:@postgres:5432/event_history
-      HASURA_GRAPHQL_DATABASE_URL_RAW_HISTORY: postgres://postgres:@postgres:5432/raw_history
-      HASURA_GRAPHQL_DATABASE_URL_CONFIGURATION: postgres://postgres:@postgres:5432/configuration
-      HASURA_GRAPHQL_DATABASE_URL_EVALUATION: postgres://postgres:@postgres:5432/evaluation
+      HASURA_GRAPHQL_DATABASE_URL_EVENT_HISTORY: postgres://postgres:unused@postgres:5432/event_history
+      HASURA_GRAPHQL_DATABASE_URL_RAW_HISTORY: postgres://postgres:unused@postgres:5432/raw_history
+      HASURA_GRAPHQL_DATABASE_URL_CONFIGURATION: postgres://postgres:unused@postgres:5432/configuration
+      HASURA_GRAPHQL_DATABASE_URL_EVALUATION: postgres://postgres:unused@postgres:5432/evaluation
       
       # Auto-apply metadata on startup
       # HASURA_GRAPHQL_METADATA_DIR: /hasura/metadata
