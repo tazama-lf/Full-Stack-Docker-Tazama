@@ -4,6 +4,7 @@ services:
   postgres:
     image: postgres:18
     restart: always
+    command: postgres -N 1000 -c shared_buffers=512MB -c effective_cache_size=2GB
     volumes:
       - postgres_data:/var/lib/postgresql
     healthcheck:

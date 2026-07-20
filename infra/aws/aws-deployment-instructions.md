@@ -53,8 +53,8 @@
   - [D.3 `deploy-extensions.ps1`](#d3-deploy-extensionsps1)
   - [D.4 `deploy-biar.ps1`](#d4-deploy-biarps1)
   - [D.5 `deploy-lakehouse.ps1`](#d5-deploy-lakehouseps1)
-  - [D.7 `deploy.ps1`](#d7-deployps1)
-  - [D.8 `teardown.ps1`](#d8-teardownps1)
+  - [D.6 `deploy.ps1`](#d6-deployps1)
+  - [D.7 `teardown.ps1`](#d7-teardownps1)
 - [Scripts Catalog](#scripts-catalog)
   - [`helpers.ps1`](#helpersps1)
   - [`deploy.ps1`](#deployps1)
@@ -63,8 +63,12 @@
   - [`deploy-biar.ps1`](#deploy-biarps1)
   - [`deploy-lakehouse.ps1`](#deploy-lakehouseps1)
   - [`restart-service.ps1`](#restart-serviceps1)
+  - [`restart-core-processors.ps1`](#restart-core-processorsps1)
   - [`deploy-service.ps1`](#deploy-serviceps1)
   - [OpenSearch Dashboards (Server B, internal-only)](#opensearch-dashboards-server-b-internal-only)
+  - [`check-disk-space.ps1`](#check-disk-spaceps1)
+  - [`backup-jupyter-notebooks.ps1`](#backup-jupyter-notebooksps1)
+  - [`dump-logs.ps1`](#dump-logsps1)
   - [`teardown.ps1`](#teardownps1)
   - [`add-ssh-key.ps1`](#add-ssh-keyps1)
   - [`tunnel-all.ps1`](#tunnel-allps1)
@@ -1475,10 +1479,12 @@ before moving on to the next. The runnable scripts are, in order:
 
 | Function | Purpose |
 |---|---|
-| `Get-TofuOutputs` | Runs `tofu output -json` and returns a hashtable of instance IDs and private IPs |
+| `Get-TofuOutputs` | Runs `tofu output -json` and returns a hashtable of instance IDs, private IPs, the EICE endpoint ID, and (when present) the ALB DNS name, Keycloak hostname, and demo public URL |
 | `Invoke-RemoteCommand` | SSH to an EC2 instance via EICE ProxyCommand and run a shell command |
 | `Copy-ToRemote` | SCP a file to an EC2 instance via EICE |
 | `Set-RemoteEnvOverlay` | Reads a `KEY=VALUE` overlay (from a local file via `-OverlayFile` or an inline string via `-OverlayContent`) and applies each entry to a remote `.env` using `sed` (replaces existing keys, appends missing ones). Exactly one of the two parameters must be supplied. |
+| `Set-DemoUiOverlay` | Points the tazama-demo UI at its public HTTPS URL and sources `NEXTAUTH_SECRET` from SSM into `core/.env`. No-op when no custom domain is active. |
+| `Set-ServerEnvOverlays` | Re-applies a server's full set of per-server AWS env overlays (`env-extensions.tpl` / `env-biar.tpl`, `KEYCLOAK_HOSTNAME`, `KC_HOSTNAME_PORT` strip, demo UI overlay) - used after any `git reset --hard` on the target server |
 | `Wait-Bootstrap` | Polls every 30 s until `/home/ec2-user/.bootstrap-complete` exists on the remote instance |
 
 **EICE SSH ProxyCommand used internally:**
@@ -1655,7 +1661,7 @@ The instance IAM role has a scoped read policy on the `lakehouse-staging/` prefi
 
 ---
 
-### D.7 `deploy.ps1`
+### D.6 `deploy.ps1`
 
 [infra/aws/scripts/deploy.ps1](full-stack-docker-tazama/infra/aws/scripts/deploy.ps1)
 
@@ -1677,7 +1683,7 @@ cd full-stack-docker-tazama\infra\aws\scripts
 
 ---
 
-### D.8 `teardown.ps1`
+### D.7 `teardown.ps1`
 
 [infra/aws/scripts/teardown.ps1](full-stack-docker-tazama/infra/aws/scripts/teardown.ps1)
 
@@ -1716,7 +1722,11 @@ scripts dot-source `helpers.ps1` for shared functions and constants.
 | [`deploy-biar.ps1`](#deploy-biarps1) | Server C - tazama-biar stack |
 | [`deploy-lakehouse.ps1`](#deploy-lakehouseps1) | Server C - stage and unpack Lakehouse warehouse data via S3 |
 | [`restart-service.ps1`](#restart-serviceps1) | Pull latest repo/image and recreate a single service on any server |
+| [`restart-core-processors.ps1`](#restart-core-processorsps1) | Batch wrapper - pull and recreate every core processor on Server A |
 | [`deploy-service.ps1`](#deploy-serviceps1) | Additively bring up a **new** single service without recreating existing containers |
+| [`check-disk-space.ps1`](#check-disk-spaceps1) | Report disk usage on a server and optionally prune stale Docker images |
+| [`backup-jupyter-notebooks.ps1`](#backup-jupyter-notebooksps1) | Back up all JupyterHub user notebooks from Server C to a local timestamped archive |
+| [`dump-logs.ps1`](#dump-logsps1) | Dump Docker container logs from a server (one container or all) to a local file |
 | [`teardown.ps1`](#teardownps1) | Stop all stacks across all three servers |
 | [`add-ssh-key.ps1`](#add-ssh-keyps1) | Add an SSH public key to one or more servers |
 | [`tunnel-all.ps1`](#tunnel-allps1) | Open port-forward tunnels to all three servers simultaneously |
@@ -1736,11 +1746,15 @@ Provides the following functions:
 
 | Function | Description |
 |---|---|
-| `Get-TofuOutputs` | Runs `tofu output -json` and returns a hashtable of instance IDs, private IPs, and the EICE endpoint ID |
+| `Get-TofuOutputs` | Runs `tofu output -json` and returns a hashtable of instance IDs, private IPs, the EICE endpoint ID, and (when present) the ALB DNS name, Keycloak hostname, and demo public URL |
 | `Invoke-RemoteCommand` | SSH to an EC2 instance via the EICE ProxyCommand and runs a bash command; throws on non-zero exit |
 | `Copy-ToRemote` | SCP a local file to an EC2 instance via EICE |
 | `Set-RemoteEnvOverlay` | Reads a `KEY=VALUE` overlay (from a local file via `-OverlayFile` or an inline string via `-OverlayContent`) and applies each entry to a remote `.env` file using `sed` (replaces existing keys, appends missing ones). Exactly one of the two parameters must be supplied. |
+| `Set-DemoUiOverlay` | Points the tazama-demo UI at its public HTTPS URL (`DEMO_PUBLIC_URL`) and sources `DEMO_NEXTAUTH_SECRET` from SSM into `core/.env`. No-op when no custom domain is active. Shared by deploy-core, deploy-service, and restart-service. |
+| `Set-ServerEnvOverlays` | Re-applies a server's full set of per-server AWS env overlays after a `git reset --hard` restores committed local-dev defaults: `env-extensions.tpl` (A and B), `env-biar.tpl` (C), `KEYCLOAK_HOSTNAME` injection and `KC_HOSTNAME_PORT` strip (A), and the demo UI overlay (A). |
 | `Wait-Bootstrap` | Polls an instance until the bootstrap script has written its completion marker (up to 15 min) |
+
+(`New-SshConfig` is an internal helper that writes the temporary per-connection SSH config with the EICE ProxyCommand; it is not called by other scripts directly.)
 
 Constants defined at script scope. Three of them can be overridden without editing the file by setting environment variables before running any script:
 
@@ -1756,7 +1770,9 @@ $env:TAZAMA_SSH_KEY     = "$HOME\.ssh\my_key"   # path to your EC2 SSH private k
 | `$Script:AwsRegion` | `ap-south-1` | `TAZAMA_AWS_REGION` | AWS region for all CLI calls |
 | `$Script:AwsProfile` | `tazama` | `TAZAMA_AWS_PROFILE` | AWS CLI named profile |
 | `$Script:RemoteRepo` | `/home/ec2-user/full-stack-docker-tazama` | - | Repo path on all three servers |
+| `$Script:RemoteUser` | `ec2-user` | - | SSH user on all three servers |
 | `$Script:RepoBranch` | `dev` | - | Branch pulled on each server during deploy |
+| `$Script:TemplatesDir` | `infra/aws/templates` | - | Location of the `.tpl` env overlay files |
 | `$Script:KeyFile` | `$env:USERPROFILE\.ssh\id_ed25519` | `TAZAMA_SSH_KEY` | EC2 SSH private key path |
 
 ---
@@ -1958,6 +1974,50 @@ container name, status, and image digest.
 
 ---
 
+### `restart-core-processors.ps1`
+
+[infra/aws/scripts/restart-core-processors.ps1](full-stack-docker-tazama/infra/aws/scripts/restart-core-processors.ps1)
+
+Thin batch wrapper around `restart-service.ps1`. Iterates every core processor Docker Compose service on Server A (tazama-core) and, for each one, pulls the latest image from DockerHub and recreates the container in place. No full-stack repo pull is performed (`RepoPull` stays `none`), so the code already on the server is used unchanged - only the container images are refreshed.
+
+The service list is grouped, and each group can be toggled off with a switch:
+
+| Group | Services | Skip switch |
+|---|---|---|
+| Pipeline | `ed`, `ef`, `tp`, `event-adjudicator` | always runs |
+| Rules | `rule-001` ... `rule-902` (35 rule processors, mirrors `docker-pulls.bat`) | `-SkipRules` |
+| Relays | `rsef`, `rstp`, `rsea` | `-SkipRelays` |
+| APIs | `tms`, `admin-service`, `auth-service`, `batch-ppa` | `-SkipApis` |
+| Logging | `event-sidecar`, `lumberjack` | `-SkipLogging` |
+
+```powershell
+# Refresh every core processor image on Server A
+.\restart-core-processors.ps1
+
+# See exactly what would run first
+.\restart-core-processors.ps1 -DryRun
+
+# Everything except the 35 rule processors
+.\restart-core-processors.ps1 -SkipRules
+
+# Keep going past individual failures, summarise at the end
+.\restart-core-processors.ps1 -SkipRules -SkipLogging -ContinueOnError
+```
+
+| Parameter | Description |
+|---|---|
+| `-SkipRules` | Skip the `rule-NNN` rule processors. |
+| `-SkipRelays` | Skip the relay services (`rsef`, `rstp`, `rsea`). |
+| `-SkipApis` | Skip the ingress/config/auth APIs (`tms`, `admin-service`, `auth-service`, `batch-ppa`). |
+| `-SkipLogging` | Skip the logging sidecar (`event-sidecar`, `lumberjack`). |
+| `-NoPull` | Pass-through to `restart-service.ps1`: skip the DockerHub pull and just recreate with the image already on the host. |
+| `-DryRun` | Pass-through to `restart-service.ps1`: print what would be done without making any changes on the server. |
+| `-ContinueOnError` | Keep going if a single service restart fails. By default the script stops on the first failure. A summary of failures is printed at the end regardless, and the script exits non-zero if any service failed. |
+
+> Pulling refreshed `:rc` images leaves the previously-tagged layers on disk as dangling images. After a batch refresh, run [`check-disk-space.ps1`](#check-disk-spaceps1) to see how much space they consume and reclaim it with `-Prune`.
+
+---
+
 ### `deploy-service.ps1`
 
 [infra/aws/scripts/deploy-service.ps1](full-stack-docker-tazama/infra/aws/scripts/deploy-service.ps1)
@@ -2063,6 +2123,117 @@ documents. Create the pattern once:
 
 The pattern is saved in the `.kibana_1` index on the `opensearch_data` volume,
 so it persists across container restarts.
+
+---
+
+### `check-disk-space.ps1`
+
+[infra/aws/scripts/check-disk-space.ps1](full-stack-docker-tazama/infra/aws/scripts/check-disk-space.ps1)
+
+Reports disk usage on a Tazama server and, optionally, reclaims space taken by stale Docker images left behind after image pulls. Pulling refreshed `:rc` images (e.g. via `restart-core-processors.ps1`) leaves the previously-tagged image layers on disk as dangling images; over time these fill the root volume.
+
+The script always shows three read-only reports:
+
+1. Filesystem usage (`df -h`) for the whole instance.
+2. Docker's own space accounting (`docker system df`).
+3. The list and count of dangling (untagged) images that can be reclaimed.
+
+Read-only by default - no changes are made unless `-Prune` or `-PruneAll` is given.
+
+```powershell
+# Read-only report for Server A (default)
+.\check-disk-space.ps1
+
+# Report for Server C
+.\check-disk-space.ps1 -Server C
+
+# Reclaim space from dangling images (safe)
+.\check-disk-space.ps1 -Prune
+
+# See what the aggressive prune would run without executing it
+.\check-disk-space.ps1 -PruneAll -DryRun
+```
+
+| Parameter | Description |
+|---|---|
+| `-Server` | Which EC2 instance to target: `A`, `B`, or `C`. Defaults to `A` (tazama-core). |
+| `-Prune` | Remove only **dangling** (untagged) images - safe: these have no tag and no container references them, typically the old `:rc` layers. |
+| `-PruneAll` | Remove **all** images not used by a running container (`docker image prune -a`). Aggressive: any image whose service is currently stopped is removed and must be pulled again. Overrides `-Prune`. |
+| `-DryRun` | Print the prune command that would run without executing it. The reporting still runs (it is read-only). |
+
+After a prune, the script re-runs the filesystem usage report so the reclaimed space is visible immediately.
+
+---
+
+### `backup-jupyter-notebooks.ps1`
+
+[infra/aws/scripts/backup-jupyter-notebooks.ps1](full-stack-docker-tazama/infra/aws/scripts/backup-jupyter-notebooks.ps1)
+
+Backs up all JupyterHub user workspaces from Server C to a local timestamped archive. User notebooks live in the `tazama-biar_jupyterhub_notebooks` Docker volume (mounted at `/srv/notebooks` in the `biar-jupyterhub` container), one directory per Keycloak username. The script:
+
+1. Creates a gzipped tar of the volume on Server C (`sudo` on the host, container untouched - no downtime).
+2. Downloads it via `scp` to the local backup directory.
+3. Removes the temporary archive from the server.
+
+`.ipynb_checkpoints` directories are excluded by default.
+
+```powershell
+# Default: archive to <repo>\backups\jupyter\jupyterhub-notebooks-<timestamp>.tar.gz
+.\backup-jupyter-notebooks.ps1
+
+# Custom destination, keep checkpoint files
+.\backup-jupyter-notebooks.ps1 -BackupDir D:\Backups\Tazama -IncludeCheckpoints
+```
+
+| Parameter | Description |
+|---|---|
+| `-BackupDir` | Local directory for the archive. Default: `<repo>\backups\jupyter` (gitignored - archives are binary and must never be committed). |
+| `-SshHost` | SSH host alias for Server C. Default: `tazama-c`. |
+| `-IncludeCheckpoints` | Include `.ipynb_checkpoints` directories in the archive. |
+
+To restore a single user's workspace, extract their directory from the archive and copy it back into the volume:
+
+```powershell
+tar -xzf jupyterhub-notebooks-<timestamp>.tar.gz ./<username>
+scp -r .\<username> tazama-c:/tmp/
+ssh tazama-c "sudo cp -r /tmp/<username> /var/lib/docker/volumes/tazama-biar_jupyterhub_notebooks/_data/ && rm -rf /tmp/<username>"
+```
+
+Workspace directories in the volume are owned by `root:root` (the hub spawns single-user servers as root), so `sudo cp` produces the correct ownership as-is.
+
+---
+
+### `dump-logs.ps1`
+
+[infra/aws/scripts/dump-logs.ps1](full-stack-docker-tazama/infra/aws/scripts/dump-logs.ps1)
+
+Dumps Docker container logs from a server to a local file. Connects via the EICE SSH tunnel and collects `docker logs --timestamps` output (stdout and stderr merged) for either a single named container or every running container on the server. Each container's log block is prefixed with a `Container: <name>` header, and the file starts with a capture summary (server, project, container, tail size, capture time).
+
+By default only the last 50 log lines per container are captured; use `-Tail` to adjust the count or `-All` for the complete history.
+
+```powershell
+# Last 50 lines of every running container on Server A -> aws-server-logs.txt
+.\dump-logs.ps1 -Server A
+
+# Last 50 lines of the tcs-api container on Server B
+.\dump-logs.ps1 -Server B -Container tcs-api
+
+# Full log history of the NiFi container on Server C
+.\dump-logs.ps1 -Server C -Container nifi -All
+
+# Last 200 lines of Keycloak to a custom file
+.\dump-logs.ps1 -Server A -Container keycloak -Tail 200 -OutFile keycloak.txt
+```
+
+| Parameter | Description |
+|---|---|
+| `-Server` | **Required.** `A`, `B`, or `C`. |
+| `-Container` | Name (or ID) of a single container to dump. Omit to dump every running container on the server. |
+| `-Tail` | Number of trailing log lines per container. Default: `50`. Ignored when `-All` is supplied. |
+| `-All` | Capture the entire log history for each container instead of the last `-Tail` lines. |
+| `-OutFile` | Path to the local output file. Default: `aws-server-logs.txt` in the current directory. |
+
+The script fails with an error if `-Container` names a container that does not exist on the target server. Output is read-only - nothing on the server is modified.
 
 ---
 
@@ -2390,6 +2561,33 @@ Update your Postman environment: set the base URL variable to
 | NiFi | `/nifi-api/system-diagnostics` | 200-399 |
 | JupyterHub | `/hub/health` | 200-399 |
 | All others | `/health` | 200-399 |
+
+**ALB tuning for socket.io / long-lived connections:**
+
+The module sets two non-default attributes. Both were added after a production incident (Jul 2026) where the tazama-demo UI misbehaved behind the ALB:
+
+| Attribute | Value | Why |
+|---|---|---|
+| ALB `idle_timeout` | 400s (default 60s) | The 60s default severed tazama-demo's long-lived socket.io connections, causing constant client reconnect churn and a ~30% target 4XX rate (`400 Session ID unknown` on stale reconnects). 400s comfortably exceeds socket.io's default 25s ping interval and survives long-poll cycles. |
+| `stickiness` on `tazama-tg-demo` | `lb_cookie`, 86400s | socket.io polling/websocket handshakes must hit the same target. Harmless with a single target, required the moment the service scales out. Add any new socket.io-style service to `sticky_services` in [modules/alb/main.tf](full-stack-docker-tazama/infra/aws/modules/alb/main.tf). |
+
+These are managed in the Terraform module, so a plain `tofu apply` preserves them. Do not tune them manually with `aws elbv2 modify-*` - manual changes will be reverted on the next apply.
+
+**Diagnosing similar symptoms** (UI works via SSH tunnel but misbehaves via the ALB, clients connect/disconnect every few seconds in `docker logs`):
+
+```powershell
+# Target health
+aws elbv2 describe-target-health --profile tazama --target-group-arn <tg-arn>
+
+# 4XX/5XX per target group over the last 6 hours (note: quote each
+# dimension - unquoted commas make PowerShell split them into separate args)
+aws cloudwatch get-metric-statistics --profile tazama --region ap-south-1 `
+  --namespace AWS/ApplicationELB --metric-name HTTPCode_Target_4XX_Count `
+  --dimensions "Name=LoadBalancer,Value=app/tazama-alb/<id>" "Name=TargetGroup,Value=targetgroup/tazama-tg-demo/<id>" `
+  --start-time (Get-Date).ToUniversalTime().AddHours(-6).ToString("yyyy-MM-ddTHH:mm:ssZ") `
+  --end-time (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ") `
+  --period 3600 --statistics Sum
+```
 
 **Key outputs (used by Phase G custom domain upgrade):**
 - `alb_dns_name` - DNS name for port-based access
