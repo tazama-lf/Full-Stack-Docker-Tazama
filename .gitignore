@@ -10,3 +10,6 @@ infra/aws/tfplan
 # OpenTofu/Terraform generated directories - never commit
 infra/aws/.terraform/
 infra/aws/.terraform.lock.hcl
+
+# Local backups (JupyterHub notebooks etc.) - binary archives, never commit
+backups/

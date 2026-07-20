@@ -9,6 +9,11 @@ resource "aws_lb" "main" {
   security_groups    = [var.alb_sg_id]
   subnets            = var.public_subnet_ids
 
+  # Raised from the 60s default: tazama-demo holds long-lived socket.io
+  # connections and the default timeout severed them, causing constant
+  # client reconnect churn and 4XX "Session ID unknown" errors.
+  idle_timeout = 400
+
   tags = { Name = "${var.prefix}-alb" }
 }
 
@@ -64,11 +69,16 @@ locals {
     cms-api     = "/api/docs"
     trs-api     = "/api/docs"
     tcs-api     = "/api/docs"
-    voila       = "/"
+    voila       = "/voila/"
     couchdb     = "/"
     # tazama-demo (Next.js) exposes a cheap, dependency-free liveness route.
     demo        = "/api/health"
   }
+
+  # Services using socket.io (or any sticky-session protocol) need session
+  # affinity so polling/websocket handshakes keep hitting the same target
+  # if the service is ever scaled beyond one instance.
+  sticky_services = ["demo"]
 }
 
 resource "aws_lb_target_group" "services" {
@@ -90,6 +100,12 @@ resource "aws_lb_target_group" "services" {
     healthy_threshold   = 2
     unhealthy_threshold = 3
     matcher             = "200-399"
+  }
+
+  stickiness {
+    type            = "lb_cookie"
+    cookie_duration = 86400
+    enabled         = contains(local.sticky_services, each.key)
   }
 
   tags = { Name = "${var.prefix}-tg-${each.key}" }
