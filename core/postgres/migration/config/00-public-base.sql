@@ -4,11 +4,11 @@ insert into
     rule (configuration)
 values (
         '{
-  "id": "901@1.0.0",
-  "cfg": "1.0.0",
+  "id": "901@4.0.0",
+  "cfg": "4.0.0",
   "tenantId": "DEFAULT",
-  "creDtTm": "2026-04-08T00:00:00.000Z",
-  "updDtTm": "2026-04-08T00:00:00.000Z",
+  "creDtTm": "2026-07-20T00:00:00.000Z",
+  "updDtTm": "2026-07-20T00:00:00.000Z",
   "desc": "Number of outgoing transactions - debtor",
   "config": {
     "parameters": {
@@ -24,29 +24,29 @@ values (
       {
         "subRuleRef": ".01",
         "upperLimit": 2,
-        "reason": "The debtor has performed one transaction to date"
+        "reason": "The debtor has performed one transaction in the last day"
       },
       {
         "subRuleRef": ".02",
         "lowerLimit": 2,
         "upperLimit": 3,
-        "reason": "The debtor has performed two transactions to date"
+        "reason": "The debtor has performed two transactions in the last day"
       },
       {
         "subRuleRef": ".03",
         "lowerLimit": 3,
-        "reason": "The debtor has performed three or more transactions to date"
+        "reason": "The debtor has performed three or more transactions in the last day"
       }
     ]
   }
 }'
     ), (
         '{
-  "id": "902@1.0.0",
-  "cfg": "1.0.0",
+  "id": "902@4.0.0",
+  "cfg": "4.0.0",
   "tenantId": "DEFAULT",
-  "creDtTm": "2026-04-08T00:00:00.000Z",
-  "updDtTm": "2026-04-08T00:00:00.000Z",
+  "creDtTm": "2026-07-20T00:00:00.000Z",
+  "updDtTm": "2026-07-20T00:00:00.000Z",
   "desc": "Number of incoming transactions - creditor",
   "config": {
     "parameters": {
@@ -62,22 +62,47 @@ values (
       {
         "subRuleRef": ".01",
         "upperLimit": 2,
-        "reason": "The creditor has received one transaction to date"
+        "reason": "The creditor has received one transaction in the last day"
       },
       {
         "subRuleRef": ".02",
         "lowerLimit": 2,
         "upperLimit": 3,
-        "reason": "The creditor has received two transactions to date"
+        "reason": "The creditor has received two transactions in the last day"
       },
       {
         "subRuleRef": ".03",
         "lowerLimit": 3,
-        "reason": "The creditor has received three or more transactions to date"
+        "reason": "The creditor has received three or more transactions in the last day"
       }
     ]
   }
 }'
+    ), (
+      '{
+  "id": "EFRuP@4.0.0",
+  "cfg": "none",
+  "tenantId": "DEFAULT",
+  "creDtTm": "2026-07-20T00:00:00.000Z",
+  "updDtTm": "2026-07-20T00:00:00.000Z",
+  "desc": "Event-Flow Rule Processor",
+  "config": {
+      "exitConditions": [
+          {
+              "subRuleRef": "none",
+              "reason": "No entity or account condition in effect"
+          },
+          {
+              "subRuleRef": "override",
+              "reason": "An entity or account override condition is in effect"
+          },
+          {
+              "subRuleRef": "block",
+              "reason": "An entity or account block condition is in effect"
+          }
+      ]
+  }
+    }'
     );
 
 insert into
@@ -86,20 +111,20 @@ values (
         '{
   "typology_name": "Typology-999-Rule-901",
   "id": "typology-processor",
-  "cfg": "999-901@1.0.0",
+  "cfg": "999-901@4.0.0",
   "tenantId": "DEFAULT",
-  "creDtTm": "2026-04-08T00:00:00.000Z",
-  "updDtTm": "2026-04-08T00:00:00.000Z",
+  "creDtTm": "2026-07-20T00:00:00.000Z",
+  "updDtTm": "2026-07-20T00:00:00.000Z",
   "workflow": {
     "alertThreshold": 200,
     "interdictionThreshold": 400,
-    "flowProcessor": "EFRuP@1.0.0"
+    "flowProcessor": "EFRuP@4.0.0"
   },
   "rules": [
     {
-      "id": "901@1.0.0",
-      "cfg": "1.0.0",
-      "termId": "v901at100at100",
+      "id": "901@4.0.0",
+      "cfg": "4.0.0",
+      "termId": "v901at400at400",
       "wghts": [
         {
           "ref": ".err",
@@ -124,9 +149,9 @@ values (
       ]
     },
     {
-      "id": "EFRuP@1.0.0",
+      "id": "EFRuP@4.0.0",
       "cfg": "none",
-      "termId": "vEFRuPat100atnone",
+      "termId": "vEFRuPat400atnone",
       "wghts": [
         {
           "ref": ".err",
@@ -151,26 +176,26 @@ values (
       ]
     }
   ],
-  "expression": ["Add", "v901at100at100"]
+  "expression": ["Add", "v901at400at400"]
 }'
     ), (
         '{
   "typology_name": "Typology-999-Rule-901-and-902",
   "id": "typology-processor",
-  "cfg": "999@1.0.0",
+  "cfg": "999-901-902@4.0.0",
   "tenantId": "DEFAULT",
-  "creDtTm": "2026-04-08T00:00:00.000Z",
-  "updDtTm": "2026-04-08T00:00:00.000Z",
+  "creDtTm": "2026-07-20T00:00:00.000Z",
+  "updDtTm": "2026-07-20T00:00:00.000Z",
   "workflow": {
     "alertThreshold": 300,
     "interdictionThreshold": 500,
-    "flowProcessor": "EFRuP@1.0.0"
+    "flowProcessor": "EFRuP@4.0.0"
   },
   "rules": [
     {
-      "id": "901@1.0.0",
-      "cfg": "1.0.0",
-      "termId": "v901at100at100",
+      "id": "901@4.0.0",
+      "cfg": "4.0.0",
+      "termId": "v901at400at400",
       "wghts": [
         {
           "ref": ".err",
@@ -195,9 +220,9 @@ values (
       ]
     },
     {
-      "id": "902@1.0.0",
-      "cfg": "1.0.0",
-      "termId": "v902at100at100",
+      "id": "902@4.0.0",
+      "cfg": "4.0.0",
+      "termId": "v902at400at400",
       "wghts": [
         {
           "ref": ".err",
@@ -222,9 +247,9 @@ values (
       ]
     },
     {
-      "id": "EFRuP@1.0.0",
+      "id": "EFRuP@4.0.0",
       "cfg": "none",
-      "termId": "vEFRuPat100atnone",
+      "termId": "vEFRuPat400atnone",
       "wghts": [
         {
           "ref": ".err",
@@ -249,6 +274,6 @@ values (
       ]
     }
   ],
-  "expression": ["Add", "v901at100at100", "v902at100at100"]
+  "expression": ["Add", "v901at400at400", "v902at400at400"]
 }'
     );

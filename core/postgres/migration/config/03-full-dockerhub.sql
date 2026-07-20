@@ -4,11 +4,11 @@ insert into
     rule (configuration)
 values (
         '{
-    "id": "001@1.0.0",
-    "cfg": "1.0.0",
+    "id": "001@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Derived account age - creditor",
     "config": {
       "parameters": {},
@@ -35,11 +35,11 @@ values (
     ),
     (
         '{
-    "id": "002@1.0.0",
-    "cfg": "1.0.0",
+    "id": "002@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Transaction convergence - debtor",
     "config": {
       "parameters": {
@@ -63,11 +63,11 @@ values (
     ),
     (
         '{
-    "id": "003@1.0.0",
-    "cfg": "1.0.0",
+    "id": "003@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Account dormancy - creditor",
     "config": {
       "parameters": {},
@@ -94,11 +94,11 @@ values (
     ),
     (
         '{
-    "id": "004@1.0.0",
-    "cfg": "1.0.0",
+    "id": "004@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Account dormancy - debtor",
     "config": {
       "parameters": {},
@@ -125,11 +125,11 @@ values (
     ),
     (
         '{
-    "id": "006@1.0.0",
-    "cfg": "1.0.0",
+    "id": "006@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Outgoing transfer similarity - amounts",
     "config": {
       "parameters": {
@@ -163,11 +163,11 @@ values (
     ),
     (
         '{
-    "id": "007@1.0.0",
-    "cfg": "1.0.0",
+    "id": "007@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Outgoing transfer similarity - descriptions",
     "config": {
       "parameters": {},
@@ -205,11 +205,11 @@ values (
     ),
     (
         '{
-    "id": "008@1.0.0",
-    "cfg": "1.0.0",
+    "id": "008@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Outgoing transfer similarity - creditor",
     "config": {
       "parameters": {
@@ -242,11 +242,11 @@ values (
     ),
     (
         '{
-    "id": "010@1.0.0",
-    "cfg": "1.0.0",
+    "id": "010@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Increased account activity: volume - debtor",
     "config": {
       "parameters": {
@@ -287,11 +287,11 @@ values (
     ),
     (
         '{
-    "id": "011@1.0.0",
-    "cfg": "1.0.0",
+    "id": "011@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Increased account activity: volume - creditor",
     "config": {
       "parameters": {
@@ -332,11 +332,11 @@ values (
     ),
     (
         '{
-    "id": "016@1.0.0",
-    "cfg": "1.0.0",
+    "id": "016@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Transaction convergence - creditor",
     "config": {
       "parameters": {
@@ -360,11 +360,11 @@ values (
     ),
     (
         '{
-    "id": "017@1.0.0",
-    "cfg": "1.0.0",
+    "id": "017@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Transaction divergence - debtor",
     "config": {
       "parameters": {
@@ -388,11 +388,11 @@ values (
     ),
     (
         '{
-    "id": "018@1.0.0",
-    "cfg": "1.0.0",
+    "id": "018@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Exceptionally large outgoing transfer - debtor",
     "config": {
       "parameters": {
@@ -425,11 +425,11 @@ values (
     ),
     (
         '{
-    "id": "020@1.0.0",
-    "cfg": "1.0.0",
+    "id": "020@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Large transaction amount vs history - creditor",
     "config": {
       "parameters": {},
@@ -468,11 +468,11 @@ values (
     ),
     (
         '{
-    "id": "021@1.0.0",
-    "cfg": "1.0.0",
+    "id": "021@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "A large number of similar transaction amounts - creditor",
     "config": {
       "parameters": {
@@ -506,11 +506,11 @@ values (
     ),
     (
         '{
-    "id": "024@1.0.0",
-    "cfg": "1.0.0",
+    "id": "024@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Non-commissioned transaction mirroring - creditor",
     "config": {
       "parameters": {
@@ -548,11 +548,11 @@ values (
     ),
     (
         '{
-    "id": "025@1.0.0",
-    "cfg": "1.0.0",
+    "id": "025@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Non-commissioned transaction mirroring - debtor",
     "config": {
       "parameters": {
@@ -590,11 +590,11 @@ values (
     ),
     (
         '{
-    "id": "026@1.0.0",
-    "cfg": "1.0.0",
+    "id": "026@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Commissioned transaction mirroring - creditor",
     "config": {
       "parameters": {
@@ -633,11 +633,11 @@ values (
     ),
     (
         '{
-    "id": "027@1.0.0",
-    "cfg": "1.0.0",
+    "id": "027@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Commissioned transaction mirroring - debtor",
     "config": {
       "parameters": {
@@ -676,11 +676,11 @@ values (
     ),
     (
         '{
-    "id": "028@1.0.0",
-    "cfg": "1.0.0",
+    "id": "028@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Age classification - debtor",
     "config": {
       "parameters": {},
@@ -703,11 +703,11 @@ values (
     ),
     (
         '{
-    "id": "030@1.0.0",
-    "cfg": "1.0.0",
+    "id": "030@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Transfer to unfamiliar creditor account - debtor",
     "config": {
       "parameters": {},
@@ -734,11 +734,11 @@ values (
     ),
     (
         '{
-    "id": "044@1.0.0",
-    "cfg": "1.0.0",
+    "id": "044@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Successful transactions from the debtor, including the new transaction",
     "config": {
       "parameters": {},
@@ -766,11 +766,11 @@ values (
     ),
     (
         '{
-    "id": "045@1.0.0",
-    "cfg": "1.0.0",
+    "id": "045@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Successful transactions to the creditor, including the new transaction",
     "config": {
       "parameters": {},
@@ -798,11 +798,11 @@ values (
     ),
     (
         '{
-    "id": "048@1.0.0",
-    "cfg": "1.0.0",
+    "id": "048@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Large transaction amount vs history - debtor",
     "config": {
       "parameters": {},
@@ -841,11 +841,11 @@ values (
     ),
     (
         '{
-    "id": "054@1.0.0",
-    "cfg": "1.0.0",
+    "id": "054@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Synthetic data check - Benford''s Law - debtor",
     "config": {
       "parameters": {
@@ -878,11 +878,11 @@ values (
     ),
     (
         '{
-    "id": "063@1.0.0",
-    "cfg": "1.0.0",
+    "id": "063@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Synthetic data check - Benford''s Law - creditor",
     "config": {
       "parameters": {
@@ -915,11 +915,11 @@ values (
     ),
     (
         '{
-    "id": "074@1.0.0",
-    "cfg": "1.0.0",
+    "id": "074@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Distance over time from last transaction location - debtor",
     "config": {
       "parameters": {
@@ -948,11 +948,11 @@ values (
     ),
     (
         '{
-    "id": "075@1.0.0",
-    "cfg": "1.0.0",
+    "id": "075@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Distance from habitual locations - debtor",
     "config": {
       "parameters": {
@@ -987,11 +987,11 @@ values (
     ),
     (
         '{
-    "id": "076@1.0.0",
-    "cfg": "1.0.0",
+    "id": "076@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Time since last transaction - debtor",
     "config": {
       "parameters": {},
@@ -1018,11 +1018,11 @@ values (
     ),
     (
         '{
-    "id": "078@1.0.0",
-    "cfg": "1.0.0",
+    "id": "078@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Transaction type",
     "config": {
       "parameters": {},
@@ -1055,11 +1055,11 @@ values (
     ),
     (
         '{
-    "id": "083@1.0.0",
-    "cfg": "1.0.0",
+    "id": "083@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Multiple accounts associated with a debtor",
     "config": {
       "parameters": {},
@@ -1081,11 +1081,11 @@ values (
     ),
     (
         '{
-    "id": "084@1.0.0",
-    "cfg": "1.0.0",
+    "id": "084@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Multiple accounts associated with a creditor",
     "config": {
       "parameters": {},
@@ -1107,11 +1107,11 @@ values (
     ),
     (
         '{
-    "id": "090@1.0.0",
-    "cfg": "1.0.0",
+    "id": "090@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Upstream transaction divergence - debtor",
     "config": {
       "parameters": {
@@ -1136,11 +1136,11 @@ values (
     ),
     (
         '{
-    "id": "091@1.0.0",
-    "cfg": "1.0.0",
+    "id": "091@4.0.0",
+    "cfg": "4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "desc": "Transaction amount vs regulatory threshold",
     "config": {
       "parameters": {},
@@ -1168,20 +1168,20 @@ values (
 {
     "desc": "Complete rule coverage",
     "id": "typology-processor",
-    "cfg": "000@1.0.0",
+    "cfg": "000@4.0.0",
     "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+    "creDtTm": "2026-07-20T00:00:00.000Z",
+    "updDtTm": "2026-07-20T00:00:00.000Z",
     "workflow": {
         "alertThreshold": 2200,
         "interdictionThreshold": 2600,
-        "flowProcessor": "EFRuP@1.0.0"
+        "flowProcessor": "EFRuP@4.0.0"
     },
     "rules": [
         {
-        "id": "001@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v001at100at100",
+        "id": "001@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v001at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1202,9 +1202,9 @@ values (
         ]
         },
         {
-        "id": "002@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v002at100at100",
+        "id": "002@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v002at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1221,9 +1221,9 @@ values (
         ]
         },
         {
-        "id": "003@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v003at100at100",
+        "id": "003@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v003at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1244,9 +1244,9 @@ values (
         ]
         },
         {
-        "id": "004@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v004at100at100",
+        "id": "004@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v004at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1267,9 +1267,9 @@ values (
         ]
         },
         {
-        "id": "006@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v006at100at100",
+        "id": "006@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v006at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1294,9 +1294,9 @@ values (
         ]
         },
         {
-        "id": "007@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v007at100at100",
+        "id": "007@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v007at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1325,9 +1325,9 @@ values (
         ]
         },
         {
-        "id": "008@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v008at100at100",
+        "id": "008@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v008at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1352,9 +1352,9 @@ values (
         ]
         },
         {
-        "id": "010@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v010at100at100",
+        "id": "010@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v010at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1387,9 +1387,9 @@ values (
         ]
         },
         {
-        "id": "011@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v011at100at100",
+        "id": "011@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v011at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1422,9 +1422,9 @@ values (
         ]
         },
         {
-        "id": "016@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v016at100at100",
+        "id": "016@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v016at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1441,9 +1441,9 @@ values (
         ]
         },
         {
-        "id": "017@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v017at100at100",
+        "id": "017@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v017at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1460,9 +1460,9 @@ values (
         ]
         },
         {
-        "id": "018@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v018at100at100",
+        "id": "018@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v018at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1487,283 +1487,9 @@ values (
         ]
         },
         {
-        "id": "020@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v020at100at100",
-        "wghts": [
-            {
-            "ref": ".err",
-            "wght": 0
-            },
-            {
-            "ref": ".x00",
-            "wght": 0
-            },
-            {
-            "ref": ".x01",
-            "wght": 0
-            },
-            {
-            "ref": ".x03",
-            "wght": 100
-            },
-            {
-            "ref": ".x04",
-            "wght": 0
-            },
-            {
-            "ref": ".01",
-            "wght": 0
-            },
-            {
-            "ref": ".02",
-            "wght": 200
-            }
-        ]
-        },
-        {
-        "id": "021@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v021at100at100",
-        "wghts": [
-            {
-            "ref": ".err",
-            "wght": 0
-            },
-            {
-            "ref": ".x00",
-            "wght": 0
-            },
-            {
-            "ref": ".x01",
-            "wght": 0
-            },
-            {
-            "ref": ".01",
-            "wght": 0
-            },
-            {
-            "ref": ".02",
-            "wght": 100
-            }
-        ]
-        },
-        {
-        "id": "024@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v024at100at100",
-        "wghts": [
-            {
-            "ref": ".err",
-            "wght": 0
-            },
-            {
-            "ref": ".x00",
-            "wght": 0
-            },
-            {
-            "ref": ".x01",
-            "wght": 0
-            },
-            {
-            "ref": ".x03",
-            "wght": 0
-            },
-            {
-            "ref": ".01",
-            "wght": 200
-            },
-            {
-            "ref": ".02",
-            "wght": 400
-            }
-        ]
-        },
-        {
-        "id": "025@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v025at100at100",
-        "wghts": [
-            {
-            "ref": ".err",
-            "wght": 0
-            },
-            {
-            "ref": ".x00",
-            "wght": 0
-            },
-            {
-            "ref": ".x01",
-            "wght": 0
-            },
-            {
-            "ref": ".x03",
-            "wght": 0
-            },
-            {
-            "ref": ".01",
-            "wght": 200
-            },
-            {
-            "ref": ".02",
-            "wght": 400
-            }
-        ]
-        },
-        {
-        "id": "026@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v026at100at100",
-        "wghts": [
-            {
-            "ref": ".err",
-            "wght": 0
-            },
-            {
-            "ref": ".x00",
-            "wght": 0
-            },
-            {
-            "ref": ".x01",
-            "wght": 0
-            },
-            {
-            "ref": ".x03",
-            "wght": 0
-            },
-            {
-            "ref": ".01",
-            "wght": 200
-            },
-            {
-            "ref": ".02",
-            "wght": 400
-            }
-        ]
-        },
-        {
-        "id": "027@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v027at100at100",
-        "wghts": [
-            {
-            "ref": ".err",
-            "wght": 0
-            },
-            {
-            "ref": ".x00",
-            "wght": 0
-            },
-            {
-            "ref": ".x01",
-            "wght": 0
-            },
-            {
-            "ref": ".x03",
-            "wght": 0
-            },
-            {
-            "ref": ".01",
-            "wght": 200
-            },
-            {
-            "ref": ".02",
-            "wght": 400
-            }
-        ]
-        },
-        {
-        "id": "028@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v028at100at100",
-        "wghts": [
-            {
-            "ref": ".err",
-            "wght": 0
-            },
-            {
-            "ref": ".01",
-            "wght": 0
-            },
-            {
-            "ref": ".02",
-            "wght": 100
-            }
-        ]
-        },
-        {
-        "id": "030@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v030at100at100",
-        "wghts": [
-            {
-            "ref": ".err",
-            "wght": 0
-            },
-            {
-            "ref": ".x00",
-            "wght": 0
-            },
-            {
-            "ref": ".01",
-            "wght": 200
-            },
-            {
-            "ref": ".02",
-            "wght": 100
-            }
-        ]
-        },
-        {
-        "id": "044@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v044at100at100",
-        "wghts": [
-            {
-            "ref": ".err",
-            "wght": 0
-            },
-            {
-            "ref": ".01",
-            "wght": 0
-            },
-            {
-            "ref": ".02",
-            "wght": 200
-            },
-            {
-            "ref": ".03",
-            "wght": 100
-            }
-        ]
-        },
-        {
-        "id": "045@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v045at100at100",
-        "wghts": [
-            {
-            "ref": ".err",
-            "wght": 0
-            },
-            {
-            "ref": ".01",
-            "wght": 0
-            },
-            {
-            "ref": ".02",
-            "wght": 200
-            },
-            {
-            "ref": ".03",
-            "wght": 100
-            }
-        ]
-        },
-        {
-        "id": "048@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v048at100at100",
+        "id": "020@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v020at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1796,9 +1522,283 @@ values (
         ]
         },
         {
-        "id": "054@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v054at100at100",
+        "id": "021@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v021at400at400",
+        "wghts": [
+            {
+            "ref": ".err",
+            "wght": 0
+            },
+            {
+            "ref": ".x00",
+            "wght": 0
+            },
+            {
+            "ref": ".x01",
+            "wght": 0
+            },
+            {
+            "ref": ".01",
+            "wght": 0
+            },
+            {
+            "ref": ".02",
+            "wght": 100
+            }
+        ]
+        },
+        {
+        "id": "024@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v024at400at400",
+        "wghts": [
+            {
+            "ref": ".err",
+            "wght": 0
+            },
+            {
+            "ref": ".x00",
+            "wght": 0
+            },
+            {
+            "ref": ".x01",
+            "wght": 0
+            },
+            {
+            "ref": ".x03",
+            "wght": 0
+            },
+            {
+            "ref": ".01",
+            "wght": 200
+            },
+            {
+            "ref": ".02",
+            "wght": 400
+            }
+        ]
+        },
+        {
+        "id": "025@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v025at400at400",
+        "wghts": [
+            {
+            "ref": ".err",
+            "wght": 0
+            },
+            {
+            "ref": ".x00",
+            "wght": 0
+            },
+            {
+            "ref": ".x01",
+            "wght": 0
+            },
+            {
+            "ref": ".x03",
+            "wght": 0
+            },
+            {
+            "ref": ".01",
+            "wght": 200
+            },
+            {
+            "ref": ".02",
+            "wght": 400
+            }
+        ]
+        },
+        {
+        "id": "026@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v026at400at400",
+        "wghts": [
+            {
+            "ref": ".err",
+            "wght": 0
+            },
+            {
+            "ref": ".x00",
+            "wght": 0
+            },
+            {
+            "ref": ".x01",
+            "wght": 0
+            },
+            {
+            "ref": ".x03",
+            "wght": 0
+            },
+            {
+            "ref": ".01",
+            "wght": 200
+            },
+            {
+            "ref": ".02",
+            "wght": 400
+            }
+        ]
+        },
+        {
+        "id": "027@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v027at400at400",
+        "wghts": [
+            {
+            "ref": ".err",
+            "wght": 0
+            },
+            {
+            "ref": ".x00",
+            "wght": 0
+            },
+            {
+            "ref": ".x01",
+            "wght": 0
+            },
+            {
+            "ref": ".x03",
+            "wght": 0
+            },
+            {
+            "ref": ".01",
+            "wght": 200
+            },
+            {
+            "ref": ".02",
+            "wght": 400
+            }
+        ]
+        },
+        {
+        "id": "028@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v028at400at400",
+        "wghts": [
+            {
+            "ref": ".err",
+            "wght": 0
+            },
+            {
+            "ref": ".01",
+            "wght": 0
+            },
+            {
+            "ref": ".02",
+            "wght": 100
+            }
+        ]
+        },
+        {
+        "id": "030@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v030at400at400",
+        "wghts": [
+            {
+            "ref": ".err",
+            "wght": 0
+            },
+            {
+            "ref": ".x00",
+            "wght": 0
+            },
+            {
+            "ref": ".01",
+            "wght": 200
+            },
+            {
+            "ref": ".02",
+            "wght": 100
+            }
+        ]
+        },
+        {
+        "id": "044@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v044at400at400",
+        "wghts": [
+            {
+            "ref": ".err",
+            "wght": 0
+            },
+            {
+            "ref": ".01",
+            "wght": 0
+            },
+            {
+            "ref": ".02",
+            "wght": 200
+            },
+            {
+            "ref": ".03",
+            "wght": 100
+            }
+        ]
+        },
+        {
+        "id": "045@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v045at400at400",
+        "wghts": [
+            {
+            "ref": ".err",
+            "wght": 0
+            },
+            {
+            "ref": ".01",
+            "wght": 0
+            },
+            {
+            "ref": ".02",
+            "wght": 200
+            },
+            {
+            "ref": ".03",
+            "wght": 100
+            }
+        ]
+        },
+        {
+        "id": "048@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v048at400at400",
+        "wghts": [
+            {
+            "ref": ".err",
+            "wght": 0
+            },
+            {
+            "ref": ".x00",
+            "wght": 0
+            },
+            {
+            "ref": ".x01",
+            "wght": 0
+            },
+            {
+            "ref": ".x03",
+            "wght": 100
+            },
+            {
+            "ref": ".x04",
+            "wght": 0
+            },
+            {
+            "ref": ".01",
+            "wght": 0
+            },
+            {
+            "ref": ".02",
+            "wght": 200
+            }
+        ]
+        },
+        {
+        "id": "054@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v054at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1823,9 +1823,9 @@ values (
         ]
         },
         {
-        "id": "063@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v063at100at100",
+        "id": "063@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v063at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1850,9 +1850,9 @@ values (
         ]
         },
         {
-        "id": "074@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v074at100at100",
+        "id": "074@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v074at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1873,9 +1873,9 @@ values (
         ]
         },
         {
-        "id": "075@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v075at100at100",
+        "id": "075@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v075at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1900,9 +1900,9 @@ values (
         ]
         },
         {
-        "id": "076@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v076at100at100",
+        "id": "076@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v076at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1923,9 +1923,9 @@ values (
         ]
         },
         {
-        "id": "078@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v078at100at100",
+        "id": "078@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v078at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1950,9 +1950,9 @@ values (
         ]
         },
         {
-        "id": "083@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v083at100at100",
+        "id": "083@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v083at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1969,9 +1969,9 @@ values (
         ]
         },
         {
-        "id": "084@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v084at100at100",
+        "id": "084@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v084at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -1988,9 +1988,9 @@ values (
         ]
         },
         {
-        "id": "090@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v090at100at100",
+        "id": "090@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v090at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -2007,9 +2007,9 @@ values (
         ]
         },
         {
-        "id": "091@1.0.0",
-        "cfg": "1.0.0",
-        "termId": "v091at100at100",
+        "id": "091@4.0.0",
+        "cfg": "4.0.0",
+        "termId": "v091at400at400",
         "wghts": [
             {
             "ref": ".err",
@@ -2026,9 +2026,9 @@ values (
         ]
         },
         {
-        "id": "EFRuP@1.0.0",
+        "id": "EFRuP@4.0.0",
         "cfg": "none",
-        "termId": "vEFRuPat100atnone",
+        "termId": "vEFRuPat400atnone",
         "wghts": [
             {
             "ref": ".err",
@@ -2055,39 +2055,39 @@ values (
     ],
     "expression": [
         "Add",
-        "v001at100at100",
-        "v002at100at100",
-        "v003at100at100",
-        "v004at100at100",
-        "v006at100at100",
-        "v007at100at100",
-        "v008at100at100",
-        "v010at100at100",
-        "v011at100at100",
-        "v016at100at100",
-        "v017at100at100",
-        "v018at100at100",
-        "v020at100at100",
-        "v021at100at100",
-        "v024at100at100",
-        "v025at100at100",
-        "v026at100at100",
-        "v027at100at100",
-        "v028at100at100",
-        "v030at100at100",
-        "v044at100at100",
-        "v045at100at100",
-        "v048at100at100",
-        "v054at100at100",
-        "v063at100at100",
-        "v074at100at100",
-        "v075at100at100",
-        "v076at100at100",
-        "v078at100at100",
-        "v083at100at100",
-        "v084at100at100",
-        "v090at100at100",
-        "v091at100at100"
+        "v001at400at400",
+        "v002at400at400",
+        "v003at400at400",
+        "v004at400at400",
+        "v006at400at400",
+        "v007at400at400",
+        "v008at400at400",
+        "v010at400at400",
+        "v011at400at400",
+        "v016at400at400",
+        "v017at400at400",
+        "v018at400at400",
+        "v020at400at400",
+        "v021at400at400",
+        "v024at400at400",
+        "v025at400at400",
+        "v026at400at400",
+        "v027at400at400",
+        "v028at400at400",
+        "v030at400at400",
+        "v044at400at400",
+        "v045at400at400",
+        "v048at400at400",
+        "v054at400at400",
+        "v063at400at400",
+        "v074at400at400",
+        "v075at400at400",
+        "v076at400at400",
+        "v078at400at400",
+        "v083at400at400",
+        "v084at400at400",
+        "v090at400at400",
+        "v091at400at400"
     ]
 }'
     );
@@ -2097,155 +2097,152 @@ insert into
 values (
         '{
   "active": true,
-  "cfg": "1.0.0",
+  "cfg": "4.0.0",
   "tenantId": "DEFAULT",
   "messages": [
     {
-      "id": "004@1.0.0",
-      "cfg": "1.0.0",
+      "id": "004@4.0.0",
+      "cfg": "4.0.0",
       "txTp": "pacs.002.001.12",
       "typologies": [
         {
           "id": "typology-processor",
-          "cfg": "000@1.0.0",
-          "tenantId": "DEFAULT",
-    "creDtTm": "2026-04-08T00:00:00.000Z",
-    "updDtTm": "2026-04-08T00:00:00.000Z",
+          "cfg": "000@4.0.0",
           "rules": [
             {
-              "id": "001@1.0.0",
-              "cfg": "1.0.0"
+              "id": "001@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "002@1.0.0",
-              "cfg": "1.0.0"
+              "id": "002@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "003@1.0.0",
-              "cfg": "1.0.0"
+              "id": "003@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "004@1.0.0",
-              "cfg": "1.0.0"
+              "id": "004@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "006@1.0.0",
-              "cfg": "1.0.0"
+              "id": "006@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "007@1.0.0",
-              "cfg": "1.0.0"
+              "id": "007@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "008@1.0.0",
-              "cfg": "1.0.0"
+              "id": "008@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "010@1.0.0",
-              "cfg": "1.0.0"
+              "id": "010@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "011@1.0.0",
-              "cfg": "1.0.0"
+              "id": "011@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "016@1.0.0",
-              "cfg": "1.0.0"
+              "id": "016@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "017@1.0.0",
-              "cfg": "1.0.0"
+              "id": "017@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "018@1.0.0",
-              "cfg": "1.0.0"
+              "id": "018@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "020@1.0.0",
-              "cfg": "1.0.0"
+              "id": "020@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "021@1.0.0",
-              "cfg": "1.0.0"
+              "id": "021@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "024@1.0.0",
-              "cfg": "1.0.0"
+              "id": "024@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "025@1.0.0",
-              "cfg": "1.0.0"
+              "id": "025@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "026@1.0.0",
-              "cfg": "1.0.0"
+              "id": "026@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "027@1.0.0",
-              "cfg": "1.0.0"
+              "id": "027@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "028@1.0.0",
-              "cfg": "1.0.0"
+              "id": "028@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "030@1.0.0",
-              "cfg": "1.0.0"
+              "id": "030@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "044@1.0.0",
-              "cfg": "1.0.0"
+              "id": "044@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "045@1.0.0",
-              "cfg": "1.0.0"
+              "id": "045@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "048@1.0.0",
-              "cfg": "1.0.0"
+              "id": "048@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "054@1.0.0",
-              "cfg": "1.0.0"
+              "id": "054@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "063@1.0.0",
-              "cfg": "1.0.0"
+              "id": "063@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "074@1.0.0",
-              "cfg": "1.0.0"
+              "id": "074@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "075@1.0.0",
-              "cfg": "1.0.0"
+              "id": "075@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "076@1.0.0",
-              "cfg": "1.0.0"
+              "id": "076@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "078@1.0.0",
-              "cfg": "1.0.0"
+              "id": "078@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "083@1.0.0",
-              "cfg": "1.0.0"
+              "id": "083@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "084@1.0.0",
-              "cfg": "1.0.0"
+              "id": "084@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "090@1.0.0",
-              "cfg": "1.0.0"
+              "id": "090@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "091@1.0.0",
-              "cfg": "1.0.0"
+              "id": "091@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "EFRuP@1.0.0",
+              "id": "EFRuP@4.0.0",
               "cfg": "none"
             }
           ]
