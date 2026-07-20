@@ -4,11 +4,11 @@ insert into
     rule (configuration)
 values (
         '{
-  "id": "901@1.0.0",
-  "cfg": "1.0.0",
+  "id": "901@4.0.0",
+  "cfg": "4.0.0",
   "tenantId": "tenant-001",
-  "creDtTm": "2026-04-08T00:00:00.000Z",
-  "updDtTm": "2026-04-08T00:00:00.000Z",
+  "creDtTm": "2026-07-20T00:00:00.000Z",
+  "updDtTm": "2026-07-20T00:00:00.000Z",
   "desc": "Number of outgoing transactions - debtor",
   "config": {
     "parameters": {
@@ -42,11 +42,11 @@ values (
 }'
     ), (
         '{
-  "id": "902@1.0.0",
-  "cfg": "1.0.0",
+  "id": "902@4.0.0",
+  "cfg": "4.0.0",
   "tenantId": "tenant-001",
-  "creDtTm": "2026-04-08T00:00:00.000Z",
-  "updDtTm": "2026-04-08T00:00:00.000Z",
+  "creDtTm": "2026-07-20T00:00:00.000Z",
+  "updDtTm": "2026-07-20T00:00:00.000Z",
   "desc": "Number of incoming transactions - creditor",
   "config": {
     "parameters": {
@@ -80,11 +80,11 @@ values (
 }'
     ), (
         '{
-  "id": "901@1.0.0",
-  "cfg": "1.0.0",
+  "id": "901@4.0.0",
+  "cfg": "4.0.0",
   "tenantId": "tenant-002",
-  "creDtTm": "2026-04-08T00:00:00.000Z",
-  "updDtTm": "2026-04-08T00:00:00.000Z",
+  "creDtTm": "2026-07-20T00:00:00.000Z",
+  "updDtTm": "2026-07-20T00:00:00.000Z",
   "desc": "Number of outgoing transactions - debtor",
   "config": {
     "parameters": {
@@ -118,11 +118,11 @@ values (
 }'
     ), (
         '{
-  "id": "902@1.0.0",
-  "cfg": "1.0.0",
+  "id": "902@4.0.0",
+  "cfg": "4.0.0",
   "tenantId": "tenant-002",
-  "creDtTm": "2026-04-08T00:00:00.000Z",
-  "updDtTm": "2026-04-08T00:00:00.000Z",
+  "creDtTm": "2026-07-20T00:00:00.000Z",
+  "updDtTm": "2026-07-20T00:00:00.000Z",
   "desc": "Number of incoming transactions - creditor",
   "config": {
     "parameters": {
@@ -162,20 +162,20 @@ values (
         '{
   "typology_name": "Typology-999-Rule-901-and-902",
   "id": "typology-processor",
-  "cfg": "999@1.0.0",
+  "cfg": "999@4.0.0",
   "tenantId": "tenant-001",
-  "creDtTm": "2026-04-08T00:00:00.000Z",
-  "updDtTm": "2026-04-08T00:00:00.000Z",
+  "creDtTm": "2026-07-20T00:00:00.000Z",
+  "updDtTm": "2026-07-20T00:00:00.000Z",
   "workflow": {
     "alertThreshold": 300,
     "interdictionThreshold": 500,
-    "flowProcessor": "EFRuP@1.0.0"
+    "flowProcessor": "EFRuP@4.0.0"
   },
   "rules": [
     {
-      "id": "901@1.0.0",
-      "cfg": "1.0.0",
-      "termId": "v901at100at100",
+      "id": "901@4.0.0",
+      "cfg": "4.0.0",
+      "termId": "v901at400at400",
       "wghts": [
         {
           "ref": ".err",
@@ -200,9 +200,9 @@ values (
       ]
     },
     {
-      "id": "902@1.0.0",
-      "cfg": "1.0.0",
-      "termId": "v902at100at100",
+      "id": "902@4.0.0",
+      "cfg": "4.0.0",
+      "termId": "v902at400at400",
       "wghts": [
         {
           "ref": ".err",
@@ -227,9 +227,9 @@ values (
       ]
     },
     {
-      "id": "EFRuP@1.0.0",
+      "id": "EFRuP@4.0.0",
       "cfg": "none",
-      "termId": "vEFRuPat100atnone",
+      "termId": "vEFRuPat400atnone",
       "wghts": [
         {
           "ref": ".err",
@@ -254,26 +254,26 @@ values (
       ]
     }
   ],
-  "expression": ["Add", "v901at100at100", "v902at100at100"]
+  "expression": ["Add", "v901at400at400", "v902at400at400"]
 }'
     ), (
         '{
   "typology_name": "Typology-999-Rule-901-and-902",
   "id": "typology-processor",
-  "cfg": "999@1.0.0",
+  "cfg": "999@4.0.0",
   "tenantId": "tenant-002",
-  "creDtTm": "2026-04-08T00:00:00.000Z",
-  "updDtTm": "2026-04-08T00:00:00.000Z",
+  "creDtTm": "2026-07-20T00:00:00.000Z",
+  "updDtTm": "2026-07-20T00:00:00.000Z",
   "workflow": {
     "alertThreshold": 300,
     "interdictionThreshold": 500,
-    "flowProcessor": "EFRuP@1.0.0"
+    "flowProcessor": "EFRuP@4.0.0"
   },
   "rules": [
     {
-      "id": "901@1.0.0",
-      "cfg": "1.0.0",
-      "termId": "v901at100at100",
+      "id": "901@4.0.0",
+      "cfg": "4.0.0",
+      "termId": "v901at400at400",
       "wghts": [
         {
           "ref": ".err",
@@ -298,9 +298,9 @@ values (
       ]
     },
     {
-      "id": "902@1.0.0",
-      "cfg": "1.0.0",
-      "termId": "v902at100at100",
+      "id": "902@4.0.0",
+      "cfg": "4.0.0",
+      "termId": "v902at400at400",
       "wghts": [
         {
           "ref": ".err",
@@ -325,9 +325,9 @@ values (
       ]
     },
     {
-      "id": "EFRuP@1.0.0",
+      "id": "EFRuP@4.0.0",
       "cfg": "none",
-      "termId": "vEFRuPat100atnone",
+      "termId": "vEFRuPat400atnone",
       "wghts": [
         {
           "ref": ".err",
@@ -352,7 +352,7 @@ values (
       ]
     }
   ],
-  "expression": ["Add", "v901at100at100", "v902at100at100"]
+  "expression": ["Add", "v901at400at400", "v902at400at400"]
 }'
     );
 
@@ -362,34 +362,31 @@ values (
         '{
   "active": true,
   "name": "Public Network Map",
-  "cfg": "1.0.0",
+  "cfg": "4.0.0",
   "tenantId": "tenant-001",
-  "creDtTm": "2026-04-08T00:00:00.000Z",
-  "updDtTm": "2026-04-08T00:00:00.000Z",
+  "creDtTm": "2026-07-20T00:00:00.000Z",
+  "updDtTm": "2026-07-20T00:00:00.000Z",
   "messages": [
     {
-      "id": "004@1.0.0",
-      "cfg": "1.0.0",
+      "id": "004@4.0.0",
+      "cfg": "4.0.0",
       "txTp": "pacs.002.001.12",
       "typologies": [
         {
           "id": "typology-processor",
-          "cfg": "999@1.0.0",
-          "tenantId": "tenant-001",
-          "creDtTm": "2026-04-08T00:00:00.000Z",
-          "updDtTm": "2026-04-08T00:00:00.000Z",
+          "cfg": "999@4.0.0",
           "rules": [
             {
-              "id": "EFRuP@1.0.0",
+              "id": "EFRuP@4.0.0",
               "cfg": "none"
             },
             {
-              "id": "901@1.0.0",
-              "cfg": "1.0.0"
+              "id": "901@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "902@1.0.0",
-              "cfg": "1.0.0"
+              "id": "902@4.0.0",
+              "cfg": "4.0.0"
             }
           ]
         }
@@ -401,34 +398,31 @@ values (
         '{
   "active": true,
   "name": "Public Network Map",
-  "cfg": "1.0.0",
+  "cfg": "4.0.0",
   "tenantId": "tenant-002",
-  "creDtTm": "2026-04-08T00:00:00.000Z",
-  "updDtTm": "2026-04-08T00:00:00.000Z",
+  "creDtTm": "2026-07-20T00:00:00.000Z",
+  "updDtTm": "2026-07-20T00:00:00.000Z",
   "messages": [
     {
-      "id": "004@1.0.0",
-      "cfg": "1.0.0",
+      "id": "004@4.0.0",
+      "cfg": "4.0.0",
       "txTp": "pacs.002.001.12",
       "typologies": [
         {
           "id": "typology-processor",
-          "cfg": "999@1.0.0",
-          "tenantId": "tenant-002",
-          "creDtTm": "2026-04-08T00:00:00.000Z",
-          "updDtTm": "2026-04-08T00:00:00.000Z",
+          "cfg": "999@4.0.0",
           "rules": [
             {
-              "id": "EFRuP@1.0.0",
+              "id": "EFRuP@4.0.0",
               "cfg": "none"
             },
             {
-              "id": "901@1.0.0",
-              "cfg": "1.0.0"
+              "id": "901@4.0.0",
+              "cfg": "4.0.0"
             },
             {
-              "id": "902@1.0.0",
-              "cfg": "1.0.0"
+              "id": "902@4.0.0",
+              "cfg": "4.0.0"
             }
           ]
         }
