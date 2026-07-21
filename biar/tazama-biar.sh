@@ -9,15 +9,33 @@ pause() {
     read -rp " Press Enter to continue..."
 }
 
+# Verify tazama-core is reachable via its NATS exterior port (14222).
+# SERVER_A_HOST defaults to localhost for single-machine; set to the private
+# IP in .env for AWS multi-host deployments.
 check_core_reachable() {
     local server_a_host="localhost"
 
     if [[ -f ./.env ]]; then
         local env_host
-        env_host=$(grep -E '^SERVER_A_HOST=' ./.env | cut -d'=' -f2- | tr -d '"' | tr -d "'" | tr -d '\r')
+        env_host=$(grep -E '^SERVER_A_HOST=' ./.env | head -n1 | cut -d'=' -f2- | tr -d '"' | tr -d "'" | tr -d '\r')
         if [[ -n "$env_host" ]]; then
             server_a_host="$env_host"
         fi
+    fi
+
+    if command -v nc >/dev/null 2>&1; then
+        nc -z -w 3 "$server_a_host" 14222 >/dev/null 2>&1
+    else
+        timeout 3 bash -c ">/dev/tcp/${server_a_host}/14222" >/dev/null 2>&1
+    fi
+
+    if [[ $? -ne 0 ]]; then
+        echo ""
+        echo " ERROR: tazama-core is not reachable at ${server_a_host}:14222"
+        echo "        Ensure tazama-core is running and SERVER_A_HOST is set correctly in .env"
+        echo ""
+        pause
+        return 1
     fi
     return 0
 }
