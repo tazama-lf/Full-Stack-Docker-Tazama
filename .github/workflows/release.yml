@@ -217,33 +217,29 @@ jobs:
             --title "${{ steps.bump_version.outputs.new_version }}" \
             --notes-file /home/runner/work/changelog.txt
 
+      - name: Resolve source PR
+        id: src_pr
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR_URL=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" --jq '.[0].html_url // empty' 2>/dev/null || true)
+          echo "PR_URL=${PR_URL}" >> "$GITHUB_OUTPUT"
+
       - name: Send Slack Notification
+        if: always()
         continue-on-error: true
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SERVICE_NAME: ${{ github.repository }}
+          RELEASE_TAG: ${{ steps.bump_version.outputs.new_version }}
+          RELEASE_URL: https://github.com/${{ github.repository }}/releases/tag/${{ steps.bump_version.outputs.new_version }}
+          PR_URL: ${{ steps.src_pr.outputs.PR_URL }}
+          JOB_STATUS: ${{ job.status }}
+          BRANCH_NAME: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          curl --fail -sS -X POST -H 'Content-type: application/json' --data '{
-            "blocks": [
-              {
-                "type": "header",
-                "text": {
-                  "type": "plain_text",
-                  "text": "New Release Alert :tazama:",
-                  "emoji": true
-                }
-              },
-              {
-                "type": "section",
-                "fields": [
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Github Repository:*\nhttps://github.com/${{ github.repository }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Release:*\n<https://github.com/${{ github.repository }}/releases/tag/${{ steps.bump_version.outputs.new_version }}|Release notes>"
-                  }
-                ]
-              }
-            ]
-          }' "$SLACK_WEBHOOK_URL"
+          [ -z "$SLACK_WEBHOOK_URL" ] && echo "SLACK_WEBHOOK_URL is not configured. Skipping Slack notification." && exit 0
+          SHORT_SHA="${COMMIT_SHA:0:7}"
+          curl --fail-with-body -sS -X POST -H 'Content-type: application/json' --data "$(jq -n --arg title "$([ "$JOB_STATUS" = "success" ] && echo "New Release Alert :tazama:" || echo "Release failed :x:")" --arg service "$SERVICE_NAME" --arg status "$JOB_STATUS" --arg release "$RELEASE_TAG" --arg release_url "$RELEASE_URL" --arg branch "$BRANCH_NAME" --arg sha "$SHORT_SHA" --arg pr "$PR_URL" --arg run "$RUN_URL" '{blocks:[{type:"header",text:{type:"plain_text",text:$title,emoji:true}},{type:"section",fields:([{type:"mrkdwn",text:("*Github Repository:*\n"+$service)},{type:"mrkdwn",text:("*Status:*\n"+$status)},{type:"mrkdwn",text:("*Release:*\n`"+$release+"`")},{type:"mrkdwn",text:("*Branch:*\n`"+$branch+"`")},{type:"mrkdwn",text:("*Commit:*\n`"+$sha+"`")},{type:"mrkdwn",text:("*Release notes:*\n<"+$release_url+"|Open release>")},{type:"mrkdwn",text:("*Workflow Run:*\n<"+$run+"|Open run>")}]+(if $pr != "" then [{type:"mrkdwn",text:("*Source PR:*\n<"+$pr+"|Open PR>")}] else [] end))}]}')" "$SLACK_WEBHOOK_URL"

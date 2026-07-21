@@ -56,6 +56,8 @@ jobs:
     steps:
       - name: Checkout rule repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          ref: dev
 
       - name: Set up Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
@@ -177,8 +179,12 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          if [[ "$GITHUB_REF" != "refs/heads/dev" ]]; then
-            echo "::error::RC images must be published from dev. Refusing to push from $GITHUB_REF."
+          # On push, GITHUB_REF is the pushed branch and must be dev. For
+          # repository_dispatch and workflow_dispatch the checkout above is pinned
+          # to ref: dev, so the dev line is always what gets built regardless of the
+          # trigger ref (which resolves to the repository default branch).
+          if [[ "$GITHUB_EVENT_NAME" == "push" && "$GITHUB_REF" != "refs/heads/dev" ]]; then
+            echo "::error::RC images must be published from the dev line. Refusing to push from $GITHUB_REF."
             exit 1
           fi
 
@@ -207,42 +213,23 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           PR_URL=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" --jq '.[0].html_url // empty' 2>/dev/null || true)
-          PR_FIELD=""
-          if [ -n "$PR_URL" ]; then
-            PR_FIELD=$(printf ',{"type": "mrkdwn","text": "*Source PR:*\\n<%s>"}' "$PR_URL")
-          fi
-          echo "PR_FIELD=${PR_FIELD}" >> "$GITHUB_OUTPUT"
+          echo "PR_URL=${PR_URL}" >> "$GITHUB_OUTPUT"
 
       - name: Send Slack notification
+        if: always()
+        continue-on-error: true
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SERVICE_NAME: rule-${{ inputs.rule_number }}
+          IMAGE_REPOSITORY: tazamaorg/rule-${{ inputs.rule_number }}:rc
+          IMAGE_URL: https://hub.docker.com/r/tazamaorg/rule-${{ inputs.rule_number }}
+          RULE_VERSION: ${{ steps.rule_version.outputs.VERSION }}
+          PR_URL: ${{ steps.src_pr.outputs.PR_URL }}
+          JOB_STATUS: ${{ job.status }}
+          BRANCH_NAME: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          curl -s -X POST -H 'Content-type: application/json' --data '{
-            "blocks": [
-              {
-                "type": "header",
-                "text": {
-                  "type": "plain_text",
-                  "text": "New Rule RC Docker image published :ship:",
-                  "emoji": true
-                }
-              },
-              {
-                "type": "section",
-                "fields": [
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Rule:*\nrule-${{ inputs.rule_number }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Version:*\n${{ steps.rule_version.outputs.VERSION }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*DockerHub:*\n<https://hub.docker.com/r/tazamaorg/rule-${{ inputs.rule_number }}>"
-                  }${{ steps.src_pr.outputs.PR_FIELD }}
-                ]
-              }
-            ]
-          }' "$SLACK_WEBHOOK_URL" || true
+          [ -z "$SLACK_WEBHOOK_URL" ] && echo "SLACK_WEBHOOK_URL is not configured. Skipping Slack notification." && exit 0
+          SHORT_SHA="${COMMIT_SHA:0:7}"
+          curl --fail-with-body -sS -X POST -H 'Content-type: application/json' --data "$(jq -n --arg title "$([ "$JOB_STATUS" = "success" ] && echo "New Rule RC Docker image published :ship:" || echo "Rule RC Docker image build failed :x:")" --arg service "$SERVICE_NAME" --arg status "$JOB_STATUS" --arg version "$RULE_VERSION" --arg image "$IMAGE_REPOSITORY" --arg image_url "$IMAGE_URL" --arg branch "$BRANCH_NAME" --arg sha "$SHORT_SHA" --arg pr "$PR_URL" --arg run "$RUN_URL" '{blocks:[{type:"header",text:{type:"plain_text",text:$title,emoji:true}},{type:"section",fields:([{type:"mrkdwn",text:("*Rule:*\n"+$service)},{type:"mrkdwn",text:("*Status:*\n"+$status)},{type:"mrkdwn",text:("*Version:*\n`"+$version+"`")},{type:"mrkdwn",text:("*Image:*\n`"+$image+"`")},{type:"mrkdwn",text:("*Branch:*\n`"+$branch+"`")},{type:"mrkdwn",text:("*Commit:*\n`"+$sha+"`")},{type:"mrkdwn",text:("*DockerHub:*\n<"+$image_url+"|Open image>")},{type:"mrkdwn",text:("*Workflow Run:*\n<"+$run+"|Open run>")}]+(if $pr != "" then [{type:"mrkdwn",text:("*Source PR:*\n<"+$pr+"|Open PR>")}] else [] end))}]}')" "$SLACK_WEBHOOK_URL"
