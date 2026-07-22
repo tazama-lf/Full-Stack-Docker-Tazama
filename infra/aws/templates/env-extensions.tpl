@@ -28,11 +28,11 @@ SIMULATION_ENDPOINT=https://tms.beta.tazama.org/v1/evaluate/iso20022/pacs.002.00
 ADMIN_ENDPOINT=https://admin.beta.tazama.org
 
 # CORS — allow browser origins from the public subdomains
-# Overrides the private-DNS SERVER_B_HOST fallback in env/trs.env and env/tcs.env
+# Overrides the private-DNS SERVER_B_HOST fallback in env/rule-studio.env and env/connection-studio.env
 ALLOWED_ORIGINS=https://trs.beta.tazama.org
 CORS_ORIGINS=https://tcs.beta.tazama.org,https://cms.beta.tazama.org
 
 # Datalakehouse API — Server C private IP + published port
-# extensions/env/cms.env ships a dev default (10.10.80.20:8001); this overlay
+# extensions/env/case-management-system.env ships a dev default (10.10.80.20:8001); this overlay
 # replaces it with the correct Server C address for every AWS deployment.
 GOLD_LAKEHOUSE_API_URL=http://biar.tazama.internal:8282

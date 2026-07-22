@@ -1,5 +1,6 @@
 services:
   elasticsearch:
+    container_name: elasticsearch
     image: elasticsearch:${ELASTIC_STACK_VERSION}
     volumes:
       - esdata:/usr/share/elasticsearch/data
@@ -27,6 +28,7 @@ services:
       retries: 120
 
   kibana:
+    container_name: kibana
     depends_on:
       elasticsearch:
         condition: service_healthy

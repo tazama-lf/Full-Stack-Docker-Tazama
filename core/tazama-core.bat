@@ -222,7 +222,7 @@ if /i "%choice%"=="r" goto :menu
 if /i "%choice%"=="" goto :utils
 
 if "%choice%"=="1" (
-    set "cmd=docker restart tazama-core-tp-1 tazama-core-event-adjudicator-1 tazama-core-ed-1"
+    set "cmd=docker restart typology-processor event-adjudicator event-director"
 )
 if "%choice%"=="2" (
     goto :teardown_all
@@ -284,32 +284,32 @@ echo Executing command...
 echo.
 
 if "%choice%"=="1" (
-    call docker exec -it tazama-core-postgres-1 psql -U postgres -c "\l"
+    call docker exec -it core-postgres psql -U postgres -c "\l"
 )
 if "%choice%"=="2" (
 
     for %%d in (event_history raw_history configuration evaluation) do (
     echo.
     echo === %%d ===
-    call docker exec -it tazama-core-postgres-1 psql -U postgres -d %%d -c "\dt"
+    call docker exec -it core-postgres psql -U postgres -d %%d -c "\dt"
     )
 )
 if "%choice%"=="3" (
     echo.
     echo Stopping Hasura containers...
-    call docker stop tazama-core-hasura-1 tazama-core-hasura-init-1 2>nul
+    call docker stop hasura hasura-init 2>nul
     echo.
     echo Removing Hasura containers...
-    call docker rm tazama-core-hasura-1 tazama-core-hasura-init-1 2>nul
+    call docker rm hasura hasura-init 2>nul
     echo.
     echo Dropping Hasura metadata database...
-    call docker exec tazama-core-postgres-1 psql -U postgres -c "DROP DATABASE IF EXISTS hasura;"
-    call docker exec tazama-core-postgres-1 psql -U postgres -c "CREATE DATABASE hasura;"
+    call docker exec core-postgres psql -U postgres -c "DROP DATABASE IF EXISTS hasura;"
+    call docker exec core-postgres psql -U postgres -c "CREATE DATABASE hasura;"
 )
 if "%choice%"=="4" (
     echo.
     echo Restarting Hasura-init container...
-    call docker restart tazama-core-hasura-init-1
+    call docker restart hasura-init
 )
 echo.
 pause

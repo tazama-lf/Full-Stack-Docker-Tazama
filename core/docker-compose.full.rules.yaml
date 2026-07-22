@@ -2,6 +2,7 @@
 services:
   # RULE 001
   rule-001:
+    container_name: rule-001
     image: tazamaorg/rule-001:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -20,11 +21,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 002
   rule-002:
+    container_name: rule-002
     image: tazamaorg/rule-002:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -43,11 +45,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 003
   rule-003:
+    container_name: rule-003
     image: tazamaorg/rule-003:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -66,11 +69,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 004
   rule-004:
+    container_name: rule-004
     image: tazamaorg/rule-004:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -89,11 +93,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 006
   rule-006:
+    container_name: rule-006
     image: tazamaorg/rule-006:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -112,11 +117,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 007
   rule-007:
+    container_name: rule-007
     image: tazamaorg/rule-007:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -135,11 +141,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 008
   rule-008:
+    container_name: rule-008
     image: tazamaorg/rule-008:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -158,11 +165,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 010
   rule-010:
+    container_name: rule-010
     image: tazamaorg/rule-010:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -181,11 +189,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 011
   rule-011:
+    container_name: rule-011
     image: tazamaorg/rule-011:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -204,11 +213,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 016
   rule-016:
+    container_name: rule-016
     image: tazamaorg/rule-016:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -227,11 +237,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 017
   rule-017:
+    container_name: rule-017
     image: tazamaorg/rule-017:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -250,11 +261,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 018
   rule-018:
+    container_name: rule-018
     image: tazamaorg/rule-018:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -273,11 +285,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 020
   rule-020:
+    container_name: rule-020
     image: tazamaorg/rule-020:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -296,11 +309,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 021
   rule-021:
+    container_name: rule-021
     image: tazamaorg/rule-021:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -319,11 +333,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 024
   rule-024:
+    container_name: rule-024
     image: tazamaorg/rule-024:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -342,11 +357,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 025
   rule-025:
+    container_name: rule-025
     image: tazamaorg/rule-025:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -365,11 +381,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 026
   rule-026:
+    container_name: rule-026
     image: tazamaorg/rule-026:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -388,11 +405,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 027
   rule-027:
+    container_name: rule-027
     image: tazamaorg/rule-027:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -411,11 +429,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 028
   rule-028:
+    container_name: rule-028
     image: tazamaorg/rule-028:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -434,11 +453,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 030
   rule-030:
+    container_name: rule-030
     image: tazamaorg/rule-030:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -457,11 +477,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 044
   rule-044:
+    container_name: rule-044
     image: tazamaorg/rule-044:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -480,11 +501,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 045
   rule-045:
+    container_name: rule-045
     image: tazamaorg/rule-045:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -503,11 +525,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 048
   rule-048:
+    container_name: rule-048
     image: tazamaorg/rule-048:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -526,11 +549,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 054
   rule-054:
+    container_name: rule-054
     image: tazamaorg/rule-054:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -549,11 +573,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 063
   rule-063:
+    container_name: rule-063
     image: tazamaorg/rule-063:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -572,11 +597,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 074
   rule-074:
+    container_name: rule-074
     image: tazamaorg/rule-074:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -595,11 +621,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 075
   rule-075:
+    container_name: rule-075
     image: tazamaorg/rule-075:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -618,11 +645,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 076
   rule-076:
+    container_name: rule-076
     image: tazamaorg/rule-076:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -641,11 +669,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 078
   rule-078:
+    container_name: rule-078
     image: tazamaorg/rule-078:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -664,11 +693,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 083
   rule-083:
+    container_name: rule-083
     image: tazamaorg/rule-083:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -687,11 +717,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 084
   rule-084:
+    container_name: rule-084
     image: tazamaorg/rule-084:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -710,11 +741,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 090
   rule-090:
+    container_name: rule-090
     image: tazamaorg/rule-090:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -733,11 +765,12 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   # RULE 091
   rule-091:
+    container_name: rule-091
     image: tazamaorg/rule-091:${TAZAMA_VERSION}
     env_file:
       - env/rule-executer.env
@@ -756,5 +789,5 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy

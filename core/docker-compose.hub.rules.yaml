@@ -1,6 +1,7 @@
 # For local testing
 services:
   rule-901:
+    container_name: rule-901
     image: tazamaorg/rule-901:${TAZAMA_VERSION}
     env_file:
       - env/rule-901.env
@@ -16,10 +17,11 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
 
   rule-902:
+    container_name: rule-902
     image: tazamaorg/rule-902:${TAZAMA_VERSION}
     env_file:
       - env/rule-902.env
@@ -35,5 +37,5 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy

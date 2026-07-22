@@ -16,7 +16,7 @@
 
     Server A runs two compose sub-chains under the same tazama-core project:
       - the main core stack (rules, TP, TMS, auth, relay, logs, pgAdmin, Hasura)
-      - the extensions APIs (deapi, dems) — deployed from extensions/ compose files
+      - the extensions APIs (data-enrichment-service, event-monitoring-service) — deployed from extensions/ compose files
     Because the working directory and config-file list are read from the live
     container, both sub-chains are handled transparently by the same script.
 
@@ -27,8 +27,9 @@
     C  = Server C (tazama-biar)
 
 .PARAMETER Service
-    The Docker Compose service name to restart (e.g. "rule-001", "deapi",
-    "tcs-api", "nifi", "automation-orchestrator").
+    The Docker Compose service name to restart (e.g. "rule-001",
+    "data-enrichment-service", "connection-studio-backend", "biar-nifi",
+    "biar-automation-orchestrator").
 
 .PARAMETER NoPull
     Skip the DockerHub image pull step.  Useful when the latest image is already
@@ -55,16 +56,16 @@
 
 .EXAMPLE
     .\restart-service.ps1 -Server A -Service rule-001
-    .\restart-service.ps1 -Server A -Service deapi
-    .\restart-service.ps1 -Server B -Service tcs-api
-    .\restart-service.ps1 -Server C -Service nifi
-    .\restart-service.ps1 -Server C -Service automation-orchestrator -NoPull
-    .\restart-service.ps1 -Server B -Service cms-frontend
-    .\restart-service.ps1 -Server B -Service cms-frontend -NoPull
-    .\restart-service.ps1 -Server A -Service deapi -RepoPull fix-biar-data-pipeline
-    .\restart-service.ps1 -Server A -Service deapi -RepoPull dev
+    .\restart-service.ps1 -Server A -Service data-enrichment-service
+    .\restart-service.ps1 -Server B -Service connection-studio-backend
+    .\restart-service.ps1 -Server C -Service biar-nifi
+    .\restart-service.ps1 -Server C -Service biar-automation-orchestrator -NoPull
+    .\restart-service.ps1 -Server B -Service case-management-system-frontend
+    .\restart-service.ps1 -Server B -Service case-management-system-frontend -NoPull
+    .\restart-service.ps1 -Server A -Service data-enrichment-service -RepoPull fix-biar-data-pipeline
+    .\restart-service.ps1 -Server A -Service data-enrichment-service -RepoPull dev
     .\restart-service.ps1 -Server A -Service event-adjudicator -DiscoverService tadp -RepoPull dev
-    .\restart-service.ps1 -Server A -Service rsea -DiscoverService rstadp -RepoPull dev
+    .\restart-service.ps1 -Server A -Service relay-service-ea -DiscoverService rstadp -RepoPull dev
     .\restart-service.ps1 -Server A -Service event-adjudicator -DiscoverService tadp -RepoPull dev -DryRun
 #>
 

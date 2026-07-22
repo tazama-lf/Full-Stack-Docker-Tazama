@@ -1,6 +1,7 @@
 services:
   # event-sidecar
   event-sidecar:
+    container_name: event-sidecar
     image: tazamaorg/event-sidecar:${TAZAMA_VERSION}
     env_file:
       - .env
@@ -15,6 +16,7 @@ services:
       - nats
 
   lumberjack:
+    container_name: lumberjack
     image: tazamaorg/lumberjack:${TAZAMA_VERSION}
     env_file:
       - env/lumberjack.env

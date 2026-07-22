@@ -2,10 +2,10 @@
 
 services:
   connection-studio-backend:
-    container_name: tcs-backend
+    container_name: connection-studio-backend
     image: tazamaorg/connection-studio-backend:${TAZAMA_VERSION}
     env_file:
-      - env/tcs.env
+      - env/connection-studio.env
       - .env
     restart: always
     ports:
@@ -13,16 +13,16 @@ services:
     depends_on:
       sftp:
         condition: service_started
-      opensearch-node1:
+      opensearch:
         condition: service_healthy
     volumes:
       - ./auth:/auth:ro
 
   connection-studio-frontend:
-    container_name: tcs-frontend
+    container_name: connection-studio-frontend
     image: tazamaorg/connection-studio-frontend:${TAZAMA_VERSION}
     env_file:
-      - env/tcs.env
+      - env/connection-studio.env
       - .env
     environment:
       - VITE_API_BASE_URL=${TCS_API_URL:-http://${SERVER_B_HOST}:${TCS_PORT}}
@@ -34,26 +34,26 @@ services:
     depends_on:
       - sftp
 
-  trs-backend:
-    container_name: trs-backend
+  rule-studio-backend:
+    container_name: rule-studio-backend
     image: tazamaorg/rule-studio-backend:${TAZAMA_VERSION}
     env_file:
-      - env/trs.env
+      - env/rule-studio.env
       - .env
     restart: always
     depends_on:
-      opensearch-node1:
+      opensearch:
         condition: service_healthy
     ports:
       - ${TRS_BACKEND_PORT}:3005
     volumes:
       - ./auth:/auth:ro
 
-  trs-frontend:
-    container_name: trs-frontend
+  rule-studio-frontend:
+    container_name: rule-studio-frontend
     image: tazamaorg/rule-studio-frontend:${TAZAMA_VERSION}
     env_file:
-      - env/trs.env
+      - env/rule-studio.env
       - .env
     environment:
       - VITE_API_URL=${TRS_API_URL:-http://${SERVER_B_HOST}:${TRS_BACKEND_PORT}}
@@ -67,31 +67,31 @@ services:
     ports:
       - ${TRS_FRONTEND_PORT}:5174
 
-  cms-backend:
+  case-management-system-backend:
     image: tazamaorg/case-management-system-backend:${TAZAMA_VERSION}
-    container_name: tazama-cms-backend
+    container_name: case-management-system-backend
     restart: unless-stopped
     depends_on:
-      migrate:
+      case-management-system-migrate:
         condition: service_completed_successfully
       flowable:
         condition: service_started
-      opensearch-node1:
+      opensearch:
         condition: service_healthy
     env_file:
-      - env/cms.env
+      - env/case-management-system.env
       - .env
     volumes:
       - ./auth/test-public-key.pem:/auth/test-public-key.pem:ro
     ports:
       - "${CMS_BACKEND_PORT}:3090"
 
-  cms-frontend:
-    container_name: tazama-cms-frontend
+  case-management-system-frontend:
+    container_name: case-management-system-frontend
     image: tazamaorg/case-management-system-frontend:${TAZAMA_VERSION}
     restart: unless-stopped
     env_file:
-      - env/cms.env
+      - env/case-management-system.env
       - .env
     environment:
       - VITE_API_BASE_URL=${CMS_API_URL:-http://${SERVER_B_HOST}:${CMS_BACKEND_PORT}}
@@ -100,15 +100,15 @@ services:
     ports:
       - "${CMS_FRONTEND_PORT}:5175"
 
-  voila:
-    container_name: tazama-cms-voila
+  case-management-system-voila:
+    container_name: case-management-system-voila
     image: tazamaorg/case-management-system-voila:${TAZAMA_VERSION}
     restart: unless-stopped
     env_file:
-      - env/cms.env
+      - env/case-management-system.env
       - .env
     environment:
-      - CASE_MGMT_BACKEND_URL=http://tazama-cms-backend:3090
+      - CASE_MGMT_BACKEND_URL=http://case-management-system-backend:3090
     ports:
       - "${VOILA_PORT}:8866"
     healthcheck:

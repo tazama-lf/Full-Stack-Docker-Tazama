@@ -1,11 +1,11 @@
 services:
-  ef:
+  event-flow:
     environment:
       SUPPRESS_ALERTS: false
       INTERDICTION_DESTINATION: global
       INTERDICTION_PRODUCER: interdiction-service-ef
 
-  tp:
+  typology-processor:
     environment:
       SUPPRESS_ALERTS: false
       INTERDICTION_DESTINATION: global
@@ -18,7 +18,8 @@ services:
       ALERT_DESTINATION: global
       ALERT_PRODUCER: investigation-service
 
-  rsef:
+  relay-service-ef:
+    container_name: relay-service-ef
     build:
       context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
       args:
@@ -26,7 +27,7 @@ services:
       secrets:
         - GH_TOKEN
     env_file:
-      - env/rs-nats.env
+      - env/relay-service-nats.env
       - .env
     restart: always
     environment:
@@ -35,9 +36,10 @@ services:
       PRODUCER_STREAM: relay-service-nats-ef
       APM_SERVICE_NAME: relay-service-ef
     depends_on:
-      - ef
+      - event-flow
 
-  rstp:
+  relay-service-tp:
+    container_name: relay-service-tp
     build:
       context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
       args:
@@ -45,7 +47,7 @@ services:
       secrets:
         - GH_TOKEN
     env_file:
-      - env/rs-nats.env
+      - env/relay-service-nats.env
       - .env
     restart: always
     environment:
@@ -54,9 +56,10 @@ services:
       PRODUCER_STREAM: relay-service-nats-tp
       APM_SERVICE_NAME: relay-service-tp
     depends_on:
-      - tp
+      - typology-processor
 
-  rsea:
+  relay-service-ea:
+    container_name: relay-service-ea
     build:
       context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
       args:
@@ -64,7 +67,7 @@ services:
       secrets:
         - GH_TOKEN
     env_file:
-      - env/rs-nats.env
+      - env/relay-service-nats.env
       - .env
     restart: always
     environment:

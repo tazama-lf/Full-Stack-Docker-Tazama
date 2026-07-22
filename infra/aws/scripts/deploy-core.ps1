@@ -70,17 +70,17 @@ KEYCLOAK_ADMIN_PASSWORD=$Password
         $coreEnvFiles = @(
             "$Script:RemoteRepo/core/.env"
             "$Script:RemoteRepo/core/env/keycloak.env"
-            "$Script:RemoteRepo/core/env/tms.env"
-            "$Script:RemoteRepo/core/env/admin.env"
-            "$Script:RemoteRepo/core/env/tp.env"
-            "$Script:RemoteRepo/core/env/ed.env"
+            "$Script:RemoteRepo/core/env/tms-service.env"
+            "$Script:RemoteRepo/core/env/admin-service.env"
+            "$Script:RemoteRepo/core/env/typology-processor.env"
+            "$Script:RemoteRepo/core/env/event-director.env"
             "$Script:RemoteRepo/core/env/event-adjudicator.env"
             "$Script:RemoteRepo/core/env/rule-executer.env"
             "$Script:RemoteRepo/core/env/rule-901.env"
             "$Script:RemoteRepo/core/env/rule-902.env"
             "$Script:RemoteRepo/core/env/event-flow.env"
             "$Script:RemoteRepo/core/env/batch-ppa.env"
-            "$Script:RemoteRepo/core/env/ui.env"
+            "$Script:RemoteRepo/core/env/tazama-demo.env"
         )
         foreach ($envFile in $coreEnvFiles) {
             Set-RemoteEnvOverlay -InstanceId $idA -OverlayFile $tmpCred -RemoteEnvFile $envFile

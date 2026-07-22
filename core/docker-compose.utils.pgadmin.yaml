@@ -1,8 +1,9 @@
 services:
-  pgadmin:
+  core-pgadmin:
+    container_name: core-pgadmin
     image: dpage/pgadmin4:9.15.0
     env_file:
-      - env/pgadmin.env
+      - env/core-pgadmin.env
     ports:
       - ${PGADMIN_PORT:-5050}:80
     environment:
@@ -13,7 +14,7 @@ services:
         target: /pgadmin4/servers.json
     restart: always
     depends_on:
-      postgres:
+      core-postgres:
         condition: service_healthy
 
 configs:
@@ -26,7 +27,7 @@ configs:
               "Group": "Servers",
               "Port": 5432,
               "Username": "postgres",
-              "Host": "postgres",
+              "Host": "core-postgres",
               "MaintenanceDB": "postgres",
               "ConnectionParameters": {
                   "sslmode": "prefer",

@@ -144,8 +144,8 @@ docker compose -p tazama-core -f ./docker-compose.hub.extensions.apis.yaml up -d
 ```
 
 Both files deploy:
-- `tazama-dems-1` -- Data Enrichment Monitoring Service (port `3002`)
-- `tazama-deapi-1` -- Data Enrichment API (port `3001`)
+- `event-monitoring-service` -- Data Enrichment Monitoring Service (port `3002`)
+- `data-enrichment-service` -- Data Enrichment API (port `3001`)
 
 ## 4.2. Server B extensions stack
 
@@ -200,8 +200,8 @@ These services run on Server A and join the `tazama-core` Docker Compose project
 
 | Service | Container | Port | Description |
 |---|---|---|---|
-| DEAPI | `tazama-deapi-1` | 3001 | Data Enrichment API -- enriches transaction data with external information |
-| DEMS | `tazama-dems-1` | 3002 | Data Enrichment Monitoring Service -- monitors data enrichment activity |
+| DEAPI | `data-enrichment-service` | 3001 | Data Enrichment API -- enriches transaction data with external information |
+| DEMS | `event-monitoring-service` | 3002 | Data Enrichment Monitoring Service -- monitors data enrichment activity |
 
 ## 5.2. Extensions infrastructure (Server B)
 
@@ -209,14 +209,14 @@ These infrastructure services are started as part of the `tazama-extensions` Com
 
 | Service | Container | Port | Description |
 |---|---|---|---|
-| PostgreSQL | `postgres` | 15433 | Dedicated PostgreSQL instance for CMS and extensions services |
-| SFTP | `tazama-sftp-1` | 12222 | SFTP server for transaction file uploads (used by TCS) |
-| CouchDB | `tazama-cms-couchdb` | 5984 | Document database for CMS audit and case data |
-| Flowable | `tazama-cms-flowable` | 8081 | Workflow engine for CMS case lifecycle management |
-| OpenSearch | `opensearch-node1` | 9200 | Audit log store for TCS, TRS, and CMS (forensic audit trail) |
+| PostgreSQL | `extensions-postgres` | 15433 | Dedicated PostgreSQL instance for CMS and extensions services |
+| SFTP | `sftp` | 12222 | SFTP server for transaction file uploads (used by TCS) |
+| CouchDB | `couchdb` | 5984 | Document database for CMS audit and case data |
+| Flowable | `flowable` | 8081 | Workflow engine for CMS case lifecycle management |
+| OpenSearch | `opensearch` | 9200 | Audit log store for TCS, TRS, and CMS (forensic audit trail) |
 | OpenSearch init | `opensearch-init` | -- | One-shot container: applies audit index template (30s refresh, async translog, 0 replicas) on first start |
-| DB Migration | `cms-migrations` | -- | One-shot container: applies CMS schema to PostgreSQL on startup |
-| pgAdmin | `pgadmin` | 5051 | Optional PostgreSQL web UI (included if pgAdmin is selected) |
+| DB Migration | `case-management-system-migrate` | -- | One-shot container: applies CMS schema to PostgreSQL on startup |
+| pgAdmin | `extensions-pgadmin` | 5051 | Optional PostgreSQL web UI (included if pgAdmin is selected) |
 
 > [!NOTE]
 > The PostgreSQL instance in the extensions stack (port 15433) is separate from the core PostgreSQL instance (port 15432). The CMS and extensions services connect to the extensions PostgreSQL; the core processors connect to the core PostgreSQL.
@@ -225,13 +225,13 @@ These infrastructure services are started as part of the `tazama-extensions` Com
 
 | Service | Container | Port | Description |
 |---|---|---|---|
-| TCS backend | `tcs-backend` | 3010 | Transaction Configuration Studio API |
-| TCS frontend | `tcs-frontend` | 5173 | Transaction Configuration Studio web UI |
-| TRS backend | `trs-backend` | 3005 | Transaction Rule Studio API |
-| TRS frontend | `trs-frontend` | 5174 | Transaction Rule Studio web UI |
-| CMS backend | `tazama-cms-backend` | 3090 | Case Management System API |
-| CMS frontend | `tazama-cms-frontend` | 5175 | Case Management System web UI |
-| Voila | `tazama-cms-voila` | 18866 | Voila notebook server - serves CMS visualisation notebooks (account network, alert history, conditions timeline, counterparty network, transaction graphs) embedded in the CMS frontend |
+| TCS backend | `connection-studio-backend` | 3010 | Transaction Configuration Studio API |
+| TCS frontend | `connection-studio-frontend` | 5173 | Transaction Configuration Studio web UI |
+| TRS backend | `rule-studio-backend` | 3005 | Transaction Rule Studio API |
+| TRS frontend | `rule-studio-frontend` | 5174 | Transaction Rule Studio web UI |
+| CMS backend | `case-management-system-backend` | 3090 | Case Management System API |
+| CMS frontend | `case-management-system-frontend` | 5175 | Case Management System web UI |
+| Voila | `case-management-system-voila` | 18866 | Voila notebook server - serves CMS visualisation notebooks (account network, alert history, conditions timeline, counterparty network, transaction graphs) embedded in the CMS frontend |
 
 <div style="text-align: right"><a href="#top">Top</a></div>
 
@@ -278,10 +278,10 @@ copy ..\core\auth\test-public-key.pem .\auth\test-public-key.pem
 
 ### CMS backend fails to start
 
-The CMS backend depends on `migrate`, `flowable`, and `opensearch-node1`. OpenSearch takes up to 60 seconds to become healthy on a cold start. If the CMS backend exits immediately, wait for OpenSearch to finish initialising and then re-run the compose command, or restart the container:
+The CMS backend depends on `case-management-system-migrate`, `flowable`, and `opensearch`. OpenSearch takes up to 60 seconds to become healthy on a cold start. If the CMS backend exits immediately, wait for OpenSearch to finish initialising and then re-run the compose command, or restart the container:
 
 ```
-docker restart tazama-cms-backend
+docker restart case-management-system-backend
 ```
 
 ### DEMS/DEAPI pre-flight fails with "tazama-core is not running"

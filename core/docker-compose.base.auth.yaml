@@ -3,6 +3,7 @@
 services:
   # AUTH PROVIDER
   keycloak:
+    container_name: keycloak
     image: quay.io/keycloak/keycloak:23.0.6
     command: "start-dev --import-realm --health-enabled=true"
     env_file:
@@ -23,12 +24,13 @@ services:
       - 8080:8080
 
   # POSTGRES WITH TRUST AUTHENTICATION FOR LOCAL TESTING ONLY
-  postgres:
+  core-postgres:
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
 
   # AUTH SERVICE
-  auth:
+  auth-service:
+    container_name: auth-service
     image: tazamaorg/auth-service:${TAZAMA_VERSION}
     env_file:
       - env/auth-service.env
@@ -43,7 +45,7 @@ services:
       - keycloak
 
   # TRANSACTION MONITORING SERVICE API
-  tms:
+  tms-service:
     environment:
       - AUTHENTICATED=true
       - CERT_PATH_PUBLIC=test-public-key.pem
@@ -70,7 +72,7 @@ services:
   tazama-demo:
     environment:
       - AUTHENTICATED=true
-      - AUTH_SERVICE_URL=http://auth:3020
+      - AUTH_SERVICE_URL=http://auth-service:3020
       # Browser-facing base URL. Defaults to the locally published port; the AWS
       # deploy script overrides DEMO_PUBLIC_URL with https://demo.<domain_zone>
       # (set in core/.env) so OIDC redirects and the Socket.IO client resolve to

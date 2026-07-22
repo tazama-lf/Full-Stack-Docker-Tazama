@@ -1,6 +1,7 @@
 services:
   # event-sidecar
   event-sidecar:
+    container_name: event-sidecar
     image: !reset null
     build:
       context: https://github.com/tazama-lf/event-sidecar.git#${SIDECAR_BRANCH}
@@ -21,6 +22,7 @@ services:
       - nats
 
   lumberjack:
+    container_name: lumberjack
     image: !reset null
     build:
       context: https://github.com/tazama-lf/lumberjack.git#${LUMBERJACK_BRANCH}

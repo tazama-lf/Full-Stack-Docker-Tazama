@@ -9,6 +9,6 @@ services:
       - 16222:6222
       - 18222:8222
 
-  postgres:
+  core-postgres:
       ports:
         - 15432:5432

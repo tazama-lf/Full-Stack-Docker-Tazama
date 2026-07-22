@@ -1,11 +1,11 @@
 services:
-  ef:
+  event-flow:
     environment:
       SUPPRESS_ALERTS: false
       INTERDICTION_DESTINATION: tenant
       INTERDICTION_PRODUCER: interdiction-service-ef
 
-  tp:
+  typology-processor:
     environment:
       SUPPRESS_ALERTS: false
       INTERDICTION_DESTINATION: tenant
@@ -18,10 +18,11 @@ services:
       ALERT_PRODUCER: investigation-service
       ALERTS_ONLY: true
 
-  rsef-tenant-001:
+  relay-service-ef-tenant-001:
+    container_name: relay-service-ef-tenant-001
     image: tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}
     env_file:
-      - env/rs-nats.env
+      - env/relay-service-nats.env
       - .env
     restart: always
     environment:
@@ -30,12 +31,13 @@ services:
       PRODUCER_STREAM: relay-service-nats-ef-tenant-001
       APM_SERVICE_NAME: relay-service-ef-tenant-001
     depends_on:
-      - ef
+      - event-flow
 
-  rsef-tenant-002:
+  relay-service-ef-tenant-002:
+    container_name: relay-service-ef-tenant-002
     image: tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}
     env_file:
-      - env/rs-nats.env
+      - env/relay-service-nats.env
       - .env
     restart: always
     environment:
@@ -44,12 +46,13 @@ services:
       PRODUCER_STREAM: relay-service-nats-ef-tenant-002
       APM_SERVICE_NAME: relay-service-ef-tenant-002
     depends_on:
-      - ef
+      - event-flow
 
-  rstp-tenant-001:
+  relay-service-tp-tenant-001:
+    container_name: relay-service-tp-tenant-001
     image: tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}
     env_file:
-      - env/rs-nats.env
+      - env/relay-service-nats.env
       - .env
     restart: always
     environment:
@@ -58,12 +61,13 @@ services:
       PRODUCER_STREAM: relay-service-nats-tp-tenant-001
       APM_SERVICE_NAME: relay-service-tp-tenant-001
     depends_on:
-      - tp
+      - typology-processor
 
-  rstp-tenant-002:
+  relay-service-tp-tenant-002:
+    container_name: relay-service-tp-tenant-002
     image: tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}
     env_file:
-      - env/rs-nats.env
+      - env/relay-service-nats.env
       - .env
     restart: always
     environment:
@@ -72,12 +76,13 @@ services:
       PRODUCER_STREAM: relay-service-nats-tp-tenant-002
       APM_SERVICE_NAME: relay-service-tp-tenant-002
     depends_on:
-      - tp
+      - typology-processor
 
-  rsea-tenant-001:
+  relay-service-ea-tenant-001:
+    container_name: relay-service-ea-tenant-001
     image: tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}
     env_file:
-      - env/rs-nats.env
+      - env/relay-service-nats.env
       - .env
     restart: always
     environment:
@@ -88,10 +93,11 @@ services:
     depends_on:
       - event-adjudicator
 
-  rsea-tenant-002:
+  relay-service-ea-tenant-002:
+    container_name: relay-service-ea-tenant-002
     image: tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}
     env_file:
-      - env/rs-nats.env
+      - env/relay-service-nats.env
       - .env
     restart: always
     environment:

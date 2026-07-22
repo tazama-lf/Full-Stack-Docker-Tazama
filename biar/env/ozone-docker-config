@@ -1,16 +1,16 @@
 # Ozone core settings
-CORE-SITE.XML_fs.defaultFS=ofs://om
+CORE-SITE.XML_fs.defaultFS=ofs://ozone-om
 CORE-SITE.XML_fs.trash.interval=1
 CORE-SITE.XML_hadoop.proxyuser.hadoop.hosts=*
 CORE-SITE.XML_hadoop.proxyuser.hadoop.groups=*
 # Ozone cluster endpoints
 OZONE-SITE.XML_ozone.scm.datanode.hostnames=ozone-datanode-1,ozone-datanode-2,ozone-datanode-3
-OZONE-SITE.XML_ozone.om.address=om
-OZONE-SITE.XML_ozone.om.http-address=om:9874
-OZONE-SITE.XML_ozone.scm.http-address=scm:9876
-OZONE-SITE.XML_ozone.scm.names=scm
-OZONE-SITE.XML_ozone.scm.client.address=scm
-OZONE-SITE.XML_ozone.scm.block.client.address=scm
+OZONE-SITE.XML_ozone.om.address=ozone-om
+OZONE-SITE.XML_ozone.om.http-address=ozone-om:9874
+OZONE-SITE.XML_ozone.scm.http-address=ozone-scm:9876
+OZONE-SITE.XML_ozone.scm.names=ozone-scm
+OZONE-SITE.XML_ozone.scm.client.address=ozone-scm
+OZONE-SITE.XML_ozone.scm.block.client.address=ozone-scm
 # Storage and metadata paths
 OZONE-SITE.XML_ozone.metadata.dirs=/data/metadata
 OZONE-SITE.XML_ozone.scm.datanode.id.dir=/data/metadata
@@ -24,7 +24,7 @@ OZONE-SITE.XML_hdds.datanode.volume.min.free.space=100MB
 OZONE-SITE.XML_ozone.datanode.pipeline.limit=1
 OZONE-SITE.XML_ozone.scm.pipeline.owner.container.count=1
 # Recon settings
-OZONE-SITE.XML_ozone.recon.address=recon:9891
+OZONE-SITE.XML_ozone.recon.address=ozone-recon:9891
 OZONE-SITE.XML_ozone.recon.http-address=0.0.0.0:9888
 OZONE-SITE.XML_ozone.recon.https-address=0.0.0.0:9889
 OZONE-SITE.XML_ozone.recon.om.snapshot.task.interval.delay=1m
@@ -49,4 +49,4 @@ OZONE-SITE.XML_ozone.filesystem.snapshot.enabled=true
 OZONE_CONF_DIR=/etc/hadoop
 OZONE_LOG_DIR=/var/log/hadoop
 # Proxy bypass
-no_proxy=om,scm,s3g,recon,kdc,localhost,127.0.0.1
+no_proxy=ozone-om,ozone-scm,ozone-s3g,ozone-recon,kdc,localhost,127.0.0.1

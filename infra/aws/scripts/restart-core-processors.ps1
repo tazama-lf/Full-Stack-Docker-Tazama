@@ -18,7 +18,7 @@
     Skip the rule-NNN rule processors.
 
 .PARAMETER SkipRelays
-    Skip the relay services (rsef, rstp, rsea).
+    Skip the relay services (relay-service-ef, relay-service-tp, relay-service-ea).
 
 .PARAMETER SkipApis
     Skip the ingress/config/auth APIs (tms, admin-service, auth-service, batch-ppa).
@@ -68,9 +68,9 @@ if (-not (Test-Path $restartScript)) {
 
 # Evaluation-pipeline processors (the core processors proper).
 $pipeline = @(
-    'ed',                 # event-director
-    'ef',                 # event-flow
-    'tp',                 # typology-processor
+    'event-director',
+    'event-flow',
+    'typology-processor',
     'event-adjudicator'
 )
 
@@ -86,14 +86,14 @@ $rules = @(
 
 # Relay services.
 $relays = @(
-    'rsef',   # relay-service-ef
-    'rstp',   # relay-service-tp
-    'rsea'    # relay-service-ea
+    'relay-service-ef',
+    'relay-service-tp',
+    'relay-service-ea'
 )
 
 # Ingress / config / auth APIs.
 $apis = @(
-    'tms',            # tms-service
+    'tms-service',
     'admin-service',
     'auth-service',
     'batch-ppa'

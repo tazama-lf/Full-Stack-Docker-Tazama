@@ -1,13 +1,13 @@
 services:
-  dems:
+  event-monitoring-service:
     image: !reset null
-    container_name: tazama-dems-1
+    container_name: event-monitoring-service
     build:
       context: https://github.com/tazama-lf/event-monitoring-service.git#${DEMS_BRANCH}
       args:
         - GH_TOKEN
     env_file:
-      - env/dems.env  
+      - env/event-monitoring-service.env
       - .env
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -15,15 +15,15 @@ services:
     ports:
       - ${DEMS_PORT}:3002
 
-  deapi:
+  data-enrichment-service:
     image: !reset null
-    container_name: tazama-deapi-1
+    container_name: data-enrichment-service
     build:
       context: https://github.com/tazama-lf/data-enrichment-service.git#${DEAPI_BRANCH}
       args:
         - GH_TOKEN
     env_file:
-      - env/deapi.env 
+      - env/data-enrichment-service.env
       - .env
     extra_hosts:
       - "host.docker.internal:host-gateway"

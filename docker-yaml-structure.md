@@ -70,16 +70,19 @@ Multi-tenant configuration - mounts:
 #### `docker-compose.dev.core.yaml`
 GitHub dev core services (built from source via `GH_TOKEN`):
 - **`admin-service`**: Administration API (port `${ADMIN_PORT}:3100`)
-- **`tms`**: Transaction Monitoring Service API (port `${TMS_PORT}:3000`)
-- **`ed`**: Event Director
+- **`tms-service`**: Transaction Monitoring Service API (port `${TMS_PORT}:3000`)
+- **`event-director`**: Event Director
 - **`rule-901`**: Rule 901 (built from `rule-executer` repo)
-- **`tp`**: Typology Processor
+- **`typology-processor`**: Typology Processor
 - **`event-adjudicator`**: Event Adjudicator
-- **`ef`**: Event Flow rule processor
+- **`event-flow`**: Event Flow rule processor
+- **`tazama-demo`**: Demo UI (built from `tazama-demo` repo, port `${DEMO_PORT:-3011}:3011`)
 
 #### `docker-compose.hub.core.yaml`
 DockerHub core services using `tazamaorg/*:${TAZAMA_VERSION}` images:
-- Same services as dev.core but from pre-built DockerHub images
+- Same services as dev.core but from pre-built DockerHub images, except `rule-901` (delivered by the rules files below)
+- Adds **`batch-ppa`**: `tazamaorg/batch-ppa:${TAZAMA_VERSION}` (port `4100:4100`) - Pain.001 batch processor; depends on `core-postgres` (healthy) and `tms-service`
+- **`tazama-demo`**: `tazamaorg/tazama-demo:${TAZAMA_VERSION}` (port `${DEMO_PORT:-3011}:3011`), configured via `env/tazama-demo.env`; sets `CORS_POLICY=demo` on `tms-service` and `admin-service`
 
 ### Rules Files
 
@@ -92,7 +95,7 @@ DockerHub minimal rule set:
 DockerHub complete rule set (33 rules):
 - Rules: 001, 002, 003, 004, 006, 007, 008, 010, 011, 016, 017, 018, 020, 021, 024, 025, 026, 027, 028, 030, 044, 045, 048, 054, 063, 074, 075, 076, 078, 083, 084, 090, 091
 - All rules use `env/rule-executer.env` as base config
-- All depend on `valkey` and `postgres`
+- All depend on `valkey` and `core-postgres`
 
 ### Authentication Files
 
@@ -100,13 +103,13 @@ DockerHub complete rule set (33 rules):
 Base auth overlay applied on top of any core deployment:
 - **`keycloak`**: Keycloak 23.0.6 identity provider (port `8080:8080`)
   - Dev mode with auto-import of `00-tazama-test-realm.json`
-- **`auth`**: Auth service `tazamaorg/auth-service:${TAZAMA_VERSION}` (port `3020:3020`)
+- **`auth-service`**: Auth service `tazamaorg/auth-service:${TAZAMA_VERSION}` (port `3020:3020`)
   - Issues and validates JWT tokens using RSA key pair
-- **`postgres`**: Overridden with `POSTGRES_HOST_AUTH_METHOD=trust`
-- **`tms`**, **`admin-service`**: Overridden with `AUTHENTICATED=true` and public key mount
+- **`core-postgres`**: Overridden with `POSTGRES_HOST_AUTH_METHOD=trust`
+- **`tms-service`**, **`admin-service`**: Overridden with `AUTHENTICATED=true` and public key mount
 
 #### `docker-compose.dev.auth.yaml`
-Overrides `auth` to build from GitHub source instead of DockerHub.
+Overrides `auth-service` to build from GitHub source instead of DockerHub.
 
 ### Relay Files
 
@@ -114,19 +117,19 @@ Relay services forward interdiction and alert messages to external NATS streams.
 
 #### `docker-compose.dev.relay.yaml`
 GitHub dev relay services (built from `relay-service` GitHub repo):
-- Configures `ef`, `tp`, `event-adjudicator` with `SUPPRESS_ALERTS=false` and `INTERDICTION_DESTINATION=global`
-- **`rsef`**: Event Flow interdiction relay (`interdiction-service-ef` → `relay-service-nats-ef`)
-- **`rstp`**: Typology Processor interdiction relay (`interdiction-service-tp` → `relay-service-nats-tp`)
-- **`rsea`**: Event Adjudicator alert relay (`investigation-service` → `relay-service-nats-ea`)
+- Configures `event-flow`, `typology-processor`, `event-adjudicator` with `SUPPRESS_ALERTS=false` and `INTERDICTION_DESTINATION=global`
+  - **`relay-service-ef`**: Event Flow interdiction relay (`interdiction-service-ef` → `relay-service-nats-ef`)
+  - **`relay-service-tp`**: Typology Processor interdiction relay (`interdiction-service-tp` → `relay-service-nats-tp`)
+  - **`relay-service-ea`**: Event Adjudicator alert relay (`investigation-service` → `relay-service-nats-ea`)
 
 #### `docker-compose.hub.relay.yaml`
 Same relay services using `tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}`.
 
 #### `docker-compose.multitenant.relay.yaml`
 Per-tenant relay services with `INTERDICTION_DESTINATION=tenant`:
-- **`rsef-tenant-001`**, **`rsef-tenant-002`**: Event Flow relays per tenant
-- **`rstp-tenant-001`**, **`rstp-tenant-002`**: Typology Processor relays per tenant
-- **`rsea-tenant-001`**, **`rsea-tenant-002`**: Event Adjudicator relays per tenant
+  - **`relay-service-ef-tenant-001`**, **`relay-service-ef-tenant-002`**: Event Flow relays per tenant
+  - **`relay-service-tp-tenant-001`**, **`relay-service-tp-tenant-002`**: Typology Processor relays per tenant
+  - **`relay-service-ea-tenant-001`**, **`relay-service-ea-tenant-002`**: Event Adjudicator relays per tenant
 
 ### Logging Files
 
@@ -141,14 +144,7 @@ Same services using `tazamaorg/event-sidecar` and `tazamaorg/lumberjack` images.
 #### `docker-compose.dev.logs.elastic.yaml` / `docker-compose.hub.logs.elastic.yaml`
 Elasticsearch integration overlay:
 - Configures `lumberjack` to forward to Elasticsearch
-- Adds `SIDECAR_HOST` env var to `tms`, `admin`, `ed`, `ef`, `rule-901`/`rule-902`, `tp`, `event-adjudicator`
-
-### UI Files
-
-#### `docker-compose.hub.ui.yaml`
-Demo web interface:
-- **`ui`**: `tazamaorg/demo-ui:v2.2.0` (port `3001:3001`)
-- Sets `CORS_POLICY=demo` on `tms` and `admin-service`
+- Adds `SIDECAR_HOST` env var to `tms-service`, `admin-service`, `event-director`, `event-flow`, `rule-901`/`rule-902`, `typology-processor`, `event-adjudicator`
 
 ### Utility Files
 
@@ -156,16 +152,12 @@ Demo web interface:
 - **`nats-utilities`**: Built from `nats-utilities` GitHub repo (port `4000:4000`)
   - NATS stream management, monitoring, and debugging tools
 
-#### `docker-compose.utils.batch-ppa.yaml`
-- **`batch-ppa`**: `tazamaorg/batch-ppa:${TAZAMA_VERSION}` (port `4100:4100`)
-  - Pain.001 batch processor; depends on `postgres` (healthy) and `tms`
-
 #### `docker-compose.utils.pgadmin.yaml`
-- **`pgadmin`**: pgAdmin 4.9 (port `${PGADMIN_PORT:-5050}:80`)
+- **`core-pgadmin`**: pgAdmin 4.9 (port `${PGADMIN_PORT:-5050}:80`)
   - Pre-configured Tazama server connection via inline `servers.json`
 
 #### `docker-compose.utils.hasura.yaml`
-- **`postgres`**: Overridden with trust auth and `01-HASURA.sql` init
+- **`core-postgres`**: Overridden with trust auth and `01-HASURA.sql` init
 - **`hasura`**: Hasura GraphQL Engine v2.36.0 (port `6100:8080`)
   - Connects to `event_history`, `raw_history`, `configuration`, `evaluation` databases
   - Admin secret: `password`; anonymous role enabled
@@ -178,9 +170,9 @@ Demo web interface:
 - Named volumes: `esdata`, `kibanadata`
 
 #### `docker-compose.utils.apm-elastic.yaml`
-- Includes Elasticsearch/Kibana via `docker-compose.dev.elastic.yaml`
+- Includes Elasticsearch/Kibana via `docker-compose.utils.elastic.yaml`
 - **`apm-server`**: Elastic APM Server (port `${APMSERVER_PORT}:8200`) with RUM enabled
-- Injects `APM_ACTIVE=true` and `APM_URL=http://apm-server:8200` into `tms`, `ed`, `rule-901`, `tp`, `event-adjudicator`
+- Injects `APM_ACTIVE=true` and `APM_URL=http://apm-server:8200` into `tms-service`, `event-director`, `rule-901`, `typology-processor`, `event-adjudicator`
 
 ## Core Deployment Patterns
 
@@ -288,7 +280,7 @@ docker compose \
 - **Elasticsearch**: `http://localhost:${ES_PORT}`
 - **Kibana**: `http://localhost:${KIBANA_PORT}`
 - **APM Server**: `http://localhost:${APMSERVER_PORT}`
-- **Demo UI**: `http://localhost:3001`
+- **Demo UI**: `http://localhost:3011`
 - **NATS Utilities**: `http://localhost:4000`
 - **Batch PPA**: `http://localhost:4100`
 
@@ -304,12 +296,12 @@ The extensions stack provides the studio tools (TCS, TRS) and Case Management Sy
 
 #### `docker-compose.extensions.infrastructure.yaml`
 Extension-specific infrastructure (Server B):
-- **`postgres`**: PostgreSQL 18 with persistent volume (port `${POSTGRESQL_CMS_PORT}:5432`, default `15433`)
+- **`extensions-postgres`**: PostgreSQL 18 with persistent volume (port `${POSTGRESQL_CMS_PORT}:5432`, default `15433`)
 - **`sftp`**: SFTP server `atmoz/sftp` (port `${SFTP_PORT}:22`, default `12222`) for file uploads
 - **`couchdb`**: CouchDB 3.3 (port `${COUCHDB_PORT}:5984`, default `5984`) for CMS document storage
-- **`migrate`**: `tazamaorg/case-management-system-migrate` one-shot migration container
+- **`case-management-system-migrate`**: `tazamaorg/case-management-system-migrate` one-shot migration container
 - **`flowable`**: Flowable REST BPM engine (port `${FLOWABLE_PORT}:8080`, default `8081`)
-- **`opensearch-node1`**: OpenSearch 2.13.0 single-node (port `${OPENSEARCH_PORT:-9200}:9200`)
+- **`opensearch`**: OpenSearch 2.13.0 single-node (port `${OPENSEARCH_PORT:-9200}:9200`)
   - Disabled security plugin; tuned for low-write audit use case
 - **`opensearch-init`**: One-shot init that applies index template (30s refresh, async translog)
 - Named volumes: `sftp_data`, `couchdb_data`, `postgres_data`, `opensearch_data`
@@ -318,13 +310,13 @@ Extension-specific infrastructure (Server B):
 
 #### `docker-compose.dev.extensions.yaml`
 GitHub dev extensions (Server B, built from source):
-- **`connection-studio-backend`** (`tcs-backend`): TCS API (port `${TCS_PORT}:3010`, default `3010`)
-- **`connection-studio-frontend`** (`tcs-frontend`): TCS UI (port `${TCS_FRONTEND_PORT}:5173`, default `5173`)
-- **`trs-backend`**: Typology Rule Studio API (port `${TRS_BACKEND_PORT}:3005`, default `3005`)
-- **`trs-frontend`**: TRS UI (port `${TRS_FRONTEND_PORT}:5174`, default `5174`)
-- **`cms-backend`** (`tazama-cms-backend`): CMS API (port `${CMS_BACKEND_PORT}:3090`, default `3090`)
-- **`cms-frontend`** (`tazama-cms-frontend`): CMS UI (port `${CMS_FRONTEND_PORT}:5175`, default `5175`)
-- **`voila`** (`tazama-cms-voila`): CMS Voila visualization server (port `${VOILA_PORT:-18866}:8866`)
+- **`connection-studio-backend`**: TCS API (port `${TCS_PORT}:3010`, default `3010`)
+- **`connection-studio-frontend`**: TCS UI (port `${TCS_FRONTEND_PORT}:5173`, default `5173`)
+- **`rule-studio-backend`**: Typology Rule Studio API (port `${TRS_BACKEND_PORT}:3005`, default `3005`)
+- **`rule-studio-frontend`**: TRS UI (port `${TRS_FRONTEND_PORT}:5174`, default `5174`)
+- **`case-management-system-backend`**: CMS API (port `${CMS_BACKEND_PORT}:3090`, default `3090`)
+- **`case-management-system-frontend`**: CMS UI (port `${CMS_FRONTEND_PORT}:5175`, default `5175`)
+- **`case-management-system-voila`**: CMS Voila visualization server (port `${VOILA_PORT:-18866}:8866`)
 
 #### `docker-compose.hub.extensions.yaml`
 DockerHub extensions (Server B) using `tazamaorg/*:${TAZAMA_VERSION}` images:
@@ -336,8 +328,8 @@ These services join the **`tazama-core`** Docker project and run on Server A.
 
 #### `docker-compose.dev.extensions.apis.yaml`
 GitHub dev API services (Server A):
-- **`dems`** (`tazama-dems-1`): Data/Event Monitoring Service (port `${DEMS_PORT}:3002`, default `3002`)
-- **`deapi`** (`tazama-deapi-1`): Data Enrichment API (port `${DEAPI_PORT}:3001`, default `3001`)
+- **`event-monitoring-service`**: Data/Event Monitoring Service (port `${DEMS_PORT}:3002`, default `3002`)
+- **`data-enrichment-service`**: Data Enrichment API (port `${DEAPI_PORT}:3001`, default `3001`)
 
 #### `docker-compose.hub.extensions.apis.yaml`
 DockerHub API services (Server A):
@@ -346,7 +338,7 @@ DockerHub API services (Server A):
 ### Utility Files
 
 #### `docker-compose.utils.pgadmin.yaml`
-- **`pgadmin`**: pgAdmin 4.9 (port `${PGADMIN_PORT:-5050}:80`, default `5051` per `.env`)
+- **`extensions-pgadmin`**: pgAdmin 4.9 (port `${PGADMIN_PORT:-5050}:80`, default `5051` per `.env`)
   - Pre-configured Tazama server connection; note: uses port 5051 on Server B to avoid conflict with core's 5050
 
 ## Extensions Deployment Patterns
@@ -411,29 +403,29 @@ The BIAR (Business Intelligence, Analytics, and Reporting) stack provides data i
 
 #### `docker-compose.biar.infrastructure.yaml`
 BIAR infrastructure services:
-- **`tika`**: Apache Tika `logicalspark/docker-tikaserver` (port `${TIKA_PORT}:9998`, default `9998`) - document parsing
-- **`solr`**: Apache Solr 9 (port `${SOLR_PORT}:8983`, default `8983`) - search indexing; `biar_docs` core pre-created
+- **`biar-tika`**: Apache Tika `logicalspark/docker-tikaserver` (port `${TIKA_PORT}:9998`, default `9998`) - document parsing
+- **`biar-solr`**: Apache Solr 9 (port `${SOLR_PORT}:8983`, default `8983`) - search indexing; `biar_docs` core pre-created
 - Apache Ozone 2.0.0 object storage cluster:
-  - **`scm`**: Storage Container Manager (port `9876:9876`)
-  - **`om`**: Ozone Manager (port `9862:9862`)
-  - **`datanode1`**, **`datanode2`**, **`datanode3`**: Data nodes (no host ports)
-  - **`recon`**: Recon server (port `9888:9888`)
-  - **`s3g`**: S3 Gateway (port `9878:9878`) - exposes S3-compatible API
+  - **`ozone-scm`**: Storage Container Manager (port `9876:9876`)
+  - **`ozone-om`**: Ozone Manager (port `9862:9862`)
+  - **`ozone-datanode-1`**, **`ozone-datanode-2`**, **`ozone-datanode-3`**: Data nodes (no host ports)
+  - **`ozone-recon`**: Recon server (port `9888:9888`)
+  - **`ozone-s3g`**: S3 Gateway (port `9878:9878`) - exposes S3-compatible API
 
 ### BIAR Service Files
 
 #### `docker-compose.hub.biar.yaml`
 DockerHub BIAR services using `tazamaorg/biar-*:${TAZAMA_VERSION}` images:
-- **`nifi`** (`biar-nifi`): NiFi data ingestion (ports `${NIFI_PORT}:8088`, `8081:8081`, default `8088`)
+- **`biar-nifi`**: NiFi data ingestion (ports `${NIFI_PORT}:8088`, `8081:8081`, default `8088`)
   - Persistent volumes for conf, state, db, flowfile, content, provenance
-  - Depends on `s3g`
-- **`automation-orchestrator`** (`biar-automation-orchestrator`): Automation/Spark orchestrator (port `${AUTOMATION_ORCHESTRATOR_PORT}:7619`, default `7619`)
+  - Depends on `ozone-s3g`
+- **`biar-automation-orchestrator`**: Automation/Spark orchestrator (port `${AUTOMATION_ORCHESTRATOR_PORT}:7619`, default `7619`)
   - Mounts `${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Warehouse`
-- **`datalakehouse-api`** (`biar-datalakehouse-api`): Data lakehouse REST API (port `${DATALAKEHOUSE_API_PORT}:8282`, default `8282`)
+- **`biar-datalakehouse-api`**: Data lakehouse REST API (port `${DATALAKEHOUSE_API_PORT}:8282`, default `8282`)
   - Mounts `${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Warehouse`
-- **`unstructured-pipeline`** (`biar-unstructured-pipeline`): Unstructured document ingestion pipeline
-  - Depends on `tika` and `solr`
-- **`jupyterhub`** (`biar-jupyterhub`): JupyterHub analytics environment (port `${JUPYTERLAB_PORT}:8000`, default `8000`)
+- **`biar-unstructured-pipeline`**: Unstructured document ingestion pipeline
+  - Depends on `biar-tika` and `biar-solr`
+- **`biar-jupyterhub`**: JupyterHub analytics environment (port `${JUPYTERHUB_PORT}:8000`, default `8000`)
   - Persistent volumes for data and notebooks
   - Read-only warehouse mount
 
@@ -444,8 +436,8 @@ GitHub dev BIAR services (same structure, built from `tazama-lf/biar.git` subdir
 
 #### `docker-compose.utils.init.yaml`
 One-shot initialization containers:
-- **`aws-cli`** (`ozone-aws-cli`): `amazon/aws-cli` - waits for S3 gateway, creates the configured bucket
-- **`nifi-init`** (`nifi-init`): `curlimages/curl` - runs `nifi/init.sh` to bootstrap NiFi flows
+- **`ozone-aws-cli`**: `amazon/aws-cli` - waits for S3 gateway, creates the configured bucket
+- **`biar-nifi-init`**: `curlimages/curl` - runs `nifi/init.sh` to bootstrap NiFi flows
 
 ## BIAR Deployment Patterns
 
@@ -479,7 +471,7 @@ docker compose -p tazama-biar \
 | NiFi (secondary) | 8081 | 8081 | NiFi HTTP listener |
 | Automation Orchestrator | 7619 | `${AUTOMATION_ORCHESTRATOR_PORT}` (7619) | Spark/automation API |
 | Datalakehouse API | 8282 | `${DATALAKEHOUSE_API_PORT}` (8282) | Data lakehouse REST API |
-| JupyterHub | 8000 | `${JUPYTERLAB_PORT}` (8000) | Analytics notebooks |
+| JupyterHub | 8000 | `${JUPYTERHUB_PORT}` (8000) | Analytics notebooks |
 
 ---
 

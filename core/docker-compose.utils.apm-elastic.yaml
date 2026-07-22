@@ -1,6 +1,6 @@
 include:
   - path:
-    - docker-compose.dev.elastic.yaml
+    - docker-compose.utils.elastic.yaml
 
 services:
   apm-server:
@@ -22,7 +22,7 @@ services:
       kibana:
         condition: service_healthy
 
-  tms:
+  tms-service:
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -31,7 +31,7 @@ services:
       APM_URL: http://apm-server:8200
       APM_SECRET_TOKEN: ""
 
-  ed:
+  event-director:
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -49,7 +49,7 @@ services:
       APM_URL: http://apm-server:8200
       APM_SECRET_TOKEN: ""
 
-  tp:
+  typology-processor:
     depends_on:
       elasticsearch:
         condition: service_healthy

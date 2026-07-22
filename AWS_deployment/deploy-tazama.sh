@@ -43,10 +43,10 @@ fi
 echo "Checks passed."
 
 # ---------------------------------------------------------------------------
-# 2. Patch env/ui.env for remote access
-#    The default env/ui.env uses localhost URLs which only work on the same
-#    machine. We replace them with the instance's public IP so that external
-#    users can access the Demo UI.
+# 2. Patch env/tazama-demo.env for remote access
+#    The default env/tazama-demo.env uses localhost URLs which only work on the
+#    same machine. We replace them with the instance's public IP so that
+#    external users can access the Demo UI.
 # ---------------------------------------------------------------------------
 echo ""
 echo "--- Patching Demo UI environment for remote access ---"
@@ -60,25 +60,20 @@ PUBLIC_IP=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" \
 echo "Instance public IP: $PUBLIC_IP"
 
 # Back up the original env file on first run so we can restore it if needed
-if [ ! -f env/ui.env.orig ]; then
-    cp env/ui.env env/ui.env.orig
-    echo "Original env/ui.env backed up to env/ui.env.orig"
+if [ ! -f env/tazama-demo.env.orig ]; then
+    cp env/tazama-demo.env env/tazama-demo.env.orig
+    echo "Original env/tazama-demo.env backed up to env/tazama-demo.env.orig"
 fi
 
 # Always restore from backup before patching (makes this script safe to re-run)
-cp env/ui.env.orig env/ui.env
+cp env/tazama-demo.env.orig env/tazama-demo.env
 
-# Replace localhost URLs with the public IP
-sed -i "s|http://localhost:3001|http://${PUBLIC_IP}:3001|g" env/ui.env
-sed -i "s|http://localhost:5000|http://${PUBLIC_IP}:5000|g" env/ui.env
-sed -i "s|http://localhost:5100|http://${PUBLIC_IP}:5100|g" env/ui.env
+# Replace the browser-facing localhost URLs with the public IP
+# (NEXT_PUBLIC_URL and NEXT_PUBLIC_WS_URL; all other service URLs are
+# server-to-server inside the Docker network and stay unchanged)
+sed -i "s|http://localhost:3011|http://${PUBLIC_IP}:3011|g" env/tazama-demo.env
 
-# Fix the NATS port to use the mapped port from base.override.yaml (14222 not 4222)
-# when the Demo UI back-end connects from outside the Docker network.
-# Note: since the UI container runs on the same Docker host it uses the internal
-# hostname 'nats' and internal port 4222. No change needed here.
-
-echo "env/ui.env patched."
+echo "env/tazama-demo.env patched."
 
 # ---------------------------------------------------------------------------
 # 3. Log into GitHub Container Registry (required for tazamaorg images)
@@ -102,7 +97,6 @@ docker compose \
     -f docker-compose.hub.core.yaml \
     -f docker-compose.full.rules.yaml \
     -f docker-compose.hub.logs.base.yaml \
-    -f docker-compose.hub.ui.yaml \
     -f docker-compose.utils.hasura.yaml \
     -f docker-compose.utils.pgadmin.yaml \
     -f docker-compose.utils.nats-utils.yaml \
@@ -121,7 +115,6 @@ docker compose \
     -f docker-compose.hub.core.yaml \
     -f docker-compose.full.rules.yaml \
     -f docker-compose.hub.logs.base.yaml \
-    -f docker-compose.hub.ui.yaml \
     -f docker-compose.utils.hasura.yaml \
     -f docker-compose.utils.pgadmin.yaml \
     -f docker-compose.utils.nats-utils.yaml \
@@ -134,7 +127,7 @@ echo ""
 echo "============================================================"
 echo "Tazama stack deployed."
 echo ""
-echo "  Demo UI:        http://${PUBLIC_IP}:3001"
+echo "  Demo UI:        http://${PUBLIC_IP}:3011"
 echo "  TMS API:        http://${PUBLIC_IP}:5000/documentation"
 echo "  Admin API:      http://${PUBLIC_IP}:5100/documentation"
 echo "  NATS utilities: http://${PUBLIC_IP}:4000"

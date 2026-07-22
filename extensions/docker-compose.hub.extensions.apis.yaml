@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 services:
-  dems:
+  event-monitoring-service:
     image: tazamaorg/event-monitoring-service:${TAZAMA_VERSION}
-    container_name: tazama-dems-1
+    container_name: event-monitoring-service
     env_file:
-      - env/dems.env
+      - env/event-monitoring-service.env
       - .env
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -15,11 +15,11 @@ services:
     volumes:
       - ./auth/test-public-key.pem:/auth/test-public-key.pem:ro
 
-  deapi:
+  data-enrichment-service:
     image: tazamaorg/data-enrichment-service:${TAZAMA_VERSION}
-    container_name: tazama-deapi-1
+    container_name: data-enrichment-service
     env_file:
-      - env/deapi.env
+      - env/data-enrichment-service.env
       - .env
     extra_hosts:
       - "host.docker.internal:host-gateway"

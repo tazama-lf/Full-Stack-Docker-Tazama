@@ -1,8 +1,9 @@
 # base infrastructure
 
 services:
-  postgres:
+  extensions-postgres:
     image: postgres:18
+    container_name: extensions-postgres
     restart: always
     command: postgres -N 1000 -c shared_buffers=512MB -c effective_cache_size=2GB
     volumes:
@@ -21,7 +22,7 @@ services:
 
   sftp:
     image: atmoz/sftp
-    container_name: tazama-sftp-1
+    container_name: sftp
     restart: unless-stopped
     ports:
       - "${SFTP_PORT}:22"
@@ -33,49 +34,49 @@ services:
 
   couchdb:
     image: couchdb:3.3
-    container_name: tazama-cms-couchdb
+    container_name: couchdb
     restart: unless-stopped
     env_file:
-      - ./env/cms.env
+      - ./env/case-management-system.env
     ports:
       - "${COUCHDB_PORT}:5984"
     volumes:
       - couchdb_data:/opt/couchdb/data
       - ./couchdb/migration/local.ini:/opt/couchdb/etc/local.d/local.ini
 
-  migrate:
+  case-management-system-migrate:
     image: tazamaorg/case-management-system-migrate:${TAZAMA_VERSION}
-    container_name: cms-migrations
+    container_name: case-management-system-migrate
     depends_on:
-      postgres:
+      extensions-postgres:
         condition: service_healthy
     env_file:
       - .env
-      - ./env/cms.env
+      - ./env/case-management-system.env
     command: sh /home/app/migrate.sh
     restart: "no"
 
   flowable:
     image: flowable/flowable-rest:latest
-    container_name: tazama-cms-flowable
+    container_name: flowable
     restart: unless-stopped
     depends_on:
-      - migrate
+      - case-management-system-migrate
     env_file:
-      - ./env/cms.env
+      - ./env/case-management-system.env
     environment:
       - JAVA_TOOL_OPTIONS=-Xms256m -Xmx1536m
     mem_limit: 2g
     ports:
       - "${FLOWABLE_PORT}:8080"
 
-  opensearch-node1:
+  opensearch:
     image: opensearchproject/opensearch:2.13.0
-    container_name: opensearch-node1
+    container_name: opensearch
     restart: always
     environment:
       - cluster.name=opensearch-cluster
-      - node.name=opensearch-node1
+      - node.name=opensearch
       - discovery.type=single-node
       - bootstrap.memory_lock=true
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
@@ -112,24 +113,24 @@ services:
     container_name: opensearch-init
     restart: "no"
     depends_on:
-      opensearch-node1:
+      opensearch:
         condition: service_healthy
     entrypoint: ["bash", "-c"]
     command:
       - |
         # Apply index template for all future indices
-        curl -sf -X PUT "http://opensearch-node1:9200/_template/tazama-audit-defaults" \
+        curl -sf -X PUT "http://opensearch:9200/_template/tazama-audit-defaults" \
           -H "Content-Type: application/json" \
           -d '{"index_patterns":["*"],"settings":{"refresh_interval":"30s","number_of_replicas":0,"translog.sync_interval":"30s","translog.durability":"async"}}' \
           && echo "[opensearch-init] Index template applied."
         # Apply to any existing indices (best-effort - may be empty on first run)
-        curl -sf -X PUT "http://opensearch-node1:9200/*/_settings" \
+        curl -sf -X PUT "http://opensearch:9200/*/_settings" \
           -H "Content-Type: application/json" \
           -d '{"settings":{"refresh_interval":"30s","translog.sync_interval":"30s","translog.durability":"async"}}' \
           && echo "[opensearch-init] Existing index settings updated." \
           || echo "[opensearch-init] No user indices yet - template will apply on first write."
 
-  # OpenSearch Dashboards (audit log UI) for opensearch-node1.
+  # OpenSearch Dashboards (audit log UI) for opensearch.
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:2.13.0
     container_name: opensearch-dashboards
@@ -137,11 +138,11 @@ services:
     ports:
       - "${OPENSEARCH_DASHBOARDS_PORT:-5601}:5601"
     environment:
-      OPENSEARCH_HOSTS: '["http://opensearch-node1:9200"]'
+      OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
       DISABLE_SECURITY_DASHBOARDS_PLUGIN: "true"
       SERVER_HOST: "0.0.0.0"
     depends_on:
-      opensearch-node1:
+      opensearch:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:5601/api/status | grep -qE '\"state\":\"(green|yellow)\"'"]

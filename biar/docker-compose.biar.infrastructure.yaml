@@ -8,7 +8,7 @@ x-ozone-replication: &ozone-replication
   OZONE-SITE.XML_ozone.server.default.replication: ${OZONE_REPLICATION_FACTOR:-1}
 
 services:
-  tika:
+  biar-tika:
     image: logicalspark/docker-tikaserver:latest
     container_name: biar-tika
     restart: unless-stopped
@@ -19,7 +19,7 @@ services:
     ports:
       - "${TIKA_PORT}:9998"
 
-  solr:
+  biar-solr:
     image: solr:9
     container_name: biar-solr
     restart: unless-stopped
@@ -36,9 +36,9 @@ services:
       - -c
       - "solr-precreate biar_docs /opt/solr/server/solr/configsets/sample_techproducts_configs"
 
-  scm:
+  ozone-scm:
     <<: *ozone-common-config
-    container_name: ozone-scm-1
+    container_name: ozone-scm
     restart: unless-stopped
     env_file:
       - .env
@@ -53,9 +53,9 @@ services:
     volumes:
       - scm_data:/data
 
-  om:
+  ozone-om:
     <<: *ozone-common-config
-    container_name: ozone-om-1
+    container_name: ozone-om
     restart: unless-stopped
     env_file:
       - .env
@@ -69,7 +69,7 @@ services:
     volumes:
       - om_data:/data
 
-  datanode1:
+  ozone-datanode-1:
     <<: *ozone-common-config
     container_name: ozone-datanode-1
     hostname: ozone-datanode-1
@@ -88,7 +88,7 @@ services:
     volumes:
       - datanode1_data:/data
 
-  datanode2:
+  ozone-datanode-2:
     <<: *ozone-common-config
     container_name: ozone-datanode-2
     hostname: ozone-datanode-2
@@ -108,7 +108,7 @@ services:
     volumes:
       - datanode2_data:/data
 
-  datanode3:
+  ozone-datanode-3:
     <<: *ozone-common-config
     container_name: ozone-datanode-3
     hostname: ozone-datanode-3
@@ -127,10 +127,10 @@ services:
     volumes:
       - datanode3_data:/data
 
-  recon:
+  ozone-recon:
     <<: *ozone-common-config
-    container_name: ozone-recon-1
-    hostname: recon
+    container_name: ozone-recon
+    hostname: ozone-recon
     restart: unless-stopped
     env_file:
       - .env
@@ -139,18 +139,18 @@ services:
       - 9888:9888
     environment:
       <<: *ozone-replication
-      OZONE-SITE.XML_ozone.recon.address: recon:9891
+      OZONE-SITE.XML_ozone.recon.address: ozone-recon:9891
       OZONE-SITE.XML_ozone.recon.http-address: 0.0.0.0:9888
     command: ["ozone", "recon"]
     volumes:
       - recon_data:/data
     depends_on:
-      - scm
-      - om
+      - ozone-scm
+      - ozone-om
 
-  s3g:
+  ozone-s3g:
     <<: *ozone-common-config
-    container_name: ozone-s3g-1
+    container_name: ozone-s3g
     restart: unless-stopped
     env_file:
       - .env
@@ -161,8 +161,8 @@ services:
       <<: *ozone-replication
     command: ["ozone", "s3g"]
     depends_on:
-      - scm
-      - om
+      - ozone-scm
+      - ozone-om
 
 volumes:
   solr_data:

@@ -255,7 +255,7 @@ docker_utils() {
             q|Q) exit 0 ;;
             1)
                 print_color $GREEN "Restarting ED, TP and EA..."
-                docker restart tazama-core-tp-1 tazama-core-event-adjudicator-1 tazama-core-ed-1
+                docker restart typology-processor event-adjudicator event-director
                 ;;
             2)
                 print_color $YELLOW "Stopping and removing Tazama containers and volumes..."
@@ -307,14 +307,14 @@ database_utils() {
             q|Q) exit 0 ;;
             1)
                 print_color $GREEN "Listing PostgreSQL databases..."
-                docker exec -it tazama-core-postgres-1 psql -U postgres -c "\l"
+                docker exec -it core-postgres psql -U postgres -c "\l"
                 ;;
             2)
                 print_color $GREEN "Listing PostgreSQL tables..."
                 for db in event_history raw_history configuration evaluation; do
                     echo ""
                     print_color $CYAN "=== $db ==="
-                    docker exec -it tazama-core-postgres-1 psql -U postgres -d $db -c "\dt" 2>/dev/null || echo "  (database not found)"
+                    docker exec -it core-postgres psql -U postgres -d $db -c "\dt" 2>/dev/null || echo "  (database not found)"
                 done
                 ;;
             3)
@@ -324,21 +324,21 @@ database_utils() {
 
                 if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
                     print_color $GREEN "Stopping Hasura containers..."
-                    docker stop tazama-core-hasura-1 tazama-core-hasura-init-1 2>/dev/null || true
+                    docker stop hasura hasura-init 2>/dev/null || true
 
                     print_color $GREEN "Removing Hasura containers..."
-                    docker rm tazama-core-hasura-1 tazama-core-hasura-init-1 2>/dev/null || true
+                    docker rm hasura hasura-init 2>/dev/null || true
 
                     print_color $GREEN "Dropping Hasura metadata database..."
-                    docker exec tazama-core-postgres-1 psql -U postgres -c "DROP DATABASE IF EXISTS hasura;"
-                    docker exec tazama-core-postgres-1 psql -U postgres -c "CREATE DATABASE hasura;"
+                    docker exec core-postgres psql -U postgres -c "DROP DATABASE IF EXISTS hasura;"
+                    docker exec core-postgres psql -U postgres -c "CREATE DATABASE hasura;"
 
                     print_color $GREEN "Hasura metadata reset complete!"
                 fi
                 ;;
             4)
                 print_color $GREEN "Reinitializing Hasura..."
-                docker restart tazama-core-hasura-init-1
+                docker restart hasura-init
                 ;;
             *)
                 print_color $RED "Invalid choice."
