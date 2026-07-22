@@ -433,7 +433,7 @@ DockerHub BIAR services using `tazamaorg/biar-*:${TAZAMA_VERSION}` images:
   - Mounts `${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Warehouse`
 - **`unstructured-pipeline`** (`biar-unstructured-pipeline`): Unstructured document ingestion pipeline
   - Depends on `tika` and `solr`
-- **`jupyterhub`** (`biar-jupyterhub`): JupyterHub analytics environment (port `${JUPYTERLAB_PORT}:8000`, default `8000`)
+- **`jupyterhub`** (`biar-jupyterhub`): JupyterHub analytics environment (port `${JUPYTERHUB_PORT}:8000`, default `8000`)
   - Persistent volumes for data and notebooks
   - Read-only warehouse mount
 
@@ -479,7 +479,7 @@ docker compose -p tazama-biar \
 | NiFi (secondary) | 8081 | 8081 | NiFi HTTP listener |
 | Automation Orchestrator | 7619 | `${AUTOMATION_ORCHESTRATOR_PORT}` (7619) | Spark/automation API |
 | Datalakehouse API | 8282 | `${DATALAKEHOUSE_API_PORT}` (8282) | Data lakehouse REST API |
-| JupyterHub | 8000 | `${JUPYTERLAB_PORT}` (8000) | Analytics notebooks |
+| JupyterHub | 8000 | `${JUPYTERHUB_PORT}` (8000) | Analytics notebooks |
 
 ---
 

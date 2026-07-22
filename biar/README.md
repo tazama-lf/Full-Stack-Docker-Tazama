@@ -247,7 +247,7 @@ After a successful deployment, the following interfaces are accessible from `loc
 
 #### JupyterHub
 - JupyterHub UI: <http://localhost:8000>
-- On first visit, use the **Sign up** form to create an account. The first user whose name matches `JUPYTERHUB_ADMIN` in `env/jupyterlab.env` (default: `admin`) is automatically granted admin rights.
+- On first visit, use the **Sign up** form to create an account. The first user whose name matches `JUPYTERHUB_ADMIN` in `env/biar-jupyterhub.env` (default: `admin`) is automatically granted admin rights.
 - Each user gets an isolated JupyterLab environment with the shared read-only notebooks pre-loaded from `/srv/notebooks/`.
 
 <div style="text-align: right"><a href="#top">Top</a></div>
@@ -264,7 +264,7 @@ JupyterHub provides a multi-user analytics environment pre-loaded with PySpark n
 4. Log in with the same `admin` username and password.
 
 > [!IMPORTANT]
-> **The first account created must use the admin username.** The admin username is set by `JUPYTERHUB_ADMIN` in `biar/env/jupyterlab.env` (default: `admin`). If the first sign-up uses a different name, no account will have admin rights and you will not be able to approve subsequent users. If this happens, stop the stack, delete the `jupyterhub_data` volume, and restart.
+> **The first account created must use the admin username.** The admin username is set by `JUPYTERHUB_ADMIN` in `biar/env/biar-jupyterhub.env` (default: `admin`). If the first sign-up uses a different name, no account will have admin rights and you will not be able to approve subsequent users. If this happens, stop the stack, delete the `jupyterhub_data` volume, and restart.
 
 > [!NOTE]
 > There is no pre-seeded password. The password you choose during sign-up is hashed and stored in the SQLite database on the `jupyterhub_data` volume. It persists across container restarts.
@@ -319,7 +319,7 @@ All notebooks read Spark configuration from environment variables. The key varia
 | `WAREHOUSE_ROOT` | `/opt/Tazama_Warehouse` | Path to the Hudi warehouse root inside the container |
 | `SPARK_DRIVER_MEMORY` | `4g` | Heap memory per user Spark session |
 
-These defaults match the values in `biar/env/jupyterlab.env` and the Ozone credentials in `biar/.env`. Override them in `jupyterlab.env` before deploying if your Ozone is configured differently.
+These defaults match the values in `biar/env/biar-jupyterhub.env` and the Ozone credentials in `biar/.env`. Override them in `biar-jupyterhub.env` before deploying if your Ozone is configured differently.
 
 > [!NOTE]
 > Each user's Spark session starts a JVM on first notebook execution. Expect a 20–30 second delay before the first cell produces output. Subsequent cells in the same session run much faster.

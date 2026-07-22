@@ -83,9 +83,9 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-      - env/jupyterlab.env
+      - env/biar-jupyterhub.env
     ports:
-      - "${JUPYTERLAB_PORT}:8000"
+      - "${JUPYTERHUB_PORT}:8000"
     volumes:
       - jupyterhub_data:/data
       - jupyterhub_notebooks:/srv/notebooks

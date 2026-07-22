@@ -2991,7 +2991,7 @@ Invoke-RestMethod http://localhost:8000/hub/health
 > **JupyterHub first-time setup:** Signup is disabled by default (`open_signup = False`). The first admin account must be created and then authorized manually:
 >
 > 1. Go to `http://localhost:8000/hub/signup` (or `https://jupyter.<your-zone>/hub/signup`)
-> 2. Sign up using the `JUPYTERHUB_ADMIN` username (default: `admin`, overridden by the `JUPYTERHUB_ADMIN` env var in `jupyterlab.env`)
+> 2. Sign up using the `JUPYTERHUB_ADMIN` username (default: `admin`, overridden by the `JUPYTERHUB_ADMIN` env var in `biar-jupyterhub.env`)
 > 3. Go to `http://localhost:8000/hub/authorize` and click **Authorize** next to the admin account
 > 4. Log in - the admin account is now active
 >
@@ -3219,7 +3219,7 @@ docker compose -p tazama-biar \
   restart s3g
 ```
 
-Also update `S3A_ACCESS_KEY` and `S3A_SECRET_KEY` in any service that connects to Ozone (e.g. `biar/env/jupyterlab.env`) to match.
+Also update `S3A_ACCESS_KEY` and `S3A_SECRET_KEY` in any service that connects to Ozone (e.g. `biar/env/biar-jupyterhub.env`) to match.
 
 ---
 
@@ -3997,7 +3997,7 @@ print("SPARK_HOME:    ", os.environ.get("SPARK_HOME", "NOT SET"))
 print("JAVA_HOME:     ", os.environ.get("JAVA_HOME", "NOT SET"))
 ```
 
-Expected: all four should show paths, not `NOT SET`. If any paths are missing, check `biar/env/jupyterlab.env` on Server C and confirm it has been updated to `/opt/Tazama_Warehouse`, then restart the container.
+Expected: all four should show paths, not `NOT SET`. If any paths are missing, check `biar/env/biar-jupyterhub.env` on Server C and confirm it has been updated to `/opt/Tazama_Warehouse`, then restart the container.
 
 **Cell 2 - Check the warehouse directory:**
 
