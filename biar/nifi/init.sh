@@ -2,7 +2,7 @@
 
 set -e
 
-BASE_URL="http://nifi:8088/nifi-api"
+BASE_URL="http://biar-nifi:8088/nifi-api"
 PB_SENSITIVE_FALSE="${PB_SENSITIVE_FALSE:-${PB_SENSITIVE:-false}}"
 
 echo "Waiting for NiFi API to be ready..."

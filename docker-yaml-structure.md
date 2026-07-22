@@ -411,29 +411,29 @@ The BIAR (Business Intelligence, Analytics, and Reporting) stack provides data i
 
 #### `docker-compose.biar.infrastructure.yaml`
 BIAR infrastructure services:
-- **`tika`**: Apache Tika `logicalspark/docker-tikaserver` (port `${TIKA_PORT}:9998`, default `9998`) - document parsing
-- **`solr`**: Apache Solr 9 (port `${SOLR_PORT}:8983`, default `8983`) - search indexing; `biar_docs` core pre-created
+- **`biar-tika`**: Apache Tika `logicalspark/docker-tikaserver` (port `${TIKA_PORT}:9998`, default `9998`) - document parsing
+- **`biar-solr`**: Apache Solr 9 (port `${SOLR_PORT}:8983`, default `8983`) - search indexing; `biar_docs` core pre-created
 - Apache Ozone 2.0.0 object storage cluster:
-  - **`scm`**: Storage Container Manager (port `9876:9876`)
-  - **`om`**: Ozone Manager (port `9862:9862`)
-  - **`datanode1`**, **`datanode2`**, **`datanode3`**: Data nodes (no host ports)
-  - **`recon`**: Recon server (port `9888:9888`)
-  - **`s3g`**: S3 Gateway (port `9878:9878`) - exposes S3-compatible API
+  - **`ozone-scm`**: Storage Container Manager (port `9876:9876`)
+  - **`ozone-om`**: Ozone Manager (port `9862:9862`)
+  - **`ozone-datanode-1`**, **`ozone-datanode-2`**, **`ozone-datanode-3`**: Data nodes (no host ports)
+  - **`ozone-recon`**: Recon server (port `9888:9888`)
+  - **`ozone-s3g`**: S3 Gateway (port `9878:9878`) - exposes S3-compatible API
 
 ### BIAR Service Files
 
 #### `docker-compose.hub.biar.yaml`
 DockerHub BIAR services using `tazamaorg/biar-*:${TAZAMA_VERSION}` images:
-- **`nifi`** (`biar-nifi`): NiFi data ingestion (ports `${NIFI_PORT}:8088`, `8081:8081`, default `8088`)
+- **`biar-nifi`**: NiFi data ingestion (ports `${NIFI_PORT}:8088`, `8081:8081`, default `8088`)
   - Persistent volumes for conf, state, db, flowfile, content, provenance
-  - Depends on `s3g`
-- **`automation-orchestrator`** (`biar-automation-orchestrator`): Automation/Spark orchestrator (port `${AUTOMATION_ORCHESTRATOR_PORT}:7619`, default `7619`)
+  - Depends on `ozone-s3g`
+- **`biar-automation-orchestrator`**: Automation/Spark orchestrator (port `${AUTOMATION_ORCHESTRATOR_PORT}:7619`, default `7619`)
   - Mounts `${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Warehouse`
-- **`datalakehouse-api`** (`biar-datalakehouse-api`): Data lakehouse REST API (port `${DATALAKEHOUSE_API_PORT}:8282`, default `8282`)
+- **`biar-datalakehouse-api`**: Data lakehouse REST API (port `${DATALAKEHOUSE_API_PORT}:8282`, default `8282`)
   - Mounts `${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Warehouse`
-- **`unstructured-pipeline`** (`biar-unstructured-pipeline`): Unstructured document ingestion pipeline
-  - Depends on `tika` and `solr`
-- **`jupyterhub`** (`biar-jupyterhub`): JupyterHub analytics environment (port `${JUPYTERHUB_PORT}:8000`, default `8000`)
+- **`biar-unstructured-pipeline`**: Unstructured document ingestion pipeline
+  - Depends on `biar-tika` and `biar-solr`
+- **`biar-jupyterhub`**: JupyterHub analytics environment (port `${JUPYTERHUB_PORT}:8000`, default `8000`)
   - Persistent volumes for data and notebooks
   - Read-only warehouse mount
 
@@ -444,8 +444,8 @@ GitHub dev BIAR services (same structure, built from `tazama-lf/biar.git` subdir
 
 #### `docker-compose.utils.init.yaml`
 One-shot initialization containers:
-- **`aws-cli`** (`ozone-aws-cli`): `amazon/aws-cli` - waits for S3 gateway, creates the configured bucket
-- **`nifi-init`** (`nifi-init`): `curlimages/curl` - runs `nifi/init.sh` to bootstrap NiFi flows
+- **`ozone-aws-cli`**: `amazon/aws-cli` - waits for S3 gateway, creates the configured bucket
+- **`biar-nifi-init`**: `curlimages/curl` - runs `nifi/init.sh` to bootstrap NiFi flows
 
 ## BIAR Deployment Patterns
 

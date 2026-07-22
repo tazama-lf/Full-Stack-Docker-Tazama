@@ -1,14 +1,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 services:
-  nifi:
+  biar-nifi:
     image: tazamaorg/biar-nifi:${TAZAMA_VERSION}
     container_name: biar-nifi
-    hostname: nifi
+    hostname: biar-nifi
     restart: unless-stopped
     env_file:
       - .env
-      - env/nifi.env
+      - env/biar-nifi.env
     environment:
       NIFI_JVM_HEAP_INIT: 512m
       NIFI_JVM_HEAP_MAX: 1g
@@ -23,15 +23,15 @@ services:
       - nifi_content:/opt/nifi/nifi-current/content_repository
       - nifi_provenance:/opt/nifi/nifi-current/provenance_repository
     depends_on:
-      - s3g
+      - ozone-s3g
 
-  automation-orchestrator:
+  biar-automation-orchestrator:
     image: tazamaorg/biar-automation-orchestrator:${TAZAMA_VERSION}
     container_name: biar-automation-orchestrator
     restart: unless-stopped
     env_file:
       - .env
-      - env/automation-orchestrator.env
+      - env/biar-automation-orchestrator.env
     ports:
       - "${AUTOMATION_ORCHESTRATOR_PORT}:7619"
     volumes:
@@ -40,34 +40,34 @@ services:
     tmpfs:
       - /tmp/spark
     depends_on:
-      - s3g
+      - ozone-s3g
 
-  datalakehouse-api:
+  biar-datalakehouse-api:
     image: tazamaorg/biar-datalakehouse-api:${TAZAMA_VERSION}
     container_name: biar-datalakehouse-api
     restart: unless-stopped
     env_file:
       - .env
-      - env/datalakehouse-api.env
+      - env/biar-datalakehouse-api.env
     ports:
       - "${DATALAKEHOUSE_API_PORT}:8282"
     volumes:
       - ${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Warehouse
     depends_on:
-      - s3g
+      - ozone-s3g
 
-  unstructured-pipeline:
+  biar-unstructured-pipeline:
     image: tazamaorg/biar-unstructured-pipeline:${TAZAMA_VERSION}
     container_name: biar-unstructured-pipeline
     restart: unless-stopped
     env_file:
       - .env
-      - env/unstructured-pipeline.env
+      - env/biar-unstructured-pipeline.env
     depends_on:
-      - tika
-      - solr
+      - biar-tika
+      - biar-solr
 
-  jupyterhub:
+  biar-jupyterhub:
     image: tazamaorg/biar-jupyterhub:${TAZAMA_VERSION}
     container_name: biar-jupyterhub
     restart: unless-stopped
@@ -81,4 +81,4 @@ services:
       - jupyterhub_notebooks:/srv/notebooks
       - ${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Warehouse:ro
     depends_on:
-      - s3g
+      - ozone-s3g

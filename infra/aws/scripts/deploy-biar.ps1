@@ -84,13 +84,13 @@ $pullFlag  = if ($NoPull) { '' } else { '--pull always' }
 
 # Step 5a: SCM only
 Write-Host '[Server C] Starting Ozone SCM...'
-Invoke-RemoteCommand -InstanceId $idC -Command "cd $Script:RemoteRepo/biar && docker compose -p tazama-biar -f $infraFile up -d scm"
+Invoke-RemoteCommand -InstanceId $idC -Command "cd $Script:RemoteRepo/biar && docker compose -p tazama-biar -f $infraFile up -d ozone-scm"
 
 # Step 5b: Wait for SCM to initialise, then start OM
 Write-Host '[Server C] Waiting 20s for SCM to initialise...'
 Start-Sleep -Seconds 20
 Write-Host '[Server C] Starting Ozone OM...'
-Invoke-RemoteCommand -InstanceId $idC -Command "cd $Script:RemoteRepo/biar && docker compose -p tazama-biar -f $infraFile up -d om"
+Invoke-RemoteCommand -InstanceId $idC -Command "cd $Script:RemoteRepo/biar && docker compose -p tazama-biar -f $infraFile up -d ozone-om"
 
 # Step 5c: Wait for OM, then bring up the full stack
 Write-Host '[Server C] Waiting 15s for OM to initialise...'

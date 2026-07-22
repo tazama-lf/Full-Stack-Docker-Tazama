@@ -3169,14 +3169,14 @@ Then re-run the deploy scripts with the new password so all service env files ar
 
 NiFi's single-user authenticator only activates when NiFi is serving over HTTPS. With `NIFI_WEB_HTTP_PORT` set, anyone who reaches port 8088 is in without a password.
 
-**Step 1 - Update `biar/env/nifi.env`** on Server C:
+**Step 1 - Update `biar/env/biar-nifi.env`** on Server C:
 
 ```bash
 # On Server C (via Invoke-RemoteCommand or SSH)
-sed -i 's/NIFI_WEB_HTTP_PORT=.*//' ~/full-stack-docker-tazama/biar/env/nifi.env
-sed -i 's/NIFI_WEB_HTTP_HOST=.*//' ~/full-stack-docker-tazama/biar/env/nifi.env
-echo "NIFI_WEB_HTTPS_PORT=8443" >> ~/full-stack-docker-tazama/biar/env/nifi.env
-echo "NIFI_WEB_HTTPS_HOST=0.0.0.0" >> ~/full-stack-docker-tazama/biar/env/nifi.env
+sed -i 's/NIFI_WEB_HTTP_PORT=.*//' ~/full-stack-docker-tazama/biar/env/biar-nifi.env
+sed -i 's/NIFI_WEB_HTTP_HOST=.*//' ~/full-stack-docker-tazama/biar/env/biar-nifi.env
+echo "NIFI_WEB_HTTPS_PORT=8443" >> ~/full-stack-docker-tazama/biar/env/biar-nifi.env
+echo "NIFI_WEB_HTTPS_HOST=0.0.0.0" >> ~/full-stack-docker-tazama/biar/env/biar-nifi.env
 ```
 
 **Step 2 - Update the biar compose file** to expose port 8443 instead of 8088, and update the ALB target group to point to 8443. This requires a `tofu apply` to update the ALB listener rule.
@@ -4011,7 +4011,7 @@ for t in sorted(tables):
     print(" ", t)
 ```
 
-Expected: a list of Hudi table directories (e.g. `gold/`, `silver/`, `views/`). If you get a `FileNotFoundError`, the warehouse volume is not mounted - check the `docker-compose.hub.biar.yaml` volume entry and re-run `docker compose up -d jupyterhub`.
+Expected: a list of Hudi table directories (e.g. `gold/`, `silver/`, `views/`). If you get a `FileNotFoundError`, the warehouse volume is not mounted - check the `docker-compose.hub.biar.yaml` volume entry and re-run `docker compose up -d biar-jupyterhub`.
 
 **Cell 3 - Start a Spark session with the Hudi JAR:**
 

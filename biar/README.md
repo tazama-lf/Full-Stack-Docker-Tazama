@@ -151,7 +151,7 @@ docker compose -p tazama-biar \
 > [!NOTE]
 > Apache Ozone requires a strict startup order. The SCM must fully initialise before the OM starts, and both must be healthy before S3G accepts requests. The launcher handles this with a staged delay (SCM → 20 s → OM → 15 s → full stack). On first boot, expect the stack to take 2–3 minutes before all services are ready.
 
-The `nifi-init` container polls the NiFi API after startup and injects the pre-configured parameter context and flow template when NiFi becomes ready (up to 5 minutes). The `aws-cli` container polls S3G and creates the `tazama` Ozone bucket automatically once S3G is healthy.
+The `biar-nifi-init` container polls the NiFi API after startup and injects the pre-configured parameter context and flow template when NiFi becomes ready (up to 5 minutes). The `ozone-aws-cli` container polls S3G and creates the `tazama` Ozone bucket automatically once S3G is healthy.
 
 ## 4.2. Utilities and teardown
 
@@ -178,13 +178,13 @@ Shared infrastructure that must be running before any application service starts
 |---|---|---|---|
 | Apache Tika | `biar-tika` | 9998 | Document parsing and content extraction (PDF, Office formats, etc.) |
 | Apache Solr | `biar-solr` | 8983 | Full-text search and indexing. Initialises with the `biar_docs` core. |
-| Ozone SCM | `ozone-scm-1` | 9876 | Storage Container Manager — Ozone control plane |
-| Ozone OM | `ozone-om-1` | — | Object Manager — Ozone namespace service |
+| Ozone SCM | `ozone-scm` | 9876 | Storage Container Manager — Ozone control plane |
+| Ozone OM | `ozone-om` | — | Object Manager — Ozone namespace service |
 | Ozone Datanode 1 | `ozone-datanode-1` | — | Stores object data (no external port) |
 | Ozone Datanode 2 | `ozone-datanode-2` | — | Stores object data (no external port) |
 | Ozone Datanode 3 | `ozone-datanode-3` | — | Stores object data (no external port) |
-| Ozone Recon | `ozone-recon-1` | 9888 | Ozone monitoring and metrics UI |
-| Ozone S3G | `ozone-s3g-1` | 9878 | S3-compatible gateway for reading and writing Ozone objects |
+| Ozone Recon | `ozone-recon` | 9888 | Ozone monitoring and metrics UI |
+| Ozone S3G | `ozone-s3g` | 9878 | S3-compatible gateway for reading and writing Ozone objects |
 
 > [!NOTE]
 > Apache Ozone runs with three datanodes and replication factor 1 in this deployment. This is appropriate for development and testing. A production Ozone deployment should use a minimum of three datanodes with replication factor 3.
@@ -211,7 +211,7 @@ One-shot containers that run at stack startup and remain running for ad-hoc oper
 | Service | Container | Description |
 |---|---|---|
 | AWS CLI | `ozone-aws-cli` | Polls S3G until healthy, then creates the `tazama` Ozone bucket. Remains running for ad-hoc S3 operations against Ozone. |
-| NiFi Init | `nifi-init` | Polls the NiFi API and injects the pre-configured parameter context and flow template when NiFi is ready (up to 5 min). Restarts on failure. |
+| NiFi Init | `biar-nifi-init` | Polls the NiFi API and injects the pre-configured parameter context and flow template when NiFi is ready (up to 5 min). Restarts on failure. |
 
 <div style="text-align: right"><a href="#top">Top</a></div>
 
@@ -313,7 +313,7 @@ All notebooks read Spark configuration from environment variables. The key varia
 
 | Variable | Default | Description |
 |---|---|---|
-| `S3A_ENDPOINT` | `http://s3g:9878` | Ozone S3G endpoint for Spark S3A reads |
+| `S3A_ENDPOINT` | `http://ozone-s3g:9878` | Ozone S3G endpoint for Spark S3A reads |
 | `S3A_ACCESS_KEY` | `tazama` | Ozone S3 access key |
 | `S3A_SECRET_KEY` | `tazama` | Ozone S3 secret key |
 | `WAREHOUSE_ROOT` | `/opt/Tazama_Warehouse` | Path to the Hudi warehouse root inside the container |
@@ -367,8 +367,8 @@ docker compose -p tazama-biar -f ./docker-compose.biar.infrastructure.yaml down 
 Ozone services use a `ENSURE_*_INITIALIZED` flag to detect first-boot and run initialisation. If the SCM or OM container exits early, check the logs for a missing `VERSION` file:
 
 ```
-docker logs scm
-docker logs om
+docker logs ozone-scm
+docker logs ozone-om
 ```
 
 On retry after a failed initialisation, ensure volumes are clean before redeploying (see teardown command above).
@@ -401,7 +401,7 @@ To export a configured flow for reuse, use NiFi's built-in `Download flow defini
 The `ozone-aws-cli` container automatically creates the `tazama` bucket each time the stack is started (the `|| true` in the entrypoint makes the command idempotent if the bucket already exists). The bucket name is controlled by `AWS_BUCKET_NAME` in `biar/.env`. To interact with Ozone manually using the S3-compatible API:
 
 ```
-docker exec ozone-aws-cli aws --endpoint-url http://s3g:9878 s3 ls
+docker exec ozone-aws-cli aws --endpoint-url http://ozone-s3g:9878 s3 ls
 ```
 
 The Ozone S3G access key is `tazama` and secret key is `tazama` in the default configuration (set via `S3A_ACCESS_KEY` and `S3A_SECRET_KEY` in `biar/.env`). These are committed defaults appropriate for a local development deployment only.
@@ -415,7 +415,7 @@ The BIAR stack uses three compose files composed together:
 | `docker-compose.biar.infrastructure.yaml` | Always-on infrastructure: Tika, Solr, Ozone (SCM, OM, 3× datanodes, Recon, S3G) |
 | `docker-compose.hub.biar.yaml` | Application services from DockerHub: NiFi, Automation Orchestrator, Datalakehouse API, Unstructured Pipeline, JupyterHub |
 | `docker-compose.dev.biar.yaml` | Application services built from GitHub source (replaces `hub.biar` for dev deployments) |
-| `docker-compose.utils.init.yaml` | Init containers: `aws-cli` (Ozone bucket creation), `nifi-init` (NiFi flow injection) |
+| `docker-compose.utils.init.yaml` | Init containers: `ozone-aws-cli` (Ozone bucket creation), `biar-nifi-init` (NiFi flow injection) |
 
 View [docker-yaml-structure.md](./docker-yaml-structure.md) for additional detail about the Docker Compose files in the wider Tazama repository.
 
