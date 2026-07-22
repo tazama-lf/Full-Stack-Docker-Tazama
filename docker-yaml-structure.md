@@ -304,12 +304,12 @@ The extensions stack provides the studio tools (TCS, TRS) and Case Management Sy
 
 #### `docker-compose.extensions.infrastructure.yaml`
 Extension-specific infrastructure (Server B):
-- **`postgres`**: PostgreSQL 18 with persistent volume (port `${POSTGRESQL_CMS_PORT}:5432`, default `15433`)
+- **`extensions-postgres`**: PostgreSQL 18 with persistent volume (port `${POSTGRESQL_CMS_PORT}:5432`, default `15433`)
 - **`sftp`**: SFTP server `atmoz/sftp` (port `${SFTP_PORT}:22`, default `12222`) for file uploads
 - **`couchdb`**: CouchDB 3.3 (port `${COUCHDB_PORT}:5984`, default `5984`) for CMS document storage
-- **`migrate`**: `tazamaorg/case-management-system-migrate` one-shot migration container
+- **`case-management-system-migrate`**: `tazamaorg/case-management-system-migrate` one-shot migration container
 - **`flowable`**: Flowable REST BPM engine (port `${FLOWABLE_PORT}:8080`, default `8081`)
-- **`opensearch-node1`**: OpenSearch 2.13.0 single-node (port `${OPENSEARCH_PORT:-9200}:9200`)
+- **`opensearch`**: OpenSearch 2.13.0 single-node (port `${OPENSEARCH_PORT:-9200}:9200`)
   - Disabled security plugin; tuned for low-write audit use case
 - **`opensearch-init`**: One-shot init that applies index template (30s refresh, async translog)
 - Named volumes: `sftp_data`, `couchdb_data`, `postgres_data`, `opensearch_data`
@@ -318,13 +318,13 @@ Extension-specific infrastructure (Server B):
 
 #### `docker-compose.dev.extensions.yaml`
 GitHub dev extensions (Server B, built from source):
-- **`connection-studio-backend`** (`tcs-backend`): TCS API (port `${TCS_PORT}:3010`, default `3010`)
-- **`connection-studio-frontend`** (`tcs-frontend`): TCS UI (port `${TCS_FRONTEND_PORT}:5173`, default `5173`)
-- **`trs-backend`**: Typology Rule Studio API (port `${TRS_BACKEND_PORT}:3005`, default `3005`)
-- **`trs-frontend`**: TRS UI (port `${TRS_FRONTEND_PORT}:5174`, default `5174`)
-- **`cms-backend`** (`tazama-cms-backend`): CMS API (port `${CMS_BACKEND_PORT}:3090`, default `3090`)
-- **`cms-frontend`** (`tazama-cms-frontend`): CMS UI (port `${CMS_FRONTEND_PORT}:5175`, default `5175`)
-- **`voila`** (`tazama-cms-voila`): CMS Voila visualization server (port `${VOILA_PORT:-18866}:8866`)
+- **`connection-studio-backend`**: TCS API (port `${TCS_PORT}:3010`, default `3010`)
+- **`connection-studio-frontend`**: TCS UI (port `${TCS_FRONTEND_PORT}:5173`, default `5173`)
+- **`rule-studio-backend`**: Typology Rule Studio API (port `${TRS_BACKEND_PORT}:3005`, default `3005`)
+- **`rule-studio-frontend`**: TRS UI (port `${TRS_FRONTEND_PORT}:5174`, default `5174`)
+- **`case-management-system-backend`**: CMS API (port `${CMS_BACKEND_PORT}:3090`, default `3090`)
+- **`case-management-system-frontend`**: CMS UI (port `${CMS_FRONTEND_PORT}:5175`, default `5175`)
+- **`case-management-system-voila`**: CMS Voila visualization server (port `${VOILA_PORT:-18866}:8866`)
 
 #### `docker-compose.hub.extensions.yaml`
 DockerHub extensions (Server B) using `tazamaorg/*:${TAZAMA_VERSION}` images:
@@ -336,8 +336,8 @@ These services join the **`tazama-core`** Docker project and run on Server A.
 
 #### `docker-compose.dev.extensions.apis.yaml`
 GitHub dev API services (Server A):
-- **`dems`** (`tazama-dems-1`): Data/Event Monitoring Service (port `${DEMS_PORT}:3002`, default `3002`)
-- **`deapi`** (`tazama-deapi-1`): Data Enrichment API (port `${DEAPI_PORT}:3001`, default `3001`)
+- **`event-monitoring-service`**: Data/Event Monitoring Service (port `${DEMS_PORT}:3002`, default `3002`)
+- **`data-enrichment-service`**: Data Enrichment API (port `${DEAPI_PORT}:3001`, default `3001`)
 
 #### `docker-compose.hub.extensions.apis.yaml`
 DockerHub API services (Server A):

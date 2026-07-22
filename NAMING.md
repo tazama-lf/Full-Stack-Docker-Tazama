@@ -67,10 +67,11 @@ This is the single source of truth for component names across the Tazama deploym
 | core-pgadmin | `pgadmin` | tazama-core-pgadmin-1 | stack prefix per rule 5 |
 | nats | `nats` | tazama-core-nats-1 | singleton, bare name |
 | valkey | `valkey` | tazama-core-valkey-1 | singleton, bare name |
+| keycloak | `keycloak` | tazama-core-keycloak-1 | singleton, bare name |
 
 Relay suffix codes: `ef` = event-flow, `tp` = typology-processor, `ea` = event-adjudicator. The relay is one image (`tazamaorg/relay-service-integration-nats`) deployed once per routed source; the short codes match the relay's frozen runtime identity (`FUNCTION_NAME=relay-service-ef`, `APM_SERVICE_NAME`, NATS stream names `relay-service-nats-ef` etc.). Multitenant relay variants follow the same pattern and are finalized in the core Phase 1 PR.
 
-## 4. Extensions stack (`-p tazama-extensions`) - target, lands with the extensions Phase 1 PR
+## 4. Extensions stack (`-p tazama-extensions`) - ALIGNED
 
 | Canonical name | Old service key | Old container | Notes |
 |---|---|---|---|
@@ -85,10 +86,17 @@ Relay suffix codes: `ef` = event-flow, `tp` = typology-processor, `ea` = event-a
 | event-monitoring-service | `dems` | tazama-dems-1 | fake `-1` removed; deploys under `-p tazama-core` from extensions/ |
 | data-enrichment-service | `deapi` | tazama-deapi-1 | fake `-1` removed; deploys under `-p tazama-core` from extensions/ |
 | extensions-postgres | `postgres` | tazama-extensions-postgres-1 | stack prefix per rule 5; volume key `postgres_data` unchanged |
-| extensions-pgadmin | `pgadmin` | tazama-extensions-pgadmin-1 | stack prefix per rule 5 |
-| keycloak | `keycloak` | tazama-extensions-keycloak-1 | singleton, bare name |
-| couchdb | `couchdb` | tazama-extensions-couchdb-1 | singleton, bare name |
-| flowable | `flowable` | tazama-extensions-flowable-1 | singleton, bare name |
+| extensions-pgadmin | `pgadmin` | tazama-extensions-pgadmin-1 | stack prefix per rule 5; image pinned to 9.15.0 and port fallback 5051 to match core hygiene |
+| sftp | `sftp` | tazama-sftp-1 | singleton, bare name; fake `-1` removed |
+| couchdb | `couchdb` | tazama-cms-couchdb | singleton, bare name |
+| flowable | `flowable` | tazama-cms-flowable | singleton, bare name |
+| opensearch | `opensearch-node1` | opensearch-node1 | singleton, bare name; fake `node1` removed (node identity is by UUID, `node.name` change is safe) |
+| opensearch-init | `opensearch-init` | opensearch-init | |
+| opensearch-dashboards | `opensearch-dashboards` | opensearch-dashboards | |
+
+Env files renamed to match: `connection-studio.env`, `rule-studio.env`, `case-management-system.env`, `event-monitoring-service.env`, `data-enrichment-service.env`, `extensions-pgadmin.env`.
+
+Note: `event-monitoring-service.env` and `data-enrichment-service.env` still reference `@postgres` - that resolves to the **core** postgres (they deploy under `-p tazama-core`) and is updated in the core Phase 1 PR when core's `postgres` key becomes `core-postgres`.
 
 ## 5. Replica whitelist
 

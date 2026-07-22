@@ -29,7 +29,7 @@ if (-not (Test-Path $namingFile)) {
 $namingContent = Get-Content $namingFile -Raw
 
 # Stacks whose Phase 1 alignment has landed. Extend as PRs merge.
-$AlignedStacks = @('biar')
+$AlignedStacks = @('biar', 'extensions')
 
 # Containers allowed a trailing -<digit> (real replicas, per NAMING.md section 5).
 $ReplicaWhitelist = @('ozone-datanode-1', 'ozone-datanode-2', 'ozone-datanode-3')
@@ -42,7 +42,10 @@ $ImageExceptions = @{
 
 # Retired hostnames that must not appear in env files or init scripts.
 $RetiredHostnames = @{
-    biar = @('s3g', 'scm', 'om', 'recon', 'tika', 'solr', 'nifi', 'automation-orchestrator')
+    biar       = @('s3g', 'scm', 'om', 'recon', 'tika', 'solr', 'nifi', 'automation-orchestrator')
+    extensions = @('opensearch-node1', 'tazama-cms-flowable', 'tazama-cms-voila', 'tazama-cms-backend',
+                   'tazama-cms-couchdb', 'tazama-extensions-postgres-1', 'tazama-sftp-1',
+                   'tazama-dems-1', 'tazama-deapi-1')
 }
 
 $failures = New-Object System.Collections.Generic.List[string]

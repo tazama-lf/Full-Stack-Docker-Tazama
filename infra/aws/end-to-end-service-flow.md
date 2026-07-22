@@ -244,7 +244,7 @@ sequenceDiagram
     Note over CMSbe,NATS: CMS Backend (Server B) subscribes to<br/>investigation-service on Server A NATS :14222
     NATS-->>CMSbe: deliver investigation alert (nats://core.tazama.internal:14222)
     CMSbe->>PG_B: store case record (tazama_cms DB)
-    CMSbe->>OSrch: index alert (opensearch-node1:9200)
+    CMSbe->>OSrch: index alert (opensearch:9200)
 
     Note over CMSbe,DLH: CMS analyst opens the case — frontend requests gold lakehouse data
     CMSbe->>DLH: GET /... (direct HTTP :8282, bypasses ALB)

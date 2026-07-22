@@ -117,10 +117,10 @@ CONFIGURATION_DATABASE_PASSWORD=$Password
         Set-Content $tmpCred $extCredOverlay -Encoding ASCII
         $extEnvFiles = @(
             "$Script:RemoteRepo/extensions/.env"
-            "$Script:RemoteRepo/extensions/env/cms.env"
-            "$Script:RemoteRepo/extensions/env/tcs.env"
-            "$Script:RemoteRepo/extensions/env/deapi.env"
-            "$Script:RemoteRepo/extensions/env/dems.env"
+            "$Script:RemoteRepo/extensions/env/case-management-system.env"
+            "$Script:RemoteRepo/extensions/env/connection-studio.env"
+            "$Script:RemoteRepo/extensions/env/data-enrichment-service.env"
+            "$Script:RemoteRepo/extensions/env/event-monitoring-service.env"
         )
         foreach ($envFile in $extEnvFiles) {
             Set-RemoteEnvOverlay -InstanceId $idB -OverlayFile $tmpCred -RemoteEnvFile $envFile

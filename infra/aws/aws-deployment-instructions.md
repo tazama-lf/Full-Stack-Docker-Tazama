@@ -306,12 +306,12 @@ These are code changes to the `full-stack-docker-tazama` repo that must be appli
 
 ### A.5 - Parameterise CORS origins in extensions env files
 
-**Problem:** `extensions/env/deapi.env`, `dems.env`, and `trs.env` had CORS and allowed-origins values hardcoded to `http://localhost:...`. On AWS, the browser-facing frontends are served from Server B - `localhost` is not correct.
+**Problem:** `extensions/env/data-enrichment-service.env`, `event-monitoring-service.env`, and `rule-studio.env` had CORS and allowed-origins values hardcoded to `http://localhost:...`. On AWS, the browser-facing frontends are served from Server B - `localhost` is not correct.
 
 **Fix:**
 - Added `SERVER_B_HOST=localhost` to `extensions/.env` (alongside existing `SERVER_A_HOST=host.docker.internal`)
-- Changed `CORS_ORIGINS=http://localhost:5173` → `CORS_ORIGINS=http://${SERVER_B_HOST}:5173` in `deapi.env` and `dems.env`
-- Changed `ALLOWED_ORIGINS=http://localhost:5174` → `ALLOWED_ORIGINS=http://${SERVER_B_HOST}:5174` in `trs.env`
+- Changed `CORS_ORIGINS=http://localhost:5173` → `CORS_ORIGINS=http://${SERVER_B_HOST}:5173` in `data-enrichment-service.env` and `event-monitoring-service.env`
+- Changed `ALLOWED_ORIGINS=http://localhost:5174` → `ALLOWED_ORIGINS=http://${SERVER_B_HOST}:5174` in `rule-studio.env`
 
 The deploy script patches `SERVER_B_HOST=extensions.tazama.internal` for AWS.
 
@@ -319,9 +319,9 @@ The deploy script patches `SERVER_B_HOST=extensions.tazama.internal` for AWS.
 
 **Files changed:**
 - `extensions/.env`
-- `extensions/env/deapi.env`
-- `extensions/env/dems.env`
-- `extensions/env/trs.env`
+- `extensions/env/data-enrichment-service.env`
+- `extensions/env/event-monitoring-service.env`
+- `extensions/env/rule-studio.env`
 
 ---
 
@@ -330,9 +330,9 @@ The deploy script patches `SERVER_B_HOST=extensions.tazama.internal` for AWS.
 **Problem:** `extensions/docker-compose.extensions.infrastructure.yaml` runs OpenSearch with `DISABLE_SECURITY_PLUGIN=true`. Acceptable for local dev; unacceptable in a VPC where port 9200 is reachable from other instances.
 
 **Required changes:**
-- Remove `DISABLE_SECURITY_PLUGIN=true` from the `opensearch-node1` service environment in `extensions/docker-compose.extensions.infrastructure.yaml`
+- Remove `DISABLE_SECURITY_PLUGIN=true` from the `opensearch` service environment in `extensions/docker-compose.extensions.infrastructure.yaml`
 - Add `OPENSEARCH_INITIAL_ADMIN_PASSWORD` sourced from SSM at deploy time
-- Update all services referencing OpenSearch (`cms-backend`, `tcs-backend`, `trs-backend`) to use the new credentials via SSM-injected env vars
+- Update all services referencing OpenSearch (`case-management-system-backend`, `connection-studio-backend`, `rule-studio-backend`) to use the new credentials via SSM-injected env vars
 
 **Status:** Pending - will be recorded here when executed.
 
@@ -371,17 +371,17 @@ Several services use different variable names for the same underlying credential
 | `/tazama/postgres_extensions_password` | PostgreSQL - Server B (CMS) | Server container + `extensions/env/` clients |
 | `/tazama/keycloak_admin_password` | Keycloak admin console | `core/env/keycloak.env` |
 | `/tazama/hasura_admin_secret` | Hasura GraphQL admin | `core/docker-compose.utils.hasura.yaml` |
-| `/tazama/pgadmin_password` | pgAdmin web UI | Both `core/env/pgadmin.env` and `extensions/env/pgadmin.env` |
-| `/tazama/redis_password` | Redis/Valkey | `extensions/env/deapi.env`, `dems.env` |
-| `/tazama/couchdb_password` | CouchDB admin | `extensions/env/cms.env` - username `simon` should also be replaced |
+| `/tazama/pgadmin_password` | pgAdmin web UI | Both `core/env/pgadmin.env` and `extensions/env/extensions-pgadmin.env` |
+| `/tazama/redis_password` | Redis/Valkey | `extensions/env/data-enrichment-service.env`, `event-monitoring-service.env` |
+| `/tazama/couchdb_password` | CouchDB admin | `extensions/env/case-management-system.env` - username `simon` should also be replaced |
 | `/tazama/auth_client_secret` | Auth service OAuth client | `core/env/auth-service.env` |
-| `/tazama/trs_crypto_key` | TRS signing key | `extensions/env/trs.env` - use 32+ random characters |
+| `/tazama/trs_crypto_key` | TRS signing key | `extensions/env/rule-studio.env` - use 32+ random characters |
 | `/tazama/relay_auth_password` | REST relay auth | `core/env/rs-rest.env` |
-| `/tazama/cms_auth_admin_password` | CMS Tazama auth admin | `extensions/env/cms.env` |
-| `/tazama/cms_flowable_password` | CMS Flowable engine | `extensions/env/cms.env` |
+| `/tazama/cms_auth_admin_password` | CMS Tazama auth admin | `extensions/env/case-management-system.env` |
+| `/tazama/cms_flowable_password` | CMS Flowable engine | `extensions/env/case-management-system.env` |
 | `/tazama/nifi_admin_password` | NiFi single-user admin | `biar/docker-compose.biar.infrastructure.yaml` - NiFi requires min 12 chars |
 | `/tazama/ozone_s3g_secret_key` | Apache Ozone S3G | `biar/docker-compose.biar.infrastructure.yaml` |
-| `/tazama/opensearch_password` | OpenSearch admin | `extensions/env/cms.env`, `tcs.env`, `trs.env` - see also A.6 |
+| `/tazama/opensearch_password` | OpenSearch admin | `extensions/env/case-management-system.env`, `connection-studio.env`, `rule-studio.env` - see also A.6 |
 | `/tazama/sftp_password` | SFTP server user | Special case - see note below |
 
 **Mapping - SSM parameter → env variables patched:**
@@ -391,24 +391,24 @@ Several services use different variable names for the same underlying credential
 | `/tazama/postgres_core_password` | `POSTGRES_PASSWORD` | `core/docker-compose.base.infrastructure.yaml` |
 | | `POSTGRES_PASSWORD`, `DB_PASSWORD` | `core/env/` service env files (deapi, dems) |
 | | `RAW_HISTORY_DATABASE_PASSWORD`, `CONFIGURATION_DATABASE_PASSWORD`, `EVENT_HISTORY_DATABASE_PASSWORD`, `EVALUATION_DATABASE_PASSWORD`, `NEXT_PUBLIC_PG_PASSWORD` | `core/env/` service env files (admin, tms, tp, rules, ea, etc.) |
-| `/tazama/postgres_extensions_password` | `POSTGRES_PASSWORD` | `extensions/docker-compose.extensions.infrastructure.yaml`, `extensions/.env`, `extensions/env/tcs.env` |
-| | `POSTGRES_PASSWORD`, `SPRING_DATASOURCE_PASSWORD` | `extensions/env/cms.env` |
+| `/tazama/postgres_extensions_password` | `POSTGRES_PASSWORD` | `extensions/docker-compose.extensions.infrastructure.yaml`, `extensions/.env`, `extensions/env/connection-studio.env` |
+| | `POSTGRES_PASSWORD`, `SPRING_DATASOURCE_PASSWORD` | `extensions/env/case-management-system.env` |
 | `/tazama/keycloak_admin_password` | `KEYCLOAK_ADMIN_PASSWORD` | `core/env/keycloak.env` |
 | `/tazama/hasura_admin_secret` | `HASURA_GRAPHQL_ADMIN_SECRET` | `core/docker-compose.utils.hasura.yaml` |
-| `/tazama/pgadmin_password` | `PGADMIN_DEFAULT_PASSWORD` | `core/env/pgadmin.env`, `extensions/env/pgadmin.env` |
-| `/tazama/redis_password` | `REDIS_PASSWORD` | `extensions/env/deapi.env`, `extensions/env/dems.env` |
-| `/tazama/couchdb_password` | `COUCHDB_PASSWORD` | `extensions/env/cms.env` |
+| `/tazama/pgadmin_password` | `PGADMIN_DEFAULT_PASSWORD` | `core/env/pgadmin.env`, `extensions/env/extensions-pgadmin.env` |
+| `/tazama/redis_password` | `REDIS_PASSWORD` | `extensions/env/data-enrichment-service.env`, `extensions/env/event-monitoring-service.env` |
+| `/tazama/couchdb_password` | `COUCHDB_PASSWORD` | `extensions/env/case-management-system.env` |
 | `/tazama/auth_client_secret` | `CLIENT_SECRET` | `core/env/auth-service.env` |
-| `/tazama/trs_crypto_key` | `CRYPTO_SECRET_KEY` | `extensions/env/trs.env` |
+| `/tazama/trs_crypto_key` | `CRYPTO_SECRET_KEY` | `extensions/env/rule-studio.env` |
 | `/tazama/relay_auth_password` | `AUTH_PASSWORD` | `core/env/rs-rest.env` |
-| `/tazama/cms_auth_admin_password` | `TAZAMA_AUTH_ADMIN_PASSWORD` | `extensions/env/cms.env` |
-| `/tazama/cms_flowable_password` | `FLOWABLE_PASSWORD` | `extensions/env/cms.env` |
+| `/tazama/cms_auth_admin_password` | `TAZAMA_AUTH_ADMIN_PASSWORD` | `extensions/env/case-management-system.env` |
+| `/tazama/cms_flowable_password` | `FLOWABLE_PASSWORD` | `extensions/env/case-management-system.env` |
 | `/tazama/nifi_admin_password` | `SINGLE_USER_CREDENTIALS_PASSWORD` | `biar/docker-compose.biar.infrastructure.yaml` |
 | `/tazama/ozone_s3g_secret_key` | `OZONE-SITE.XML_ozone.s3g.secret.key` | `biar/docker-compose.biar.infrastructure.yaml` |
-| `/tazama/opensearch_password` | `OPENSEARCH_PASSWORD`, `OPENSEARCH_INITIAL_ADMIN_PASSWORD` | `extensions/env/cms.env`, `tcs.env`, `trs.env` |
-| `/tazama/sftp_password` | `SFTP_PASSWORD_CONSUMER`, `SFTP_PASSWORD_PRODUCER` | `extensions/env/tcs.env` - see note below |
+| `/tazama/opensearch_password` | `OPENSEARCH_PASSWORD`, `OPENSEARCH_INITIAL_ADMIN_PASSWORD` | `extensions/env/case-management-system.env`, `connection-studio.env`, `rule-studio.env` |
+| `/tazama/sftp_password` | `SFTP_PASSWORD_CONSUMER`, `SFTP_PASSWORD_PRODUCER` | `extensions/env/connection-studio.env` - see note below |
 
-> **SFTP special case:** The SFTP server user is defined in the `command:` line of the `atmoz/sftp` container in `extensions/docker-compose.extensions.infrastructure.yaml` as the literal string `user:password:1001`. This cannot be overridden by env var substitution without first changing the compose file to `${SFTP_USER}:${SFTP_PASSWORD}:1001`. That compose file change is a prerequisite for the overlay. Additionally, the `SFTP_PASSWORD_CONSUMER` and `SFTP_PASSWORD_PRODUCER` values in `tcs.env` use a `hash:salt` format specific to the SFTP server's authentication scheme - replacement values must be generated in that same format.
+> **SFTP special case:** The SFTP server user is defined in the `command:` line of the `atmoz/sftp` container in `extensions/docker-compose.extensions.infrastructure.yaml` as the literal string `user:password:1001`. This cannot be overridden by env var substitution without first changing the compose file to `${SFTP_USER}:${SFTP_PASSWORD}:1001`. That compose file change is a prerequisite for the overlay. Additionally, the `SFTP_PASSWORD_CONSUMER` and `SFTP_PASSWORD_PRODUCER` values in `connection-studio.env` use a `hash:salt` format specific to the SFTP server's authentication scheme - replacement values must be generated in that same format.
 
 **Commands to store secrets in SSM (run once, before Phase D):**
 
@@ -1302,7 +1302,7 @@ Files created:
 | `TRS_API_URL` / `TCS_API_URL` / `CMS_API_URL` | localhost defaults | Public ALB subdomains | Browser-facing VITE_ vars |
 | `SIMULATION_ENDPOINT` / `ADMIN_ENDPOINT` | localhost defaults | Public ALB subdomains | Browser-facing VITE_ vars |
 | `ALLOWED_ORIGINS` / `CORS_ORIGINS` | localhost | Public ALB subdomains | CORS |
-| `VOILA_URL` | `http://tazama-cms-voila:8866` (container-internal) | `https://voila.beta.tazama.org` | Prevents mixed-content block when CMS frontend embeds the Voila iframe over HTTPS |
+| `VOILA_URL` | `http://case-management-system-voila:8866` (container-internal) | `https://voila.beta.tazama.org` | Prevents mixed-content block when CMS frontend embeds the Voila iframe over HTTPS |
 | `CMS_FRONTEND_ORIGIN` | `http://localhost:5175` | `https://cms.beta.tazama.org` | Sets the Voila `frame-ancestors` CSP to allow the CMS frontend to embed the iframe (requires CMS image with env-var-driven CSP support - see [case-management-system #92](https://github.com/tazama-lf/case-management-system/issues/92)) |
 | `GOLD_LAKEHOUSE_API_URL` | `http://${SERVER_C_HOST}:8282` (placeholder, resolves to dev default at runtime) | `SERVER_C_HOST=biar.tazama.internal` set by this overlay | Server C datalakehouse-api |
 
@@ -2046,7 +2046,7 @@ The new service must be defined in the same compose `-f` chain that the sibling
 uses. For the core stack on Server A, `tms` or `nats` are reliable siblings -
 the `tazama-demo` service lives in the same chain (`docker-compose.hub.core.yaml`
 and `docker-compose.base.auth.yaml`). For the extensions stack on Server B,
-`opensearch-node1` is a reliable sibling - the `opensearch-dashboards` service
+`opensearch` is a reliable sibling - the `opensearch-dashboards` service
 lives in the same chain (`docker-compose.extensions.infrastructure.yaml`).
 
 ```powershell
@@ -2058,7 +2058,7 @@ lives in the same chain (`docker-compose.extensions.infrastructure.yaml`).
 .\deploy-service.ps1 -Server A -Service tazama-demo -FromService tms
 
 # First-time bring-up of OpenSearch Dashboards on Server B
-.\deploy-service.ps1 -Server B -Service opensearch-dashboards -FromService opensearch-node1 -RepoPull <branch>
+.\deploy-service.ps1 -Server B -Service opensearch-dashboards -FromService opensearch -RepoPull <branch>
 
 # Dry run first to see the resolved compose command before committing
 .\deploy-service.ps1 -Server A -Service tazama-demo -FromService tms -RepoPull tazama/demo-ui-4-update -DryRun
@@ -2086,7 +2086,7 @@ the container name, status, and image.
 ### OpenSearch Dashboards (Server B, internal-only)
 
 OpenSearch Dashboards is the web UI for browsing the `audit-logs-*` indices
-written to `opensearch-node1` on Server B. It is **deliberately not exposed**
+written to `opensearch` on Server B. It is **deliberately not exposed**
 through the ALB or a public subdomain: the OpenSearch security plugin is
 disabled (see [G.3](#g3---re-enable-opensearch-security-plugin)), so an
 internet-facing dashboard would be unauthenticated. Operator access is via the
@@ -2096,11 +2096,11 @@ EICE SSH tunnel only.
 
 ```powershell
 cd infra\aws\scripts
-# opensearch-node1 shares the extensions compose chain, so it is a reliable sibling
-.\deploy-service.ps1 -Server B -Service opensearch-dashboards -FromService opensearch-node1 -RepoPull <branch>
+# opensearch shares the extensions compose chain, so it is a reliable sibling
+.\deploy-service.ps1 -Server B -Service opensearch-dashboards -FromService opensearch -RepoPull <branch>
 ```
 
-The container connects to `opensearch-node1` automatically via its
+The container connects to `opensearch` automatically via its
 `OPENSEARCH_HOSTS` environment variable - no extra wiring is required.
 
 **Access:**
@@ -3149,7 +3149,7 @@ Invoke-RemoteCommand -InstanceId $out.ServerA_InstanceId -Command `
 
 # Server B
 Invoke-RemoteCommand -InstanceId $out.ServerB_InstanceId -Command `
-  "docker exec tazama-extensions-postgres-1 psql -U postgres -c `"ALTER USER postgres PASSWORD '$pgPw'`""
+  "docker exec extensions-postgres psql -U postgres -c `"ALTER USER postgres PASSWORD '$pgPw'`""
 ```
 
 Then re-run the deploy scripts with the new password so all service env files are updated:
@@ -3239,7 +3239,7 @@ The remaining services (Redis, CouchDB, TRS signing key, Hasura, pgAdmin, OAuth 
 
 See A.6. OpenSearch is currently running with `DISABLE_SECURITY_PLUGIN=true`. This is the highest-risk open item after credential rotation because OpenSearch is reachable from Server C (NiFi) and potentially accessible to any service on the private subnet without authentication.
 
-**To fix:** Remove `DISABLE_SECURITY_PLUGIN=true` from the `opensearch-node1` service in `extensions/docker-compose.extensions.infrastructure.yaml`, set a strong password in SSM as `/tazama/opensearch_password`, and redeploy the extensions stack.
+**To fix:** Remove `DISABLE_SECURITY_PLUGIN=true` from the `opensearch` service in `extensions/docker-compose.extensions.infrastructure.yaml`, set a strong password in SSM as `/tazama/opensearch_password`, and redeploy the extensions stack.
 
 ---
 

@@ -1,16 +1,17 @@
 services:
-  pgadmin:
-    image: dpage/pgadmin4:9
+  extensions-pgadmin:
+    image: dpage/pgadmin4:9.15.0
+    container_name: extensions-pgadmin
     env_file:
-      - env/pgadmin.env
+      - env/extensions-pgadmin.env
     ports:
-      - ${PGADMIN_PORT:-5050}:80
+      - ${PGADMIN_PORT:-5051}:80
     configs:
       - source: servers.json
         target: /pgadmin4/servers.json
     restart: always
     depends_on:
-      - postgres
+      - extensions-postgres
 
 configs:
   servers.json:
@@ -22,7 +23,7 @@ configs:
               "Group": "Servers",
               "Port": 5432,
               "Username": "postgres",
-              "Host": "postgres",
+              "Host": "extensions-postgres",
               "MaintenanceDB": "postgres",
               "ConnectionParameters": {
                   "sslmode": "prefer",
