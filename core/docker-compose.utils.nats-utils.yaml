@@ -1,9 +1,6 @@
 services:
   nats-utilities:
-    build:
-      context: https://github.com/tazama-lf/nats-utilities.git#${NATS_UTILITIES_BRANCH}
-      secrets:
-        - GH_TOKEN
+    image: tazamaorg/nats-utilities:${TAZAMA_VERSION}
     env_file:
       - env/nats-utilities.env
       - .env
