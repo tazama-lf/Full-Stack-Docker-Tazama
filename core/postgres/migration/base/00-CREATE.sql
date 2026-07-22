@@ -8,6 +8,8 @@ create database evaluation;
 
 create database enrichment;
 
+create database simulation;
+
 \connect configuration;
 
 create table network_map (
