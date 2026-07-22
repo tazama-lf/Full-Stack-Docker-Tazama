@@ -7,6 +7,7 @@ include:
 services:
   # ADMIN SERVICE API
   admin-service:
+    container_name: admin-service
     image: !reset null
     build:
       context: https://github.com/tazama-lf/admin-service.git#${ADMIN_BRANCH}
@@ -15,19 +16,20 @@ services:
       secrets:
         - GH_TOKEN
     env_file:
-      - env/admin.env
+      - env/admin-service.env
       - .env
     restart: always
     ports:
       - ${ADMIN_PORT}:3100
     depends_on:
-      postgres:
+      core-postgres:
         condition: service_healthy
       valkey:
         condition: service_started
 
   # TRANSACTION MONITORING SERVICE API
-  tms:
+  tms-service:
+    container_name: tms-service
     image: !reset null
     build:
       context: https://github.com/tazama-lf/tms-service.git#${TMS_BRANCH}
@@ -36,7 +38,7 @@ services:
       secrets:
         - GH_TOKEN
     env_file:
-      - env/tms.env
+      - env/tms-service.env
       - .env
     restart: always
     ports:
@@ -44,13 +46,14 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
       nats:
         condition: service_started
 
   # EVENT DIRECTOR
-  ed:
+  event-director:
+    container_name: event-director
     image: !reset null
     build:
       context: https://github.com/tazama-lf/event-director.git#${ED_BRANCH}
@@ -59,19 +62,20 @@ services:
       secrets:
         - GH_TOKEN
     env_file:
-      - env/ed.env
+      - env/event-director.env
       - .env
     restart: always
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
       nats:
         condition: service_started
 
   # RULE PROCESSOR
   rule-901:
+    container_name: rule-901
     image: !reset null
     build:
       context: https://github.com/tazama-lf/rule-executer.git#${RULE_901_BRANCH}
@@ -86,13 +90,14 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
       nats:
         condition: service_started
 
   # TYPOLOGY PROCESSOR
-  tp:
+  typology-processor:
+    container_name: typology-processor
     image: !reset null
     build:
       context: https://github.com/tazama-lf/typology-processor.git#${TP_BRANCH}
@@ -101,19 +106,20 @@ services:
       secrets:
         - GH_TOKEN
     env_file:
-      - env/tp.env
+      - env/typology-processor.env
       - .env
     restart: always
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
       nats:
         condition: service_started
 
   # EVENT ADJUDICATOR
   event-adjudicator:
+    container_name: event-adjudicator
     image: !reset null
     build:
       context: https://github.com/tazama-lf/event-adjudicator.git#${EA_BRANCH}
@@ -128,13 +134,14 @@ services:
     depends_on:
       valkey:
         condition: service_started
-      postgres:
+      core-postgres:
         condition: service_healthy
       nats:
         condition: service_started
   
   # EVENT FLOW RULE PROCESSOR
-  ef:
+  event-flow:
+    container_name: event-flow
     image: !reset null
     build:
       context: https://github.com/tazama-lf/event-flow.git#${EVENT_FLOW_BRANCH}
@@ -147,7 +154,7 @@ services:
       - .env
     restart: always
     depends_on:
-      postgres:
+      core-postgres:
         condition: service_healthy
       valkey:
         condition: service_started
@@ -156,6 +163,7 @@ services:
 
   # TAZAMA DEMO UI
   tazama-demo:
+    container_name: tazama-demo
     image: !reset null
     build:
       context: https://github.com/tazama-lf/tazama-demo.git#${TAZAMA_DEMO_BRANCH}
@@ -165,9 +173,9 @@ services:
         - GH_TOKEN
     restart: always
     env_file:
-      - env/ui.env
+      - env/tazama-demo.env
     depends_on:
-      tms:
+      tms-service:
         condition: service_started
       admin-service:
         condition: service_started

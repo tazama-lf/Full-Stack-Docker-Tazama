@@ -29,23 +29,38 @@ if (-not (Test-Path $namingFile)) {
 $namingContent = Get-Content $namingFile -Raw
 
 # Stacks whose Phase 1 alignment has landed. Extend as PRs merge.
-$AlignedStacks = @('biar', 'extensions')
+$AlignedStacks = @('biar', 'extensions', 'core')
 
 # Containers allowed a trailing -<digit> (real replicas, per NAMING.md section 5).
 $ReplicaWhitelist = @('ozone-datanode-1', 'ozone-datanode-2', 'ozone-datanode-3')
 
+# Canonical names ending in a functional digit code (not replica suffixes, per NAMING.md section 5).
+$CanonicalDigitPatterns = @('^rule-\d{3}$', '-tenant-\d{3}$')
+
 # Service keys whose tazamaorg image name legitimately differs from the key
 # (deployment fan-out, per NAMING.md rules 1-2).
 $ImageExceptions = @{
-    # 'relay-service-ef' = 'relay-service-integration-nats'  # uncomment when core lands
+    'relay-service-ef'            = 'relay-service-integration-nats'
+    'relay-service-tp'            = 'relay-service-integration-nats'
+    'relay-service-ea'            = 'relay-service-integration-nats'
+    'relay-service-ef-tenant-001' = 'relay-service-integration-nats'
+    'relay-service-ef-tenant-002' = 'relay-service-integration-nats'
+    'relay-service-tp-tenant-001' = 'relay-service-integration-nats'
+    'relay-service-tp-tenant-002' = 'relay-service-integration-nats'
+    'relay-service-ea-tenant-001' = 'relay-service-integration-nats'
+    'relay-service-ea-tenant-002' = 'relay-service-integration-nats'
 }
 
 # Retired hostnames that must not appear in env files or init scripts.
+# Note: bare 'postgres' is deliberately absent from the core list - it is still
+# the database username (`*_DATABASE_USER=postgres`), only the hostname moved
+# to core-postgres. Hostname cutover is asserted via the retired service keys.
 $RetiredHostnames = @{
     biar       = @('s3g', 'scm', 'om', 'recon', 'tika', 'solr', 'nifi', 'automation-orchestrator')
     extensions = @('opensearch-node1', 'tazama-cms-flowable', 'tazama-cms-voila', 'tazama-cms-backend',
                    'tazama-cms-couchdb', 'tazama-extensions-postgres-1', 'tazama-sftp-1',
                    'tazama-dems-1', 'tazama-deapi-1')
+    core       = @('tms', 'ed', 'tp', 'ef', 'auth', 'rsef', 'rstp', 'rsea')
 }
 
 $failures = New-Object System.Collections.Generic.List[string]
@@ -76,37 +91,63 @@ foreach ($stack in $AlignedStacks) {
     $stackDir = Join-Path $repoRoot $stack
     $composeFiles = Get-ChildItem $stackDir -Filter 'docker-compose*.yaml' -File
 
+    # Aggregate service definitions across the stack's compose files: overlay
+    # files legitimately extend a service without repeating container_name/image,
+    # so the checks run against the merged view per service key.
+    $svcAgg = [ordered]@{}
     foreach ($file in $composeFiles) {
         $rel = $file.FullName.Substring($repoRoot.Path.Length + 1)
         foreach ($svc in (Get-ComposeServices $file.FullName)) {
-            $key = $svc.Key
-
-            # 1. Service key must appear in NAMING.md
-            if ($namingContent -notmatch [regex]::Escape("``$key``") -and $namingContent -notmatch "\| $([regex]::Escape($key)) \|") {
-                $failures.Add("${rel}: service key '$key' not found in NAMING.md")
+            if (-not $svcAgg.Contains($svc.Key)) {
+                $svcAgg[$svc.Key] = New-Object System.Collections.Generic.List[object]
             }
+            $svcAgg[$svc.Key].Add([PSCustomObject]@{ Rel = $rel; ContainerName = $svc.ContainerName; Image = $svc.Image })
+        }
+    }
 
-            # 2. container_name must be present and equal to the key
-            if (-not $svc.ContainerName) {
-                $failures.Add("${rel}: service '$key' has no explicit container_name")
-            }
-            elseif ($svc.ContainerName -ne $key) {
-                $failures.Add("${rel}: service '$key' has container_name '$($svc.ContainerName)' (must equal the key)")
-            }
+    foreach ($key in $svcAgg.Keys) {
+        $entries = $svcAgg[$key]
 
-            # 3. tazamaorg image name must match the key (exceptions allowed)
-            if ($svc.Image -and $svc.Image -match '^tazamaorg/([^:]+)') {
-                $imageName = $Matches[1]
-                $expected = if ($ImageExceptions.ContainsKey($key)) { $ImageExceptions[$key] } else { $key }
-                if ($imageName -ne $expected) {
-                    $failures.Add("${rel}: service '$key' uses image '$imageName' (expected '$expected')")
+        # 1. Service key must appear in NAMING.md (rule-NNN and per-tenant
+        #    variants are registered via their canonical base name).
+        $lookupKey = $key
+        if ($lookupKey -match '^rule-\d{3}$') { $lookupKey = 'rule-NNN' }
+        $lookupKey = $lookupKey -replace '-tenant-\d{3}$', ''
+        if ($namingContent -notmatch [regex]::Escape("``$lookupKey``") -and $namingContent -notmatch "\| $([regex]::Escape($lookupKey)) \|") {
+            $failures.Add("${stack}: service key '$key' not found in NAMING.md")
+        }
+
+        # 2. container_name must be set (in at least one file) and equal to the key
+        $named = @($entries | Where-Object { $_.ContainerName })
+        if ($named.Count -eq 0) {
+            $failures.Add("${stack}: service '$key' has no explicit container_name in any compose file")
+        }
+        foreach ($entry in $named) {
+            if ($entry.ContainerName -ne $key) {
+                $failures.Add("$($entry.Rel): service '$key' has container_name '$($entry.ContainerName)' (must equal the key)")
+            }
+        }
+
+        # 3. tazamaorg image name must match the key (exceptions allowed)
+        foreach ($entry in ($entries | Where-Object { $_.Image -and $_.Image -match '^tazamaorg/([^:]+)' })) {
+            $null = $entry.Image -match '^tazamaorg/([^:]+)'
+            $imageName = $Matches[1]
+            $expected = if ($ImageExceptions.ContainsKey($key)) { $ImageExceptions[$key] } else { $key }
+            if ($imageName -ne $expected) {
+                $failures.Add("$($entry.Rel): service '$key' uses image '$imageName' (expected '$expected')")
+            }
+        }
+
+        # 4. No trailing -<digit> unless a real replica or a canonical digit code
+        $allNames = @($key) + @($named | ForEach-Object { $_.ContainerName }) | Sort-Object -Unique
+        foreach ($name in $allNames) {
+            if ($name -match '-\d+$' -and $ReplicaWhitelist -notcontains $name) {
+                $isCanonical = $false
+                foreach ($p in $CanonicalDigitPatterns) {
+                    if ($name -match $p) { $isCanonical = $true; break }
                 }
-            }
-
-            # 4. No trailing -<digit> unless a real replica
-            foreach ($name in @($key, $svc.ContainerName) | Where-Object { $_ }) {
-                if ($name -match '-\d+$' -and $ReplicaWhitelist -notcontains $name) {
-                    $failures.Add("${rel}: name '$name' has a trailing -<digit> and is not a whitelisted replica")
+                if (-not $isCanonical) {
+                    $failures.Add("${stack}: name '$name' has a trailing -<digit> and is not a whitelisted replica")
                 }
             }
         }

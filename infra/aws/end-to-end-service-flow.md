@@ -40,7 +40,7 @@ flowchart TD
         PG_A[("PostgreSQL\n:5432 / ext :15432")]
         VK[("Valkey\n:6379 / ext :16379")]
         PIPELINE["NATS Pipeline\nED → Rules → TP / EF / EA"]
-        RS["Relay Services\nrsef · rstp · rsea"]
+        RS["Relay Services\nrelay-service-ef · relay-service-tp · relay-service-ea"]
         Logging["Event Sidecar :15000\n+ Lumberjack"]
     end
 
@@ -193,7 +193,7 @@ sequenceDiagram
     participant TP as Typology Processor<br/>Server A
     participant EF as Event Flow<br/>Server A
     participant EA as EA<br/>Server A
-    participant RS as Relay Services<br/>Server A (rsef/rstp/rsea)
+    participant RS as Relay Services<br/>Server A (relay-service-ef/tp/ea)
     participant CMSbe as CMS Backend<br/>Server B :3090
     participant PG_B as PostgreSQL<br/>Server B :5432
     participant OSrch as OpenSearch<br/>Server B :9200
@@ -227,10 +227,10 @@ sequenceDiagram
     EF->>VK: cache event-flow state
     EF->>NATS: publish → stream: interdiction-service-ef
 
-    NATS-->>RS: rsef consumes ← interdiction-service-ef
+    NATS-->>RS: relay-service-ef consumes ← interdiction-service-ef
     RS->>NATS: republish → relay-service-nats-ef
 
-    NATS-->>RS: rstp consumes ← interdiction-service-tp
+    NATS-->>RS: relay-service-tp consumes ← interdiction-service-tp
     RS->>NATS: republish → relay-service-nats-tp
 
     NATS-->>EA: consume ← relay-service-nats-tp + relay-service-nats-ef
@@ -238,7 +238,7 @@ sequenceDiagram
     EA->>PG_A: write evaluation result (evaluation DB)
     EA->>NATS: publish → stream: investigation-service (alert)
 
-    NATS-->>RS: rsea consumes ← investigation-service
+    NATS-->>RS: relay-service-ea consumes ← investigation-service
     RS->>NATS: republish → relay-service-nats-ea
 
     Note over CMSbe,NATS: CMS Backend (Server B) subscribes to<br/>investigation-service on Server A NATS :14222
@@ -525,9 +525,9 @@ flowchart TD
     end
 
     subgraph Relay["Relay Services"]
-        RSEF["rsef\n(relay EF)"]
-        RSTP["rstp\n(relay TP)"]
-        RSEA["rsea\n(relay EA)"]
+        RSEF["relay-service-ef\n(relay EF)"]
+        RSTP["relay-service-tp\n(relay TP)"]
+        RSEA["relay-service-ea\n(relay EA)"]
     end
 
     subgraph External["External Consumers (cross-server)"]

@@ -1,5 +1,5 @@
 services:
-  postgres:
+  core-postgres:
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
     volumes:

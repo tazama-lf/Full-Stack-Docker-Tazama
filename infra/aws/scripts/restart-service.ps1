@@ -65,7 +65,7 @@
     .\restart-service.ps1 -Server A -Service data-enrichment-service -RepoPull fix-biar-data-pipeline
     .\restart-service.ps1 -Server A -Service data-enrichment-service -RepoPull dev
     .\restart-service.ps1 -Server A -Service event-adjudicator -DiscoverService tadp -RepoPull dev
-    .\restart-service.ps1 -Server A -Service rsea -DiscoverService rstadp -RepoPull dev
+    .\restart-service.ps1 -Server A -Service relay-service-ea -DiscoverService rstadp -RepoPull dev
     .\restart-service.ps1 -Server A -Service event-adjudicator -DiscoverService tadp -RepoPull dev -DryRun
 #>
 

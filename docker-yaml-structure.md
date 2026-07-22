@@ -70,16 +70,19 @@ Multi-tenant configuration - mounts:
 #### `docker-compose.dev.core.yaml`
 GitHub dev core services (built from source via `GH_TOKEN`):
 - **`admin-service`**: Administration API (port `${ADMIN_PORT}:3100`)
-- **`tms`**: Transaction Monitoring Service API (port `${TMS_PORT}:3000`)
-- **`ed`**: Event Director
+- **`tms-service`**: Transaction Monitoring Service API (port `${TMS_PORT}:3000`)
+- **`event-director`**: Event Director
 - **`rule-901`**: Rule 901 (built from `rule-executer` repo)
-- **`tp`**: Typology Processor
+- **`typology-processor`**: Typology Processor
 - **`event-adjudicator`**: Event Adjudicator
-- **`ef`**: Event Flow rule processor
+- **`event-flow`**: Event Flow rule processor
+- **`tazama-demo`**: Demo UI (built from `tazama-demo` repo, port `${DEMO_PORT:-3011}:3011`)
 
 #### `docker-compose.hub.core.yaml`
 DockerHub core services using `tazamaorg/*:${TAZAMA_VERSION}` images:
-- Same services as dev.core but from pre-built DockerHub images
+- Same services as dev.core but from pre-built DockerHub images, except `rule-901` (delivered by the rules files below)
+- Adds **`batch-ppa`**: `tazamaorg/batch-ppa:${TAZAMA_VERSION}` (port `4100:4100`) - Pain.001 batch processor; depends on `core-postgres` (healthy) and `tms-service`
+- **`tazama-demo`**: `tazamaorg/tazama-demo:${TAZAMA_VERSION}` (port `${DEMO_PORT:-3011}:3011`), configured via `env/tazama-demo.env`; sets `CORS_POLICY=demo` on `tms-service` and `admin-service`
 
 ### Rules Files
 
@@ -92,7 +95,7 @@ DockerHub minimal rule set:
 DockerHub complete rule set (33 rules):
 - Rules: 001, 002, 003, 004, 006, 007, 008, 010, 011, 016, 017, 018, 020, 021, 024, 025, 026, 027, 028, 030, 044, 045, 048, 054, 063, 074, 075, 076, 078, 083, 084, 090, 091
 - All rules use `env/rule-executer.env` as base config
-- All depend on `valkey` and `postgres`
+- All depend on `valkey` and `core-postgres`
 
 ### Authentication Files
 
@@ -100,13 +103,13 @@ DockerHub complete rule set (33 rules):
 Base auth overlay applied on top of any core deployment:
 - **`keycloak`**: Keycloak 23.0.6 identity provider (port `8080:8080`)
   - Dev mode with auto-import of `00-tazama-test-realm.json`
-- **`auth`**: Auth service `tazamaorg/auth-service:${TAZAMA_VERSION}` (port `3020:3020`)
+- **`auth-service`**: Auth service `tazamaorg/auth-service:${TAZAMA_VERSION}` (port `3020:3020`)
   - Issues and validates JWT tokens using RSA key pair
-- **`postgres`**: Overridden with `POSTGRES_HOST_AUTH_METHOD=trust`
-- **`tms`**, **`admin-service`**: Overridden with `AUTHENTICATED=true` and public key mount
+- **`core-postgres`**: Overridden with `POSTGRES_HOST_AUTH_METHOD=trust`
+- **`tms-service`**, **`admin-service`**: Overridden with `AUTHENTICATED=true` and public key mount
 
 #### `docker-compose.dev.auth.yaml`
-Overrides `auth` to build from GitHub source instead of DockerHub.
+Overrides `auth-service` to build from GitHub source instead of DockerHub.
 
 ### Relay Files
 
@@ -114,19 +117,19 @@ Relay services forward interdiction and alert messages to external NATS streams.
 
 #### `docker-compose.dev.relay.yaml`
 GitHub dev relay services (built from `relay-service` GitHub repo):
-- Configures `ef`, `tp`, `event-adjudicator` with `SUPPRESS_ALERTS=false` and `INTERDICTION_DESTINATION=global`
-- **`rsef`**: Event Flow interdiction relay (`interdiction-service-ef` → `relay-service-nats-ef`)
-- **`rstp`**: Typology Processor interdiction relay (`interdiction-service-tp` → `relay-service-nats-tp`)
-- **`rsea`**: Event Adjudicator alert relay (`investigation-service` → `relay-service-nats-ea`)
+- Configures `event-flow`, `typology-processor`, `event-adjudicator` with `SUPPRESS_ALERTS=false` and `INTERDICTION_DESTINATION=global`
+  - **`relay-service-ef`**: Event Flow interdiction relay (`interdiction-service-ef` → `relay-service-nats-ef`)
+  - **`relay-service-tp`**: Typology Processor interdiction relay (`interdiction-service-tp` → `relay-service-nats-tp`)
+  - **`relay-service-ea`**: Event Adjudicator alert relay (`investigation-service` → `relay-service-nats-ea`)
 
 #### `docker-compose.hub.relay.yaml`
 Same relay services using `tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}`.
 
 #### `docker-compose.multitenant.relay.yaml`
 Per-tenant relay services with `INTERDICTION_DESTINATION=tenant`:
-- **`rsef-tenant-001`**, **`rsef-tenant-002`**: Event Flow relays per tenant
-- **`rstp-tenant-001`**, **`rstp-tenant-002`**: Typology Processor relays per tenant
-- **`rsea-tenant-001`**, **`rsea-tenant-002`**: Event Adjudicator relays per tenant
+  - **`relay-service-ef-tenant-001`**, **`relay-service-ef-tenant-002`**: Event Flow relays per tenant
+  - **`relay-service-tp-tenant-001`**, **`relay-service-tp-tenant-002`**: Typology Processor relays per tenant
+  - **`relay-service-ea-tenant-001`**, **`relay-service-ea-tenant-002`**: Event Adjudicator relays per tenant
 
 ### Logging Files
 
@@ -141,14 +144,7 @@ Same services using `tazamaorg/event-sidecar` and `tazamaorg/lumberjack` images.
 #### `docker-compose.dev.logs.elastic.yaml` / `docker-compose.hub.logs.elastic.yaml`
 Elasticsearch integration overlay:
 - Configures `lumberjack` to forward to Elasticsearch
-- Adds `SIDECAR_HOST` env var to `tms`, `admin`, `ed`, `ef`, `rule-901`/`rule-902`, `tp`, `event-adjudicator`
-
-### UI Files
-
-#### `docker-compose.hub.ui.yaml`
-Demo web interface:
-- **`ui`**: `tazamaorg/demo-ui:v2.2.0` (port `3001:3001`)
-- Sets `CORS_POLICY=demo` on `tms` and `admin-service`
+- Adds `SIDECAR_HOST` env var to `tms-service`, `admin-service`, `event-director`, `event-flow`, `rule-901`/`rule-902`, `typology-processor`, `event-adjudicator`
 
 ### Utility Files
 
@@ -156,16 +152,12 @@ Demo web interface:
 - **`nats-utilities`**: Built from `nats-utilities` GitHub repo (port `4000:4000`)
   - NATS stream management, monitoring, and debugging tools
 
-#### `docker-compose.utils.batch-ppa.yaml`
-- **`batch-ppa`**: `tazamaorg/batch-ppa:${TAZAMA_VERSION}` (port `4100:4100`)
-  - Pain.001 batch processor; depends on `postgres` (healthy) and `tms`
-
 #### `docker-compose.utils.pgadmin.yaml`
-- **`pgadmin`**: pgAdmin 4.9 (port `${PGADMIN_PORT:-5050}:80`)
+- **`core-pgadmin`**: pgAdmin 4.9 (port `${PGADMIN_PORT:-5050}:80`)
   - Pre-configured Tazama server connection via inline `servers.json`
 
 #### `docker-compose.utils.hasura.yaml`
-- **`postgres`**: Overridden with trust auth and `01-HASURA.sql` init
+- **`core-postgres`**: Overridden with trust auth and `01-HASURA.sql` init
 - **`hasura`**: Hasura GraphQL Engine v2.36.0 (port `6100:8080`)
   - Connects to `event_history`, `raw_history`, `configuration`, `evaluation` databases
   - Admin secret: `password`; anonymous role enabled
@@ -178,9 +170,9 @@ Demo web interface:
 - Named volumes: `esdata`, `kibanadata`
 
 #### `docker-compose.utils.apm-elastic.yaml`
-- Includes Elasticsearch/Kibana via `docker-compose.dev.elastic.yaml`
+- Includes Elasticsearch/Kibana via `docker-compose.utils.elastic.yaml`
 - **`apm-server`**: Elastic APM Server (port `${APMSERVER_PORT}:8200`) with RUM enabled
-- Injects `APM_ACTIVE=true` and `APM_URL=http://apm-server:8200` into `tms`, `ed`, `rule-901`, `tp`, `event-adjudicator`
+- Injects `APM_ACTIVE=true` and `APM_URL=http://apm-server:8200` into `tms-service`, `event-director`, `rule-901`, `typology-processor`, `event-adjudicator`
 
 ## Core Deployment Patterns
 
@@ -288,7 +280,7 @@ docker compose \
 - **Elasticsearch**: `http://localhost:${ES_PORT}`
 - **Kibana**: `http://localhost:${KIBANA_PORT}`
 - **APM Server**: `http://localhost:${APMSERVER_PORT}`
-- **Demo UI**: `http://localhost:3001`
+- **Demo UI**: `http://localhost:3011`
 - **NATS Utilities**: `http://localhost:4000`
 - **Batch PPA**: `http://localhost:4100`
 
@@ -346,7 +338,7 @@ DockerHub API services (Server A):
 ### Utility Files
 
 #### `docker-compose.utils.pgadmin.yaml`
-- **`pgadmin`**: pgAdmin 4.9 (port `${PGADMIN_PORT:-5050}:80`, default `5051` per `.env`)
+- **`extensions-pgadmin`**: pgAdmin 4.9 (port `${PGADMIN_PORT:-5050}:80`, default `5051` per `.env`)
   - Pre-configured Tazama server connection; note: uses port 5051 on Server B to avoid conflict with core's 5050
 
 ## Extensions Deployment Patterns

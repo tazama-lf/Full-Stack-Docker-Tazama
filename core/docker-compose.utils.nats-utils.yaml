@@ -1,5 +1,6 @@
 services:
   nats-utilities:
+    container_name: nats-utilities
     image: tazamaorg/nats-utilities:${TAZAMA_VERSION}
     env_file:
       - env/nats-utilities.env

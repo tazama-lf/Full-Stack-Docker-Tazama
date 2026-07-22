@@ -7,7 +7,7 @@
 # and restarts the stack with a clean database.
 #
 # Use this between beta user sessions or to clear accumulated test data.
-# The env/ui.env patch from the initial deploy is preserved - no re-patching needed.
+# The env/tazama-demo.env patch from the initial deploy is preserved - no re-patching needed.
 #
 # Usage (from SSM session as ec2-user):
 #   /opt/tazama/AWS_deployment/reset-tazama.sh
@@ -29,7 +29,6 @@ COMPOSE_CMD="docker compose \
     -f docker-compose.hub.core.yaml \
     -f docker-compose.full.rules.yaml \
     -f docker-compose.hub.logs.base.yaml \
-    -f docker-compose.hub.ui.yaml \
     -f docker-compose.utils.hasura.yaml \
     -f docker-compose.utils.pgadmin.yaml \
     -f docker-compose.utils.nats-utils.yaml"
@@ -45,7 +44,7 @@ echo "All containers stopped and volumes removed."
 
 # ---------------------------------------------------------------------------
 # 2. Restart the stack
-#    env/ui.env is already patched from the initial deploy - no re-patching needed.
+#    env/tazama-demo.env is already patched from the initial deploy - no re-patching needed.
 # ---------------------------------------------------------------------------
 echo ""
 echo "--- Restarting Tazama stack ---"
@@ -63,7 +62,7 @@ echo ""
 echo "============================================================"
 echo "Tazama stack reset complete. Clean state."
 echo ""
-echo "  Demo UI:        http://${PUBLIC_IP}:3001"
+echo "  Demo UI:        http://${PUBLIC_IP}:3011"
 echo "  TMS API:        http://${PUBLIC_IP}:5000/documentation"
 echo "  Admin API:      http://${PUBLIC_IP}:5100/documentation"
 echo ""

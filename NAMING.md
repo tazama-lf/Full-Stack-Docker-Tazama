@@ -43,7 +43,7 @@ This is the single source of truth for component names across the Tazama deploym
 
 `env/biar-nifi.env`, `env/biar-automation-orchestrator.env`, `env/biar-datalakehouse-api.env`, `env/biar-unstructured-pipeline.env`, `env/biar-jupyterhub.env`, `env/biar-tika.env`, `env/ozone-docker-config` (shared Ozone cluster config, not per-service).
 
-## 3. Core stack (`-p tazama-core`) - target, lands with the core Phase 1 PR
+## 3. Core stack (`-p tazama-core`) - ALIGNED
 
 | Canonical name | Old service key | Old container | Notes |
 |---|---|---|---|
@@ -53,10 +53,11 @@ This is the single source of truth for component names across the Tazama deploym
 | typology-processor | `tp` | tazama-core-tp-1 | |
 | event-flow | `ef` | tazama-core-ef-1 | |
 | event-adjudicator | `event-adjudicator` | tazama-core-event-adjudicator-1 | |
-| rule-NNN | `rule-NNN` | tazama-core-rule-NNN-1 | one `rule-executer` repo fans out to per-rule images by design |
+| rule-NNN | `rule-NNN` | tazama-core-rule-NNN-1 | one `rule-executer` repo fans out to per-rule images by design; includes `rule-901`/`rule-902` (own images and env files) |
 | relay-service-ef | `rsef` | tazama-core-rsef-1 | image `relay-service-integration-nats`; suffix codes below |
 | relay-service-tp | `rstp` | tazama-core-rstp-1 | |
 | relay-service-ea | `rsea` | tazama-core-rsea-1 | |
+| relay-service-{ef,tp,ea}-tenant-{001,002} | `rsef-tenant-001` etc. | tazama-core-rsef-tenant-001-1 etc. | multitenant relay variants; image `relay-service-integration-nats` |
 | event-sidecar | `event-sidecar` | tazama-core-event-sidecar-1 | |
 | lumberjack | `lumberjack` | tazama-core-lumberjack-1 | |
 | auth-service | `auth-service` | tazama-core-auth-service-1 | |
@@ -68,8 +69,21 @@ This is the single source of truth for component names across the Tazama deploym
 | nats | `nats` | tazama-core-nats-1 | singleton, bare name |
 | valkey | `valkey` | tazama-core-valkey-1 | singleton, bare name |
 | keycloak | `keycloak` | tazama-core-keycloak-1 | singleton, bare name |
+| hasura | `hasura` | tazama-core-hasura-1 | singleton, bare name |
+| hasura-init | `hasura-init` | tazama-core-hasura-init-1 | init container |
+| elasticsearch | `elasticsearch` | tazama-core-elasticsearch-1 | singleton, bare name |
+| kibana | `kibana` | tazama-core-kibana-1 | singleton, bare name |
+| apm-server | `apm-server` | apm-server | `container_name` was already pinned |
 
-Relay suffix codes: `ef` = event-flow, `tp` = typology-processor, `ea` = event-adjudicator. The relay is one image (`tazamaorg/relay-service-integration-nats`) deployed once per routed source; the short codes match the relay's frozen runtime identity (`FUNCTION_NAME=relay-service-ef`, `APM_SERVICE_NAME`, NATS stream names `relay-service-nats-ef` etc.). Multitenant relay variants follow the same pattern and are finalized in the core Phase 1 PR.
+Relay suffix codes: `ef` = event-flow, `tp` = typology-processor, `ea` = event-adjudicator. The relay is one image (`tazamaorg/relay-service-integration-nats`) deployed once per routed source; the short codes match the relay's frozen runtime identity (`FUNCTION_NAME=relay-service-ef`, `APM_SERVICE_NAME`, NATS stream names `relay-service-nats-ef` etc.). Multitenant relay variants follow the same pattern (`relay-service-ef-tenant-001` etc.).
+
+### Core env files
+
+Renamed to match canonical names: `admin-service.env` (was `admin.env`), `tms-service.env` (was `tms.env`), `event-director.env` (was `ed.env`), `typology-processor.env` (was `tp.env`), `tazama-demo.env` (was `ui.env`), `core-pgadmin.env` (was `pgadmin.env`), `relay-service-nats.env` (was `rs-nats.env`, shared by all NATS relays), `relay-service-rest.env` (was `rs-rest.env`), `relay-service-kafka.env` (was `rs-kafka.env`), `relay-service-rabbitmq.env` (was `rs-rabbitmq.env`).
+
+Kept as-is: `rule-executer.env` (shared base config for all `rule-NNN` services, named after the `rule-executer` repo), plus per-service files already canonical (`event-flow.env`, `event-adjudicator.env`, `rule-901.env`, `rule-902.env`, `batch-ppa.env`, `auth-service.env`, `keycloak.env`, `lumberjack.env`, `nats-utilities.env`).
+
+Dead files: `relay-service-nats-tp.env` and `relay-service-nats-ea.env` (were `rs-nats-tp.env` / `rs-nats-ea.env`) are referenced by no compose file - deletion candidates.
 
 ## 4. Extensions stack (`-p tazama-extensions`) - ALIGNED
 
@@ -96,11 +110,11 @@ Relay suffix codes: `ef` = event-flow, `tp` = typology-processor, `ea` = event-a
 
 Env files renamed to match: `connection-studio.env`, `rule-studio.env`, `case-management-system.env`, `event-monitoring-service.env`, `data-enrichment-service.env`, `extensions-pgadmin.env`.
 
-Note: `event-monitoring-service.env` and `data-enrichment-service.env` still reference `@postgres` - that resolves to the **core** postgres (they deploy under `-p tazama-core`) and is updated in the core Phase 1 PR when core's `postgres` key becomes `core-postgres`.
+Note: `event-monitoring-service.env` and `data-enrichment-service.env` reference `@core-postgres` - that resolves to the **core** postgres (they deploy under `-p tazama-core`).
 
 ## 5. Replica whitelist
 
-Containers allowed a trailing `-<digit>`: `ozone-datanode-1`, `ozone-datanode-2`, `ozone-datanode-3`. Everything else must have a suffix-free `container_name`.
+Containers allowed a trailing `-<digit>`: `ozone-datanode-1`, `ozone-datanode-2`, `ozone-datanode-3`. Canonical names ending in a functional digit code (`rule-901`, `relay-service-ef-tenant-001`) are not suffixes. Everything else must have a suffix-free `container_name`.
 
 ## 6. Shorthand table (docs and CLI sugar only)
 

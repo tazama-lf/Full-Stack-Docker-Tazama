@@ -1,32 +1,32 @@
 services:
   lumberjack:
     extends:
-      file: docker-compose.hub.logs-base.yaml
-      service: event-sidecar
+      file: docker-compose.hub.logs.base.yaml
+      service: lumberjack
     environment:
       ELASTIC_SEARCH_VERSION: ${ELASTIC_STACK_VERSION}
       ELASTIC_HOST: http://elasticsearch:9200
       ELASTIC: true
 
-  tms:
+  tms-service:
     depends_on:
       - event-sidecar
     environment:
       SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
 
-  admin:
+  admin-service:
     depends_on:
       - event-sidecar
     environment:
       SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
 
-  ed:
+  event-director:
     depends_on:
       - event-sidecar
     environment:
       SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
 
-  ef:
+  event-flow:
     depends_on:
       - event-sidecar
     environment:
@@ -44,7 +44,7 @@ services:
     environment:
       SIDECAR_HOST: event-sidecar:${EVENT_SIDECAR_PORT}
 
-  tp:
+  typology-processor:
     depends_on:
       - event-sidecar
     environment:

@@ -258,25 +258,18 @@ This option will deploy the Tazama Demo User Interface contained and described i
 > [!NOTE]
 > The Tazama Demo UI is not designed to work with the Authentication or Relay services in this deployment. As these components are a key dependency for a Multi-tenancy deployment, the Demo UI is not available for selection during a Multi-Tenant deployment. The selection of the Demo UI during other deployments will initially deselect the Authentication and Relay services, though they can be selected again to force their deployment, though the Demo UI will then not function properly.
 
-The Demo UI is configured, by default, to connect via `localhost`. If you want to access the Demo UI from a different device, you would need to alter the follwing environment variables in the configuration defined in the `docker-compose.hub.ui.yaml` as follows:
+The Demo UI is configured, by default, to be accessed via `localhost`. If you want to access the Demo UI from a different device, you would need to alter the following environment variables in `env/tazama-demo.env` as follows:
 
 ```javascript
-NEXT_PUBLIC_URL="http://<host_IP_address>:3001"
-NEXT_PUBLIC_TMS_SERVER_URL="http://<host_IP_address>:5000"
-NEXT_PUBLIC_CMS_NATS_HOSTING="nats://nats:14222"
-NEXT_PUBLIC_PG_HOST=postgres
-NEXT_PUBLIC_PG_PORT=15432
-NEXT_PUBLIC_ADMIN_SERVICE_HOSTING="http://<host_IP_address>:5100"
-NEXT_PUBLIC_WS_URL="http://<host_IP_address>:3001"
+NEXT_PUBLIC_URL=http://<host_IP_address>:3011
+NEXT_PUBLIC_WS_URL=http://<host_IP_address>:3011
 ```
 
 Summary of changes required:
 1. Update all instances of `localhost` to the IP address of the host computer
-2. Update the NATS port in `NEXT_PUBLIC_CMS_NATS_HOSTING` from `4222` to `14222`
-3. Update the postgres port in `NEXT_PUBLIC_PG_PORT` from `5432` to `15432`
 
 > [!NOTE]
-> When running on `localhost`, the Tazama Demo UI back-end client will interact with the NATS and Postgres containers from _within_ the Docker Compose network, but when the Demo UI is running on a different device, the Tazama Demo UI back-end client will interact with the NATS and Postgres containers from _outside_ the Docker Compose network.
+> The Demo UI's back-end client interacts with the NATS, Postgres, TMS and Admin Service containers from _within_ the Docker Compose network (via `NATS_SERVER_URL`, `TMS_SERVER_URL` and `ADMIN_SERVICE_URL` in `env/tazama-demo.env`), so only the two browser-facing `NEXT_PUBLIC_*` URLs need to change when accessing the Demo UI from a different device.
 
 #### NATS Utilities
 
@@ -531,13 +524,11 @@ You can trash your container followed by deleting the image in docker if none of
 
 To easily idetify the name of a service, perform a
 
-`docker container ls` command and use the part of the container name between the `tazama-` and the `-1`, for example:
-
-If the container name is `tazama-rsea-1`, the service name is `rsea`.
+`docker container ls` command. Container names now match their Docker Compose service names directly (for example the `relay-service-ea` container is the `relay-service-ea` service).
 
 ### If Postman failing to connect to PostgreSQL when performing tests
 
-Check the Docker container console lots for the `tazama-hasura-init-1` container.
+Check the Docker container console lots for the `hasura-init` container.
 
 Check for any failed initializations, for example:
 
