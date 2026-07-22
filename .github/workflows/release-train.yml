@@ -1,0 +1,54 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Caller workflow: prepares and opens a release PR from the source branch to the target branch.
+#
+# Use for package repos, libraries, services, and rule repos that have package.json.
+#
+# Usage:
+#   Trigger manually from the source branch (dev).
+#   Leave version blank: orchestrator passes REL_VERSION; central workflow uses that for the
+#   platform release (release/v4.0.0) and falls back to RELEASE_VERSION, then package.json.
+#
+# Version policies (PACKAGE_VERSION_POLICY repo variable):
+#   aligned     - package.json is set to the platform release version (services, rules, apps).
+#   independent - package.json keeps its own semver (e.g. 8.2.0); platform release is still v4.0.0.
+#
+# What the central workflow does:
+#   1. Platform version: workflow input → RELEASE_VERSION → package.json fallback.
+#   2. npm version: aligned → platform version; independent → package.json own semver.
+#   3. Opens release PR branch (release/vX.Y.Z) and resolves internal rc deps to stable.
+#   4. Regenerates package-lock.json when present.
+#
+# After the release PR is merged to the target branch, publish.yml runs automatically.
+#
+# This file is managed centrally - do not edit manually.
+# To change release-train behaviour, update the reusable workflow in tazama-lf/workflows.
+
+name: Release train
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Platform release version (e.g. 4.0.0). Leave blank to use RELEASE_VERSION, then package.json."
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-train:
+    uses: tazama-lf/workflows/.github/workflows/release-train.yml@v1
+    with:
+      version: ${{ inputs.version || '' }}
+      version_policy: ${{ vars.PACKAGE_VERSION_POLICY || 'aligned' }}
+      source_branch: ${{ vars.SOURCE_BRANCH || 'dev' }}
+      target_branch: ${{ vars.TARGET_BRANCH || 'main' }}
+      package_scope: ${{ vars.PACKAGE_SCOPE || '@frmscoe' }}
+      node_version: ${{ vars.NODE_VERSION || '22' }}
+      internal_scopes_regex: ${{ vars.INTERNAL_SCOPES_REGEX || '^@(tazama-lf|frmscoe)/' }}
+      version_mismatch_behavior: ${{ vars.VERSION_MISMATCH_BEHAVIOR || 'fail' }}
+      reviewer: ${{ vars.RELEASE_REVIEWER || '' }}
+    secrets: inherit
