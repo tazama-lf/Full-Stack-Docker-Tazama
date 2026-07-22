@@ -83,7 +83,7 @@ Renamed to match canonical names: `admin-service.env` (was `admin.env`), `tms-se
 
 Kept as-is: `rule-executer.env` (shared base config for all `rule-NNN` services, named after the `rule-executer` repo), plus per-service files already canonical (`event-flow.env`, `event-adjudicator.env`, `rule-901.env`, `rule-902.env`, `batch-ppa.env`, `auth-service.env`, `keycloak.env`, `lumberjack.env`, `nats-utilities.env`).
 
-Dead files: `relay-service-nats-tp.env` and `relay-service-nats-ea.env` (were `rs-nats-tp.env` / `rs-nats-ea.env`) are referenced by no compose file - deletion candidates.
+Deleted: `rs-nats-tp.env` and `rs-nats-ea.env` - superseded by the shared `relay-service-nats.env` plus per-service compose `environment:` overrides (`FUNCTION_NAME`, `CONSUMER_STREAM`, `PRODUCER_STREAM`, `APM_SERVICE_NAME`); they were referenced by no compose file and the tp variant carried a stale `CONSUMER_STREAM=interdiction-service`.
 
 ## 4. Extensions stack (`-p tazama-extensions`) - ALIGNED
 
