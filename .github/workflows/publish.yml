@@ -28,6 +28,7 @@ on:
 permissions:
   packages: write
   contents: read
+  pull-requests: read
 
 jobs:
   publish:
