@@ -1,0 +1,21 @@
+# For local testing
+
+services:
+  # AUTH SERVICE
+  auth-service:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/auth-service.git#${AUTH_SERVICE_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+
+  # BATCH PRE-PROCESSING API
+  # base.auth.yaml adds an auth overlay for batch-ppa, but the dev chain
+  # (dev.core.yaml) does not deploy batch-ppa - remove the orphan override.
+  batch-ppa: !reset null
+
+secrets:
+  GH_TOKEN:
+    environment: GH_TOKEN

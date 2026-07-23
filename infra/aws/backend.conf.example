@@ -1,0 +1,12 @@
+# Copy this file to backend.conf (gitignored) and replace <your-account-id>
+# with your 12-digit AWS account ID before running:
+#   tofu init -backend-config=backend.conf
+#
+# The S3 bucket and DynamoDB table were created in Phase B step B.8.
+
+bucket         = "tazama-tofu-state-<your-account-id>"
+key            = "tazama/terraform.tfstate"
+region         = "ap-south-1"
+dynamodb_table = "tazama-tofu-locks"
+encrypt        = true
+profile        = "tazama"

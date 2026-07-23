@@ -1,0 +1,14 @@
+# Phase G: custom domain HTTPS
+# Copy this file to domain.tfvars (gitignored) and set your subdomain zone.
+#
+# Usage:
+#   tofu apply -var-file terraform.tfvars -var-file alb.tfvars -var-file domain.tfvars
+#
+# To remove the custom domain, omit this file:
+#   tofu apply -var-file terraform.tfvars -var-file alb.tfvars
+#
+# Prerequisite: NS delegation for domain_zone must exist at your registrar
+# before applying, otherwise ACM certificate validation will time out.
+
+enable_custom_domain = true
+domain_zone          = "env.your-domain.com"  # replace with your subdomain zone

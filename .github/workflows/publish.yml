@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Caller workflow: publishes this repo's npm package to GitHub Packages.
+#
+# Versioning policy (handled by the central publish.yml):
+#   - Prerelease versions on the source branch (e.g. 4.0.0-rc.4) publish with dist-tag "rc".
+#   - Stable versions on the target branch (e.g. 4.0.0) publish with dist-tag "latest".
+#
+# Triggers:
+#   - Automatically on push to the target branch when package.json or package-lock.json changes
+#     (typically after the release PR is merged).
+#   - Manually via workflow_dispatch from the target branch.
+#
+# This file is managed centrally - do not edit manually.
+# To change publish behaviour, update the reusable workflow in tazama-lf/workflows.
+
+name: Publish npm package
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+
+permissions:
+  packages: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  publish:
+    uses: tazama-lf/workflows/.github/workflows/publish.yml@v1
+    with:
+      node_version: ${{ vars.NODE_VERSION || '22' }}
+      package_scope: ${{ vars.PACKAGE_SCOPE || '@frmscoe' }}
+      run_build: ${{ vars.RUN_BUILD != 'false' }}
+      build_command: ${{ vars.BUILD_COMMAND || 'npm run build' }}
+      skip_if_already_published: ${{ vars.SKIP_IF_ALREADY_PUBLISHED != 'false' }}
+      publish_branch: ${{ vars.TARGET_BRANCH || 'main' }}
+    secrets: inherit

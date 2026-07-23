@@ -1,0 +1,79 @@
+services:
+  event-flow:
+    environment:
+      SUPPRESS_ALERTS: false
+      INTERDICTION_DESTINATION: global
+      INTERDICTION_PRODUCER: interdiction-service-ef
+
+  typology-processor:
+    environment:
+      SUPPRESS_ALERTS: false
+      INTERDICTION_DESTINATION: global
+      INTERDICTION_PRODUCER: interdiction-service-tp
+
+  event-adjudicator:
+    environment:
+      SUPPRESS_ALERTS: false
+      ALERTS_ONLY: false
+      ALERT_DESTINATION: global
+      ALERT_PRODUCER: investigation-service
+
+  relay-service-ef:
+    container_name: relay-service-ef
+    build:
+      context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+    env_file:
+      - env/relay-service-nats.env
+      - .env
+    restart: always
+    environment:
+      FUNCTION_NAME: relay-service-ef
+      CONSUMER_STREAM: interdiction-service-ef
+      PRODUCER_STREAM: relay-service-nats-ef
+      APM_SERVICE_NAME: relay-service-ef
+    depends_on:
+      - event-flow
+
+  relay-service-tp:
+    container_name: relay-service-tp
+    build:
+      context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+    env_file:
+      - env/relay-service-nats.env
+      - .env
+    restart: always
+    environment:
+      FUNCTION_NAME: relay-service-tp
+      CONSUMER_STREAM: interdiction-service-tp
+      PRODUCER_STREAM: relay-service-nats-tp
+      APM_SERVICE_NAME: relay-service-tp
+    depends_on:
+      - typology-processor
+
+  relay-service-ea:
+    container_name: relay-service-ea
+    build:
+      context: https://github.com/tazama-lf/relay-service.git#${RELAY_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+    env_file:
+      - env/relay-service-nats.env
+      - .env
+    restart: always
+    environment:
+      FUNCTION_NAME: relay-service-ea
+      CONSUMER_STREAM: investigation-service
+      PRODUCER_STREAM: relay-service-nats-ea
+      APM_SERVICE_NAME: relay-service-ea
+    depends_on:
+      - event-adjudicator

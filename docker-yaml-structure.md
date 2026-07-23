@@ -1,30 +1,44 @@
 # Tazama Docker Compose Structure
 
-This document outlines the structure and organization of Docker Compose files in the Tazama system.
+This document describes the structure and organization of Docker Compose files across all three Tazama stacks.
+
+## Repository Overview
+
+The repository is divided into three independent sub-folders, each deployable on the same machine (local dev) or on separate servers (AWS sandbox):
+
+| Folder | Stack | Project name | Typical server |
+|--------|-------|--------------|----------------|
+| `core/` | Core transaction processing pipeline | `tazama-core` | Server A |
+| `extensions/` | Studios and Case Management System | `tazama-extensions` | Server B (APIs on Server A) |
+| `biar/` | Business Intelligence, Analytics, and Reporting | `tazama-biar` | Server C |
+
+---
+
+# CORE STACK (`core/`)
 
 ## Core Architecture
 
-The Tazama system is built with a modular Docker Compose architecture that allows for flexible deployment options:
+The core stack uses a modular, layered Docker Compose design with four deployment modes:
 
-1. **GitHub Development Deployment**: Builds services from GitHub repositories
-2. **DockerHub Public Deployment**: Uses pre-built images with minimal rule set (rule-901, rule-902)
-3. **DockerHub Full-Service Deployment**: Uses pre-built images with complete rule set (30+ rules)
-4. **Multi-Tenant Deployment**: Specialized configuration for multi-tenant environments with mandatory authentication and relay services
+1. **GitHub Dev** - builds services from GitHub source
+2. **DockerHub Public** - pre-built images with minimal rule set (rule-901, rule-902)
+3. **DockerHub Full-service** - pre-built images with complete rule set (30+ rules)
+4. **Multi-Tenant** - per-tenant relay streams, mandatory auth
 
 ## File Hierarchy
 
 ### Base Infrastructure Files
 
 #### `docker-compose.base.infrastructure.yaml`
-Core infrastructure services common to all deployments:
-- **`valkey`**: Valkey cache (Redis fork) for caching and pub/sub messaging
-- **`postgres`**: PostgreSQL 18 database with base schema creation
-- **`nats`**: NATS messaging system for event-driven communication
+Core infrastructure services shared by all deployments:
+- **`valkey`**: Valkey 7.2.5 cache (Redis fork) for caching and pub/sub
+- **`postgres`**: PostgreSQL 18 with base schema init scripts; health-checked
+- **`nats`**: NATS 2 messaging system
 
-All services include health checks and automatic restart policies.
+All services have health checks and `restart: always`.
 
 #### `docker-compose.base.override.yaml`
-Port mappings for local development access:
+Host port mappings for local development access:
 - Valkey: `16379:6379`
 - NATS: `14222:4222`, `16222:6222`, `18222:8222`
 - PostgreSQL: `15432:5432`
@@ -32,213 +46,147 @@ Port mappings for local development access:
 ### Configuration Files
 
 #### `docker-compose.dev.cfg.yaml`
-GitHub development configuration:
-- Mounts `00-public-base.sql` (base schema)
-- Mounts `01-public-github.sql` (minimal configuration for development)
-- Single rule-901 configuration
+GitHub dev configuration - mounts two SQL init files:
+- `00-public-base.sql` - base schema
+- `01-public-github.sql` - minimal dev config (rule-901 only)
 
 #### `docker-compose.hub.cfg.yaml`
-DockerHub public deployment configuration:
-- Mounts `00-public-base.sql` (base schema)
-- Mounts `02-public-dockerhub.sql` (minimal configuration with rule-901 and rule-902)
+DockerHub public configuration - mounts:
+- `00-public-base.sql` - base schema
+- `02-public-dockerhub.sql` - minimal config (rule-901 and rule-902)
 
 #### `docker-compose.full.cfg.yaml`
-DockerHub full-service configuration:
-- Mounts `03-full-dockerhub.sql` (complete network map with all typologies and rules)
-- Increased PostgreSQL performance settings:
-  - Max connections: 1000
-  - Shared buffers: 512MB
-  - Effective cache size: 2GB
+DockerHub full-service configuration - mounts:
+- `03-full-dockerhub.sql` - complete network map with all typologies and rules
+- Increased PostgreSQL performance settings: `max_connections=1000`, `shared_buffers=512MB`, `effective_cache_size=2GB`
 
 #### `docker-compose.multitenant.cfg.yaml`
-Multi-tenant deployment configuration:
-- Mounts `04-multitenancy.sql` (tenant-aware network map)
-- Enables trust authentication for local testing
+Multi-tenant configuration - mounts:
+- `04-multitenancy.sql` - tenant-aware network map
+- Enables `POSTGRES_HOST_AUTH_METHOD=trust` for local testing
 
 ### Core Service Files
 
 #### `docker-compose.dev.core.yaml`
-GitHub development core services built from source:
-- **`admin-service`**: Administration API (port 3100)
-- **`tms`**: Transaction Monitoring Service API (port 3000)
-- **`ed`**: Event Director
-- **`rule-901`**: Rule 901 processor (built from rule-executer)
-- **`tp`**: Typology Processor
-- **`tadp`**: Transaction Aggregation and Decisioning Processor
-- **`ef`**: Event Flow rule processor
-
-All services build from GitHub with `GH_TOKEN` authentication.
+GitHub dev core services (built from source via `GH_TOKEN`):
+- **`admin-service`**: Administration API (port `${ADMIN_PORT}:3100`)
+- **`tms-service`**: Transaction Monitoring Service API (port `${TMS_PORT}:3000`)
+- **`event-director`**: Event Director
+- **`rule-901`**: Rule 901 (built from `rule-executer` repo)
+- **`typology-processor`**: Typology Processor
+- **`event-adjudicator`**: Event Adjudicator
+- **`event-flow`**: Event Flow rule processor
+- **`tazama-demo`**: Demo UI (built from `tazama-demo` repo, port `${DEMO_PORT:-3011}:3011`)
 
 #### `docker-compose.hub.core.yaml`
-DockerHub core services using pre-built images:
-- Same services as dev.core but from `tazamaorg/*` Docker images
-- Version controlled via `${TAZAMA_VERSION}` variable
+DockerHub core services using `tazamaorg/*:${TAZAMA_VERSION}` images:
+- Same services as dev.core but from pre-built DockerHub images, except `rule-901` (delivered by the rules files below)
+- Adds **`batch-ppa`**: `tazamaorg/batch-ppa:${TAZAMA_VERSION}` (port `4100:4100`) - Pain.001 batch processor; depends on `core-postgres` (healthy) and `tms-service`
+- **`tazama-demo`**: `tazamaorg/tazama-demo:${TAZAMA_VERSION}` (port `${DEMO_PORT:-3011}:3011`), configured via `env/tazama-demo.env`; sets `CORS_POLICY=demo` on `tms-service` and `admin-service`
 
 ### Rules Files
 
 #### `docker-compose.hub.rules.yaml`
 DockerHub minimal rule set:
-- **`rule-901`**: Basic transaction validation
-- **`rule-902`**: Additional rule processor
+- **`rule-901`**: `tazamaorg/rule-901`
+- **`rule-902`**: `tazamaorg/rule-902`
 
 #### `docker-compose.full.rules.yaml`
-DockerHub complete rule set (30+ rules):
+DockerHub complete rule set (33 rules):
 - Rules: 001, 002, 003, 004, 006, 007, 008, 010, 011, 016, 017, 018, 020, 021, 024, 025, 026, 027, 028, 030, 044, 045, 048, 054, 063, 074, 075, 076, 078, 083, 084, 090, 091
-- All rules configured with database credentials and environment variables
-- All rules depend on valkey and postgres
+- All rules use `env/rule-executer.env` as base config
+- All depend on `valkey` and `core-postgres`
 
 ### Authentication Files
 
 #### `docker-compose.base.auth.yaml`
-Base authentication configuration for all deployments:
-- **`keycloak`**: Identity and access management (port 8080)
-  - Keycloak 23.0.6
-  - Development mode with auto-import
-  - Imports `00-tazama-test-realm.json`
-- **`auth`**: Authentication service (port 3020)
-  - Issues and validates JWT tokens
-  - Uses RSA key pair for signing
-- **`postgres`**: Configured with trust authentication for local testing
-- **`tms`** and **`admin-service`**: Configured with JWT authentication enabled
+Base auth overlay applied on top of any core deployment:
+- **`keycloak`**: Keycloak 23.0.6 identity provider (port `8080:8080`)
+  - Dev mode with auto-import of `00-tazama-test-realm.json`
+- **`auth-service`**: Auth service `tazamaorg/auth-service:${TAZAMA_VERSION}` (port `3020:3020`)
+  - Issues and validates JWT tokens using RSA key pair
+- **`core-postgres`**: Overridden with `POSTGRES_HOST_AUTH_METHOD=trust`
+- **`tms-service`**, **`admin-service`**: Overridden with `AUTHENTICATED=true` and public key mount
 
 #### `docker-compose.dev.auth.yaml`
-GitHub development authentication:
-- Builds `auth` service from GitHub source
-
-#### `docker-compose.multitenant.auth.yaml`
-Currently empty - multi-tenant auth uses base auth configuration only.
+Overrides `auth-service` to build from GitHub source instead of DockerHub.
 
 ### Relay Files
 
-Relay services enable external system integration by forwarding alerts and interdiction messages to NATS streams.
+Relay services forward interdiction and alert messages to external NATS streams.
 
 #### `docker-compose.dev.relay.yaml`
-GitHub development relay services (built from source):
-- **`rsef`**: Relay service for Event Flow interdictions (global scope)
-- **`rstp`**: Relay service for Typology Processor interdictions (global scope)
-- **`rstadp`**: Relay service for TADP alerts/investigations (global scope)
-
-All relay services:
-- Build from `relay-service` GitHub repository
-- Subscribe to internal streams (e.g., `interdiction-service-ef`)
-- Publish to external NATS streams (e.g., `relay-service-nats-ef`)
+GitHub dev relay services (built from `relay-service` GitHub repo):
+- Configures `event-flow`, `typology-processor`, `event-adjudicator` with `SUPPRESS_ALERTS=false` and `INTERDICTION_DESTINATION=global`
+  - **`relay-service-ef`**: Event Flow interdiction relay (`interdiction-service-ef` → `relay-service-nats-ef`)
+  - **`relay-service-tp`**: Typology Processor interdiction relay (`interdiction-service-tp` → `relay-service-nats-tp`)
+  - **`relay-service-ea`**: Event Adjudicator alert relay (`investigation-service` → `relay-service-nats-ea`)
 
 #### `docker-compose.hub.relay.yaml`
-DockerHub relay services (pre-built images):
-- Same services using `tazamaorg/relay-service-integration-nats` image
-- Global scope configuration
+Same relay services using `tazamaorg/relay-service-integration-nats:${TAZAMA_VERSION}`.
 
 #### `docker-compose.multitenant.relay.yaml`
-Multi-tenant relay services with per-tenant streams:
-- **`rsef-tenant-001`**, **`rsef-tenant-002`**: Event Flow relays per tenant
-- **`rstp-tenant-001`**, **`rstp-tenant-002`**: Typology Processor relays per tenant
-- **`rstadp-tenant-001`**, **`rstadp-tenant-002`**: TADP relays per tenant
-
-Each tenant has isolated relay streams for complete data segregation.
+Per-tenant relay services with `INTERDICTION_DESTINATION=tenant`:
+  - **`relay-service-ef-tenant-001`**, **`relay-service-ef-tenant-002`**: Event Flow relays per tenant
+  - **`relay-service-tp-tenant-001`**, **`relay-service-tp-tenant-002`**: Typology Processor relays per tenant
+  - **`relay-service-ea-tenant-001`**, **`relay-service-ea-tenant-002`**: Event Adjudicator relays per tenant
 
 ### Logging Files
 
 #### `docker-compose.dev.logs.base.yaml`
-GitHub development base logging (built from source):
-- **`event-sidecar`**: Logging sidecar service (port 15000)
-  - Receives logs from services via HTTP
-  - Publishes to NATS `Lumberjack` subject
-- **`lumberjack`**: Log aggregation and processing
-  - Consumes logs from NATS
-  - Outputs to STDOUT by default
+GitHub dev base logging (built from source):
+- **`event-sidecar`**: Logging sidecar (port `15000:${EVENT_SIDECAR_PORT}`) - receives HTTP logs, publishes to NATS `Lumberjack` subject
+- **`lumberjack`**: Log aggregation - consumes from NATS, outputs to STDOUT
 
 #### `docker-compose.hub.logs.base.yaml`
-DockerHub base logging (pre-built images):
-- Same services using `tazamaorg/event-sidecar` and `tazamaorg/lumberjack` images
+Same services using `tazamaorg/event-sidecar` and `tazamaorg/lumberjack` images.
 
 #### `docker-compose.dev.logs.elastic.yaml` / `docker-compose.hub.logs.elastic.yaml`
-Elasticsearch integration for logging:
-- Extends base logging configuration
-- Configures `lumberjack` to forward logs to Elasticsearch
-- Configures all services to send logs to `event-sidecar`
-
-### UI Files
-
-#### `docker-compose.hub.ui.yaml`
-Demo web interface:
-- **`ui`**: Demo UI (port 3001)
-  - `tazamaorg/demo-ui:v2.2.0`
-  - Provides web interface for testing transactions
-- Configures `tms` and `admin-service` with `CORS_POLICY=demo`
+Elasticsearch integration overlay:
+- Configures `lumberjack` to forward to Elasticsearch
+- Adds `SIDECAR_HOST` env var to `tms-service`, `admin-service`, `event-director`, `event-flow`, `rule-901`/`rule-902`, `typology-processor`, `event-adjudicator`
 
 ### Utility Files
 
 #### `docker-compose.utils.nats-utils.yaml`
-NATS utilities and tools:
-- **`nats-utilities`**: NATS CLI and management tools (port 4000)
-  - Built from `nats-utilities` GitHub repository
-  - Provides NATS stream management, monitoring, and debugging
-
-#### `docker-compose.utils.batch-ppa.yaml`
-Batch processing for Pain.001 messages:
-- **`nats-utilities`** (overridden name): Pain.001 batch processor (port 4000)
-  - Built from `batch-ppa` GitHub repository
-  - Processes batch payment initiation messages
+- **`nats-utilities`**: Built from `nats-utilities` GitHub repo (port `4000:4000`)
+  - NATS stream management, monitoring, and debugging tools
 
 #### `docker-compose.utils.pgadmin.yaml`
-PostgreSQL web-based administration:
-- **`pgadmin`**: pgAdmin 4 web interface (port 5050, configurable via `${PGADMIN_PORT}`)
-  - Pre-configured connection to Tazama PostgreSQL instance
-  - Server configuration via inline config
+- **`core-pgadmin`**: pgAdmin 4.9 (port `${PGADMIN_PORT:-5050}:80`)
+  - Pre-configured Tazama server connection via inline `servers.json`
 
 #### `docker-compose.utils.hasura.yaml`
-GraphQL API for databases:
-- **`hasura`**: Hasura GraphQL Engine (port 6100)
-  - Hasura v2.36.0
-  - Connects to all four databases: `event_history`, `raw_history`, `configuration`, `evaluation`
-  - Admin secret: `password`
-  - Anonymous role enabled for unauthenticated access
-- **`hasura-init`**: Initialization service
-  - Runs `init.sh` script to configure metadata, track tables, and set permissions
-  - Waits 60s for system stabilization before initialization
-  - Runs once and exits
-- **`postgres`**: Configured with trust authentication and `01-HASURA.sql` initialization
+- **`core-postgres`**: Overridden with trust auth and `01-HASURA.sql` init
+- **`hasura`**: Hasura GraphQL Engine v2.36.0 (port `6100:8080`)
+  - Connects to `event_history`, `raw_history`, `configuration`, `evaluation` databases
+  - Admin secret: `password`; anonymous role enabled
+- **`hasura-init`**: `curlimages/curl` one-shot container
+  - Waits 10s after Hasura health check, then runs `init.sh` to configure metadata
 
 #### `docker-compose.utils.elastic.yaml`
-Elasticsearch and Kibana stack:
-- **`elasticsearch`**: Elasticsearch single-node (port 9200, configurable via `${ES_PORT}`)
-  - Version controlled via `${ELASTIC_STACK_VERSION}`
-  - Memory limit: `${ES_MEM_LIMIT}`
-  - Security disabled for local development
-- **`kibana`**: Kibana visualization (port 5601, configurable via `${KIBANA_PORT}`)
-  - Memory limit: `${KB_MEM_LIMIT}`
-  - Connected to Elasticsearch
-
-Includes named volumes: `esdata`, `kibanadata`
+- **`elasticsearch`**: Single-node Elasticsearch (port `${ES_PORT}:9200`)
+- **`kibana`**: Kibana (port `${KIBANA_PORT}:5601`)
+- Named volumes: `esdata`, `kibanadata`
 
 #### `docker-compose.utils.apm-elastic.yaml`
-Application Performance Monitoring with Elastic APM:
-- Includes Elasticsearch and Kibana via `docker-compose.dev.elastic.yaml`
-- **`apm-server`**: Elastic APM Server (port 8200, configurable via `${APMSERVER_PORT}`)
-  - RUM (Real User Monitoring) enabled
-  - Connected to Elasticsearch and Kibana
-- Configures `tms`, `ed`, `rule-901`, `tp`, `tadp` with APM instrumentation:
-  - `APM_ACTIVE=true`
-  - `APM_URL=http://apm-server:8200`
+- Includes Elasticsearch/Kibana via `docker-compose.utils.elastic.yaml`
+- **`apm-server`**: Elastic APM Server (port `${APMSERVER_PORT}:8200`) with RUM enabled
+- Injects `APM_ACTIVE=true` and `APM_URL=http://apm-server:8200` into `tms-service`, `event-director`, `rule-901`, `typology-processor`, `event-adjudicator`
 
-#### `docker-compose.base.pgbouncer.yaml`
-**Note**: This file appears to be referenced in your batch file but is not included in the attachments. Based on context, it likely configures PgBouncer connection pooling.
+## Core Deployment Patterns
 
-## Deployment Patterns
-
-### 1. GitHub Development Deployment
-**Command:**
+### 1. GitHub Dev
 ```bash
 docker compose \
   -f docker-compose.base.infrastructure.yaml \
   -f docker-compose.base.override.yaml \
   -f docker-compose.dev.cfg.yaml \
   -f docker-compose.dev.core.yaml \
-  -p tazama up -d
+  -p tazama-core up -d
 ```
 
-### 2. DockerHub Public Deployment
-**Command:**
+### 2. DockerHub Public
 ```bash
 docker compose \
   -f docker-compose.base.infrastructure.yaml \
@@ -246,11 +194,10 @@ docker compose \
   -f docker-compose.hub.cfg.yaml \
   -f docker-compose.hub.core.yaml \
   -f docker-compose.hub.rules.yaml \
-  -p tazama up -d
+  -p tazama-core up -d
 ```
 
-### 3. DockerHub Full-Service Deployment
-**Command:**
+### 3. DockerHub Full-service
 ```bash
 docker compose \
   -f docker-compose.base.infrastructure.yaml \
@@ -258,10 +205,10 @@ docker compose \
   -f docker-compose.full.cfg.yaml \
   -f docker-compose.hub.core.yaml \
   -f docker-compose.full.rules.yaml \
-  -p tazama up -d
+  -p tazama-core up -d
 ```
-### 4. Multi-Tenant Deployment
-**Command:**
+
+### 4. Multi-Tenant
 ```bash
 docker compose \
   -f docker-compose.base.infrastructure.yaml \
@@ -271,14 +218,12 @@ docker compose \
   -f docker-compose.hub.core.yaml \
   -f docker-compose.hub.rules.yaml \
   -f docker-compose.multitenant.relay.yaml \
-  -p tazama up -d
+  -p tazama-core up -d
 ```
 
-# Tazama Service Port Mappings
+## Core Port Mappings
 
-When using `docker-compose.base.override.yaml`, the following ports are exposed for local development access:
-
-## Infrastructure Services
+### Infrastructure Services
 
 | Service | Internal Port | External Port | Purpose |
 |---------|---------------|---------------|---------|
@@ -288,400 +233,302 @@ When using `docker-compose.base.override.yaml`, the following ports are exposed 
 | NATS Cluster | 6222 | 16222 | Cluster communication |
 | NATS HTTP Monitoring | 8222 | 18222 | Monitoring API |
 
-## Core Services
+### Core Services
 
 | Service | Internal Port | External Port | Purpose |
 |---------|---------------|---------------|---------|
-| TMS | 3000 | 3000 (or `${TMS_PORT}`) | Transaction Monitoring API |
-| Admin Service | 3100 | 3100 (or `${ADMIN_PORT}`) | Administration API |
+| TMS | 3000 | `${TMS_PORT}` | Transaction Monitoring API |
+| Admin Service | 3100 | `${ADMIN_PORT}` | Administration API |
 
-## Authentication Services
+### Authentication Services
 
 | Service | Internal Port | External Port | Purpose |
 |---------|---------------|---------------|---------|
-| Keycloak | 8080 | 8080 | Authentication provider |
+| Keycloak | 8080 | 8080 | Identity provider |
 | Auth Service | 3020 | 3020 | Token generation |
 
-## Logging Services
+### Logging Services
 
 | Service | Internal Port | External Port | Purpose |
 |---------|---------------|---------------|---------|
-| Event Sidecar | Various | 15000 (or `${EVENT_SIDECAR_PORT}`) | Logging sidecar |
+| Event Sidecar | `${EVENT_SIDECAR_PORT}` | 15000 | Logging sidecar |
 
-## Utility Services
+### Core Utility Services
 
 | Service | Internal Port | External Port | Purpose |
 |---------|---------------|---------------|---------|
-| pgAdmin | 80 | 5050 (or `${PGADMIN_PORT}`) | PostgreSQL admin UI |
+| pgAdmin | 80 | `${PGADMIN_PORT:-5050}` | PostgreSQL admin UI |
 | Hasura | 8080 | 6100 | GraphQL API |
-| Elasticsearch | 9200 | 9200 (or `${ES_PORT}`) | Search and analytics |
-| Kibana | 5601 | 5601 (or `${KIBANA_PORT}`) | Visualization |
-| APM Server | 8200 | 8200 (or `${APMSERVER_PORT}`) | Application monitoring |
-| UI | 3001 | 3001 | Demo interface |
+| Elasticsearch | 9200 | `${ES_PORT}` | Search and analytics |
+| Kibana | 5601 | `${KIBANA_PORT}` | Visualization |
+| APM Server | 8200 | `${APMSERVER_PORT}` | Application monitoring |
+| Demo UI | 3001 | 3001 | Demo interface |
 | NATS Utilities | 4000 | 4000 | NATS management |
-| Batch PPA | 4000 | 4000 | Pain.001 processor |
+| Batch PPA | 4100 | 4100 | Pain.001 processor |
 
-## Access URLs
+### Core Access URLs
 
-Based on the port mappings above, services can be accessed at:
-
-- **PostgreSQL**: `localhost:15432` (user: `postgres`, password: `postgres`)
+- **PostgreSQL**: `localhost:15432` (user: `postgres`, password: `unused`)
 - **Valkey**: `localhost:16379`
 - **NATS**: `localhost:14222` (client), `localhost:18222` (monitoring)
-- **TMS API**: `http://localhost:3000` (or `${TMS_PORT}`)
-- **Admin API**: `http://localhost:3100` (or `${ADMIN_PORT}`)
-- **Keycloak**: `http://localhost:8080` (admin: `admin`, password: `admin`)
+- **TMS API**: `http://localhost:${TMS_PORT}`
+- **Admin API**: `http://localhost:${ADMIN_PORT}`
+- **Keycloak**: `http://localhost:8080` (admin/admin)
 - **Auth Service**: `http://localhost:3020`
-- **pgAdmin**: `http://localhost:5050` (or `${PGADMIN_PORT}`)
-  - Email: `admin@tazama.org`
-  - Password: `admin`
-- **Hasura Console**: `http://localhost:6100`
-  - Admin Secret: `password`
-- **Elasticsearch**: `http://localhost:9200` (or `${ES_PORT}`)
-- **Kibana**: `http://localhost:5601` (or `${KIBANA_PORT}`)
-- **APM Server**: `http://localhost:8200` (or `${APMSERVER_PORT}`)
-- **Demo UI**: `http://localhost:3001`
+- **pgAdmin**: `http://localhost:5050` (admin@tazama.org / admin)
+- **Hasura Console**: `http://localhost:6100` (admin secret: `password`)
+- **Elasticsearch**: `http://localhost:${ES_PORT}`
+- **Kibana**: `http://localhost:${KIBANA_PORT}`
+- **APM Server**: `http://localhost:${APMSERVER_PORT}`
+- **Demo UI**: `http://localhost:3011`
 - **NATS Utilities**: `http://localhost:4000`
-- **Batch PPA**: `http://localhost:4000`
+- **Batch PPA**: `http://localhost:4100`
 
-## Notes
+---
 
-- Many ports are configurable via environment variables (shown in `${VAR_NAME}` format)
-- Internal ports are used for service-to-service communication within Docker network
-- External ports are mapped for host machine access during development
-- Port conflicts will occur if multiple services map to the same external port
-- Production deployments should use different port configurations and proper network isolation
+# EXTENSIONS STACK (`extensions/`)
 
-# Tazama Environment Variables
+The extensions stack provides the studio tools (TCS, TRS) and Case Management System (CMS), plus API services (DEMS, DEAPI) that run on Server A alongside core.
 
-Environment variables are managed through `.env` files located in the `env/` directory. Each service has its own environment file for configuration.
+## File Hierarchy
 
-## Global Variables
+### Infrastructure File
 
-**File**: `.env` (root directory)
+#### `docker-compose.extensions.infrastructure.yaml`
+Extension-specific infrastructure (Server B):
+- **`extensions-postgres`**: PostgreSQL 18 with persistent volume (port `${POSTGRESQL_CMS_PORT}:5432`, default `15433`)
+- **`sftp`**: SFTP server `atmoz/sftp` (port `${SFTP_PORT}:22`, default `12222`) for file uploads
+- **`couchdb`**: CouchDB 3.3 (port `${COUCHDB_PORT}:5984`, default `5984`) for CMS document storage
+- **`case-management-system-migrate`**: `tazamaorg/case-management-system-migrate` one-shot migration container
+- **`flowable`**: Flowable REST BPM engine (port `${FLOWABLE_PORT}:8080`, default `8081`)
+- **`opensearch`**: OpenSearch 2.13.0 single-node (port `${OPENSEARCH_PORT:-9200}:9200`)
+  - Disabled security plugin; tuned for low-write audit use case
+- **`opensearch-init`**: One-shot init that applies index template (30s refresh, async translog)
+- Named volumes: `sftp_data`, `couchdb_data`, `postgres_data`, `opensearch_data`
 
-Global variables that affect multiple services:
+### Extensions Service Files
+
+#### `docker-compose.dev.extensions.yaml`
+GitHub dev extensions (Server B, built from source):
+- **`connection-studio-backend`**: TCS API (port `${TCS_PORT}:3010`, default `3010`)
+- **`connection-studio-frontend`**: TCS UI (port `${TCS_FRONTEND_PORT}:5173`, default `5173`)
+- **`rule-studio-backend`**: Typology Rule Studio API (port `${TRS_BACKEND_PORT}:3005`, default `3005`)
+- **`rule-studio-frontend`**: TRS UI (port `${TRS_FRONTEND_PORT}:5174`, default `5174`)
+- **`case-management-system-backend`**: CMS API (port `${CMS_BACKEND_PORT}:3090`, default `3090`)
+- **`case-management-system-frontend`**: CMS UI (port `${CMS_FRONTEND_PORT}:5175`, default `5175`)
+- **`case-management-system-voila`**: CMS Voila visualization server (port `${VOILA_PORT:-18866}:8866`)
+
+#### `docker-compose.hub.extensions.yaml`
+DockerHub extensions (Server B) using `tazamaorg/*:${TAZAMA_VERSION}` images:
+- Same services as dev.extensions but from pre-built DockerHub images
+
+### API Service Files (Server A pre-flight)
+
+These services join the **`tazama-core`** Docker project and run on Server A.
+
+#### `docker-compose.dev.extensions.apis.yaml`
+GitHub dev API services (Server A):
+- **`event-monitoring-service`**: Data/Event Monitoring Service (port `${DEMS_PORT}:3002`, default `3002`)
+- **`data-enrichment-service`**: Data Enrichment API (port `${DEAPI_PORT}:3001`, default `3001`)
+
+#### `docker-compose.hub.extensions.apis.yaml`
+DockerHub API services (Server A):
+- Same services using `tazamaorg/event-monitoring-service` and `tazamaorg/data-enrichment-service`
+
+### Utility Files
+
+#### `docker-compose.utils.pgadmin.yaml`
+- **`extensions-pgadmin`**: pgAdmin 4.9 (port `${PGADMIN_PORT:-5050}:80`, default `5051` per `.env`)
+  - Pre-configured Tazama server connection; note: uses port 5051 on Server B to avoid conflict with core's 5050
+
+## Extensions Deployment Patterns
+
+### Server A pre-flight (DEMS + DEAPI, runs in `tazama-core` project)
+
+```bash
+# GitHub builds
+docker compose -p tazama-core \
+  -f ./docker-compose.dev.extensions.apis.yaml up -d
+
+# DockerHub images
+docker compose -p tazama-core \
+  -f ./docker-compose.hub.extensions.apis.yaml up -d
+```
+
+### Server B extensions stack
+
+```bash
+# GitHub builds
+docker compose -p tazama-extensions \
+  -f ./docker-compose.extensions.infrastructure.yaml \
+  -f ./docker-compose.dev.extensions.yaml \
+  up -d
+
+# DockerHub images
+docker compose -p tazama-extensions \
+  -f ./docker-compose.extensions.infrastructure.yaml \
+  -f ./docker-compose.hub.extensions.yaml \
+  up -d
+```
+
+## Extensions Port Mappings
+
+| Service | Internal Port | External Port (default) | Purpose |
+|---------|---------------|-------------------------|---------|
+| PostgreSQL (CMS) | 5432 | `${POSTGRESQL_CMS_PORT}` (15433) | CMS database |
+| SFTP | 22 | `${SFTP_PORT}` (12222) | File uploads |
+| CouchDB | 5984 | `${COUCHDB_PORT}` (5984) | Document store |
+| Flowable | 8080 | `${FLOWABLE_PORT}` (8081) | BPM engine |
+| OpenSearch | 9200 | `${OPENSEARCH_PORT}` (9200) | Search / audit log |
+| TCS Backend | 3010 | `${TCS_PORT}` (3010) | Connection Studio API |
+| TCS Frontend | 5173 | `${TCS_FRONTEND_PORT}` (5173) | Connection Studio UI |
+| TRS Backend | 3005 | `${TRS_BACKEND_PORT}` (3005) | Rule Studio API |
+| TRS Frontend | 5174 | `${TRS_FRONTEND_PORT}` (5174) | Rule Studio UI |
+| CMS Backend | 3090 | `${CMS_BACKEND_PORT}` (3090) | Case Management API |
+| CMS Frontend | 5175 | `${CMS_FRONTEND_PORT}` (5175) | Case Management UI |
+| Voila | 8866 | `${VOILA_PORT}` (18866) | CMS visualization server |
+| DEMS (Server A) | 3002 | `${DEMS_PORT}` (3002) | Event Monitoring Service |
+| DEAPI (Server A) | 3001 | `${DEAPI_PORT}` (3001) | Data Enrichment API |
+| pgAdmin | 80 | `${PGADMIN_PORT}` (5051) | PostgreSQL admin UI |
+
+---
+
+# BIAR STACK (`biar/`)
+
+The BIAR (Business Intelligence, Analytics, and Reporting) stack provides data ingestion (NiFi), object storage (Apache Ozone/S3), analytics (JupyterHub), an automation orchestrator, and document processing.
+
+## File Hierarchy
+
+### Infrastructure File
+
+#### `docker-compose.biar.infrastructure.yaml`
+BIAR infrastructure services:
+- **`biar-tika`**: Apache Tika `logicalspark/docker-tikaserver` (port `${TIKA_PORT}:9998`, default `9998`) - document parsing
+- **`biar-solr`**: Apache Solr 9 (port `${SOLR_PORT}:8983`, default `8983`) - search indexing; `biar_docs` core pre-created
+- Apache Ozone 2.0.0 object storage cluster:
+  - **`ozone-scm`**: Storage Container Manager (port `9876:9876`)
+  - **`ozone-om`**: Ozone Manager (port `9862:9862`)
+  - **`ozone-datanode-1`**, **`ozone-datanode-2`**, **`ozone-datanode-3`**: Data nodes (no host ports)
+  - **`ozone-recon`**: Recon server (port `9888:9888`)
+  - **`ozone-s3g`**: S3 Gateway (port `9878:9878`) - exposes S3-compatible API
+
+### BIAR Service Files
+
+#### `docker-compose.hub.biar.yaml`
+DockerHub BIAR services using `tazamaorg/biar-*:${TAZAMA_VERSION}` images:
+- **`biar-nifi`**: NiFi data ingestion (ports `${NIFI_PORT}:8088`, `8081:8081`, default `8088`)
+  - Persistent volumes for conf, state, db, flowfile, content, provenance
+  - Depends on `ozone-s3g`
+- **`biar-automation-orchestrator`**: Automation/Spark orchestrator (port `${AUTOMATION_ORCHESTRATOR_PORT}:7619`, default `7619`)
+  - Mounts `${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Warehouse`
+- **`biar-datalakehouse-api`**: Data lakehouse REST API (port `${DATALAKEHOUSE_API_PORT}:8282`, default `8282`)
+  - Mounts `${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Warehouse`
+- **`biar-unstructured-pipeline`**: Unstructured document ingestion pipeline
+  - Depends on `biar-tika` and `biar-solr`
+- **`biar-jupyterhub`**: JupyterHub analytics environment (port `${JUPYTERHUB_PORT}:8000`, default `8000`)
+  - Persistent volumes for data and notebooks
+  - Read-only warehouse mount
+
+#### `docker-compose.dev.biar.yaml`
+GitHub dev BIAR services (same structure, built from `tazama-lf/biar.git` subdirs).
+
+### Utility / Init Files
+
+#### `docker-compose.utils.init.yaml`
+One-shot initialization containers:
+- **`ozone-aws-cli`**: `amazon/aws-cli` - waits for S3 gateway, creates the configured bucket
+- **`biar-nifi-init`**: `curlimages/curl` - runs `nifi/init.sh` to bootstrap NiFi flows
+
+## BIAR Deployment Patterns
+
+```bash
+# DockerHub images
+docker compose -p tazama-biar \
+  -f ./docker-compose.biar.infrastructure.yaml \
+  -f ./docker-compose.hub.biar.yaml \
+  -f ./docker-compose.utils.init.yaml \
+  up -d
+
+# GitHub builds
+docker compose -p tazama-biar \
+  -f ./docker-compose.biar.infrastructure.yaml \
+  -f ./docker-compose.dev.biar.yaml \
+  -f ./docker-compose.utils.init.yaml \
+  up -d
+```
+
+## BIAR Port Mappings
+
+| Service | Internal Port | External Port (default) | Purpose |
+|---------|---------------|-------------------------|---------|
+| Tika | 9998 | `${TIKA_PORT}` (9998) | Document parsing |
+| Solr | 8983 | `${SOLR_PORT}` (8983) | Search indexing |
+| Ozone SCM | 9876 | 9876 | Storage Container Manager |
+| Ozone OM | 9862 | 9862 | Ozone Manager |
+| Ozone Recon | 9888 | 9888 | Recon dashboard |
+| Ozone S3 Gateway | 9878 | 9878 | S3-compatible API |
+| NiFi | 8088 | `${NIFI_PORT}` (8088) | Data ingestion UI |
+| NiFi (secondary) | 8081 | 8081 | NiFi HTTP listener |
+| Automation Orchestrator | 7619 | `${AUTOMATION_ORCHESTRATOR_PORT}` (7619) | Spark/automation API |
+| Datalakehouse API | 8282 | `${DATALAKEHOUSE_API_PORT}` (8282) | Data lakehouse REST API |
+| JupyterHub | 8000 | `${JUPYTERHUB_PORT}` (8000) | Analytics notebooks |
+
+---
+
+# Global Environment Variables
+
+Root-level `.env` files in each sub-folder share these key variables:
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `TAZAMA_VERSION` | Version tag for DockerHub images | `v2.2.0` |
-| `GH_TOKEN` | GitHub Personal Access Token (for builds) | `ghp_xxxxxxxxxxxxx` |
-| `BRANCH_NAME` | Branch to build from GitHub (dev deployments) | `main` or `dev` |
-
-## Infrastructure Services
-
-### PostgreSQL
-**File**: `env/postgres.env`
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `POSTGRES_USER` | Database superuser | `postgres` |
-| `POSTGRES_PASSWORD` | Superuser password | `postgres` |
-| `POSTGRES_DB` | Default database | `configuration` |
-| `POSTGRES_HOST_AUTH_METHOD` | Authentication method | `trust` (local only) |
-
-### NATS
-**File**: `env/nats.env` (if applicable)
-
-NATS configuration variables (may vary based on deployment).
-
-## Core Services
-
-### Transaction Monitoring Service (TMS)
-**File**: `env/tms.env`
-
-| Variable | Description |
-|----------|-------------|
-| `NODE_ENV` | Node.js environment |
-| `SERVER_URL` | TMS server URL |
-| `PORT` | Service port |
-| `FUNCTION_NAME` | Service identifier |
-| `QUOTING` | Enable/disable quoting |
-| `AUTH_ENABLED` | JWT authentication |
-| `CERT_PATH` | Path to public key |
-| `DATABASE_*` | PostgreSQL connection settings |
-| `VALKEY_*` | Valkey connection settings |
-| `APM_*` | APM instrumentation settings (if enabled) |
-
-### Admin Service
-**File**: `env/admin.env`
-
-| Variable | Description |
-|----------|-------------|
-| `NODE_ENV` | Node.js environment |
-| `PORT` | Service port |
-| `SERVER_URL` | Admin API URL |
-| `AUTH_ENABLED` | JWT authentication |
-| `CERT_PATH` | Path to public key |
-| `DATABASE_*` | PostgreSQL connection settings |
-| `APM_*` | APM instrumentation settings (if enabled) |
-
-### Event Director (ED)
-**File**: `env/ed.env`
-
-| Variable | Description |
-|----------|-------------|
-| `NODE_ENV` | Node.js environment |
-| `FUNCTION_NAME` | Service identifier |
-| `DATABASE_*` | PostgreSQL connection settings |
-| `VALKEY_*` | Valkey connection settings |
-| `NATS_*` | NATS connection settings |
-| `APM_*` | APM instrumentation settings (if enabled) |
-
-### Typology Processor (TP)
-**File**: `env/tp.env`
-
-| Variable | Description |
-|----------|-------------|
-| `NODE_ENV` | Node.js environment |
-| `FUNCTION_NAME` | Service identifier |
-| `DATABASE_*` | PostgreSQL connection settings |
-| `VALKEY_*` | Valkey connection settings |
-| `NATS_*` | NATS connection settings |
-| `APM_*` | APM instrumentation settings (if enabled) |
-
-### Transaction Aggregation and Decisioning Processor (TADP)
-**File**: `env/tadp.env`
-
-| Variable | Description |
-|----------|-------------|
-| `NODE_ENV` | Node.js environment |
-| `FUNCTION_NAME` | Service identifier |
-| `DATABASE_*` | PostgreSQL connection settings |
-| `VALKEY_*` | Valkey connection settings |
-| `NATS_*` | NATS connection settings |
-| `APM_*` | APM instrumentation settings (if enabled) |
-
-### Event Flow (EF)
-**File**: `env/event-flow.env`
-
-| Variable | Description |
-|----------|-------------|
-| `NODE_ENV` | Node.js environment |
-| `FUNCTION_NAME` | Service identifier |
-| `DATABASE_*` | PostgreSQL connection settings |
-| `NATS_*` | NATS connection settings |
-
-## Rule Processors
-
-### Rule 901
-**File**: `env/rule-901.env`
-
-| Variable | Description |
-|----------|-------------|
-| `NODE_ENV` | Node.js environment |
-| `FUNCTION_NAME` | Rule identifier |
-| `RULE_NAME` | Rule name |
-| `RULE_VERSION` | Rule version |
-| `DATABASE_*` | PostgreSQL connection settings |
-| `VALKEY_*` | Valkey connection settings |
-| `APM_*` | APM instrumentation settings (if enabled) |
-
-### Rule 902
-**File**: `env/rule-902.env`
-
-Similar structure to rule-901.env.
-
-### Rule Executer (Base for Full Deployment)
-**File**: `env/rule-executer.env`
-
-Base configuration for all rules in full deployment:
-
-| Variable | Description |
-|----------|-------------|
-| `NODE_ENV` | Node.js environment |
-| `DATABASE_*` | PostgreSQL connection settings |
-| `VALKEY_*` | Valkey connection settings |
-
-Each individual rule (001-091) inherits from this base configuration.
-
-## Authentication Services
-
-### Keycloak
-**File**: `env/keycloak.env`
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `KEYCLOAK_ADMIN` | Admin username | `admin` |
-| `KEYCLOAK_ADMIN_PASSWORD` | Admin password | `admin` |
-| `KC_DB` | Database type | `postgres` |
-| `KC_DB_URL_HOST` | Database host | `postgres` |
-| `KC_DB_URL_DATABASE` | Database name | `keycloak` |
-| `KC_DB_USERNAME` | Database user | `postgres` |
-| `KC_DB_PASSWORD` | Database password | `postgres` |
-
-### Auth Service
-**File**: `env/auth-service.env`
-
-| Variable | Description |
-|----------|-------------|
-| `NODE_ENV` | Node.js environment |
-| `PORT` | Service port |
-| `FUNCTION_NAME` | Service identifier |
-| `KEYCLOAK_URL` | Keycloak server URL |
-| `KEYCLOAK_REALM` | Keycloak realm name |
-| `PRIVATE_KEY_PATH` | Path to RSA private key |
-| `PUBLIC_KEY_PATH` | Path to RSA public key |
-
-## Relay Services
-
-### NATS Relay
-**File**: `env/rs-nats.env`
-
-| Variable | Description |
-|----------|-------------|
-| `NODE_ENV` | Node.js environment |
-| `FUNCTION_NAME` | Service identifier |
-| `NATS_URL` | NATS server URL |
-| `SUBSCRIBE_STREAM` | Internal stream to subscribe to |
-| `PUBLISH_STREAM` | External stream to publish to |
-
-For multi-tenant deployments, each tenant has separate relay configuration with tenant-specific streams.
-
-## Logging Services
-
-### Lumberjack
-**File**: `env/lumberjack.env`
-
-| Variable | Description |
-|----------|-------------|
-| `NODE_ENV` | Node.js environment |
-| `FUNCTION_NAME` | Service identifier |
-| `NATS_URL` | NATS server URL |
-| `NATS_SUBJECT` | NATS subject to subscribe to |
-| `ELASTICSEARCH_URL` | Elasticsearch URL (if elastic logging enabled) |
-| `ELASTICSEARCH_INDEX` | Index pattern for logs |
-
-## Utility Services
-
-### Demo UI
-**File**: `env/ui.env`
-
-| Variable | Description |
-|----------|-------------|
-| `TMS_URL` | TMS API endpoint |
-| `ADMIN_URL` | Admin API endpoint |
-
-### pgAdmin
-**File**: `env/pgadmin.env`
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PGADMIN_DEFAULT_EMAIL` | Login email | `admin@tazama.org` |
-| `PGADMIN_DEFAULT_PASSWORD` | Login password | `admin` |
-| `PGADMIN_LISTEN_PORT` | Internal port | `80` |
-| `PGADMIN_PORT` | External port mapping | `5050` |
-
-### Hasura
-**File**: `env/hasura.env` (if applicable)
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `HASURA_GRAPHQL_ADMIN_SECRET` | Admin secret | `password` |
-| `HASURA_GRAPHQL_UNAUTHORIZED_ROLE` | Anonymous role | `anonymous` |
-| `HASURA_GRAPHQL_ENABLE_CONSOLE` | Enable web console | `true` |
-
-### NATS Utilities
-**File**: `env/nats-utilities.env`
-
-| Variable | Description |
-|----------|-------------|
-| `NATS_URL` | NATS server URL |
-| `PORT` | Service port |
-
-### Batch PPA
-**File**: `env/batch-ppa.env`
-
-| Variable | Description |
-|----------|-------------|
-| `TMS_URL` | TMS API endpoint |
-| `PORT` | Service port |
-
-## Elasticsearch Stack
-
-### Elasticsearch
-**File**: `env/elasticsearch.env` (or via docker-compose)
-
-| Variable | Description |
-|----------|-------------|
-| `ELASTIC_STACK_VERSION` | Elasticsearch version |
-| `ES_PORT` | External port mapping |
-| `ES_MEM_LIMIT` | Memory limit |
-| `discovery.type` | Cluster type |
-| `xpack.security.enabled` | Security settings |
-
-### Kibana
-**File**: `env/kibana.env` (or via docker-compose)
-
-| Variable | Description |
-|----------|-------------|
-| `KIBANA_PORT` | External port mapping |
-| `KB_MEM_LIMIT` | Memory limit |
-| `ELASTICSEARCH_HOSTS` | Elasticsearch URL |
-
-### APM Server
-**File**: `env/apm-server.env` (or via docker-compose)
-
-| Variable | Description |
-|----------|-------------|
-| `APMSERVER_PORT` | External port mapping |
-| `apm-server.rum.enabled` | Enable RUM |
-| `output.elasticsearch.hosts` | Elasticsearch URL |
+| `TAZAMA_VERSION` | Docker image tag for DockerHub images | `v2.2.0`, `rc`, `latest` |
+| `GH_TOKEN` | GitHub PAT for source builds | `ghp_xxx` |
+| `BRANCH_NAME` | Default branch for GitHub builds | `dev`, `main` |
+| `SERVER_A_HOST` | Hostname/IP of Server A (for cross-server refs) | `localhost`, `10.0.1.x` |
+| `SERVER_B_HOST` | Hostname/IP of Server B | `localhost`, `10.0.2.x` |
 
 ## Common Variable Patterns
 
-### Database Connection Variables
-Most services use these PostgreSQL connection variables:
+### Database Connection
 
-| Variable | Description | Typical Value |
-|----------|-------------|---------------|
-| `DATABASE_NAME` | Database name | `configuration` |
-| `DATABASE_USER` | Database user | `postgres` |
-| `DATABASE_PASSWORD` | Database password | `postgres` |
-| `DATABASE_URL` | Full connection string | `postgresql://postgres:postgres@postgres:5432/configuration` |
+| Variable | Typical Value |
+|----------|---------------|
+| `POSTGRES_USER` | `postgres` |
+| `POSTGRES_PASSWORD` | `unused` |
+| `DATABASE_URL` | `postgresql://postgres:@postgres:5432/<db>` |
 
-### Valkey Connection Variables
-Services that use Valkey cache:
+### Valkey
 
-| Variable | Description | Typical Value |
-|----------|-------------|---------------|
-| `VALKEY_DB` | Valkey database number | `0` |
-| `VALKEY_AUTH` | Authentication | (empty for local) |
-| `VALKEY_SERVERS` | Server connection string | `valkey:6379` |
+| Variable | Typical Value |
+|----------|---------------|
+| `VALKEY_DB` | `0` |
+| `VALKEY_AUTH` | *(empty for local)* |
+| `VALKEY_SERVERS` | `valkey:6379` |
 
-### NATS Connection Variables
-Services that use NATS messaging:
+### NATS
 
-| Variable | Description | Typical Value |
-|----------|-------------|---------------|
-| `NATS_URL` | NATS server URL | `nats:4222` |
-| `PRODUCER_STREAM` | Stream to publish to | Service-specific |
-| `CONSUMER_STREAM` | Stream to consume from | Service-specific |
+| Variable | Typical Value |
+|----------|---------------|
+| `NATS_URL` | `nats:4222` |
+| `PRODUCER_STREAM` | Service-specific |
+| `CONSUMER_STREAM` | Service-specific |
 
-### APM Instrumentation Variables
-Services with APM monitoring enabled:
+### APM Instrumentation
 
-| Variable | Description | Typical Value |
-|----------|-------------|---------------|
-| `APM_ACTIVE` | Enable APM | `true` or `false` |
-| `APM_URL` | APM server URL | `http://apm-server:8200` |
-| `APM_SERVICE_NAME` | Service identifier | Service-specific |
+| Variable | Typical Value |
+|----------|---------------|
+| `APM_ACTIVE` | `true` or `false` |
+| `APM_URL` | `http://apm-server:8200` |
+| `APM_SERVICE_NAME` | Service-specific |
 
-## Security Considerations
+---
 
-**WARNING**: The default configuration uses insecure settings for local development:
+# Security Notes
 
-- `POSTGRES_HOST_AUTH_METHOD=trust` - No password authentication
-- Weak default passwords (`admin`, `postgres`)
-- Disabled security features in Elasticsearch
+**WARNING**: The default configuration uses insecure settings for local development only:
+- `POSTGRES_PASSWORD=unused` with `POSTGRES_HOST_AUTH_METHOD=trust` - no password auth
+- Weak default passwords (`admin`, `password`)
+- Disabled security plugins (OpenSearch, Elasticsearch)
+- Self-signed RSA keys for JWT
 
-**Never use these settings in production!**
-
-For production deployments:
-1. Use strong passwords and store them securely
-2. Enable proper authentication methods
-3. Use secrets management (Docker secrets, Kubernetes secrets, etc.)
-4. Enable TLS/SSL for all network communication
-5. Restrict network access and use firewalls
-6. Enable security features in Elasticsearch/Kibana
-7. Use least-privilege access controls
+**Never use these settings in production.** Production deployments should use secrets management, strong passwords, TLS, and least-privilege access controls.

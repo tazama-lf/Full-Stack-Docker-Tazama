@@ -1,0 +1,146 @@
+# Event History endpoints
+- name: event_history_entity
+  url: event_history/entity
+  methods:
+    - POST
+  definition:
+    query:
+      query_name: insert_entity
+      collection_name: allowed-queries
+
+- name: event_history_account
+  url: event_history/account
+  methods:
+    - POST
+  definition:
+    query:
+      query_name: insert_account
+      collection_name: allowed-queries
+
+- name: event_history_account_holder
+  url: event_history/account_holder
+  methods:
+    - POST
+  definition:
+    query:
+      query_name: insert_account_holder
+      collection_name: allowed-queries
+
+- name: event_history_transaction
+  url: event_history/transaction
+  methods:
+    - POST
+  definition:
+    query:
+      query_name: insert_transaction
+      collection_name: allowed-queries
+
+- name: event_history_condition
+  url: event_history/condition
+  methods:
+    - POST
+  definition:
+    query:
+      query_name: insert_condition
+      collection_name: allowed-queries
+
+- name: event_history_goverened_as_debtor_by
+  url: event_history/goverened_as_debtor_by
+  methods:
+    - POST
+  definition:
+    query:
+      query_name: insert_goverened_as_debtor_by
+      collection_name: allowed-queries
+
+- name: event_history_goverened_as_debtor_account_by
+  url: event_history/goverened_as_debtor_account_by
+  methods:
+    - POST
+  definition:
+    query:
+      query_name: insert_goverened_as_debtor_account_by
+      collection_name: allowed-queries
+
+- name: event_history_goverened_as_creditor_by
+  url: event_history/goverened_as_creditor_by
+  methods:
+    - POST
+  definition:
+    query:
+      query_name: insert_goverened_as_creditor_by
+      collection_name: allowed-queries
+
+- name: event_history_goverened_as_creditor_account_by
+  url: event_history/goverened_as_creditor_account_by
+  methods:
+    - POST
+  definition:
+    query:
+      query_name: insert_goverened_as_creditor_account_by
+      collection_name: allowed-queries
+
+# Raw History endpoints
+- name: raw_history_pacs002
+  url: raw_history/pacs002
+  methods:
+    - POST
+  definition:
+    query:
+      query_name: insert_pacs002
+      collection_name: allowed-queries
+
+- name: raw_history_pacs008
+  url: raw_history/pacs008
+  methods:
+    - POST
+  definition:
+    query:
+      query_name: insert_pacs008
+      collection_name: allowed-queries
+
+- name: raw_history_pain001
+  url: raw_history/pain001
+  methods:
+    - POST
+  definition:
+    query:
+      query_name: insert_pain001
+      collection_name: allowed-queries
+
+- name: raw_history_pain013
+  url: raw_history/pain013
+  methods:
+    - POST
+  definition:
+    query:
+      query_name: insert_pain013
+      collection_name: allowed-queries
+
+# Configuration endpoints
+- name: configuration_network_map
+  url: configuration/network_map
+  methods:
+    - POST
+  definition:
+    query:
+      query_name: insert_network_map
+      collection_name: allowed-queries
+
+- name: configuration_typology
+  url: configuration/typology
+  methods:
+    - POST
+  definition:
+    query:
+      query_name: insert_typology
+      collection_name: allowed-queries
+
+- name: configuration_rule
+  url: configuration/rule
+  methods:
+    - POST
+  definition:
+    query:
+      query_name: insert_rule
+      collection_name: allowed-queries

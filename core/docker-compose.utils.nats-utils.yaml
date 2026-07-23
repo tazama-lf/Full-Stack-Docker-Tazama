@@ -1,0 +1,16 @@
+services:
+  nats-utilities:
+    container_name: nats-utilities
+    image: tazamaorg/nats-utilities:${TAZAMA_VERSION}
+    env_file:
+      - env/nats-utilities.env
+      - .env
+    restart: always
+    depends_on:
+      - nats
+    ports:
+      - 4000:4000
+
+secrets:
+  GH_TOKEN:
+    environment: GH_TOKEN

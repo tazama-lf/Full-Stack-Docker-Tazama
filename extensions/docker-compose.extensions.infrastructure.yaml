@@ -1,0 +1,158 @@
+# base infrastructure
+
+services:
+  extensions-postgres:
+    image: postgres:18
+    container_name: extensions-postgres
+    restart: always
+    command: postgres -N 1000 -c shared_buffers=512MB -c effective_cache_size=2GB
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    ports:
+      - "${POSTGRESQL_CMS_PORT}:5432"
+    environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=unused
+
+  sftp:
+    image: atmoz/sftp
+    container_name: sftp
+    restart: unless-stopped
+    ports:
+      - "${SFTP_PORT}:22"
+    volumes:
+      - sftp_data:/home/user/upload
+    command: user:password:1001
+    env_file:
+      - ./.env
+
+  couchdb:
+    image: couchdb:3.3
+    container_name: couchdb
+    restart: unless-stopped
+    env_file:
+      - ./env/case-management-system.env
+    ports:
+      - "${COUCHDB_PORT}:5984"
+    volumes:
+      - couchdb_data:/opt/couchdb/data
+      - ./couchdb/migration/local.ini:/opt/couchdb/etc/local.d/local.ini
+
+  case-management-system-migrate:
+    image: tazamaorg/case-management-system-migrate:${TAZAMA_VERSION}
+    container_name: case-management-system-migrate
+    depends_on:
+      extensions-postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+      - ./env/case-management-system.env
+    command: sh /home/app/migrate.sh
+    restart: "no"
+
+  flowable:
+    image: flowable/flowable-rest:latest
+    container_name: flowable
+    restart: unless-stopped
+    depends_on:
+      - case-management-system-migrate
+    env_file:
+      - ./env/case-management-system.env
+    environment:
+      - JAVA_TOOL_OPTIONS=-Xms256m -Xmx1536m
+    mem_limit: 2g
+    ports:
+      - "${FLOWABLE_PORT}:8080"
+
+  opensearch:
+    image: opensearchproject/opensearch:2.13.0
+    container_name: opensearch
+    restart: always
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - DISABLE_SECURITY_PLUGIN=true
+      # Reduce indexing memory buffer (default 10% of heap) - low write volume audit use case
+      - indices.memory.index_buffer_size=5%
+      # Single write thread is sufficient for sequential audit log writes
+      - thread_pool.write.size=1
+      - thread_pool.write.queue_size=500
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    ports:
+      - "${OPENSEARCH_PORT:-9200}:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -v '\"status\":\"red\"'"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  # One-shot init container: applies index template and updates existing indices
+  # to use a slower refresh interval and async translog. Runs once per compose up,
+  # exits immediately after. Uses the already-pulled opensearch image to avoid
+  # pulling an additional image.
+  opensearch-init:
+    image: opensearchproject/opensearch:2.13.0
+    container_name: opensearch-init
+    restart: "no"
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    entrypoint: ["bash", "-c"]
+    command:
+      - |
+        # Apply index template for all future indices
+        curl -sf -X PUT "http://opensearch:9200/_template/tazama-audit-defaults" \
+          -H "Content-Type: application/json" \
+          -d '{"index_patterns":["*"],"settings":{"refresh_interval":"30s","number_of_replicas":0,"translog.sync_interval":"30s","translog.durability":"async"}}' \
+          && echo "[opensearch-init] Index template applied."
+        # Apply to any existing indices (best-effort - may be empty on first run)
+        curl -sf -X PUT "http://opensearch:9200/*/_settings" \
+          -H "Content-Type: application/json" \
+          -d '{"settings":{"refresh_interval":"30s","translog.sync_interval":"30s","translog.durability":"async"}}' \
+          && echo "[opensearch-init] Existing index settings updated." \
+          || echo "[opensearch-init] No user indices yet - template will apply on first write."
+
+  # OpenSearch Dashboards (audit log UI) for opensearch.
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.13.0
+    container_name: opensearch-dashboards
+    restart: unless-stopped
+    ports:
+      - "${OPENSEARCH_DASHBOARDS_PORT:-5601}:5601"
+    environment:
+      OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: "true"
+      SERVER_HOST: "0.0.0.0"
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:5601/api/status | grep -qE '\"state\":\"(green|yellow)\"'"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+volumes:
+  sftp_data:
+  couchdb_data:
+  postgres_data:
+  opensearch_data:

@@ -1,0 +1,84 @@
+# SPDX-License-Identifier: Apache-2.0
+
+services:
+  biar-nifi:
+    image: tazamaorg/biar-nifi:${TAZAMA_VERSION}
+    container_name: biar-nifi
+    hostname: biar-nifi
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/biar-nifi.env
+    environment:
+      NIFI_JVM_HEAP_INIT: 512m
+      NIFI_JVM_HEAP_MAX: 1g
+    ports:
+      - "${NIFI_PORT}:8088"
+      - 8081:8081
+    volumes:
+      - nifi_conf:/opt/nifi/nifi-current/conf
+      - nifi_state:/opt/nifi/nifi-current/state
+      - nifi_db:/opt/nifi/nifi-current/database_repository
+      - nifi_flowfile:/opt/nifi/nifi-current/flowfile_repository
+      - nifi_content:/opt/nifi/nifi-current/content_repository
+      - nifi_provenance:/opt/nifi/nifi-current/provenance_repository
+    depends_on:
+      - ozone-s3g
+
+  biar-automation-orchestrator:
+    image: tazamaorg/biar-automation-orchestrator:${TAZAMA_VERSION}
+    container_name: biar-automation-orchestrator
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/biar-automation-orchestrator.env
+    ports:
+      - "${AUTOMATION_ORCHESTRATOR_PORT}:7619"
+    volumes:
+      - automation_orchestrator_out:/app/out
+      - ${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Warehouse
+    tmpfs:
+      - /tmp/spark
+    depends_on:
+      - ozone-s3g
+
+  biar-datalakehouse-api:
+    image: tazamaorg/biar-datalakehouse-api:${TAZAMA_VERSION}
+    container_name: biar-datalakehouse-api
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/biar-datalakehouse-api.env
+    ports:
+      - "${DATALAKEHOUSE_API_PORT}:8282"
+    volumes:
+      - ${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Warehouse
+    depends_on:
+      - ozone-s3g
+
+  biar-unstructured-pipeline:
+    image: tazamaorg/biar-unstructured-pipeline:${TAZAMA_VERSION}
+    container_name: biar-unstructured-pipeline
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/biar-unstructured-pipeline.env
+    depends_on:
+      - biar-tika
+      - biar-solr
+
+  biar-jupyterhub:
+    image: tazamaorg/biar-jupyterhub:${TAZAMA_VERSION}
+    container_name: biar-jupyterhub
+    restart: unless-stopped
+    env_file:
+      - .env
+      - env/biar-jupyterhub.env
+    ports:
+      - "${JUPYTERHUB_PORT}:8000"
+    volumes:
+      - jupyterhub_data:/data
+      - jupyterhub_notebooks:/srv/notebooks
+      - ${TAZAMA_WAREHOUSE_HOST_PATH}:/opt/Tazama_Warehouse:ro
+    depends_on:
+      - ozone-s3g

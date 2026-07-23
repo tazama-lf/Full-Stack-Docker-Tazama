@@ -1,3 +1,0 @@
-version: 3
-endpoint: http://localhost:6100
-metadata_directory: metadata

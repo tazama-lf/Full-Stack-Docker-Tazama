@@ -1,0 +1,31 @@
+# Copy this file to terraform.tfvars (gitignored) and fill in your values.
+# `key_name` and `state_bucket` are required - all other variables have sensible defaults.
+
+# EC2 key pair name created in Phase B step B.7.
+key_name = "tazama-aws"
+
+# S3 bucket name for OpenTofu state - same value as `bucket` in backend.conf.
+# Used to scope the IAM staging policy for large-file transfers (lakehouse-staging/ prefix).
+state_bucket = "tazama-tofu-state-<your-account-id>"
+
+# Override instance types if your workload needs more resources.
+# instance_type_a = "t3.xlarge"   # Server A - tazama-core
+# instance_type_b = "t3.xlarge"   # Server B - tazama-extensions
+# instance_type_c = "t3.2xlarge"  # Server C - tazama-biar (NiFi + Solr + Ozone)
+
+# Override region if deploying outside ap-south-1 (Mumbai).
+# region = "ap-south-1"
+
+# Override the AWS CLI named profile if yours is not called "tazama".
+# aws_profile = "tazama"
+
+# ALB and custom domain are enabled via separate var-files (no editing required):
+#   Phase E (ALB):           tofu apply -var-file terraform.tfvars -var-file alb.tfvars
+#   Phase G (custom domain): tofu apply -var-file terraform.tfvars -var-file alb.tfvars -var-file domain.tfvars
+# See aws-deployment-instructions.md § Phase E and § Phase G for full instructions.
+# See aws-deployment-instructions.md § Phase G for full instructions.
+# Prerequisite: NS delegation for your subdomain zone must exist at your
+# registrar before enabling this, otherwise ACM validation will time out.
+# ---------------------------------------------------------------------------
+# enable_custom_domain = true
+# domain_zone          = "env.your-domain.com"

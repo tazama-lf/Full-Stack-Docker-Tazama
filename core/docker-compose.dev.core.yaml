@@ -1,0 +1,195 @@
+# base
+
+include:
+  - path:
+    - docker-compose.base.infrastructure.yaml
+
+services:
+  # ADMIN SERVICE API
+  admin-service:
+    container_name: admin-service
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/admin-service.git#${ADMIN_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+    env_file:
+      - env/admin-service.env
+      - .env
+    restart: always
+    ports:
+      - ${ADMIN_PORT}:3100
+    depends_on:
+      core-postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_started
+
+  # TRANSACTION MONITORING SERVICE API
+  tms-service:
+    container_name: tms-service
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/tms-service.git#${TMS_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+    env_file:
+      - env/tms-service.env
+      - .env
+    restart: always
+    ports:
+      - ${TMS_PORT}:3000
+    depends_on:
+      valkey:
+        condition: service_started
+      core-postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  # EVENT DIRECTOR
+  event-director:
+    container_name: event-director
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/event-director.git#${ED_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+    env_file:
+      - env/event-director.env
+      - .env
+    restart: always
+    depends_on:
+      valkey:
+        condition: service_started
+      core-postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  # RULE PROCESSOR
+  rule-901:
+    container_name: rule-901
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/rule-executer.git#${RULE_901_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+    env_file:
+      - env/rule-901.env
+      - .env
+    restart: always
+    depends_on:
+      valkey:
+        condition: service_started
+      core-postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  # TYPOLOGY PROCESSOR
+  typology-processor:
+    container_name: typology-processor
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/typology-processor.git#${TP_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+    env_file:
+      - env/typology-processor.env
+      - .env
+    restart: always
+    depends_on:
+      valkey:
+        condition: service_started
+      core-postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  # EVENT ADJUDICATOR
+  event-adjudicator:
+    container_name: event-adjudicator
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/event-adjudicator.git#${EA_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+    env_file:
+      - env/event-adjudicator.env
+      - .env
+    restart: always
+    depends_on:
+      valkey:
+        condition: service_started
+      core-postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+  
+  # EVENT FLOW RULE PROCESSOR
+  event-flow:
+    container_name: event-flow
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/event-flow.git#${EVENT_FLOW_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+    env_file:
+      - env/event-flow.env
+      - .env
+    restart: always
+    depends_on:
+      core-postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_started
+      nats:
+        condition: service_started
+
+  # TAZAMA DEMO UI
+  tazama-demo:
+    container_name: tazama-demo
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/tazama-demo.git#${TAZAMA_DEMO_BRANCH}
+      args:
+        - GH_TOKEN
+      secrets:
+        - GH_TOKEN
+    restart: always
+    env_file:
+      - env/tazama-demo.env
+    depends_on:
+      tms-service:
+        condition: service_started
+      admin-service:
+        condition: service_started
+      nats:
+        condition: service_started
+    ports:
+      - "${DEMO_PORT:-3011}:3011"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3011/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+secrets:
+  GH_TOKEN:
+    environment: GH_TOKEN

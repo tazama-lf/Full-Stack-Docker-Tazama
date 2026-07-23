@@ -1,0 +1,141 @@
+services:
+  # ADMIN SERVICE API
+  admin-service:
+    container_name: admin-service
+    image: tazamaorg/admin-service:${TAZAMA_VERSION}
+    env_file:
+      - env/admin-service.env
+      - .env
+    restart: always
+    ports:
+      - ${ADMIN_PORT}:3100
+    depends_on:
+      core-postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_started
+    environment:
+      - CORS_POLICY=demo
+
+  # TRANSACTION MONITORING SERVICE API
+  tms-service:
+    container_name: tms-service
+    image: tazamaorg/tms-service:${TAZAMA_VERSION}
+    env_file:
+      - env/tms-service.env
+      - .env
+    restart: always
+    ports:
+      - ${TMS_PORT}:3000
+    depends_on:
+      valkey:
+        condition: service_started
+      core-postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+    environment:
+      - CORS_POLICY=demo
+
+  # BATCH PRE-PROCESSING API
+  batch-ppa:
+    container_name: batch-ppa
+    image: tazamaorg/batch-ppa:${TAZAMA_VERSION}
+    env_file:
+      - env/batch-ppa.env
+      - .env
+    restart: always
+    depends_on:
+      core-postgres:
+        condition: service_healthy
+      tms-service:
+        condition: service_started
+    ports:
+      - 4100:4100
+
+  # EVENT DIRECTOR
+  event-director:
+    container_name: event-director
+    image: tazamaorg/event-director:${TAZAMA_VERSION}
+    env_file:
+      - env/event-director.env
+      - .env
+    restart: always
+    depends_on:
+      valkey:
+        condition: service_started
+      core-postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  # TYPOLOGY PROCESSOR
+  typology-processor:
+    container_name: typology-processor
+    image: tazamaorg/typology-processor:${TAZAMA_VERSION}
+    env_file:
+      - env/typology-processor.env
+      - .env
+    restart: always
+    depends_on:
+      valkey:
+        condition: service_started
+      core-postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  # EVENT ADJUDICATOR
+  event-adjudicator:
+    container_name: event-adjudicator
+    image: tazamaorg/event-adjudicator:${TAZAMA_VERSION}
+    env_file:
+      - env/event-adjudicator.env
+      - .env
+    restart: always
+    depends_on:
+      valkey:
+        condition: service_started
+      core-postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+  
+  # EVENT FLOW RULE PROCESSOR
+  event-flow:
+    container_name: event-flow
+    image: tazamaorg/event-flow:${TAZAMA_VERSION}
+    env_file:
+      - env/event-flow.env
+      - .env
+    restart: always
+    depends_on:
+      core-postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_started
+      nats:
+        condition: service_started
+
+  # TAZAMA DEMO UI
+  tazama-demo:
+    container_name: tazama-demo
+    image: tazamaorg/tazama-demo:${TAZAMA_VERSION}
+    restart: always
+    env_file:
+      - env/tazama-demo.env
+    depends_on:
+      tms-service:
+        condition: service_started
+      admin-service:
+        condition: service_started
+      nats:
+        condition: service_started
+    ports:
+      - "${DEMO_PORT:-3011}:3011"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3011/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s

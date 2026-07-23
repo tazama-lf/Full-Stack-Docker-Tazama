@@ -1,0 +1,141 @@
+services:
+  connection-studio-backend:
+    container_name: connection-studio-backend
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/connection-studio.git#${TCS_BRANCH}:backend
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/connection-studio.env
+      - .env
+    restart: always
+    ports:
+      - ${TCS_PORT}:3010
+    depends_on:
+      - sftp
+      - opensearch
+    volumes:
+      - ./auth:/auth:ro
+
+  connection-studio-frontend:
+    container_name: connection-studio-frontend
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/connection-studio.git#${TCS_BRANCH}:frontend
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/connection-studio.env
+      - .env
+    environment:
+      - VITE_API_BASE_URL=http://${SERVER_B_HOST}:${TCS_PORT}
+      - VITE_DATA_ENRICHMENT_SERVICE_URL=http://${SERVER_B_HOST}:${DEAPI_PORT}
+      - VITE_ALLOWED_HOSTS=all
+    restart: always
+    ports:
+      - ${TCS_FRONTEND_PORT}:5173
+    depends_on:
+      - sftp
+
+  rule-studio-backend:
+    container_name: rule-studio-backend
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/rule-studio.git#${TRS_BRANCH_BACKEND}:backend
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule-studio.env
+      - .env
+    restart: always
+    depends_on:
+      - opensearch
+    ports:
+      - ${TRS_BACKEND_PORT}:3005
+    volumes:
+      - ./auth:/auth:ro
+
+  rule-studio-frontend:
+    container_name: rule-studio-frontend
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/rule-studio.git#${TRS_BRANCH_FRONTEND}:frontend
+      args:
+        - GH_TOKEN
+    env_file:
+      - env/rule-studio.env
+      - .env
+    environment:
+      - VITE_API_URL=http://${SERVER_B_HOST}:${TRS_BACKEND_PORT}
+      - VITE_SANDBOX_API_URL=http://${SERVER_A_HOST}:3050
+      - VITE_NATS_API_URL=http://${SERVER_A_HOST}:4000
+      - VITE_SIMULATION_ENDPOINT=http://${SERVER_A_HOST}:5000/v1/evaluate/iso20022/pacs.002.001.12
+      - VITE_DEMS_ENDPOINT=http://${SERVER_B_HOST}:${DEMS_PORT}
+      - VITE_ADMIN_ENDPOINT=http://${SERVER_A_HOST}:3100
+      - VITE_ALLOWED_HOSTS=all
+    restart: always
+    ports:
+      - ${TRS_FRONTEND_PORT}:5174
+    
+  case-management-system-backend:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/case-management-system.git#${CMS_BRANCH}:backend
+      args:
+        - GH_TOKEN
+      target: run-env
+    container_name: case-management-system-backend
+    restart: unless-stopped
+    depends_on:
+      - case-management-system-migrate
+      - flowable
+      - opensearch
+    env_file:
+      - ./env/case-management-system.env
+      - .env
+    volumes:
+      - ./auth/test-public-key.pem:/auth/test-public-key.pem:ro
+    ports:
+      - "${CMS_BACKEND_PORT}:3090"
+
+  case-management-system-frontend:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/case-management-system.git#${CMS_BRANCH}:frontend
+      args:
+        - GH_TOKEN
+    container_name: case-management-system-frontend
+    restart: unless-stopped
+    env_file:
+      - ./env/case-management-system.env
+      - .env
+    environment:
+      - VITE_API_BASE_URL=http://${SERVER_B_HOST}:${CMS_BACKEND_PORT}
+      - VITE_VOILA_BASE_URL=${VOILA_URL:-http://${SERVER_B_HOST}:${VOILA_PORT}}
+      - VITE_ALLOWED_HOSTS=all
+    ports:
+      - "${CMS_FRONTEND_PORT}:5175"
+
+  case-management-system-voila:
+    image: !reset null
+    build:
+      context: https://github.com/tazama-lf/case-management-system.git#${CMS_BRANCH}
+      dockerfile: Dockerfile.voila
+      args:
+        - GH_TOKEN
+    container_name: case-management-system-voila
+    restart: unless-stopped
+    env_file:
+      - ./env/case-management-system.env
+      - .env
+    environment:
+      - CASE_MGMT_BACKEND_URL=http://case-management-system-backend:3090
+    ports:
+      - "${VOILA_PORT:-18866}:8866"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8866/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
